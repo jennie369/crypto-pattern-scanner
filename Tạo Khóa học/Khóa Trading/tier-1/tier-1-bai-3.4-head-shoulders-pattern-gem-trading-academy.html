@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.4: Head & Shoulders Pattern - Mô Hình Vai Đầu Vai | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title, .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        /* HIGHLIGHT BOXES */
+        .highlight-box {
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid;
+        }
+
+        .highlight-box.important {
+            background: rgba(255, 189, 89, 0.1);
+            border-left-color: var(--gold);
+        }
+        .highlight-box.important .highlight-title { color: var(--gold); }
+
+        .highlight-box.warning {
+            background: rgba(239, 68, 68, 0.1);
+            border-left-color: var(--error);
+        }
+        .highlight-box.warning .highlight-title { color: var(--error); }
+
+        .highlight-box.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-left-color: var(--success);
+        }
+        .highlight-box.success .highlight-title { color: var(--success); }
+
+        .highlight-box.info {
+            background: rgba(0, 240, 255, 0.1);
+            border-left-color: var(--cyan);
+        }
+        .highlight-box.info .highlight-title { color: var(--cyan); }
+
+        .highlight-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .definition-box h4, .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        .summary-box h3, .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-list li { margin-bottom: var(--space-sm); position: relative; padding-left: 1.5rem; }
+        .summary-list li::before { content: "✓"; position: absolute; left: 0; color: var(--success); font-weight: bold; }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); }
+        
+        .quiz-question { margin-bottom: 2rem; }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; }
+        
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); background: var(--bg-card); }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; color: var(--success); }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; color: var(--error); }
+        
+        .quiz-result { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--radius-md); display: none; }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); color: var(--success); }
+        .quiz-result.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); color: var(--error); }
+
+        .btn-retake {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); margin-top: var(--space-xl); border-top: 1px solid var(--glass-border); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>📉</span>
+                <span>Tier 1 - Classic Patterns</span>
+            </div>
+            <h1 class="lesson-title">Bài 3.4: Head & Shoulders Pattern (Mô Hình Vai Đầu Vai)</h1>
+            <p class="lesson-subtitle">Vua của các mô hình đảo chiều và cách giao dịch chuẩn xác</p>
+            
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 3.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>15 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- 1. OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title">1. Tại Sao Mô Hình Này Lại Nổi Tiếng Đến Vậy?</h2>
+            
+            <p>Bạn đã bao giờ nhìn thấy một biểu đồ giá đang tăng rất đẹp, đột nhiên khựng lại, cố gắng rướn lên một lần nữa tạo đỉnh cao mới, rồi lại sụt giảm, cố hồi phục một lần cuối nhưng thất bại, và sau đó... <strong>SẬP ĐỔ HOÀN TOÀN</strong>?</p>
+            
+            <p>Đó chính là kịch bản kinh điển của mô hình <strong>Head & Shoulders (Vai Đầu Vai)</strong>. Đây được mệnh danh là "Vua của các mô hình đảo chiều" (King of Reversal Patterns) vì độ tin cậy cao và xuất hiện thường xuyên ở đỉnh của các xu hướng lớn.</p>
+            
+            <p>Tuy nhiên, sự nổi tiếng đi kèm với rủi ro. Rất nhiều trader "nhìn đâu cũng thấy Vai Đầu Vai" và vào lệnh quá sớm khi mô hình chưa hoàn thành, dẫn đến việc bị thị trường nghiền nát khi xu hướng cũ tiếp tục. Trong bài học này, chúng ta sẽ không chỉ học cách nhận diện, mà quan trọng hơn là học cách <strong>kiên nhẫn chờ đợi xác nhận (Confirmation)</strong> để biến mô hình này thành vũ khí lợi hại trong tay bạn.</p>
+        </section>
+
+        <!-- 2. CONCEPT INTRODUCTION -->
+        <section class="section">
+            <h2 class="section-title">2. Head & Shoulders Là Gì?</h2>
+            
+            <div class="definition-box">
+                <h4>📖 Định Nghĩa</h4>
+                <p><strong>Head & Shoulders (H&S)</strong> là mô hình giá đảo chiều từ Tăng sang Giảm (Bearish Reversal). Nó bao gồm 3 đỉnh liên tiếp:</p>
+                <ul>
+                    <li><strong>Vai Trái (Left Shoulder):</strong> Đỉnh đầu tiên, đánh dấu sự tiếp diễn của xu hướng tăng.</li>
+                    <li><strong>Đầu (Head):</strong> Đỉnh thứ hai, cao nhất, thể hiện nỗ lực cuối cùng của phe mua.</li>
+                    <li><strong>Vai Phải (Right Shoulder):</strong> Đỉnh thứ ba, thấp hơn Đỉnh (Head), cho thấy phe mua đã kiệt sức.</li>
+                    <li><strong>Đường Viền Cổ (Neckline):</strong> Đường hỗ trợ nối các đáy của mô hình. Đây là ranh giới sinh tử.</li>
+                </ul>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.4/6-4-1.webp" alt="Cấu trúc mô hình Head & Shoulders">
+                <div class="image-caption">Hình 3.4.1: Cấu trúc giải phẫu của mô hình Vai Đầu Vai</div>
+            </div>
+        </section>
+
+        <!-- 3. DEEP DIVE -->
+        <section class="section">
+            <h2 class="section-title">3. Phân Tích Chuyên Sâu</h2>
+
+            <h3>📊 Standard H&S vs Inverse H&S</h3>
+            <p>Tồn tại hai phiên bản của pattern Head & Shoulders, mỗi phiên bản xuất hiện trong bối cảnh thị trường khác nhau và mang lại tín hiệu giao dịch ngược nhau. Việc nhận biết đúng loại pattern là bước đầu tiên để có quyết định giao dịch chính xác.</p>
+
+            <div class="highlight-box warning">
+                <div class="highlight-title">📉 Standard Head & Shoulders (Bearish Reversal)</div>
+                <p>Standard H&S xuất hiện SAU MỘT UPTREND rõ ràng và báo hiệu khả năng đảo chiều từ tăng sang giảm. Đây là pattern phổ biến hơn và thường có độ tin cậy cao hơn so với phiên bản inverse. Khi Standard H&amp;S hoàn thành, nó cho thấy rằng người mua đã cạn kiệt sức mua - họ không còn đủ lực để đẩy giá lên cao mới (right shoulder thấp hơn head). Tín hiệu giao dịch là SHORT khi giá break xuống dưới neckline.</p>
+            </div>
+
+            <div class="highlight-box success">
+                <div class="highlight-title">📈 Inverse Head & Shoulders (Bullish Reversal)</div>
+                <p>Inverse H&amp;S là bản đảo ngược hoàn toàn của Standard, xuất hiện SAU MỘT DOWNTREND rõ ràng và báo hiệu khả năng đảo chiều từ giảm sang tăng. Pattern này có hình dạng như Standard H&amp;S lộn ngược - với ba đáy thay vì ba đỉnh, trong đó đáy giữa (head) sâu nhất. Inverse H&amp;S cho thấy người bán đã kiệt sức - họ không còn khả năng đẩy giá xuống thấp mới (right shoulder cao hơn head). Tín hiệu giao dịch là LONG khi giá break lên trên neckline.</p>
+            </div>
+
+            <div class="definition-box" style="margin-top: 1rem;">
+                <div class="definition-box-title">💡 Mối Liên Hệ Với GEM Patterns</div>
+                <p>Nếu bạn đã học về GEM Pattern System, bạn sẽ nhận ra sự tương đồng thú vị giữa hai hệ thống. Standard H&amp;S có điểm chung với UPD (Up-Pause-Down) vì cả hai đều báo hiệu sự kết thúc của uptrend và khởi đầu downtrend. Tương tự, Inverse H&amp;S có điểm chung với DPU (Down-Pause-Up) vì cả hai báo hiệu sự kết thúc của downtrend và khởi đầu uptrend. Việc kết hợp cả hai hệ thống phân tích sẽ tăng đáng kể độ tin cậy của tín hiệu giao dịch.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.4/6-4-2.webp" alt="Mô hình Inverse Head & Shoulders">
+                <div class="image-caption">Hình 3.4.2: Mô hình Vai Đầu Vai Ngược (Bullish)</div>
+            </div>
+
+            <h3>📈 Volume - Yếu Tố Xác Nhận Quyết Định</h3>
+            <p>Volume là yếu tố không thể thiếu khi giao dịch Head &amp; Shoulders. Một pattern H&amp;S với volume pattern đúng chuẩn có tỷ lệ thành công cao hơn đáng kể so với pattern không có volume confirmation. Hiểu đúng về volume sẽ giúp bạn phân biệt được H&amp;S thật với những fake patterns.</p>
+
+            <div class="highlight-box info">
+                <div class="highlight-title">📊 Volume Pattern Chuẩn Trong Standard H&S</div>
+                <ul>
+                    <li><strong>Left Shoulder:</strong> Volume CAO NHẤT trong ba đỉnh - đây là giai đoạn uptrend còn nhiều sức mạnh, nhiều trader tham gia mua vào, tạo nên volume đáng kể. Đây là biểu hiện của sự hưng phấn thị trường.</li>
+                    <li><strong>Head:</strong> Volume THẤP HƠN left shoulder dù giá tạo đỉnh cao hơn - đây là bearish divergence quan trọng, cho thấy đỉnh giá mới không được hỗ trợ bởi sức mua tương xứng. Smart money đã bắt đầu phân phối.</li>
+                    <li><strong>Right Shoulder:</strong> Volume THẤP NHẤT trong ba đỉnh - sự thiếu hụt volume rõ rệt cho thấy bulls đã hoàn toàn mất hứng thú, không còn ai muốn mua ở mức giá cao.</li>
+                    <li><strong>Breakout:</strong> Volume SPIKE MẠNH khi giá break neckline - đây là confirmation quan trọng nhất, cho thấy bears đã chính thức chiếm ưu thế và bắt đầu đợt bán mạnh.</li>
+                </ul>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.4/6-4-3.webp" alt="Minh họa Volume trong H&S">
+                <div class="image-caption">Hình 3.4.3: Volume giảm dần ở các đỉnh và tăng vọt tại điểm phá vỡ</div>
+            </div>
+        </section>
+
+        <!-- 4. TARGET CALCULATION -->
+        <section class="section">
+            <h2 class="section-title">4. Phương Pháp Tính Target Chính Xác</h2>
+            <p>Một trong những ưu điểm lớn nhất của Head & Shoulders là khả năng tính được target price khá chính xác. Phương pháp này dựa trên nguyên lý "measured move" - khoảng cách giá di chuyển sau breakout thường bằng với chiều cao của pattern. Việc biết target trước giúp bạn quản lý vị thế hiệu quả hơn.</p>
+
+            <div class="highlight-box important">
+                <div class="highlight-title">📏 Công Thức Tính Target</div>
+                <p>Đầu tiên, đo khoảng cách thẳng đứng từ đỉnh của Head xuống đến Neckline - gọi giá trị này là D (Distance). Tiếp theo, xác định điểm breakout trên neckline - gọi là B (Breakout Point). Cuối cùng, tính Target bằng cách: Target = B - D (cho Standard H&S) hoặc Target = B + D (cho Inverse H&S).</p>
+            </div>
+
+            <h3>💰 Ví Dụ Tính Target Cụ Thể</h3>
+            <ul>
+                <li><strong>Standard H&S trên BTC:</strong> Head đạt đỉnh $69,000, Neckline nằm ở mức $58,000, vậy D = $69,000 - $58,000 = $11,000. Khi giá break xuống dưới neckline tại $58,000, Target = $58,000 - $11,000 = $47,000. Trong thực tế, BTC đã giảm sâu hơn cả target này, nhưng việc có mục tiêu $47,000 đã giúp trader biết được potential downside tối thiểu.</li>
+                <li><strong>Inverse H&S trên ETH:</strong> Head đạt đáy $880, Neckline nằm ở mức $1,350, vậy D = $1,350 - $880 = $470. Khi giá break lên trên neckline tại $1,350, Target = $1,350 + $470 = $1,820. Đây là measured move tối thiểu mà trader có thể kỳ vọng.</li>
+            </ul>
+        </section>
+
+        <!-- 5. CASE STUDY -->
+        <section class="section">
+            <h2 class="section-title">5. Case Study: BTC Standard H&S 2021-2022</h2>
+            
+            <p>Để hiểu rõ hơn cách áp dụng kiến thức về Head & Shoulders trong thực tế, hãy cùng phân tích chi tiết một trong những pattern H&S lớn nhất trong lịch sử crypto - pattern hình thành trên BTC từ cuối 2021 đến đầu 2022.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-title">📊 Bối Cảnh Thị Trường</div>
+                <p>Năm 2021 là năm của những kỷ lục mới trong thị trường crypto. Bitcoin đã tăng từ $29,000 đầu năm lên đến $64,000 vào tháng 4, sau đó correction về $30,000 trong mùa hè trước khi rally mạnh mẽ lên $69,000 vào tháng 11. Đây là giai đoạn mà sentiment thị trường cực kỳ bullish, nhiều chuyên gia dự đoán BTC sẽ đạt $100,000 trước cuối năm. Tuy nhiên, một pattern đáng lo ngại đang âm thầm hình thành trên chart tuần.</p>
+            </div>
+
+            <h3>📈 Cấu Trúc Pattern</h3>
+            <ul>
+                <li><strong>Left Shoulder:</strong> Hình thành vào tháng 4/2021 với đỉnh $64,800. Volume trong giai đoạn này rất cao vì đây là lần đầu tiên BTC chạm mức $60,000+. Giá sau đó pullback về vùng $30,000-$35,000, tạo điểm đầu tiên của neckline.</li>
+                <li><strong>Head:</strong> Hình thành vào tháng 11/2021 với đỉnh $69,000 - all-time high mới. Tuy nhiên, volume trong giai đoạn này THẤP HƠN so với left shoulder dù giá cao hơn. Đây là bearish divergence rõ ràng mà nhiều trader đã bỏ qua vì quá hưng phấn. Giá sau đó pullback về vùng $42,000.</li>
+                <li><strong>Right Shoulder:</strong> Hình thành vào tháng 3-4/2022 với đỉnh khoảng $48,000 - thấp hơn đáng kể so với head và gần bằng với mức của left shoulder. Volume trong giai đoạn này thấp nhất, cho thấy sự thiếu hứng thú của người mua.</li>
+                <li><strong>Neckline:</strong> Đường nối đáy tháng 7/2021 ($30,000) và đáy tháng 1/2022 ($33,000). Neckline này hơi nghiêng lên, nhưng vẫn là vùng support quan trọng.</li>
+            </ul>
+
+            <div class="highlight-box success">
+                <div class="highlight-title">🎯 Kết Quả Giao Dịch</div>
+                <p>Neckline bị phá vỡ vào tháng 5/2022 khi giá giảm xuống dưới $30,000 với volume cực cao. Target được tính như sau: Head = $69,000, Neckline ≈ $31,500, D = $37,500. Target = $31,500 - $37,500 = -$6,000. Vì giá không thể âm, target thực tế được hiểu là "giảm rất sâu". Trong thực tế, BTC đã giảm xuống $15,500 vào tháng 11/2022 - thấp hơn cả target tính toán. Những trader nhận ra pattern này và SHORT hoặc đơn giản là thoát khỏi vị thế LONG đã tránh được khoản lỗ 77% từ đỉnh.</p>
+            </div>
+        </section>
+
+        <!-- 6. MISTAKES & FAQ -->
+        <section class="section">
+            <h2 class="section-title">6. Sai Lầm & Câu Hỏi Thường Gặp</h2>
+            
+            <div class="highlight-box warning">
+                <div class="highlight-title">⚠️ Sai Lầm: "Cầm Đèn Chạy Trước Ô Tô"</div>
+                <p>Rất nhiều trader thấy Vai Phải đang hình thành liền vội vàng vào lệnh Short ngay đỉnh Vai Phải. <strong>Đừng làm vậy!</strong> Mô hình CHƯA HOÀN THÀNH cho đến khi Neckline bị phá vỡ. Giá hoàn toàn có thể bật lên từ Neckline và tiếp tục xu hướng tăng.</p>
+            </div>
+
+            <h3>❓ Câu Hỏi Thường Gặp</h3>
+            <div class="definition-box">
+                <p><strong>1. Làm sao phân biệt H&S thật với fake pattern?</strong></p>
+                <p>H&S thật có những đặc điểm quan trọng mà fake pattern thường thiếu. Đầu tiên, context phải đúng - Standard H&S chỉ có ý nghĩa sau một uptrend rõ ràng, còn Inverse H&S chỉ có ý nghĩa sau downtrend. Thứ hai, volume pattern phải chuẩn - volume giảm dần qua ba đỉnh hoặc ba đáy. Thứ ba, right shoulder không được vượt qua head - nếu vượt qua, pattern bị invalid. Cuối cùng, breakout phải có volume spike để confirm.</p>
+            </div>
+            
+            <div class="definition-box" style="margin-top: 1rem;">
+                <p><strong>2. Entry ngay khi break neckline hay chờ retest?</strong></p>
+                <p>Có hai trường phái giao dịch với H&S. Entry aggressively ngay khi break neckline giúp bạn có giá entry tốt hơn nhưng có risk cao hơn vì có thể là fake breakout. Entry conservative bằng cách chờ retest neckline giúp giảm risk nhưng có thể bỏ lỡ cơ hội nếu giá không retest. Khuyến nghị của tôi là chia position thành hai phần - 50% entry ngay khi break với stop tight, 50% chờ retest để thêm vị thế.</p>
+            </div>
+
+            <div class="definition-box" style="margin-top: 1rem;">
+                <p><strong>3. Neckline nghiêng có ảnh hưởng đến pattern không?</strong></p>
+                <p>Góc nghiêng của neckline có ý nghĩa nhất định trong phân tích. Neckline nghiêng xuống trong Standard H&S là dấu hiệu bearish mạnh hơn vì nó cho thấy mỗi đợt pullback đều tạo đáy thấp hơn. Ngược lại, neckline nghiêng lên trong Inverse H&S là dấu hiệu bullish mạnh hơn. Tuy nhiên, góc nghiêng quá lớn có thể làm pattern trở nên không hợp lệ vì hai shoulder sẽ không cân đối.</p>
+            </div>
+        </section>
+
+        <!-- 7. APPLICATION & ACTION PLAN -->
+        <section class="section">
+            <h2 class="section-title">7. Chiến Lược Giao Dịch & Hành Động</h2>
+            
+            <p>Theo phương pháp GEM Frequency, chúng ta không bao giờ đuổi theo giá. Chúng ta là những thợ săn kiên nhẫn.</p>
+
+            <ol class="styled-list">
+                <li><strong>Bước 1: Nhận diện:</strong> Xác định 3 đỉnh và vẽ đường Neckline.</li>
+                <li><strong>Bước 2: Chờ Phá Vỡ:</strong> Đợi nến đóng cửa hoàn toàn dưới Neckline với Volume lớn.</li>
+                <li><strong>Bước 3: Chờ Retest:</strong> Kiên nhẫn đợi giá quay lại kiểm tra Neckline (lúc này trở thành kháng cự/HFZ).</li>
+                <li><strong>Bước 4: Xác Nhận & Vào Lệnh:</strong> Tìm tín hiệu nến đảo chiều tại vùng Retest để Short.</li>
+            </ol>
+
+            <div class="highlight-box important">
+                <div class="highlight-title">🎯 Hành Động Thực Hành</div>
+                <p><strong>⚡ Làm Ngay Hôm Nay:</strong> Mở TradingView và chọn 5 altcoin có vốn hóa lớn (ETH, BNB, SOL, ADA, XRP). Chuyển sang khung thời gian D1 và quan sát xem có đồng nào đang hình thành pattern H&S hay không. Chú ý đặc biệt đến những đồng đã có uptrend mạnh trong 3-6 tháng gần đây - đây là môi trường lý tưởng cho Standard H&S. Vẽ neckline dự kiến nếu bạn thấy có left shoulder và head đã hình thành.</p>
+                <p><strong>📋 Bài Tập Tuần Này:</strong> Tìm trong lịch sử biểu đồ của BTC và ETH ít nhất 3 pattern H&S (cả Standard và Inverse) đã hoàn thành trong quá khứ. Với mỗi pattern, hãy ghi chép lại: (1) Thời điểm hình thành từng component, (2) Volume pattern có chuẩn không, (3) Target được tính bằng bao nhiêu và giá thực tế đi được bao xa, (4) Bạn sẽ entry và đặt SL ở đâu nếu giao dịch pattern này. Việc backtest này sẽ giúp bạn xây dựng confidence khi giao dịch H&S trong tương lai.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.4/6-4-4.webp" alt="Chiến lược giao dịch H&S">
+                <div class="image-caption">Hình 3.4.4: Chiến lược vào lệnh tại điểm Retest và đặt SL/TP</div>
+            </div>
+        </section>
+
+        <!-- 8. SUMMARY -->
+        <div class="summary-box">
+            <h3>📝 Tổng Kết Bài Học</h3>
+            <ul class="summary-list">
+                <li><strong>Head & Shoulders</strong> là mô hình đảo chiều từ Tăng sang Giảm mạnh mẽ.</li>
+                <li><strong>Inverse H&S</strong> báo hiệu đảo chiều từ Giảm sang Tăng.</li>
+                <li><strong>Neckline</strong> là ranh giới quan trọng nhất. Chỉ giao dịch khi Neckline bị phá vỡ.</li>
+                <li><strong>Volume</strong> cần giảm dần qua các đỉnh và tăng mạnh khi phá vỡ.</li>
+                <li><strong>Case Study BTC 2021</strong> là minh chứng kinh điển cho sức mạnh của mô hình này.</li>
+            </ul>
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p><strong>🎯 BÀI HỌC LỚN:</strong> Head & Shoulders không chỉ là một pattern kỹ thuật - nó là bức tranh về tâm lý thị trường đang chuyển đổi. Khi bạn nhìn thấy H&S hoàn chỉnh, bạn đang nhìn thấy quá trình bulls dần mất sức và bears bắt đầu chiếm ưu thế. Hiểu được câu chuyện đằng sau pattern sẽ giúp bạn giao dịch tự tin hơn và quản lý risk tốt hơn.</p>
+            </div>
+        </div>
+
+        <!-- QUIZ -->
+        <section class="quiz-section">
+            <h2 class="quiz-title">🎯 Kiểm Tra Kiến Thức</h2>
+
+            <div class="quiz-question" data-correct="1">
+                <p class="question-text">Câu 1: Trong mô hình Head & Shoulders chuẩn, volume thường diễn biến như thế nào?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">A. Tăng dần từ Vai Trái đến Vai Phải.</div>
+                    <div class="quiz-option" data-index="1">B. Cao ở Vai Trái, giảm ở Đầu và thấp nhất ở Vai Phải, tăng vọt khi phá Neckline.</div>
+                    <div class="quiz-option" data-index="2">C. Volume không quan trọng.</div>
+                    <div class="quiz-option" data-index="3">D. Thấp ở Vai Trái, cao nhất ở Đầu.</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <p class="question-text">Câu 2: Tại sao không nên vào lệnh Short ngay khi thấy Vai Phải đang hình thành?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">A. Vì giá sẽ luôn tăng lại.</div>
+                    <div class="quiz-option" data-index="1">B. Vì phí giao dịch cao.</div>
+                    <div class="quiz-option" data-index="2">C. Vì mô hình chưa hoàn thành cho đến khi phá vỡ Neckline, giá có thể bật tăng tiếp.</div>
+                    <div class="quiz-option" data-index="3">D. Vì volume lúc đó quá thấp.</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <p class="question-text">Câu 3: Mục tiêu giá (Target) tối thiểu của mô hình H&S được tính như thế nào?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">A. Khoảng cách từ đỉnh Đầu đến Neckline, chiếu xuống từ điểm phá vỡ.</div>
+                    <div class="quiz-option" data-index="1">B. Bằng chiều cao của Vai Trái.</div>
+                    <div class="quiz-option" data-index="2">C. Luôn là 10% giá trị tài sản.</div>
+                    <div class="quiz-option" data-index="3">D. Khoảng cách từ Vai Trái sang Vai Phải.</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <h3>🎉 Hoàn thành!</h3>
+                <p class="quiz-score-text">Bạn đã trả lời đúng <span id="correct-count">0</span>/3 câu hỏi.</p>
+                <button class="retake-btn" onclick="resetQuiz()">Làm lại Quiz</button>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <div class="footer-logo">
+                <span class="gem">GEM</span> Trading Academy
+            </div>
+            <p class="footer-text">Tier 1 • Bài 3.4</p>
+            <p class="copyright">© 2024 GEM Trading. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Xem lại bài học nhé!';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function resetQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+            document.querySelector('.quiz-score').classList.remove('show');
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelector('.quiz-result').classList.remove('show');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+            });
+        }
+    </script>
+
+</body>
+</html>

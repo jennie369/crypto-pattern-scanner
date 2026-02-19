@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 4.1: UPD Là Gì? | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .warning-box { background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05)); border: 1px solid rgba(156, 6, 18, 0.4); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .warning-box { border: none; border-radius: 0; border-left: 4px solid var(--burgundy); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .warning-box-title { font-weight: 700; color: var(--burgundy-light); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        @media (max-width: 600px) { .stat-card { border: none; border-radius: 0; padding: var(--space-md); } }
+        .stat-value { font-size: 1.75rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        @media (max-width: 600px) { .stat-value { font-size: 1.25rem; } }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+
+        .formula-box { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border: 2px solid var(--purple); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; text-align: center; }
+        @media (max-width: 600px) { .formula-box { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .formula-title { font-size: 1.1rem; font-weight: 700; color: var(--purple); margin-bottom: var(--space-md); }
+        .formula-content { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--space-sm); }
+        .formula-item { background: var(--bg-card); padding: var(--space-sm) var(--space-md); border-radius: var(--space-sm); border: 1px solid var(--glass-border); font-weight: 600; }
+        .formula-operator { color: var(--gold); font-size: 1.25rem; }
+
+        .patterns-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .patterns-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .pattern-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        @media (max-width: 600px) { .pattern-card { border: none; border-radius: 0; padding: var(--space-md); } }
+        .pattern-icon { font-size: 2.5rem; margin-bottom: var(--space-sm); }
+        .pattern-name { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .pattern-desc { font-size: 0.85rem; color: var(--text-muted); }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+
+        .quiz-section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; padding: 0; margin-top: 0; border-top: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: var(--space-lg) 16px var(--space-md); margin-bottom: 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-question { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin-bottom: 0; border-bottom: 1px solid var(--glass-border); } }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; font-weight: 700; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); line-height: 1.6; }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        @media (max-width: 600px) { .quiz-options { gap: 1px; background: var(--glass-border); margin-left: -16px; margin-right: -16px; margin-left: calc(-16px - 4px); } }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .quiz-option { border: none; border-radius: 0; border-left: 4px solid transparent; padding: var(--space-md) 16px; } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); background: var(--bg-card); }
+        @media (max-width: 600px) { .quiz-option:hover:not(.disabled) { border-left-color: var(--gold); } }
+        .quiz-option.selected { border-color: var(--gold); background: rgba(255, 189, 89, 0.1); }
+        @media (max-width: 600px) { .quiz-option.selected { border-left-color: var(--gold); } }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.correct { border-left-color: var(--success) !important; } }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.incorrect { border-left-color: var(--error) !important; } }
+        .quiz-option.disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-marker { width: 28px; height: 28px; min-width: 28px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.selected .option-marker { background: var(--gold); border-color: var(--gold); color: var(--navy-dark); }
+        .quiz-option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; }
+        .quiz-option.incorrect .option-marker { background: var(--error); border-color: var(--error); color: white; }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--space-sm); display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .result-text { font-size: 1.25rem; font-weight: 700; margin-bottom: var(--space-sm); }
+        .result-message { color: var(--text-muted); }
+
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-buttons { padding: var(--space-lg) 16px; } }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>📉</span>
+                <span>Reversal Pattern</span>
+            </div>
+            <div class="lesson-chapter">Chapter 5 - UPD Pattern Mastery</div>
+            <h1 class="lesson-title">Bài 5.1: UPD Là Gì?</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 5.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🔥</span> Lời Mở Đầu: Cạm Bẫy Ngọt Ngào</h2>
+            <p>Chào bạn, tôi có một câu hỏi dành cho bạn: Đã bao giờ bạn rơi vào tình cảnh mua đúng "đỉnh" chưa? Bạn nhìn thấy giá đang tăng vùn vụt, tin tức tốt tràn ngập mặt báo, bạn bè ai cũng khoe lãi. Bạn sợ bỏ lỡ cơ hội (FOMO) và quyết định nhảy vào mua. Nhưng ngay khi lệnh của bạn khớp, giá bắt đầu chững lại, đi ngang vài ngày rồi... ĐÙNG! Nó quay đầu giảm không phanh, cuốn trôi tài khoản của bạn.</p>
+
+            <p>Nếu câu trả lời là "Có", thì xin chia buồn, bạn vừa trở thành nạn nhân của một trong những cạm bẫy tinh vi nhất của Smart Money: <strong>Pattern UPD (Up-Pause-Down)</strong>. Nhưng cũng xin chúc mừng bạn, vì sau bài học này, bạn sẽ không còn là nạn nhân nữa. Bạn sẽ trở thành người đi săn.</p>
+
+            <p>Trong thị trường tài chính, không có gì tăng mãi mãi. Mọi bữa tiệc đều phải tàn. Và UPD chính là "dấu hiệu tàn tiệc" rõ ràng nhất mà Cá Mập để lại trên biểu đồ. Bài học này sẽ giúp bạn giải mã dấu hiệu đó.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Sự Thật Đau Lòng</div>
+                <p>Thống kê từ các sàn giao dịch lớn cho thấy: Hơn 70% retail trader thua lỗ vì cố gắng "bắt đỉnh" hoặc mua đuổi trong giai đoạn phân phối. Họ không nhận ra rằng khi họ đang hưng phấn nhất, Smart Money đang âm thầm bán ra. UPD chính là bản đồ chỉ đường cho quá trình chuyển giao tài sản tàn khốc này.</p>
+            </div>
+        </section>
+
+        <!-- MỤC TIÊU BÀI HỌC -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Mục Tiêu Bài Học</h2>
+            <p>Hôm nay, chúng ta sẽ không chỉ học một định nghĩa khô khan. Tôi muốn bạn thấu hiểu bản chất của UPD như một người trong cuộc.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📋</span> Bạn Sẽ Làm Chủ</div>
+                <p>• <strong>Nhận diện UPD chuẩn xác:</strong> Phân biệt được đâu là UPD thật, đâu là nhiễu loạn thị trường.<br>
+                • <strong>Hiểu sâu về Tâm lý đám đông:</strong> Tại sao Retail lại mua đúng lúc Cá Mập bán?<br>
+                • <strong>Phân biệt UPD và DPD:</strong> Tuy cùng tạo ra vùng bán (HFZ) nhưng sức mạnh và cách dùng hoàn toàn khác nhau.<br>
+                • <strong>Chiến lược "Đi ngược đám đông":</strong> Cách biến nỗi sợ hãi của người khác thành lợi nhuận của bạn.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Concept: UPD - Up Pause Down</h2>
+            <p>Hãy bắt đầu với những điều cơ bản nhất. UPD là viết tắt của <strong>Up - Pause - Down</strong> (Tăng - Nghỉ - Giảm). Đây là mô hình giá 3 giai đoạn mô tả quá trình <strong>ĐẢO CHIỀU (Reversal)</strong> từ xu hướng tăng sang xu hướng giảm.</p>
+
+            <p>Đừng nhầm lẫn nó với DPD (Down-Pause-Down) mà chúng ta đã học ở Chapter 3. DPD là pattern tiếp diễn xu hướng giảm, còn UPD là pattern <strong>kết thúc xu hướng tăng</strong>. Vị thế của UPD "cao cấp" hơn nhiều vì nó thường xuất hiện ở những vùng đỉnh quan trọng (Key Level) của thị trường.</p>
+
+            <div class="formula-box">
+                <div class="formula-title">🔄 Công Thức Cấu Tạo UPD</div>
+                <div class="formula-content">
+                    <span class="formula-item">📈 UP (Tăng Nóng)</span>
+                    <span class="formula-operator">→</span>
+                    <span class="formula-item">⏸️ PAUSE (Phân Phối)</span>
+                    <span class="formula-operator">→</span>
+                    <span class="formula-item">📉 DOWN (Sập Hầm)</span>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⭐</span> Pattern Mạnh Nhất!</div>
+                <p>UPD là pattern REVERSAL (đảo chiều), được xếp hạng mạnh hơn DPD (continuation) vì nó bắt được <strong>điểm đảo chiều xu hướng</strong> - chính xác nơi mà Smart Money hoàn tất việc phân phối tài sản và Retail traders bị mắc kẹt ở đỉnh. Khi bạn thành thạo UPD, bạn sẽ có khả năng SHORT ở những vị trí có xác suất thắng cao nhất.</p>
+            </div>
+
+            <p>Hãy nhìn vào hình minh họa dưới đây. Bạn có thấy sự chuyển đổi trạng thái của thị trường không? Từ hưng phấn tột độ (Up) sang nghi ngờ (Pause) và cuối cùng là hoảng loạn (Down).</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch4/4.1/4-1-1.webp" alt="UPD Structure">
+            </div>
+            <div class="image-caption">Hình 1: Cấu trúc giải phẫu của UPD - Hành trình từ Đỉnh xuống Vực sâu</div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Thông Số Kỹ Thuật Quan Trọng</h2>
+            <p>Trước khi đi sâu vào tâm lý, hãy nhìn vào những con số biết nói. Dưới đây là các thông số backtest thực tế của pattern UPD trên thị trường crypto trong 3 năm qua:</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">65%</div>
+                    <div class="stat-label">Win Rate Trung Bình</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">1:2.2</div>
+                    <div class="stat-label">Avg R:R (Risk:Reward)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">HFZ</div>
+                    <div class="stat-label">Zone Tạo Ra (Vùng Bán)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">⭐</div>
+                    <div class="stat-label">Độ Mạnh: Rất Cao</div>
+                </div>
+            </div>
+
+            <div class="patterns-grid">
+                <div class="pattern-card">
+                    <div class="pattern-icon">🔄</div>
+                    <div class="pattern-name">Loại Pattern</div>
+                    <div class="pattern-desc">REVERSAL - Đảo chiều xu hướng giảm</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">📍</div>
+                    <div class="pattern-name">Zone Tạo Ra</div>
+                    <div class="pattern-desc">HFZ - High Frequency Zone (Vùng Bán)</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">📉</div>
+                    <div class="pattern-name">Hướng Trade</div>
+                    <div class="pattern-desc">SHORT - Vào lệnh bán khi retest HFZ</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">⚡</div>
+                    <div class="pattern-name">Sức Mạnh</div>
+                    <div class="pattern-desc">MẠNH hơn DPD - Bắt đỉnh xu hướng</div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📊</span> Khi Nào Dùng UPD?</div>
+                <p>Sử dụng UPD khi xu hướng tăng đã kéo dài và có dấu hiệu kiệt sức: volume giảm dù giá vẫn tăng, RSI divergence, giá tiến gần vùng kháng cự lớn. UPD giúp bạn bắt được điểm đảo chiều - nơi trend tăng kết thúc và trend giảm bắt đầu với sức mạnh mới.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🔍</span> Deep Dive: Giải Mã Tâm Lý Đằng Sau UPD</h2>
+            <p>Tại sao UPD lại hiệu quả đến vậy? Tại sao nó lặp đi lặp lại hàng trăm năm nay trên mọi thị trường? Câu trả lời nằm ở <strong>Bản chất con người</strong> và <strong>Cơ chế thanh khoản</strong>.</p>
+
+            <p>Hãy cùng tôi mổ xẻ từng giai đoạn dưới góc nhìn của Smart Money:</p>
+
+            <ul class="summary-list" style="list-style: none; padding-left: 0;">
+                <li style="margin-bottom: 1.5rem;">
+                    <strong style="color: var(--success); font-size: 1.1rem;">Phase 1: UP (Cái Bẫy Ngọt Ngào)</strong><br>
+                    Giá tăng mạnh, nến xanh liên tiếp. Tin tốt ra dồn dập. Retail Trader bị kích thích lòng tham (Greed). Họ sợ lỡ tàu (FOMO) nên nhảy vào mua bất chấp giá cao. 
+                    <br><em>👉 Smart Money nghĩ gì?</em> "Tuyệt vời! Đám đông đang tranh nhau mua. Đây là lúc chúng ta có đủ thanh khoản (Liquidity) để bắt đầu xả hàng."
+                </li>
+                <li style="margin-bottom: 1.5rem;">
+                    <strong style="color: var(--gold); font-size: 1.1rem;">Phase 2: PAUSE (Quá Trình Chuyển Giao)</strong><br>
+                    Giá chững lại, đi ngang trong biên độ hẹp. Volume bắt đầu giảm hoặc hỗn loạn. Retail vẫn hy vọng giá sẽ tăng tiếp ("chỉ là điều chỉnh thôi mà"). Họ tiếp tục giữ lệnh hoặc mua thêm (Buy the dip).
+                    <br><em>👉 Smart Money nghĩ gì?</em> "Giữ giá ở đây để xả nốt số hàng còn lại. Đừng để giá sập sớm quá, phải dụ thêm gà vào chuồng đã." -> Đây chính là vùng tạo ra <strong>HFZ (High Frequency Zone)</strong>.
+                </li>
+                <li>
+                    <strong style="color: var(--error); font-size: 1.1rem;">Phase 3: DOWN (Sập Bẫy)</strong><br>
+                    Đùng! Một cây nến đỏ dài xuất hiện, phá vỡ vùng đi ngang. Giá giảm mạnh. Retail hoảng loạn nhưng không kịp trở tay. Stop Loss của phe Mua bị kích hoạt hàng loạt, càng đẩy giá xuống sâu hơn.
+                    <br><em>👉 Smart Money nghĩ gì?</em> "Xong việc. Giờ thì ngồi xem đám đông dẫm đạp lên nhau chạy thoát thân."
+                </li>
+            </ul>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch4/4.1/4-1-2.webp" alt="Smart Money Distribution">
+            </div>
+            <div class="image-caption">Hình 2: Minh họa quá trình Smart Money "trao tay" túi than hồng cho Retail tại vùng Pause</div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>⚡</span> So Sánh Chiến Lược: UPD vs DPD</h2>
+            <p>Rất nhiều học viên của tôi nhầm lẫn giữa hai pattern này. Cả hai đều tạo ra vùng bán (HFZ), nhưng bối cảnh sử dụng (Context) là hoàn toàn khác biệt. Hiểu sai bối cảnh là con đường ngắn nhất dẫn đến thua lỗ.</p>
+
+            <div class="patterns-grid">
+                <div class="pattern-card">
+                    <div class="pattern-icon">🔄</div>
+                    <div class="pattern-name" style="color: var(--error);">UPD (Đảo Chiều)</div>
+                    <div class="pattern-desc">
+                        <strong>Vị trí:</strong> ĐỈNH của xu hướng tăng.<br>
+                        <strong>Tâm lý:</strong> Từ Tham lam → Sợ hãi.<br>
+                        <strong>Sức mạnh:</strong> Rất Mạnh (Bắt được đỉnh).<br>
+                        <strong>Rủi ro:</strong> Cao hơn (Bắt dao rơi ngược).
+                    </div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">📉</div>
+                    <div class="pattern-name" style="color: var(--gold);">DPD (Tiếp Diễn)</div>
+                    <div class="pattern-desc">
+                        <strong>Vị trí:</strong> GIỮA xu hướng giảm.<br>
+                        <strong>Tâm lý:</strong> Sợ hãi tiếp diễn.<br>
+                        <strong>Sức mạnh:</strong> Trung bình (Ăn theo trend).<br>
+                        <strong>Rủi ro:</strong> Thấp hơn (Thuận trend).
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch4/4.1/4-1-3-png.webp" alt="UPD vs DPD">
+            </div>
+            <div class="image-caption">Hình 3: UPD chặn đứng đà tăng (Reversal), trong khi DPD tiếp sức đà giảm (Continuation)</div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⭐</span> Tại Sao UPD Được Coi Là "Vua" Của Các Pattern Bán?</div>
+                <p>Bởi vì UPD bắt được sự thay đổi căn bản trong cấu trúc thị trường (Market Structure Shift). Khi UPD hình thành thành công, nó thường báo hiệu sự khởi đầu của một xu hướng giảm dài hạn mới, mang lại tỷ lệ R:R (Risk:Reward) cực kỳ hấp dẫn (1:5, 1:10...). Trong khi đó, DPD thường chỉ ăn được đoạn giữa thân cá.</p>
+            </div>
+        </section>
+
+        <!-- VÍ DỤ THỰC TẾ -->
+        <section class="section">
+            <h2 class="section-title"><span>📈</span> Case Study: UPD Trong Thực Chiến</h2>
+            <p>Hãy cùng xem lý thuyết áp dụng vào thực tế như thế nào. Dưới đây là hai ví dụ kinh điển mà bất kỳ trader nào cũng nên ghi nhớ.</p>
+
+            <div class="highlight-box" style="border-left-color: var(--success);">
+                <div class="highlight-box-title"><span>📊</span> Ví Dụ 1: BTC/USDT - Cú Lừa Tháng 11/2024</div>
+                <p><strong>Bối cảnh:</strong> BTC đang trong cơn say tăng giá từ $67k lên sát mốc $99k. Truyền thông bơm tin liên tục.<br>
+                <strong>Phase 1 (UP):</strong> Giá tăng dựng đứng, volume mua cực lớn. Retail Trader điên cuồng vào lệnh Long.<br>
+                <strong>Phase 2 (PAUSE):</strong> Tại vùng $95k-$99k, giá khựng lại trong 4 ngày. Volume giảm đột ngột. Đây là lúc Smart Money âm thầm chốt lời và mở lệnh Short.<br>
+                <strong>Phase 3 (DOWN):</strong> Một cây nến H4 đỏ lòm xuyên thủng mốc $95k. Trend tăng chính thức gãy. HFZ hình thành tại đỉnh.<br>
+                <strong>Kết quả:</strong> Giá sau đó retest lại vùng $96k (HFZ) và sập mạnh về $88k. Ai Short tại HFZ đã có R:R 1:4.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📊</span> Ví Dụ 2: ETH/USDT - Sự Kiện ETF Tháng 3/2024</div>
+                <p><strong>Bối cảnh:</strong> Tin đồn ETF đẩy ETH bay từ $3,200 lên $4,090.<br>
+                <strong>Diễn biến:</strong> Ngay khi chạm $4,090, giá đi ngang (Pause) tạo mô hình 2 đỉnh nhỏ trong khung H4. Volume mua cạn kiệt. Sau đó giá sập mạnh (Down) về $3,100.<br>
+                <strong>Bài học:</strong> UPD thường xuất hiện kèm theo sự kiện "Tin ra là bán" (Sell the news). Vùng Pause chính là lúc tin tức được công bố và hấp thụ.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch4/4.1/4-1-4.webp" alt="UPD Examples">
+            </div>
+            <div class="image-caption">Hình 4: Chart thực tế cho thấy sức mạnh hủy diệt của UPD khi phe Mua bị mắc kẹt</div>
+        </section>
+
+        <!-- SAI LẦM THƯỜNG GẶP -->
+        <section class="section">
+            <h2 class="section-title"><span>⚠️</span> Những Sai Lầm "Chết Người" Khi Trade UPD</h2>
+            <p>UPD là con dao hai lưỡi. Nếu dùng sai, bạn sẽ đứt tay. Hãy tránh xa 3 lỗi sau:</p>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>❌</span> 1. Bán Sớm (Front-running)</div>
+                <p>Nhiều bạn thấy giá vừa tăng mạnh (Phase 1) và mới chững lại 1-2 cây nến (Phase 2) đã vội vàng Short ngay. <strong>SAI!</strong> Lúc này chưa có Phase 3 (Down). Giá hoàn toàn có thể chỉ nghỉ ngơi một chút rồi tăng tiếp (Pattern UPU). Bán sớm là cản đầu xe lửa.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>❌</span> 2. Chọn Phase 1 Quá Yếu</div>
+                <p>Phase 1 (Up) phải là một đợt tăng mạnh, dứt khoát. Nếu đợt tăng trước đó yếu ớt, lình xình, thì cú đảo chiều (nếu có) cũng sẽ không mạnh. Hãy nhớ: "Leo núi càng cao, ngã càng đau". UPD cần một Phase 1 đủ cao để tạo ra cú ngã đau (Phase 3).</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>❌</span> 3. Trade Ngược Pattern</div>
+                <p>Tuyệt đối không được tìm điểm Buy trong pattern UPD. Đây là pattern Bearish (Giảm giá). Tư duy Buy the dip (bắt đáy) trong lúc UPD đang hình thành là cách nhanh nhất để cháy tài khoản.</p>
+            </div>
+        </section>
+
+        <!-- HÀNH ĐỘNG THỰC HÀNH -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Bài Tập Thực Hành</h2>
+            <p>Kiến thức chỉ là sức mạnh tiềm năng. Hành động mới tạo ra kết quả. Tuần này, tôi muốn bạn làm như sau:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Săn Tìm UPD</div>
+                        <div class="flow-step-desc">Mở biểu đồ D1 của 5 đồng coin top đầu (BTC, ETH, BNB, SOL, XRP). Tìm kiếm các pattern UPD đã từng xảy ra trong quá khứ.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Vẽ Vùng HFZ</div>
+                        <div class="flow-step-desc">Sử dụng công cụ Rectangle để đánh dấu vùng Pause của các pattern đó. Kéo dài sang phải xem giá phản ứng thế nào khi chạm lại.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Ghi Chép Nhật Ký</div>
+                        <div class="flow-step-desc">Ghi lại cảm nhận của bạn: "Lúc đó thị trường đang hưng phấn thế nào?", "Volume thay đổi ra sao?". Việc này giúp rèn luyện trực giác.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Tổng Kết</h2>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>🎯</span> Chìa Khóa Mang Về</div>
+                <ul class="summary-list">
+                    <li><strong>UPD (Up-Pause-Down):</strong> Là pattern ĐẢO CHIỀU xu hướng tăng sang giảm, xuất hiện tại đỉnh.</li>
+                    <li><strong>Bản chất:</strong> Là quá trình phân phối tài sản từ Smart Money sang tay Retail Trader đang FOMO.</li>
+                    <li><strong>Sức mạnh:</strong> Mạnh hơn DPD vì bắt được điểm khởi đầu của trend giảm mới, R:R cao.</li>
+                    <li><strong>Nguyên tắc sống còn:</strong> Phải đợi Phase 3 (Down) xác nhận hoàn thành mới được coi là UPD. Không đoán mò, không chặn đầu xe lửa.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Chọn đáp án đúng nhất để mở khóa bài tiếp theo</p>
+            </div>
+
+            <div class="quiz-question" data-question="1" data-correct="B">
+                <div class="question-number">1</div>
+                <div class="question-text">UPD là viết tắt của chuỗi hành động giá nào?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Up - Push - Down (Tăng - Đẩy - Giảm)</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Up - Pause - Down (Tăng - Nghỉ - Giảm)</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Ultra - Price - Drop (Giá Giảm Siêu Mạnh)</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Up - Peak - Down (Tăng - Đỉnh - Giảm)</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="C">
+                <div class="question-number">2</div>
+                <div class="question-text">Tại sao UPD được đánh giá là pattern MẠNH HƠN DPD?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Vì nó xuất hiện nhiều hơn trên biểu đồ.</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Vì nó dễ vẽ hơn.</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Vì nó bắt được điểm ĐẢO CHIỀU xu hướng, nơi Smart Money phân phối mạnh nhất.</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Vì nó tạo ra vùng Zone rộng hơn.</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="3" data-correct="A">
+                <div class="question-number">3</div>
+                <div class="question-text">Hành động của Smart Money trong Phase 2 (Pause) của UPD là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Âm thầm bán ra (Phân phối) cho đám đông đang FOMO mua vào.</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Mua thêm để đẩy giá lên cao nữa.</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Không làm gì cả, chờ thị trường tự quyết định.</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Hoảng loạn bán tháo cùng Retail Trader.</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score">0/3</div>
+                <div class="result-text">Hoàn thành!</div>
+                <div class="result-message"></div>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+
+            let answeredCount = 0;
+            let correctCount = 0;
+            const totalQuestions = 3;
+
+            const explanations = {
+                1: {
+                    correct: '✓ Chính xác! UPD = Up-Pause-Down, mô tả chuyển động: Tăng → Nghỉ → Giảm.',
+                    incorrect: '✗ Sai! UPD là viết tắt của Up-Pause-Down (Tăng-Nghỉ-Giảm).'
+                },
+                2: {
+                    correct: '✓ Chính xác! UPD mạnh hơn vì nó là pattern đảo chiều, bắt được điểm kết thúc xu hướng tăng.',
+                    incorrect: '✗ Sai! UPD mạnh hơn DPD vì nó bắt được điểm đảo chiều xu hướng - nơi Smart Money phân phối.'
+                },
+                3: {
+                    correct: '✓ Chính xác! Trong Phase 2, volume giảm 40-60% vì Smart Money bán dần cho Retail, tạo ra sự "tĩnh lặng" trước đợt giảm mạnh.',
+                    incorrect: '✗ Sai! Trong Phase 2 (PAUSE), volume GIẢM 40-60% so với Phase 1 - đây là dấu hiệu quan trọng để nhận biết UPD thật.'
+                }
+            };
+
+            questions.forEach(question => {
+                const options = question.querySelectorAll('.quiz-option');
+                const correctAnswer = question.dataset.correct;
+                const questionNum = question.dataset.question;
+                const feedbackDiv = question.querySelector('.question-feedback');
+                const feedbackTitle = feedbackDiv.querySelector('.feedback-title');
+                const feedbackText = feedbackDiv.querySelector('.feedback-text');
+
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        if (question.classList.contains('answered')) return;
+
+                        question.classList.add('answered');
+                        answeredCount++;
+
+                        const selectedOption = this.dataset.option;
+                        const isCorrect = selectedOption === correctAnswer;
+
+                        options.forEach(opt => opt.classList.add('disabled'));
+                        this.classList.add('selected');
+
+                        if (isCorrect) {
+                            this.classList.add('correct');
+                            correctCount++;
+                            feedbackDiv.classList.add('correct');
+                            feedbackTitle.textContent = '✓ Chính xác!';
+                            feedbackText.textContent = explanations[questionNum].correct;
+                        } else {
+                            this.classList.add('incorrect');
+                            feedbackDiv.classList.add('incorrect');
+                            feedbackTitle.textContent = '✗ Sai rồi!';
+                            feedbackText.textContent = explanations[questionNum].incorrect;
+                            options.forEach(opt => {
+                                if (opt.dataset.option === correctAnswer) {
+                                    opt.classList.add('correct');
+                                }
+                            });
+                        }
+
+                        feedbackDiv.classList.add('show');
+
+                        if (answeredCount === totalQuestions) {
+                            const scoreDiv = resultDiv.querySelector('.result-score');
+                            const messageDiv = resultDiv.querySelector('.result-message');
+                            scoreDiv.textContent = `${correctCount}/${totalQuestions}`;
+
+                            if (correctCount === totalQuestions) {
+                                messageDiv.textContent = '🎉 Xuất sắc! Bạn đã nắm vững định nghĩa UPD!';
+                            } else if (correctCount >= 1) {
+                                messageDiv.textContent = '👍 Tốt! Tiếp tục học các bài tiếp theo!';
+                            } else {
+                                messageDiv.textContent = '📚 Đọc lại phần định nghĩa để hiểu rõ hơn!';
+                            }
+
+                            resultDiv.classList.add('show');
+                            retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0;
+                correctCount = 0;
+
+                questions.forEach(question => {
+                    question.classList.remove('answered');
+                    const options = question.querySelectorAll('.quiz-option');
+                    const feedbackDiv = question.querySelector('.question-feedback');
+
+                    options.forEach(opt => {
+                        opt.classList.remove('selected', 'correct', 'incorrect', 'disabled');
+                    });
+                    feedbackDiv.classList.remove('show', 'correct', 'incorrect');
+                });
+
+                resultDiv.classList.remove('show');
+                retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+
+    <footer class="section" style="text-align: center; padding: var(--space-xl);">
+        <p style="color: var(--gold); font-weight: 600;">Hoàn thành Bài 4.1 - UPD Là Gì?</p>
+        <p style="color: var(--text-muted);">Tiếp theo: <strong style="color: var(--text-primary);">Bài 4.2 - Cấu Trúc 3 Phases Của UPD</strong></p>
+    </footer>
+
+    </div>
+</body>
+</html>

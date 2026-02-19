@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 2.3: Cách Nhận Diện Zone Trên Biểu Đồ</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================
+       🎨 GEM DESIGN SYSTEM - V5.3 FACEBOOK-STYLE
+       ========================================== */
+    :root {
+      --color-navy: #112250;
+      --color-navy-dark: #0A0F1A;
+      --color-gold: #FFBD59;
+      --color-gold-dark: #E5A84D;
+      --color-burgundy: #9C0612;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-warning: #F59E0B;
+      --color-white: #FFFFFF;
+      --color-text: #E8E8E8;
+      --color-text-secondary: rgba(255, 255, 255, 0.7);
+      --color-text-muted: rgba(255, 255, 255, 0.5);
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.08);
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(255, 189, 89, 0.3);
+      --text-padding: 16px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 20px;
+      --radius-sm: 0;
+      --radius-md: 0;
+      --radius-lg: 0;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --glass-blur: blur(40px);
+    }
+
+    @media (min-width: 600px) {
+      :root {
+        --text-padding: 24px;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      font-size: 15px;
+      color: var(--color-text);
+      background: linear-gradient(180deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-dark) 100%);
+      min-height: 100vh;
+    }
+
+    @media (min-width: 600px) { body { font-size: 16px; line-height: 1.7; } }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(106, 91, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .lesson-container { max-width: 900px; margin: 0 auto; padding: 0; }
+    @media (min-width: 600px) { .lesson-container { padding: 16px; } }
+
+    .lesson-header {
+      text-align: center;
+      padding: var(--space-lg) var(--text-padding);
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: var(--space-md);
+    }
+
+    @media (min-width: 600px) {
+      .lesson-header {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        margin-bottom: var(--space-xl);
+      }
+    }
+
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-gold), var(--color-cyan), var(--color-gold));
+    }
+
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, var(--color-burgundy), #c41e2a);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+    }
+
+    @media (min-width: 600px) { .lesson-badge { font-size: 13px; padding: 6px 16px; } }
+
+    .lesson-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.5rem, 6vw, 2.5rem);
+      font-weight: 800;
+      color: var(--color-gold);
+      margin-bottom: var(--space-sm);
+      line-height: 1.2;
+      text-shadow: 0 0 30px rgba(255, 189, 89, 0.3);
+    }
+
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    .lesson-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--color-text-muted);
+      font-size: 12px;
+    }
+
+    @media (min-width: 600px) { .lesson-meta-item { font-size: 14px; } }
+    .lesson-meta-icon { color: var(--color-cyan); }
+
+    .lesson-content { background: transparent; border-radius: 0; padding: 0; backdrop-filter: none; border: none; }
+
+    @media (min-width: 600px) {
+      .lesson-content {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        padding: var(--text-padding);
+        backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--border-subtle);
+      }
+    }
+
+    .section { margin-bottom: var(--space-xl); }
+
+    h2, h3, p, ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      h2, h3, p, ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+
+    h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.25rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid rgba(255, 189, 89, 0.3);
+    }
+
+    @media (min-width: 600px) { h2 { font-size: 1.75rem; } }
+
+    h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-cyan);
+      margin-top: var(--space-lg);
+      margin-bottom: var(--space-sm);
+    }
+
+    @media (min-width: 600px) { h3 { font-size: 1.25rem; } }
+
+    p { margin-bottom: var(--space-md); }
+    strong { color: var(--color-gold); font-weight: 600; }
+
+    ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+      margin-bottom: var(--space-md);
+      padding-left: calc(var(--text-padding) + 20px);
+    }
+
+    @media (min-width: 600px) {
+      ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) { padding-left: 24px; }
+    }
+
+    ul li { margin-bottom: var(--space-xs); }
+
+    .opening-hook {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(17, 34, 80, 0.4));
+      border-left: 4px solid var(--color-burgundy);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin-bottom: var(--space-lg);
+      font-size: 15px;
+      font-style: italic;
+    }
+
+    @media (min-width: 600px) { .opening-hook { border-radius: var(--radius-md); font-size: 17px; } }
+    .opening-hook p { padding-left: 0; padding-right: 0; }
+    .opening-hook p:last-child { margin-bottom: 0; }
+
+    .highlight-box {
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-md) 0;
+      border-left: 4px solid;
+    }
+
+    @media (min-width: 600px) { .highlight-box { border-radius: var(--radius-md); } }
+    .highlight-box p, .highlight-box ul { padding-left: 0 !important; padding-right: 0 !important; }
+
+    .highlight-box.important { background: rgba(255, 189, 89, 0.1); border-color: var(--color-gold); }
+    .highlight-box.tip { background: rgba(0, 240, 255, 0.1); border-color: var(--color-cyan); }
+    .highlight-box.warning { background: rgba(245, 158, 11, 0.1); border-color: var(--color-warning); }
+    .highlight-box.success { background: rgba(16, 185, 129, 0.1); border-color: var(--color-green); }
+    .highlight-box.definition { background: rgba(106, 91, 255, 0.1); border-color: var(--color-purple); }
+
+    .highlight-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (min-width: 600px) { .highlight-title { font-size: 17px; } }
+
+    .highlight-box.important .highlight-title { color: var(--color-gold); }
+    .highlight-box.tip .highlight-title { color: var(--color-cyan); }
+    .highlight-box.warning .highlight-title { color: var(--color-warning); }
+    .highlight-box.success .highlight-title { color: var(--color-green); }
+    .highlight-box.definition .highlight-title { color: var(--color-purple); }
+
+    .lesson-image {
+      margin: var(--space-md) 0;
+      text-align: center;
+      overflow: hidden;
+      border-radius: 0;
+    }
+
+    @media (min-width: 600px) { .lesson-image { border-radius: var(--radius-md); margin: var(--space-lg) 0; } }
+
+    .lesson-image img { width: 100%; height: auto; display: block; border-radius: 0; }
+
+    @media (min-width: 600px) {
+      .lesson-image img {
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-subtle);
+      }
+    }
+
+    .image-caption {
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 12px;
+      margin-top: var(--space-sm);
+      font-style: italic;
+      padding: 0 var(--text-padding);
+    }
+
+    @media (min-width: 600px) { .image-caption { font-size: 14px; padding: 0; } }
+
+    .key-concept-box {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.15), rgba(17, 34, 80, 0.3));
+      border: none;
+      border-left: 4px solid var(--color-burgundy);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .key-concept-box {
+        border: 2px solid var(--color-burgundy);
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl);
+      }
+    }
+
+    .key-concept-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (min-width: 600px) { .key-concept-title { font-size: 1.25rem; } }
+
+    .key-concept-list { list-style: none; padding: 0; margin: 0; }
+
+    .key-concept-list li {
+      padding: 6px 0;
+      padding-left: 24px;
+      position: relative;
+      color: var(--color-text);
+      font-size: 14px;
+    }
+
+    @media (min-width: 600px) { .key-concept-list li { font-size: 16px; padding: 8px 0; padding-left: 28px; } }
+    .key-concept-list li::before { content: "✓"; position: absolute; left: 0; color: var(--color-green); font-weight: bold; }
+
+    .quiz-section {
+      background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05));
+      border: none;
+      border-left: 4px solid var(--color-purple);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .quiz-section {
+        border: 2px solid var(--color-purple);
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl);
+      }
+    }
+
+    .quiz-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.2rem;
+      color: var(--color-purple);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (min-width: 600px) { .quiz-title { font-size: 1.5rem; } }
+
+    .quiz-question {
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-lg);
+      border-bottom: 1px solid rgba(106, 91, 255, 0.2);
+    }
+
+    .quiz-question:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+    .quiz-question-text {
+      font-weight: 600;
+      color: var(--color-white);
+      margin-bottom: var(--space-sm);
+      font-size: 15px;
+    }
+
+    @media (min-width: 600px) { .quiz-question-text { font-size: 17px; } }
+
+    .quiz-options { list-style: none; padding: 0; }
+
+    .quiz-option {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      margin-bottom: 6px;
+      background: rgba(17, 34, 80, 0.4);
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    @media (min-width: 600px) { .quiz-option { font-size: 15px; padding: var(--space-md); } }
+    .quiz-option:hover { background: rgba(17, 34, 80, 0.6); border-color: var(--color-purple); }
+
+    .quiz-option-letter {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      background: rgba(106, 91, 255, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--color-purple);
+    }
+
+    @media (min-width: 600px) { .quiz-option-letter { width: 30px; height: 30px; font-size: 14px; } }
+
+    .quiz-answer {
+      margin-top: var(--space-sm);
+      padding: var(--space-md);
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 3px solid var(--color-green);
+      border-radius: 8px;
+      display: none;
+      font-size: 14px;
+    }
+
+    @media (min-width: 600px) { .quiz-answer { font-size: 15px; } }
+    .quiz-answer.show { display: block; }
+    .quiz-answer-label { font-weight: 600; color: var(--color-green); margin-bottom: 4px; }
+
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-xl) var(--text-padding);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: var(--space-lg);
+      background: var(--bg-card);
+    }
+
+    @media (min-width: 600px) { .lesson-footer { background: transparent; padding: var(--space-xl) 0; } }
+
+    .footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--color-gold);
+      margin-bottom: 4px;
+    }
+
+    .footer-link { color: var(--color-text-muted); font-size: 13px; }
+    .footer-link a { color: var(--color-cyan); text-decoration: none; }
+    .footer-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+
+<body>
+  <div class="lesson-container">
+
+    <!-- HEADER -->
+    <header class="lesson-header">
+      <span class="lesson-badge">📚 TIER 1 • Chương 2 • Bài 2.3</span>
+      <h1 class="lesson-title">Cách Nhận Diện Zone Trên Biểu Đồ</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">⏱️</span>
+          12 phút đọc
+        </span>
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">📚</span>
+          ~1500 từ
+        </span>
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">✅</span>
+          3 câu quiz
+        </span>
+      </div>
+    </header>
+
+    <!-- LESSON CONTENT -->
+    <div class="lesson-content">
+      
+      <div class="opening-hook">
+        <p>Bạn đã hiểu khái niệm HFZ và LFZ, nhưng làm thế nào để thực sự "nhìn thấy" chúng trên biểu đồ? Đây là bước quan trọng nhất trong việc áp dụng phương pháp GEM Frequency vào thực tế.</p>
+        <p>Trong bài học này, tôi sẽ hướng dẫn bạn cách nhận diện các vùng Frequency Zone một cách trực quan, không cần công thức phức tạp. Đây là kỹ năng nền tảng mà bạn sẽ phát triển thêm khi học các patterns cụ thể ở TIER 2.</p>
+      </div>
+
+      <section class="section">
+        <h2>Nguyên Tắc Cơ Bản: Tìm Vùng Tích Lũy</h2>
+
+        <p>Điều đầu tiên bạn cần tìm kiếm là <strong>vùng tích lũy (consolidation)</strong> sau một đợt di chuyển mạnh. Vùng tích lũy là nơi giá đi ngang trong một khoảng hẹp, thường có từ 2-6 cây nến với thân nhỏ và biên độ dao động thấp. Đây chính là nơi mà HFZ hoặc LFZ được hình thành.</p>
+
+        <div class="highlight-box definition">
+          <div class="highlight-title">📖 Vùng Tích Lũy (Consolidation)</div>
+          <p>Vùng tích lũy là khu vực trên biểu đồ nơi giá di chuyển trong một phạm vi hẹp, thể hiện sự cân bằng tạm thời giữa lực mua và lực bán. Sau vùng tích lũy, giá thường có một đợt di chuyển mạnh theo một hướng, và vùng tích lũy này trở thành HFZ hoặc LFZ tùy thuộc vào hướng giá đi.</p>
+        </div>
+
+        <h3>Bước 1: Xác Định Xu Hướng Trước</h3>
+
+        <p>Trước khi tìm zone, bạn cần xác định xu hướng trước đó. Nếu trước vùng tích lũy là một đợt tăng giá và sau đó giá phá vỡ xuống, vùng đó có thể là HFZ. Ngược lại, nếu trước đó là đợt giảm giá và sau đó giá phá vỡ lên, vùng đó có thể là LFZ.</p>
+
+        <div class="highlight-box tip">
+          <div class="highlight-title">💡 Mẹo Nhận Diện Nhanh</div>
+          <p>Hãy tìm kiếm những vùng mà nến có thân nhỏ, wicks ngắn, và giá nằm trong một khoảng range hẹp (thường dưới 1.5% đối với crypto). Đây là dấu hiệu của sự tích lũy, và khi giá quay lại vùng này, nó có thể hoạt động như một HFZ hoặc LFZ.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Cách Nhận Diện HFZ Bằng Mắt</h2>
+
+        <p>Để nhận diện HFZ, hãy tìm kiếm những vùng ở phía trên giá hiện tại. HFZ thường được hình thành khi giá tăng lên, tạo ra một vùng tích lũy, sau đó phá vỡ xuống dưới. Vùng tích lũy đó trở thành HFZ - nơi có nhiều lệnh bán đang chờ.</p>
+
+        <p>Khi giá quay lại test HFZ, bạn sẽ thấy giá có xu hướng bị "từ chối" và quay đầu xuống. Đây là lúc bạn có thể tìm cơ hội SHORT nếu có xác nhận từ nến đảo chiều.</p>
+
+        <div class="highlight-box warning">
+          <div class="highlight-title">⚠️ Lưu Ý Quan Trọng</div>
+          <p>Không phải mọi vùng tích lũy đều trở thành zone mạnh. Zone chất lượng cao thường có đặc điểm: vùng tích lũy gọn gàng (2-5 nến), sau đó giá rời khỏi vùng với một đợt di chuyển mạnh (impulse). Vùng tích lũy càng ngắn và di chuyển sau đó càng mạnh, zone càng có khả năng hoạt động tốt.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Cách Nhận Diện LFZ Bằng Mắt</h2>
+
+        <p>Để nhận diện LFZ, hãy tìm kiếm những vùng ở phía dưới giá hiện tại. LFZ thường được hình thành khi giá giảm xuống, tạo ra một vùng tích lũy, sau đó phá vỡ lên trên. Vùng tích lũy đó trở thành LFZ - nơi có nhiều lệnh mua đang chờ.</p>
+
+        <p>Khi giá giảm xuống test LFZ, bạn sẽ thấy giá có xu hướng được "hỗ trợ" và bật ngược lên. Đây là lúc bạn có thể tìm cơ hội LONG nếu có xác nhận từ nến đảo chiều.</p>
+      </section>
+
+      <section class="section">
+        <h2>Ví Dụ Thực Tế Trên BTC/USDT</h2>
+
+        <p>Hãy thực hành ngay bằng cách mở biểu đồ BTC/USDT khung 4H trên TradingView hoặc GEM Scanner. Tìm kiếm những vùng mà giá đã tích lũy 2-5 nến, sau đó có một đợt di chuyển mạnh. Đánh dấu những vùng này và theo dõi xem điều gì xảy ra khi giá quay lại.</p>
+
+        <div class="highlight-box success">
+          <div class="highlight-title">✅ Bài Tập Thực Hành</div>
+          <p>Mở biểu đồ BTC/USDT 4H và tìm 3 vùng tích lũy trong 30 ngày gần nhất. Ghi chú lại: vùng đó nằm ở đâu, xu hướng trước đó là gì, giá đã di chuyển theo hướng nào sau khi rời vùng. Đây là bước đầu tiên để bạn rèn luyện khả năng nhận diện zone.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Tóm Tắt Bài Học</h2>
+
+        <div class="key-concept-box">
+          <div class="key-concept-title">🔑 Khái Niệm Cốt Lõi Cần Nhớ</div>
+          <ul class="key-concept-list">
+            <li>Tìm <strong>vùng tích lũy</strong> (consolidation) sau một đợt di chuyển mạnh</li>
+            <li>Vùng tích lũy tốt có 2-5 nến, thân nhỏ, range hẹp</li>
+            <li>HFZ ở phía trên giá hiện tại, LFZ ở phía dưới giá hiện tại</li>
+            <li>Zone chất lượng cao: tích lũy ngắn gọn + di chuyển sau đó mạnh</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- QUIZ SECTION -->
+      <div class="quiz-section">
+        <div class="quiz-title">📝 Kiểm Tra Kiến Thức</div>
+        
+        <div class="quiz-question">
+          <div class="quiz-question-text">Câu 1: Đặc điểm của vùng tích lũy (consolidation) là gì?</div>
+          <ul class="quiz-options">
+            
+            <li class="quiz-option">
+              <span class="quiz-option-letter">A</span>
+              <span>Nến có thân lớn, biên độ dao động cao</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">B</span>
+              <span>Nến có thân nhỏ, biên độ dao động thấp</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">C</span>
+              <span>Giá tăng liên tục không nghỉ</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">D</span>
+              <span>Volume giao dịch rất cao</span>
+            </li>
+          </ul>
+          <div class="quiz-answer">
+            <div class="quiz-answer-label">✓ Đáp án đúng: B</div>
+            <p>Vùng tích lũy có đặc điểm là nến có thân nhỏ, wicks ngắn, và giá nằm trong khoảng range hẹp (thường dưới 1.5%). Đây là dấu hiệu của sự cân bằng tạm thời giữa lực mua và bán.</p>
+          </div>
+        </div>
+        <div class="quiz-question">
+          <div class="quiz-question-text">Câu 2: HFZ thường nằm ở vị trí nào so với giá hiện tại?</div>
+          <ul class="quiz-options">
+            
+            <li class="quiz-option">
+              <span class="quiz-option-letter">A</span>
+              <span>Phía dưới giá hiện tại</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">B</span>
+              <span>Phía trên giá hiện tại</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">C</span>
+              <span>Ngay tại giá hiện tại</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">D</span>
+              <span>Không có vị trí cố định</span>
+            </li>
+          </ul>
+          <div class="quiz-answer">
+            <div class="quiz-answer-label">✓ Đáp án đúng: B</div>
+            <p>HFZ thường nằm ở phía trên giá hiện tại, được hình thành khi giá tăng lên tạo vùng tích lũy rồi phá vỡ xuống. Đây là nơi có nhiều lệnh bán đang chờ khi giá quay lại test.</p>
+          </div>
+        </div>
+        <div class="quiz-question">
+          <div class="quiz-question-text">Câu 3: Zone chất lượng cao thường có đặc điểm gì?</div>
+          <ul class="quiz-options">
+            
+            <li class="quiz-option">
+              <span class="quiz-option-letter">A</span>
+              <span>Vùng tích lũy dài (10+ nến) và di chuyển sau đó yếu</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">B</span>
+              <span>Vùng tích lũy ngắn (2-5 nến) và di chuyển sau đó mạnh</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">C</span>
+              <span>Không có vùng tích lũy</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">D</span>
+              <span>Volume thấp trong suốt quá trình</span>
+            </li>
+          </ul>
+          <div class="quiz-answer">
+            <div class="quiz-answer-label">✓ Đáp án đúng: B</div>
+            <p>Zone chất lượng cao có vùng tích lũy gọn gàng (2-5 nến) và sau đó giá rời khỏi vùng với một đợt di chuyển mạnh (impulse). Điều này cho thấy áp lực mua/bán tập trung và mạnh mẽ.</p>
+          </div>
+        </div>
+
+        <p style="text-align: center; color: var(--color-text-muted); margin-top: var(--space-lg);">
+          <em>💡 Click vào đáp án để kiểm tra</em>
+        </p>
+      </div>
+
+      
+      <!-- NEXT LESSON -->
+      <div class="highlight-box tip">
+        <div class="highlight-title">📚 Bài Tiếp Theo</div>
+        <p>Trong <strong>Bài 2.4: Nguyên Tắc Giao Dịch Với Zone</strong>, bạn sẽ tiếp tục khám phá những kiến thức quan trọng để nâng cao kỹ năng trading của mình.</p>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="lesson-footer">
+      <div class="footer-logo">GEM Trading Academy</div>
+      <div class="footer-link">
+        <a href="https://gemral.com" target="_blank">gemral.com</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    document.querySelectorAll('.quiz-option').forEach(option => {
+      option.addEventListener('click', function() {
+        const question = this.closest('.quiz-question');
+        const answer = question.querySelector('.quiz-answer');
+        answer.classList.toggle('show');
+        question.querySelectorAll('.quiz-option').forEach(opt => { opt.style.opacity = '0.5'; });
+        this.style.opacity = '1';
+        this.style.borderColor = 'var(--color-purple)';
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 9.3: Sự Thay Đổi Thực Sự - Tier 2</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section, .content-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section, .content-card {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title, .card-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p, .card-body p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul, .card-body ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li, .card-body li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        .image-caption {
+            text-align: center;
+            font-size: 0.9em;
+            color: var(--text-muted);
+            margin-top: -10px;
+            margin-bottom: var(--space-lg);
+            font-style: italic;
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4, .highlight-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: 8px;}
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .warning-box h4 { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .definition-box h4 { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .success-box h4 { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+        .success-box p { color: var(--text-secondary); margin: 0; }
+
+        /* Custom for this lesson */
+        .card-icon {
+            font-size: 2rem;
+            margin-right: var(--space-md);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: var(--space-md);
+        }
+        .card-meta span {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .quote-box {
+            border-left: 4px solid var(--purple);
+            padding-left: var(--space-md);
+            margin: var(--space-lg) 0;
+            font-style: italic;
+            color: var(--text-primary);
+        }
+        .quote-author {
+            margin-top: var(--space-sm);
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+        }
+        .change-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        .change-card {
+            background: var(--bg-primary);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            text-align: center;
+            border: 1px solid var(--glass-border);
+        }
+        .change-icon { font-size: 2rem; margin-bottom: var(--space-sm); }
+        .change-title { color: var(--gold); font-weight: 700; margin-bottom: var(--space-xs); }
+        .change-desc { font-size: 0.9rem; color: var(--text-muted); }
+        
+        .habit-box {
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            margin-bottom: var(--space-md);
+            border: 1px solid var(--glass-border);
+        }
+        .habit-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); border-bottom: 1px solid var(--glass-border); padding-bottom: var(--space-xs); }
+        .habit-list { list-style: none; padding: 0 !important; }
+        .habit-item { display: flex; gap: var(--space-sm); margin-bottom: var(--space-xs); align-items: center; }
+        .habit-checkbox { color: var(--gold); font-weight: 700; }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+        }
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        .quiz-question h4 {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+        }
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+            color: var(--error);
+        }
+        .quiz-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .quiz-result.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent);
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .retake-btn {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-xl);
+        }
+        .footer-text { color: var(--text-muted); }
+        .footer-logo { color: var(--gold); font-weight: 700; font-size: 1.2rem; margin-bottom: var(--space-xs); }
+
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="lesson-header">
+            <span class="lesson-badge">🦋 Tier 2 - Bài 9.3</span>
+            <h1 class="lesson-title">Sự Thay Đổi Thực Sự</h1>
+            <p class="lesson-subtitle">Từ biết đến làm - Hành trình chuyển hóa bản sắc</p>
+        </header>
+
+        <!-- 1. OPENING HOOK -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon gold">❓</div>
+                <div class="card-meta">
+                    <h3>Câu Hỏi Mở Đầu</h3>
+                    <span>Tại sao chúng ta thất bại?</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Hãy để tôi hỏi bạn một câu: Tại sao có hai người cùng học một khóa học, cùng sử dụng một bộ công cụ, cùng nhìn vào một biểu đồ, nhưng kết quả lại hoàn toàn trái ngược? Một người kiếm được lợi nhuận đều đặn, còn người kia liên tục cháy tài khoản?</p>
+                
+                <p>Bạn có thể nghĩ rằng người thành công thông minh hơn, hoặc họ biết một "bí mật" nào đó mà bạn chưa biết. Nhưng sự thật thường phũ phàng hơn nhiều: Sự khác biệt không nằm ở những gì họ <strong>BIẾT</strong>, mà nằm ở những gì họ <strong>LÀM</strong>.</p>
+                
+                <p>90% traders thất bại không phải vì thiếu kiến thức kỹ thuật. Họ thất bại vì họ không thể vượt qua được rào cản lớn nhất: <strong>Chính bản thân mình</strong>. Trong bài học này, chúng ta sẽ không nói về nến hay xu hướng. Chúng ta sẽ nói về cách "hack" não bộ của bạn để biến việc trading kỷ luật trở thành một bản năng, chứ không phải một cuộc chiến ý chí mỗi ngày.</p>
+            </div>
+        </article>
+
+        <!-- 2. CONCEPT INTRODUCTION -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon purple">🔑</div>
+                <div class="card-meta">
+                    <h3>Khái Niệm: Sự Thay Đổi Đến Từ Đâu?</h3>
+                    <span>Knowledge vs Action vs Identity</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Chúng ta thường nghĩ rằng để thay đổi kết quả (Lợi nhuận), chúng ta cần thay đổi hành động (Phương pháp). Nhưng đó chỉ là bề nổi. Sự thay đổi thực sự và bền vững phải đi theo một quy trình sâu hơn:</p>
+
+                <div class="definition-box">
+                    <h4>💡 Tam Giác Của Sự Thay Đổi</h4>
+                    <ul class="styled-list">
+                        <li><strong>Lớp ngoài cùng (Outcome - Kết quả):</strong> Những gì bạn nhận được (Ví dụ: Kiếm được $1000). Đa số mọi người tập trung vào đây.</li>
+                        <li><strong>Lớp giữa (Process - Quy trình):</strong> Những gì bạn làm (Ví dụ: Tuân thủ quy tắc quản lý vốn). Đây là nơi xây dựng thói quen.</li>
+                        <li><strong>Lớp lõi (Identity - Bản sắc):</strong> Những gì bạn tin tưởng (Ví dụ: "Tôi là một trader kỷ luật"). Đây là nơi thay đổi bắt đầu.</li>
+                    </ul>
+                </div>
+
+                <p>Vấn đề của hầu hết trader là họ cố gắng thay đổi từ ngoài vào trong. Họ muốn có lợi nhuận (Outcome), nên họ ép mình tuân thủ quy tắc (Process), nhưng sâu thẳm bên trong họ vẫn tin rằng mình là một kẻ cờ bạc muốn làm giàu nhanh (Identity). Kết quả là sự xung đột nội tâm và sớm muộn gì họ cũng phá vỡ quy tắc.</p>
+
+                <p>Sự thay đổi thực sự xảy ra khi bạn đảo ngược quy trình: <strong>Identity → Process → Outcome</strong>. Bạn không cố gắng "giả vờ" kỷ luật. Bạn TRỞ THÀNH một người kỷ luật.</p>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x350/112250/8B5CF6?text=Knowledge+to+Identity" alt="Change Process">
+                    <p class="image-caption">Hình 9.3.1: Hành trình chuyển hóa từ Kiến thức đến Bản sắc</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 3. DEEP DIVE -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon green">🎯</div>
+                <div class="card-meta">
+                    <h3>Phân Tích Sâu: 3 Trụ Cột Của Sự Chuyển Hóa</h3>
+                    <span>Mindset - Behavior - Habits</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Để thực hiện sự chuyển hóa bản sắc này, chúng ta cần tác động vào 3 lĩnh vực cụ thể:</p>
+
+                <div class="change-grid">
+                    <div class="change-card">
+                        <div class="change-icon">🧠</div>
+                        <div class="change-title">MINDSET</div>
+                        <div class="change-desc">Tư duy xác suất<br>Chấp nhận rủi ro<br>Kiên nhẫn</div>
+                    </div>
+                    <div class="change-card">
+                        <div class="change-icon">⚡</div>
+                        <div class="change-title">BEHAVIOR</div>
+                        <div class="change-desc">Tuân thủ plan<br>Không FOMO<br>Cắt lỗ dứt khoát</div>
+                    </div>
+                    <div class="change-card">
+                        <div class="change-icon">🔄</div>
+                        <div class="change-title">HABITS</div>
+                        <div class="change-desc">Daily routine<br>Viết nhật ký<br>Review lệnh</div>
+                    </div>
+                </div>
+
+                <h4>1. Mindset (Tư duy): Cài Đặt Lại Hệ Điều Hành</h4>
+                <p>Bạn cần thay đổi cách bộ não phản ứng với thị trường. Ví dụ:</p>
+                <ul class="styled-list">
+                    <li><strong>Tư duy cũ:</strong> "Thua lỗ là thất bại, là mình dốt." → <strong>Tư duy mới:</strong> "Thua lỗ là chi phí kinh doanh. Miễn là tôi tuân thủ quy tắc, kết quả từng lệnh lẻ tẻ không quan trọng."</li>
+                    <li><strong>Tư duy cũ:</strong> "Phải gỡ lại ngay." → <strong>Tư duy mới:</strong> "Cơ hội luôn còn đó. Bảo vệ vốn là ưu tiên số 1."</li>
+                </ul>
+
+                <h4>2. Behavior (Hành vi): Từ Ý Chí Sang Hệ Thống</h4>
+                <p>Đừng dựa vào ý chí (Willpower). Ý chí giống như pin điện thoại, nó sẽ cạn dần trong ngày. Hãy xây dựng môi trường để hành vi đúng đắn trở nên dễ dàng nhất.</p>
+                <p><em>Ví dụ:</em> Nếu bạn hay FOMO vào lệnh bậy bạ trên điện thoại, hãy xóa app trading trên điện thoại và chỉ trade trên máy tính.</p>
+
+                <h4>3. Habits (Thói quen): Sức Mạnh Của Sự Lặp Lại</h4>
+                <p>Một hành động lặp đi lặp lại đủ lâu sẽ trở thành thói quen. Khi đã thành thói quen, bạn sẽ tốn rất ít năng lượng não bộ để thực hiện nó. Mục tiêu của chúng ta là biến việc "Check list trước khi vào lệnh" thành một phản xạ vô điều kiện như việc đánh răng mỗi sáng.</p>
+            </div>
+        </article>
+
+        <!-- 4. EXAMPLES -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon gold">📋</div>
+                <div class="card-meta">
+                    <h3>Ví Dụ Thực Tế: Routine Của Pro Trader</h3>
+                    <span>Sự khác biệt trong một ngày</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Hãy xem sự khác biệt giữa một Amateur Trader và một Pro Trader trong một ngày làm việc:</p>
+
+                <div class="success-box">
+                    <h4>✅ Pro Trader Routine</h4>
+                    <p><strong>Sáng (30p):</strong> Không mở chart ngay. Thiền/Tập thể dục. Đọc tin tức kinh tế quan trọng. Mở chart khung Daily/4H để xác định Key Zones. Đặt cảnh báo giá (Alerts) và đi làm việc khác.</p>
+                    <p><strong>Trong ngày:</strong> Chỉ mở chart khi có Alert kêu. Kiểm tra Checklist. Nếu đủ điều kiện -> Vào lệnh. Nếu không -> Tắt chart.</p>
+                    <p><strong>Tối (30p):</strong> Review lại các lệnh đã vào (dù thắng hay thua). Viết nhật ký giao dịch (Journal). Rút ra bài học.</p>
+                </div>
+
+                <div class="warning-box">
+                    <h4>❌ Amateur Trader Routine</h4>
+                    <p><strong>Sáng:</strong> Vừa mở mắt vớ ngay điện thoại check PnL. Thấy đỏ thì hoảng, thấy xanh thì sướng.</p>
+                    <p><strong>Trong ngày:</strong> Dán mắt vào màn hình 15m/5m. Vào lệnh liên tục vì sợ lỡ cơ hội. Thua thì gấp thếp volume để gỡ.</p>
+                    <p><strong>Tối:</strong> Mệt mỏi, stress, không muốn nhìn lại chart vì quá đau đớn. Đi ngủ với tâm trạng lo âu.</p>
+                </div>
+
+                <div class="habit-box">
+                    <div class="habit-title">💪 Xây Dựng Thói Quen Hàng Ngày</div>
+                    <ul class="habit-list">
+                        <li class="habit-item">
+                            <div class="habit-checkbox">☐</div>
+                            <div class="habit-text"><strong>Check tin tức:</strong> Xem lịch kinh tế để tránh biến động mạnh.</div>
+                        </li>
+                        <li class="habit-item">
+                            <div class="habit-checkbox">☐</div>
+                            <div class="habit-text"><strong>Top-Down Analysis:</strong> Luôn bắt đầu từ khung lớn (HTF).</div>
+                        </li>
+                        <li class="habit-item">
+                            <div class="habit-checkbox">☐</div>
+                            <div class="habit-text"><strong>Set & Forget:</strong> Dùng Alert thay vì nhìn màn hình.</div>
+                        </li>
+                        <li class="habit-item">
+                            <div class="habit-checkbox">☐</div>
+                            <div class="habit-text"><strong>Journaling:</strong> "Không viết nhật ký = Không tiến bộ".</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x300/112250/FFBD59?text=Pro+Trader+Daily+Routine" alt="Daily Routine">
+                    <p class="image-caption">Hình 9.3.2: Daily routine giúp duy trì sự ổn định tâm lý</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 5. MISTAKES -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon cyan">📝</div>
+                <div class="card-meta">
+                    <h3>Công Cụ Tối Thượng: Trading Journal</h3>
+                    <span>Sai lầm lớn nhất là không ghi chép</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Sai lầm lớn nhất ngăn cản sự thay đổi là: <strong>Không biết mình sai ở đâu.</strong> Trí nhớ của chúng ta rất tệ, đặc biệt là khi bị cảm xúc chi phối. Trading Journal (Nhật ký giao dịch) là tấm gương phản chiếu sự thật trần trụi về năng lực của bạn.</p>
+
+                <div class="highlight-box">
+                    <h4 class="highlight-title">📓 Journal Cần Ghi Những Gì?</h4>
+                    <ul class="styled-list">
+                        <li><strong>Setup:</strong> Pattern gì? Tại sao vào lệnh? (Có ảnh chụp màn hình lúc vào).</li>
+                        <li><strong>Cảm xúc:</strong> Lúc đó bạn cảm thấy thế nào? (Hào hứng, sợ hãi, tham lam?).</li>
+                        <li><strong>Kết quả:</strong> Thắng hay thua? R:R thực tế đạt được?</li>
+                        <li><strong>Bài học:</strong> Lần sau sẽ làm gì khác đi?</li>
+                    </ul>
+                </div>
+
+                <div class="quote-box">
+                    <div class="quote-text">"Journal không phải để ghi lại những con số, mà để ghi lại quá trình trưởng thành của bạn. Một cuốn nhật ký tốt đáng giá hơn bất kỳ khóa học ngàn đô nào."</div>
+                    <div class="quote-author">— GEM Method</div>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x350/112250/00F0FF?text=Trading+Journal+Template" alt="Journal Template">
+                    <p class="image-caption">Hình 9.3.3: Mẫu Trading Journal cơ bản nhưng hiệu quả</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 6. APPLICATION -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon purple">🚀</div>
+                <div class="card-meta">
+                    <h3>Thử Thách: 30 Ngày Chuyển Hóa</h3>
+                    <span>Action Plan</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Bạn không thể thay đổi sau một đêm. Nhưng bạn có thể bắt đầu quá trình đó ngay hôm nay. Tôi thách thức bạn tham gia <strong>"30-Day GEM Challenge"</strong>:</p>
+
+                <div class="success-box">
+                    <h4>🔥 Luật Chơi 30 Ngày</h4>
+                    <ul class="styled-list">
+                        <li><strong>Cam kết 1:</strong> Chỉ vào lệnh khi setup đạt điểm A (Zone Score > 12). Nếu không có, tuyệt đối không trade.</li>
+                        <li><strong>Cam kết 2:</strong> Viết nhật ký cho MỌI lệnh giao dịch ngay sau khi đóng lệnh.</li>
+                        <li><strong>Cam kết 3:</strong> Giới hạn rủi ro tối đa 1-2% mỗi lệnh. Thua 2 lệnh liên tiếp trong ngày -> Nghỉ trade 24h.</li>
+                        <li><strong>Cam kết 4:</strong> Đọc lại nhật ký giao dịch vào mỗi cuối tuần.</li>
+                    </ul>
+                </div>
+
+                <p><strong>Tại sao là 30 ngày?</strong> Khoa học chứng minh não bộ cần khoảng 21-30 ngày để hình thành một liên kết thần kinh mới (thói quen). Nếu bạn vượt qua được 30 ngày này, việc kỷ luật sẽ trở nên tự nhiên như hơi thở.</p>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x300/112250/8B5CF6?text=30+Day+Trading+Challenge" alt="30 Day Challenge">
+                    <p class="image-caption">Hình 9.3.4: Lộ trình 30 ngày để xây dựng kỷ luật thép</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 7. SUMMARY -->
+        <div class="summary-box">
+            <h3>📝 Tóm Tắt Bài Học</h3>
+            <ul class="summary-list">
+                <li>Sự thay đổi bền vững đi từ trong ra ngoài: <strong>Identity (Bản sắc) → Process (Quy trình) → Outcome (Kết quả)</strong>.</li>
+                <li>Đừng cố gắng thay đổi kết quả PnL, hãy thay đổi con người bạn trở thành.</li>
+                <li>Xây dựng môi trường để hành vi tốt dễ thực hiện (Daily Routine) và hành vi xấu khó thực hiện.</li>
+                <li><strong>Trading Journal</strong> là công cụ bắt buộc để soi chiếu và sửa lỗi.</li>
+                <li>Thực hiện <strong>30-Day Challenge</strong> để cài đặt thói quen mới vào tiềm thức.</li>
+            </ul>
+        </div>
+
+        <!-- 8. QUIZ -->
+        <section class="quiz-section">
+            <h3>🎯 Kiểm Tra Kiến Thức</h3>
+
+            <div class="quiz-question" data-correct="1">
+                <h4>Câu 1: Theo mô hình Tam Giác Của Sự Thay Đổi, thứ tự chuyển hóa bền vững nhất là gì?</h4>
+                <div class="quiz-options">
+                    <button class="quiz-option" data-index="0">Outcome (Kết quả) → Process (Quy trình) → Identity (Bản sắc)</button>
+                    <button class="quiz-option" data-index="1">Identity (Bản sắc) → Process (Quy trình) → Outcome (Kết quả)</button>
+                    <button class="quiz-option" data-index="2">Process (Quy trình) → Outcome (Kết quả) → Identity (Bản sắc)</button>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <h4>Câu 2: Tại sao chúng ta KHÔNG nên dựa hoàn toàn vào Ý Chí (Willpower) để giữ kỷ luật?</h4>
+                <div class="quiz-options">
+                    <button class="quiz-option" data-index="0">Vì ý chí là nguồn tài nguyên có hạn và sẽ cạn kiệt dần trong ngày.</button>
+                    <button class="quiz-option" data-index="1">Vì ý chí không quan trọng bằng kiến thức kỹ thuật.</button>
+                    <button class="quiz-option" data-index="2">Vì chỉ những người bẩm sinh mạnh mẽ mới có ý chí.</button>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <h4>Câu 3: Mục đích quan trọng nhất của Trading Journal là gì?</h4>
+                <div class="quiz-options">
+                    <button class="quiz-option" data-index="0">Để khoe thành tích thắng lệnh với bạn bè.</button>
+                    <button class="quiz-option" data-index="1">Để tính toán xem tháng này kiếm được bao nhiêu tiền.</button>
+                    <button class="quiz-option" data-index="2">Để nhận diện các sai lầm lặp đi lặp lại và cải thiện quy trình ra quyết định.</button>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-text"><span id="correct-count">0</span>/3</div>
+                <div class="score-label">Câu trả lời đúng</div>
+                <button class="retake-btn" onclick="resetQuiz()">Làm lại Quiz</button>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <div class="footer-logo">GEM Trading Academy</div>
+            <p class="footer-text">Tier 2 - Bài 9.3: Sự Thay Đổi Thực Sự</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        function resetQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                const result = question.querySelector('.quiz-result');
+                result.classList.remove('show', 'correct', 'incorrect');
+                result.textContent = '';
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect', 'disabled');
+                });
+            });
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach((option, index) => {
+                option.setAttribute('data-index', index);
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    
+                    question.classList.add('answered');
+                    answeredCount++;
+                    
+                    // Disable all options
+                    options.forEach(opt => opt.classList.add('disabled'));
+
+                    const selectedIndex = parseInt(this.getAttribute('data-index'));
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác! Bạn đã nắm vững cốt lõi của bài học.';
+                        result.classList.add('show', 'correct');
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy xem lại phần lý thuyết nhé!';
+                        result.classList.add('show', 'incorrect');
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 1.6: Ví Dụ Thực Tế HFZ - GEM Trading Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary-navy: #112250; --primary-gold: #FFBD59; --accent-cyan: #00F0FF; --accent-purple: #6A5BFF; --success-green: #10B981; --error-red: #EF4444; --bg-dark: #0A0E17; --bg-card: #1A1F2E; --bg-card-hover: #252B3D; --text-primary: #FFFFFF; --text-secondary: #A0A9C0; --border-color: rgba(255, 189, 89, 0.2); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-primary); line-height: 1.7; font-size: 16px; }
+        .lesson-container { max-width: 800px; margin: 0 auto; }
+        @media (min-width: 600px) { body { padding: 2rem; background: linear-gradient(135deg, #0A0E17 0%, #112250 100%); } .lesson-container { background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border-color); overflow: hidden; } }
+        .lesson-header { background: linear-gradient(135deg, var(--primary-navy) 0%, #1a3a7a 100%); padding: 2rem 1rem; text-align: center; border-bottom: 3px solid var(--error-red); }
+        .header-badge { display: inline-block; background: linear-gradient(135deg, var(--error-red) 0%, #DC2626 100%); color: white; padding: 0.5rem 1.25rem; border-radius: 25px; font-size: 0.85rem; font-weight: 700; margin-bottom: 1rem; }
+        .lesson-header h1 { font-size: clamp(1.5rem, 5vw, 2rem); font-weight: 700; margin-bottom: 0.5rem; }
+        .lesson-header p { color: var(--text-secondary); }
+        .content-section { padding: 0; }
+        @media (min-width: 600px) { .content-section { padding: 1.5rem; } }
+        .content-card { background: var(--bg-card); padding: 1.5rem 1rem; margin-bottom: 1px; border-left: 4px solid var(--error-red); }
+        @media (min-width: 600px) { .content-card { border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color); border-left: 4px solid var(--error-red); } }
+        .content-card h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--error-red); display: flex; align-items: center; gap: 0.75rem; }
+        .content-card h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 1rem 0; color: var(--accent-cyan); }
+        .content-card p { margin-bottom: 1rem; color: var(--text-secondary); line-height: 1.8; }
+        .content-card ul, .content-card ol { margin: 1rem 0; padding-left: 1.5rem; color: var(--text-secondary); }
+        .content-card li { margin-bottom: 0.75rem; }
+        .highlight-box { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 1.25rem; margin: 1.25rem 0; }
+        .highlight-box.green { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%); border-color: rgba(16, 185, 129, 0.3); }
+        .highlight-box.gold { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, rgba(255, 189, 89, 0.05) 100%); border-color: rgba(255, 189, 89, 0.3); }
+        .highlight-box p { margin: 0; color: var(--text-primary); }
+        .image-placeholder { background: linear-gradient(145deg, #1a2235 0%, #0d1321 100%); border: 2px dashed rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 1rem; margin: 1.5rem 0; text-align: center; }
+        .image-placeholder img { max-width: 100%; border-radius: 8px; margin-bottom: 0.75rem; }
+        .image-placeholder p { font-size: 0.85rem; color: var(--error-red); margin: 0; font-style: italic; }
+        .case-study { background: var(--bg-card-hover); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; border-left: 4px solid var(--primary-gold); }
+        .case-study .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+        .case-study .title { font-size: 1.1rem; font-weight: 700; color: var(--primary-gold); }
+        .case-study .result { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        .case-study .result.win { background: rgba(16, 185, 129, 0.2); color: var(--success-green); }
+        .case-study .result.loss { background: rgba(239, 68, 68, 0.2); color: var(--error-red); }
+        .trade-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 1rem 0; }
+        @media (max-width: 600px) { .trade-stats { grid-template-columns: repeat(2, 1fr); } }
+        .stat-item { background: var(--bg-card); padding: 0.75rem; border-radius: 8px; text-align: center; }
+        .stat-item .label { font-size: 0.75rem; color: var(--text-secondary); }
+        .stat-item .value { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+        .summary-box { background: linear-gradient(135deg, var(--primary-navy) 0%, #1a3a7a 100%); border: 2px solid var(--error-red); padding: 1.5rem 1rem; margin: 0; }
+        @media (min-width: 600px) { .summary-box { border-radius: 16px; padding: 2rem; margin: 1.5rem; } }
+        .summary-box h3 { color: var(--error-red); font-size: 1.25rem; margin-bottom: 1rem; }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li { padding: 0.5rem 0; padding-left: 1.75rem; position: relative; color: var(--text-primary); }
+        .summary-box li::before { content: '✓'; position: absolute; left: 0; color: var(--error-red); font-weight: 700; }
+        .quiz-section { padding: 0; }
+        @media (min-width: 600px) { .quiz-section { padding: 1.5rem; } }
+        .quiz-container { background: var(--bg-card); padding: 1.5rem 1rem; border-left: 4px solid var(--accent-purple); }
+        @media (min-width: 600px) { .quiz-container { border-radius: 16px; padding: 2rem; border: 1px solid var(--border-color); border-left: 4px solid var(--accent-purple); } }
+        .quiz-container h2 { color: var(--accent-purple); font-size: 1.35rem; margin-bottom: 1.5rem; }
+        .quiz-question { background: var(--bg-card-hover); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem; border: 1px solid var(--border-color); }
+        .quiz-question p { font-weight: 600; margin-bottom: 1rem; color: var(--text-primary); }
+        .quiz-option { display: block; width: 100%; padding: 0.875rem 1rem; margin-bottom: 0.5rem; background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 8px; color: var(--text-primary); cursor: pointer; text-align: left; transition: all 0.3s; }
+        .quiz-option:hover { border-color: var(--accent-purple); }
+        .quiz-option.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--success-green); color: var(--success-green); }
+        .quiz-option.incorrect { background: rgba(239, 68, 68, 0.2); border-color: var(--error-red); color: var(--error-red); }
+        .quiz-result { padding: 0.75rem; border-radius: 8px; margin-top: 0.75rem; font-weight: 600; display: none; }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct { background: rgba(16, 185, 129, 0.2); color: var(--success-green); }
+        .quiz-result.incorrect { background: rgba(239, 68, 68, 0.2); color: var(--error-red); }
+        .quiz-score { text-align: center; padding: 1.5rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.05) 100%); border-radius: 12px; margin-top: 1.5rem; display: none; }
+        .quiz-score.show { display: block; }
+        .quiz-score h3 { color: var(--error-red); margin-bottom: 0.5rem; }
+        .retake-btn { margin-top: 1rem; padding: 0.75rem 2rem; background: linear-gradient(135deg, var(--accent-purple) 0%, #5346E0 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .lesson-footer { text-align: center; padding: 2rem 1rem; background: var(--bg-card); border-top: 1px solid var(--border-color); }
+        .lesson-footer p { color: var(--text-secondary); font-size: 0.9rem; }
+        .lesson-footer .brand { color: var(--primary-gold); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="header-badge">🥈 TIER 2 - Chapter 1</div>
+            <h1>Ví Dụ Thực Tế HFZ</h1>
+            <p>5 Case Studies phân tích chi tiết</p>
+        </header>
+
+        <section class="content-section">
+            <!-- 📌 1. OPENING HOOK -->
+            <div class="content-card">
+                <h2><span class="icon">🎯</span> Học Từ Những "Vết Sẹo" Và Chiến Công Thực Tế</h2>
+                <p>Bạn đã nắm vững lý thuyết về HFZ, đã biết cách vẽ zone, hiểu về vòng đời và chiến lược entry. Nhưng có một sự thật phũ phàng trong trading: "Lý thuyết là màu xám, còn cây đời mãi mãi xanh tươi". Thị trường không bao giờ chạy chính xác 100% như trong sách giáo khoa. Nó luôn có những sắc thái, những cú lừa và những khoảnh khắc đầy kịch tính.</p>
+                <p>Trong bài học này, tôi không chỉ dạy bạn cách chiến thắng. Tôi sẽ cùng bạn phân tích 5 kịch bản thực tế – bao gồm cả những lệnh thắng rực rỡ và cả những lệnh thua đau đớn. Tại sao chúng ta lại phân tích lệnh thua? Bởi vì trong trading, một sai lầm được phân tích kỹ lưỡng đáng giá gấp mười lần một chiến thắng ngẫu nhiên. Đến cuối bài này, bạn sẽ hình thành được "trực giác thị trường" để nhận diện đâu là một HFZ thực sự chất lượng và đâu là một cái bẫy thanh khoản chết người.</p>
+                <div class="highlight-box important">
+                    <div class="highlight-title">💡 Insight Nâng Cao</div>
+                    <p>Trading là trò chơi của xác suất và quản lý cảm xúc. Khi bạn nhìn vào 5 ví dụ này, hãy chú ý không chỉ ở các con số, mà ở <strong>BỐI CẢNH</strong> (Context). Một vùng zone không hoạt động độc lập; nó là một phần của câu chuyện lớn hơn đang diễn ra trên biểu đồ.</p>
+                </div>
+            </div>
+
+            <!-- 📌 2. CONCEPT INTRODUCTION -->
+            <div class="content-card">
+                <h2><span class="icon">🔄</span> Tại Sao Phải Phân Tích Case Study?</h2>
+                <p>Phân tích Case Study là cách nhanh nhất để "nạp" kinh nghiệm của nhiều năm giao dịch vào bộ não của bạn chỉ trong vài phút. Thay vì tự mình mất tiền để học, bạn học từ những người đi trước. Để tôi giải thích cho bạn rõ hơn tại sao quy trình này lại quan trọng:</p>
+                <ul>
+                    <li><strong>Nhận diện sự biến thiên:</strong> Bạn sẽ thấy cách pattern UPD hay DPD biến hóa linh hoạt trên các khung thời gian khác nhau.</li>
+                    <li><strong>Hiểu về Confluence thực tế:</strong> Cách mà các vùng kháng cự HTF hỗ trợ cho lệnh Short tại HFZ như thế nào.</li>
+                    <li><strong>Rèn luyện tâm lý chấp nhận thua lỗ:</strong> Thấy được một lệnh thua "đúng quy trình" là một phần tất yếu của nghề trading chuyên nghiệp.</li>
+                </ul>
+                <div class="highlight-box gold">
+                    <div class="highlight-title">🎯 Quy tắc vàng: Ghi chép là sức mạnh</div>
+                    <p>Đừng chỉ đọc qua. Hãy tự hỏi: "Nếu là mình lúc đó, mình có dám vào lệnh không?". Việc tự đặt mình vào vị trí của người thực hiện lệnh sẽ giúp bạn nhớ kiến thức sâu hơn gấp 5 lần thông thường.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2><span class="icon">📊</span> Case Study #1: BTC/USDT - 4H</h2>
+                <div class="case-study">
+                    <div class="header">
+                        <span class="title">🔴 HFZ từ Pattern UPD</span>
+                        <span class="result win">✅ WIN +R:R 2.5</span>
+                    </div>
+                    <p><strong>Bối cảnh:</strong> BTC đang trong downtrend trên Daily. Xuất hiện pattern UPD trên 4H tạo HFZ tại $43,500-$44,200. Đây là một setup thuận xu hướng chính cực kỳ tiềm năng.</p>
+                    <div class="trade-stats">
+                        <div class="stat-item"><div class="label">Entry</div><div class="value">$43,600</div></div>
+                        <div class="stat-item"><div class="label">Stop Loss</div><div class="value">$44,400</div></div>
+                        <div class="stat-item"><div class="label">Take Profit</div><div class="value">$41,600</div></div>
+                        <div class="stat-item"><div class="label">R:R</div><div class="value">1:2.5</div></div>
+                    </div>
+                    <p><strong>Diễn biến:</strong> Giá pump lên test HFZ, xuất hiện Bearish Engulfing → Entry SHORT ngay khi nến xác nhận đóng cửa → TP hit sau 18 giờ. Lực bán tại zone cực mạnh khiến giá không hề có nhịp hồi đáng kể nào sau khi entry.</p>
+                </div>
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x400/112250/10B981?text=Case+1+BTC+WIN" alt="Case 1 BTC WIN">
+                    <p>📸 Case Study #1: BTC HFZ trade thắng - Thuận trend HTF</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2><span class="icon">📊</span> Case Study #2: ETH/USDT - 1H</h2>
+                <div class="case-study">
+                    <div class="header">
+                        <span class="title">🔴 HFZ từ Pattern DPD</span>
+                        <span class="result win">✅ WIN +R:R 2.0</span>
+                    </div>
+                    <p><strong>Bối cảnh:</strong> ETH tạo DPD pattern trên 1H. Zone HFZ tại $2,380-$2,420. Confluence mạnh mẽ với vùng kháng cự quan trọng trên khung 4H.</p>
+                    <div class="trade-stats">
+                        <div class="stat-item"><div class="label">Entry</div><div class="value">$2,390</div></div>
+                        <div class="stat-item"><div class="label">Stop Loss</div><div class="value">$2,440</div></div>
+                        <div class="stat-item"><div class="label">Take Profit</div><div class="value">$2,290</div></div>
+                        <div class="stat-item"><div class="label">R:R</div><div class="value">1:2.0</div></div>
+                    </div>
+                    <p><strong>Diễn biến:</strong> Pin bar rejection sắc nét xuất hiện ngay tại Giá Entry của zone → Entry ngay lập tức → TP hit chỉ trong vòng 6 giờ. Đây là một ví dụ điển hình cho việc "đánh nhanh rút gọn" khi có sự hội tụ của nhiều khung thời gian.</p>
+                </div>
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x400/0A0E17/10B981?text=Case+2+ETH+WIN" alt="Case 2 ETH WIN">
+                    <p>📸 Case Study #2: ETH HFZ trade với confluence resistance 4H</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2><span class="icon">📊</span> Case Study #3: SOL/USDT - 4H (LOSS)</h2>
+                <div class="case-study">
+                    <div class="header">
+                        <span class="title">🔴 HFZ Zone Bị Phá Vỡ</span>
+                        <span class="result loss">❌ LOSS -1R</span>
+                    </div>
+                    <p><strong>Bối cảnh:</strong> SOL có HFZ tại $98-$102 từ UPD pattern. Tuy nhiên, nếu quan sát kỹ, đây là một zone đã bị test tới lần thứ 2 (TESTED_2X).</p>
+                    <div class="trade-stats">
+                        <div class="stat-item"><div class="label">Entry</div><div class="value">$99</div></div>
+                        <div class="stat-item"><div class="label">Stop Loss</div><div class="value">$103</div></div>
+                        <div class="stat-item"><div class="label">Take Profit</div><div class="value">$91</div></div>
+                        <div class="stat-item"><div class="label">Result</div><div class="value">SL Hit</div></div>
+                    </div>
+                    <p><strong>Phân tích lỗi:</strong> Zone đã yếu đi đáng kể sau 2 lần test trước đó (Order Absorption). Hơn nữa, ngay thời điểm entry có tin tức Breaking News cực tốt về hệ sinh thái Solana khiến lực mua đột biến → Giá xuyên thủng zone và SL bị quét sạch chỉ trong 30 phút.</p>
+                </div>
+                <div class="highlight-box">
+                    <p><strong>⚠️ Bài học xương máu:</strong> Không trade zone đã test 2+ lần khi không có confluence mạnh từ khung lớn (Daily). Luôn luôn check lịch tin tức trước khi thực thi lệnh để tránh các biến động nhiễu không đáng có!</p>
+                </div>
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x400/112250/EF4444?text=Case+3+SOL+LOSS" alt="Case 3 SOL LOSS">
+                    <p>📸 Case Study #3: SOL trade thua và bài học về vòng đời zone</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2><span class="icon">📊</span> Case Study #4: BNB/USDT - Daily</h2>
+                <div class="case-study">
+                    <div class="header">
+                        <span class="title">🔴 HFZ Daily - High Quality</span>
+                        <span class="result win">✅ WIN +R:R 3.0</span>
+                    </div>
+                    <p><strong>Bối cảnh:</strong> BNB tạo pattern UPD cực kỳ hoành tráng trên Daily. Đây là loại zone có sức mạnh "vạn quân". FRESH zone hoàn toàn mới tại vùng $320-$335.</p>
+                    <div class="trade-stats">
+                        <div class="stat-item"><div class="label">Entry</div><div class="value">$322</div></div>
+                        <div class="stat-item"><div class="label">Stop Loss</div><div class="value">$340</div></div>
+                        <div class="stat-item"><div class="label">Take Profit</div><div class="value">$268</div></div>
+                        <div class="stat-item"><div class="label">R:R</div><div class="value">1:3.0</div></div>
+                    </div>
+                    <p><strong>Diễn biến:</strong> Kiên nhẫn chờ đợi 5 ngày ròng rã để giá quay lại test zone → Mẫu hình nến Evening Star khổng lồ xác nhận đảo chiều trên khung Daily → Entry SHORT → TP hit sau 12 ngày giữ lệnh. Phần thưởng cho sự kiên nhẫn là vô cùng xứng đáng.</p>
+                </div>
+                <div class="highlight-box green">
+                    <p><strong>✅ Key insight:</strong> Zone Daily + FRESH = High probability. Khi bạn trade trên khung lớn, mọi tín hiệu nhiễu đều bị loại bỏ. "Thị trường là nơi chuyển tiền từ người thiếu kiên nhẫn sang người kiên nhẫn".</p>
+                </div>
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x400/0A0E17/FFBD59?text=Case+4+BNB+WIN" alt="Case 4 BNB WIN">
+                    <p>📸 Case Study #4: BNB Daily zone - Sức mạnh của khung thời gian lớn</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2><span class="icon">📊</span> Case Study #5: DOGE/USDT - 15M Scalp</h2>
+                <div class="case-study">
+                    <div class="header">
+                        <span class="title">🔴 HFZ Scalping</span>
+                        <span class="result win">✅ WIN +R:R 1.5</span>
+                    </div>
+                    <p><strong>Bối cảnh:</strong> DOGE đang có momentum giảm mạnh trên khung 1H. Xuất hiện HFZ khung 15M tại $0.0825-$0.0835. Đây là một setup Scalping nhanh đánh theo dòng tiền nóng.</p>
+                    <div class="trade-stats">
+                        <div class="stat-item"><div class="label">Entry</div><div class="value">$0.0828</div></div>
+                        <div class="stat-item"><div class="label">Stop Loss</div><div class="value">$0.0840</div></div>
+                        <div class="stat-item"><div class="label">Take Profit</div><div class="value">$0.0810</div></div>
+                        <div class="stat-item"><div class="label">Duration</div><div class="value">45 phút</div></div>
+                    </div>
+                    <p><strong>Lưu ý về Scalping:</strong> Khi trade khung nhỏ, bạn cần chấp nhận R:R thấp hơn một chút (thường là 1:1.5) nhưng execution phải cực kỳ nhanh và quyết đoán. Chỉ một giây do dự có thể khiến điểm entry của bạn không còn lợi thế.</p>
+                </div>
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x400/112250/00F0FF?text=Case+5+DOGE+SCALP" alt="Case 5 DOGE SCALP">
+                    <p>📸 Case Study #5: Chiến thuật đánh nhanh rút gọn trên DOGE</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2><span class="icon">📈</span> Thống Kê Và Bài Học Tổng Hợp</h2>
+                <div class="highlight-box gold">
+                    <div class="highlight-title">📊 Kết quả 5 Case Studies:</div>
+                    <ul style="margin-top: 0.5rem; padding-left: 1.25rem;">
+                        <li><strong>Tỷ lệ thắng (Win Rate):</strong> 4/5 = 80%</li>
+                        <li><strong>Average R:R:</strong> 2.25 (Mỗi lệnh thắng trung bình mang lại lợi nhuận gấp 2.25 lần rủi ro)</li>
+                        <li><strong>Lệnh thắng lớn nhất (Best):</strong> BNB Daily +3R (Nhờ sức mạnh HTF)</li>
+                        <li><strong>Lệnh thua đau đớn nhất (Worst):</strong> SOL -1R (Do trade zone cũ và bỏ qua tin tức)</li>
+                    </ul>
+                </div>
+                
+                <h3>Những bài học "vàng" rút ra từ thực tế:</h3>
+                <ul>
+                    <li><strong>Sự ưu việt của FRESH zones:</strong> Các vùng zone chưa từng bị test luôn mang lại những cú phản ứng giá mạnh mẽ và nhanh nhất.</li>
+                    <li><strong>Tầm quan trọng của khung lớn:</strong> HTF (Daily, 4H) giống như bản đồ vệ tinh dẫn đường, giúp bạn tránh khỏi những đợt sóng nhiễu của khung nhỏ.</li>
+                    <li><strong>Confluence là vũ khí tối thượng:</strong> Khi các vùng HFZ trùng nhau hoặc nằm chồng lên nhau, xác suất thành công tăng vọt thêm 15-20%.</li>
+                    <li><strong>Chấp nhận lệnh thua:</strong> Một lệnh thua "đúng quy trình" như SOL không phải là thất bại, đó là chi phí kinh doanh. Quan trọng là bạn học được gì từ nó.</li>
+                </ul>
+            </div>
+
+            <div class="summary-box">
+                <h3>📝 Tóm Tắt Chương 1: HFZ Mastery</h3>
+                <p>Trước khi bước sang chương mới, hãy cùng tôi ghi nhớ những nguyên tắc bất di bất dịch của HFZ:</p>
+                <ul>
+                    <li>✓ <strong>HFZ = High Frequency Zone:</strong> Vùng Smart Money tập trung lệnh BÁN, luôn nằm PHÍA TRÊN giá hiện tại.</li>
+                    <li>✓ <strong>Quy trình hình thành:</strong> Luôn tìm kiếm nến Pause và Departure mạnh từ pattern DPD/UPD.</li>
+                    <li>✓ <strong>Vòng đời zone:</strong> Kỷ luật tuyệt đối trong việc loại bỏ zone đã test quá 2 lần hoặc đã bị phá vỡ hoàn toàn.</li>
+                    <li>✓ <strong>Chiến lược entry:</strong> Chỉ bóp cò khi có nến xác nhận đóng cửa. SL luôn đặt trên đỉnh zone cộng thêm 0.5% buffer an toàn.</li>
+                    <li>✓ <strong>Đa khung thời gian:</strong> Luôn nhìn từ lớn xuống nhỏ để tìm kiếm sự hội tụ (Confluence).</li>
+                </ul>
+                <p><strong>Lời nhắn từ Mentor:</strong> Bạn đã có trong tay bộ vũ khí mạnh nhất để săn tìm các vùng đỉnh tiềm năng. Hãy dành thời gian thực hành vẽ lại 10 ví dụ HFZ trên chart TradingView của bạn trước khi đi tiếp.</p>
+                <p>Chúc mừng bạn đã hoàn thành <strong>Chapter 1: HFZ Mastery</strong>. Ở chương tiếp theo, chúng ta sẽ lật ngược lại vấn đề để tìm hiểu về <strong>LFZ - Vùng Tần Số Thấp</strong>, nơi chúng ta sẽ học cách săn tìm những vùng đáy để vào lệnh LONG cực mạnh!</p>
+            </div>
+        </section>
+
+        <section class="quiz-section">
+            <div class="quiz-container">
+                <h2>❓ Quiz Tổng Kết Chapter 1</h2>
+                <div class="quiz-question" data-correct="1">
+                    <p>1. Trong 5 case studies đã phân tích, tại sao lệnh SOL lại dẫn đến kết quả thua lỗ?</p>
+                    <button class="quiz-option" data-index="0">A. Vì không có nến xác nhận Rejection.</button>
+                    <button class="quiz-option" data-index="1">B. Vì zone đã bị test quá nhiều lần (TESTED_2X) và gặp tin tức biến động mạnh đột ngột.</button>
+                    <button class="quiz-option" data-index="2">C. Vì trader đã đặt Take Profit quá xa.</button>
+                    <button class="quiz-option" data-index="3">D. Vì cặp SOL/USDT không phù hợp với phương pháp HFZ.</button>
+                    <div class="quiz-result"></div>
+                </div>
+                <div class="quiz-question" data-correct="0">
+                    <p>2. Dựa trên thống kê tổng hợp, yếu tố nào giúp lệnh BNB Daily đạt được mức R:R 1:3.0?</p>
+                    <button class="quiz-option" data-index="0">A. Kết hợp giữa vùng FRESH zone và khung thời gian lớn Daily cực kỳ uy tín.</button>
+                    <button class="quiz-option" data-index="1">B. Vì trader đã gồng lời qua nhiều lần dính SL.</button>
+                    <button class="quiz-option" data-index="2">C. Vì BNB là đồng coin có volume giao dịch lớn nhất.</button>
+                    <button class="quiz-option" data-index="3">D. Nhờ vào sự may mắn tình cờ.</button>
+                    <div class="quiz-result"></div>
+                </div>
+                <div class="quiz-question" data-correct="2">
+                    <p>3. Bài học quan trọng nhất khi áp dụng HFZ vào thực tế là gì?</p>
+                    <button class="quiz-option" data-index="0">A. Phải tìm cách thắng trong mọi lệnh giao dịch.</button>
+                    <button class="quiz-option" data-index="1">B. Luôn luôn đặt lệnh Limit ngay khi giá vừa chạm mép zone.</button>
+                    <button class="quiz-option" data-index="2">C. Tuân thủ kỷ luật về vòng đời zone, đợi xác nhận nến và luôn ưu tiên sự hội tụ (Confluence) của đa khung thời gian.</button>
+                    <button class="quiz-option" data-index="3">D. Chỉ nên giao dịch trên khung thời gian 15 phút để tối ưu tốc độ.</button>
+                    <div class="quiz-result"></div>
+                </div>
+                <div class="quiz-score">
+                    <h3>🎉 Chúc mừng bạn đã chinh phục Chapter 1!</h3>
+                    <p>Bạn trả lời đúng <span id="correct-count">0</span>/3 câu hỏi. Bạn đã sẵn sàng để trở thành một "Thợ săn HFZ" chuyên nghiệp!</p>
+                    <p style="margin-top: 0.5rem; color: var(--success-green);">Tiếp theo: Chapter 2 - LFZ Mastery (Nghệ thuật săn tìm vùng mua)</p>
+                    <button class="retake-btn" onclick="location.reload()">Làm lại Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <p>Bài học thuộc <span class="brand">GEM Trading Academy - TIER 2</span></p>
+            <p>© 2024 - Nền tảng đào tạo trading chuyên nghiệp</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0, correctCount = 0;
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

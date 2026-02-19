@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 7.8: Ví Dụ Thực Tế Triangle Patterns | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-navy: #112250;
+            --accent-gold: #FFBD59;
+            --accent-cyan: #00F0FF;
+            --accent-purple: #6A5BFF;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0AEC0;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --bg-card-hover: rgba(255, 255, 255, 0.08);
+            --border-subtle: rgba(255, 255, 255, 0.1);
+            --gradient-gold: linear-gradient(135deg, #FFBD59 0%, #FFCF87 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--primary-navy);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--primary-navy);
+        }
+
+        /* HEADER */
+        .lesson-header {
+            padding: 2rem 1.5rem;
+            background: linear-gradient(180deg, rgba(0, 240, 255, 0.15) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border-subtle);
+            text-align: center;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #00F0FF 0%, #00C4CC 100%);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #000;
+            margin-bottom: 1rem;
+        }
+
+        .lesson-chapter {
+            font-size: 0.875rem;
+            color: var(--accent-cyan);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .lesson-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* CONTENT */
+        .content-section {
+            padding: 0;
+        }
+
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            margin: 1rem;
+            padding: 1.5rem;
+            border-left: 4px solid var(--accent-cyan);
+        }
+
+        .content-card h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .content-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.25rem 0 0.75rem 0;
+            color: var(--text-primary);
+        }
+
+        .content-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9375rem;
+        }
+
+        .content-card ul, .content-card ol {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .content-card li {
+            margin-bottom: 0.5rem;
+            font-size: 0.9375rem;
+        }
+
+        /* IMAGE PLACEHOLDER */
+        .image-placeholder {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(0, 240, 255, 0.1) 100%);
+            border: 2px dashed var(--accent-cyan);
+            border-radius: 0.75rem;
+            padding: 3rem 1.5rem;
+            text-align: center;
+            margin: 1.25rem 0;
+        }
+
+        .image-placeholder .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .image-placeholder .label {
+            font-size: 0.875rem;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .image-placeholder .dimensions {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* HIGHLIGHT BOXES */
+        .highlight-box {
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .highlight-box.important {
+            background: rgba(255, 189, 89, 0.1);
+            border: 1px solid rgba(255, 189, 89, 0.3);
+        }
+
+        .highlight-box.warning {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .highlight-box.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .highlight-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .highlight-box.important .highlight-title { color: var(--accent-gold); }
+        .highlight-box.warning .highlight-title { color: var(--error-red); }
+        .highlight-box.success .highlight-title { color: var(--success-green); }
+
+        /* CASE CARD */
+        .case-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 1rem;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .case-header {
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .case-header.asc {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0.1) 100%);
+        }
+
+        .case-header.desc {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0.1) 100%);
+        }
+
+        .case-header.sym {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.3) 0%, rgba(106, 91, 255, 0.1) 100%);
+        }
+
+        .case-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .case-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .case-badge.win {
+            background: rgba(16, 185, 129, 0.3);
+            color: var(--success-green);
+        }
+
+        .case-badge.loss {
+            background: rgba(239, 68, 68, 0.3);
+            color: var(--error-red);
+        }
+
+        .case-body {
+            padding: 1.25rem;
+        }
+
+        .case-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-item {
+            background: var(--bg-card);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.6875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .stat-value.green {
+            color: var(--success-green);
+        }
+
+        .stat-value.red {
+            color: var(--error-red);
+        }
+
+        .case-analysis {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .case-analysis h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .case-analysis ol {
+            padding-left: 1.25rem;
+            margin: 0.5rem 0;
+        }
+
+        .case-analysis li {
+            margin-bottom: 0.25rem;
+        }
+
+        /* SUMMARY BOX */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(0, 240, 255, 0.05) 100%);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 1rem;
+        }
+
+        .summary-box h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .summary-box li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.625rem;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        }
+
+        .summary-box li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent-cyan);
+            font-weight: bold;
+        }
+
+        /* QUIZ SECTION */
+        .quiz-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            margin: 1.5rem 1rem;
+            padding: 1.5rem;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 0.25rem;
+        }
+
+        .quiz-header p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .quiz-question {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .quiz-option {
+            padding: 0.875rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+        }
+
+        .quiz-option:hover:not(.correct):not(.incorrect) {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-gold);
+        }
+
+        .quiz-option.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--success-green);
+            color: var(--success-green);
+        }
+
+        .quiz-option.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--error-red);
+            color: var(--error-red);
+        }
+
+        .quiz-result {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .quiz-result.show {
+            display: block;
+        }
+
+        .quiz-result.correct {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+        }
+
+        .quiz-result.incorrect {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-red);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .quiz-score.show {
+            display: block;
+        }
+
+        .score-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .retake-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-gold);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #000;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .retake-btn:hover {
+            transform: scale(1.02);
+        }
+
+        /* FOOTER */
+        .lesson-footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-logo .gem {
+            color: var(--accent-gold);
+        }
+
+        .footer-text {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 600px) {
+            .content-card {
+                margin: 0.75rem 0;
+                border-radius: 0;
+                border-left: 4px solid var(--accent-cyan);
+                border-right: none;
+                border-top: none;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+
+            .summary-box,
+            .quiz-section {
+                margin: 1rem 0;
+                border-radius: 0;
+            }
+
+            .case-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="header-badge">
+                <span>📊</span>
+                <span>Tier 2 - Nâng Cao</span>
+            </div>
+            <div class="lesson-chapter">Chapter 7 - Triangle Patterns</div>
+            <h1 class="lesson-title">Bài 7.8: Ví Dụ Thực Tế Triangle Patterns</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 7.8</span></div>
+                <div class="meta-item"><span>⏱️</span><span>15 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>2 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- CONTENT -->
+        <main class="content-section">
+            
+            <!-- 1. OPENING HOOK -->
+            <div class="content-card">
+                <h2>1. Lý Thuyết và Thực Chiến Khác Nhau Thế Nào?</h2>
+                <p>Chào bạn,</p>
+                <p>Bạn đã bao giờ nhìn thấy một mô hình tam giác hoàn hảo trên sách giáo khoa, vẽ đẹp như tranh vẽ, nhưng khi mở chart thực tế ra thì mọi thứ lại rối tinh lên chưa? Wicks dài ngoằng, volume không rõ ràng, và bạn bối rối không biết nên vào lệnh hay đứng ngoài.</p>
+                <p>Đó là khoảng cách giữa "lý thuyết phòng thí nghiệm" và "chiến trường thực tế". Trên thực tế, thị trường không bao giờ vẽ những đường thẳng hoàn hảo cho bạn. Nó đầy rẫy nhiễu động (noise), bẫy giá (traps) và tâm lý đám đông.</p>
+                <p>Trong bài học này, tôi sẽ không vẽ lại những mô hình lý thuyết nữa. Thay vào đó, chúng ta sẽ cùng nhau phân tích 4 Case Studies thực tế - bao gồm cả những lệnh WIN rực rỡ và những lệnh LOSS đau đớn. Bạn sẽ học được cách nhìn xuyên qua những cây nến lộn xộn để thấy được cấu trúc thực sự của thị trường, và quan trọng nhất: Cách kết hợp Triangle Patterns với sức mạnh của GEM Zones (HFZ/LFZ) để tăng xác suất thắng lên mức cao nhất.</p>
+            </div>
+
+            <!-- 2. CONCEPT RECAP -->
+            <div class="content-card">
+                <h2>2. Ôn Tập Nhanh: 3 Chìa Khóa Của Triangle</h2>
+                <p>Trước khi đi vào ví dụ, hãy chắc chắn rằng bạn đang cầm trên tay bộ công cụ đúng. Dù là Tam giác Tăng, Giảm hay Cân, thành công luôn đến từ 3 yếu tố cốt lõi này:</p>
+                
+                <h3>A. Compression (Sự Nén Giá)</h3>
+                <p>Hãy tưởng tượng giá như một chiếc lò xo đang bị nén lại. Range giao dịch càng ngày càng hẹp (Lower Highs gặp Higher Lows, hoặc Flat lines). Sự nén này càng chặt, năng lượng tích tụ càng lớn, và cú nổ (breakout) sẽ càng mạnh. Đừng bao giờ trade triangle nếu bạn không thấy sự "ngột ngạt" của giá.</p>
+
+                <h3>B. Volume Confirmation (Xác Nhận Khối Lượng)</h3>
+                <p>Đây là quy tắc sống còn: <strong>Volume phải giảm dần trong quá trình hình thành tam giác và TĂNG ĐỘT BIẾN khi breakout.</strong></p>
+                <p>Nếu breakout xảy ra với volume thấp (như những cây nến volume lẹt đẹt), đó thường là bẫy (fakeout). Smart Money không tham gia vào cú breakout đó, chỉ có retail trader đang FOMO thôi.</p>
+
+                <h3>C. Zone Confluence (Sự Hợp Lưu Với Zone)</h3>
+                <p>Đây là vũ khí bí mật của GEM Trading. Một triangle pattern đơn lẻ chỉ cho xác suất 50-60%. Nhưng nếu đường Resistance của Ascending Triangle trùng khớp với một HFZ (Vùng Bán) trên khung lớn? Hoặc đường Support của Descending Triangle lại nằm ngay trên một LFZ (Vùng Mua)? Đó là lúc xác suất tăng vọt.</p>
+
+                <div class="highlight-box important">
+                    <div class="highlight-title">💡 Nguyên Tắc Vàng: Breakout vs. Retest</div>
+                    <p>Trong thực chiến, chúng ta có 2 điểm vào lệnh:</p>
+                    <p>1. <strong>Aggressive Entry:</strong> Vào ngay khi nến đóng cửa vượt qua cạnh tam giác (Dành cho trader kinh nghiệm, rủi ro cao).</p>
+                    <p>2. <strong>Conservative Entry (Khuyên dùng):</strong> Đợi giá phá vỡ, sau đó quay lại Retest cạnh tam giác (lúc này đã đổi vai trò Support/Resistance). Đây là cách trade an toàn và bền vững nhất.</p>
+                </div>
+            </div>
+
+            <!-- 3. REAL WORLD EXAMPLES -->
+            <div class="content-card">
+                <h2>3. Case Studies Thực Chiến</h2>
+                <p>Bây giờ, hãy cùng mổ xẻ từng lệnh một. Đừng chỉ nhìn kết quả, hãy chú ý đến <strong>Logic</strong> và <strong>Tâm lý</strong> đằng sau mỗi quyết định.</p>
+            </div>
+
+            <!-- Case Study 1: Ascending Triangle WIN -->
+            <div class="content-card">
+                <h2>📈 Case #1: BTC/USDT - Ascending Triangle Breakout</h2>
+                <p>Đây là ví dụ kinh điển về một setup Ascending Triangle (Tam giác tăng) hoạt động hoàn hảo trong bối cảnh thị trường đang có xu hướng tăng.</p>
+
+                <div class="case-card">
+                    <div class="case-header asc">
+                        <div class="case-title">BTC/USDT 4H - Ascending Triangle</div>
+                        <div class="case-badge win">✓ WIN +22%</div>
+                    </div>
+                    <div class="case-body">
+                        <div class="case-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Entry</div>
+                                <div class="stat-value">$43,200</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Stop</div>
+                                <div class="stat-value">$41,800</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Target</div>
+                                <div class="stat-value">$48,500</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">R:R</div>
+                                <div class="stat-value green">1:3.8</div>
+                            </div>
+                        </div>
+
+                        <div class="case-analysis">
+                            <h4>Phân Tích Setup Chi Tiết:</h4>
+                            <p><strong>1. Context (Bối cảnh):</strong> BTC đang trong một Uptrend rõ ràng trên khung Daily. Giá tạm dừng chân để nghỉ ngơi (Consolidation) sau một đợt tăng mạnh.</p>
+                            <p><strong>2. Pattern (Mô hình):</strong>
+                                <br>• <strong>Flat Resistance ($43,000):</strong> Giá đã 3 lần cố gắng phá vỡ mức này nhưng bị từ chối. Điều này cho thấy có một bức tường bán (Sell Wall) ở đây.
+                                <br>• <strong>Rising Support:</strong> Mặc dù bị từ chối ở $43k, nhưng mỗi lần giảm, phe mua lại nhảy vào sớm hơn, tạo ra các đỉnh thấp dần (Higher Lows). Điều này chứng tỏ phe mua đang rất hung hăng và "nuốt" dần các lệnh bán.
+                            </p>
+                            <p><strong>3. Volume & Entry:</strong>
+                                <br>• Trong suốt 18 ngày hình thành tam giác, volume giảm dần (phe bán cạn kiệt).
+                                <br>• Vào ngày breakout, một cây nến xanh thân dài xuất hiện, đóng cửa dứt khoát trên $43,200 với Volume tăng gấp 3 lần trung bình. Đây là tín hiệu Smart Money đã tham gia để phá vỡ tường bán.
+                                <br>• <strong>Entry:</strong> Thay vì FOMO đu đỉnh cây nến breakout, chúng ta đặt limit order chờ Retest tại $43,200. Giá quay lại chạm nhẹ mức này (biến Resistance thành Support) rồi bật lên.
+                            </p>
+                            <p><strong>4. Kết quả:</strong> Giá rally mạnh lên $48,500, đạt tỷ lệ R:R ấn tượng 1:3.8.</p>
+                        </div>
+
+                        <div class="highlight-box success">
+                            <div class="highlight-title">✅ Bài Học Thành Công</div>
+                            <p>Sự kiên nhẫn đợi Retest đã được đền đáp. Nhiều trader vội vã mua ngay khi giá vừa chớm vượt $43,000 thường bị quét Stoploss trong nhịp rung lắc nhẹ trước khi giá thực sự bay. Retest entry giúp bạn có điểm Stoploss chặt hơn và an toàn hơn.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">📈</div>
+                    <div class="label">Hình 3.5.1: BTC Ascending Triangle Breakout</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+
+            <!-- Case Study 2: Descending Triangle WIN -->
+            <div class="content-card">
+                <h2>📉 Case #2: ETH/USDT - Descending Triangle Breakdown</h2>
+                <p>Ngược lại với ví dụ trên, đây là một setup Short (Bán khống) tuyệt đẹp khi Descending Triangle (Tam giác giảm) xuất hiện trong một Downtrend.</p>
+
+                <div class="case-card">
+                    <div class="case-header desc">
+                        <div class="case-title">ETH/USDT Daily - Descending Triangle</div>
+                        <div class="case-badge win">✓ WIN +18%</div>
+                    </div>
+                    <div class="case-body">
+                        <div class="case-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Entry</div>
+                                <div class="stat-value">$2,080</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Stop</div>
+                                <div class="stat-value">$2,250</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Target</div>
+                                <div class="stat-value">$1,750</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">R:R</div>
+                                <div class="stat-value green">1:2</div>
+                            </div>
+                        </div>
+
+                        <div class="case-analysis">
+                            <h4>Phân Tích Setup & Sự Hợp Lưu (Confluence):</h4>
+                            <p>Ở ví dụ này, điều làm cho setup trở nên "A+ Grade" không chỉ là hình dáng tam giác, mà là sự hợp lưu với <strong>GEM Zones</strong>.</p>
+                            <p><strong>1. Phân tích Zone:</strong>
+                                <br>• Trước khi tam giác hình thành, giá đã có một nhịp giảm mạnh và tạo ra một pattern <strong>UPD (Up-Pause-Down)</strong>. Vùng Pause của pattern này tạo thành một <strong>HFZ (Vùng Bán)</strong> rất mạnh ngay phía trên cạnh huyền của tam giác.
+                            </p>
+                            <p><strong>2. Diễn biến tâm lý:</strong>
+                                <br>• Support $2,100 là chốt chặn cuối cùng. Phe mua cố gắng tử thủ ở đây (Flat Support).
+                                <br>• Tuy nhiên, mỗi lần giá hồi lên, nó lại đụng phải HFZ và bị đập xuống mạnh hơn, tạo các đỉnh thấp dần (Lower Highs).
+                                <br>• Điều này cho thấy phe bán đang kiểm soát hoàn toàn cuộc chơi, ép phe mua vào chân tường.
+                            </p>
+                            <p><strong>3. Execution:</strong>
+                                <br>• Khi Support $2,100 bị phá vỡ với volume lớn, toàn bộ Stoploss của phe mua (đặt dưới $2,100) bị kích hoạt, biến thành lệnh bán thị trường (Market Sell), đẩy giá trượt dốc không phanh.
+                            </p>
+                        </div>
+
+                        <div class="highlight-box important">
+                            <div class="highlight-title">💡 Insight Nâng Cao</div>
+                            <p>Descending Triangle trong Downtrend là một mô hình Continuation (Tiếp diễn) cực mạnh. Khi bạn thấy cạnh trên của tam giác trùng với một HFZ, đó là tín hiệu "Double Bearish" - xác suất thắng có thể lên tới 70-75%.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">📉</div>
+                    <div class="label">Hình 3.5.2: ETH Descending Triangle Breakdown + HFZ</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+
+            <!-- Case Study 3: Symmetrical Triangle LOSS -->
+            <div class="content-card">
+                <h2>⚠️ Case #3: SOL/USDT - Tại Sao Lệnh Này Thua? (False Breakout)</h2>
+                <p>Trong trading, học từ thất bại quan trọng hơn học từ thành công. Hãy xem xét kỹ case study này để hiểu về "Bẫy Giá" (False Breakout) trong Symmetrical Triangle (Tam giác cân).</p>
+
+                <div class="case-card">
+                    <div class="case-header sym">
+                        <div class="case-title">SOL/USDT 4H - Symmetrical Triangle</div>
+                        <div class="case-badge loss">✗ LOSS -2.5%</div>
+                    </div>
+                    <div class="case-body">
+                        <div class="case-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Entry</div>
+                                <div class="stat-value">$98.50</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Stop</div>
+                                <div class="stat-value">$96.00</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Target</div>
+                                <div class="stat-value">$108.00</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Result</div>
+                                <div class="stat-value red">SL Hit</div>
+                            </div>
+                        </div>
+
+                        <div class="case-analysis">
+                            <h4>Giải Phẫu Sai Lầm (Post-Mortem Analysis):</h4>
+                            <p>Trader trong ví dụ này đã Long khi thấy giá vượt qua cạnh trên của tam giác. Nhưng lệnh đã bị Stoploss chỉ sau vài cây nến. Tại sao?</p>
+                            <ol>
+                                <li><strong>Sai lầm 1: Entry quá vội vàng (FOMO).</strong> Trader đã vào lệnh ngay khi giá <em>vừa chớm</em> vượt qua trendline (trong phiên), chưa đợi nến đóng cửa (Close). Kết quả là cây nến đó rút râu tạo thành một cú <strong>Fakeout</strong> (Phá vỡ giả).</li>
+                                <li><strong>Sai lầm 2: Volume yếu ớt.</strong> Cây nến breakout có volume chỉ nhỉnh hơn trung bình 1.2 lần. Một breakout thật sự cần volume ít nhất 1.5x - 2x để xác nhận dòng tiền lớn tham gia.</li>
+                                <li><strong>Sai lầm 3: Vị trí Breakout (Apex Proximity).</strong> Giá đã đi đến tận cùng của mũi tam giác (Apex) mới breakout. Theo thống kê, những breakout xảy ra ở 10% cuối cùng của tam giác thường thiếu lực và dễ đảo chiều. Breakout tốt nhất nên xảy ra ở khoảng 2/3 đến 3/4 chiều dài tam giác.</li>
+                                <li><strong>Sai lầm 4: Bỏ qua Context thị trường.</strong> Lúc đó BTC (King) đang điều chỉnh giảm. Trade Altcoin (SOL) hướng lên ngược dòng với BTC là một hành động rủi ro cao.</li>
+                            </ol>
+                        </div>
+
+                        <div class="highlight-box warning">
+                            <div class="highlight-title">⚠️ Bài Học Xương Máu</div>
+                            <p>Tuyệt đối không trade breakout Symmetrical Triangle nếu:</p>
+                            <p>1. Không có Volume xác nhận.</p>
+                            <p>2. Giá đã đi quá sát vào mũi tam giác (Apex).</p>
+                            <p>3. Breakout ngược hướng với Trend chính của thị trường (Bitcoin).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">⚠️</div>
+                    <div class="label">Hình 3.5.3: SOL False Breakout - What Went Wrong</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+
+            <!-- Case Study 4: Triangle + LFZ WIN -->
+            <div class="content-card">
+                <h2>🔥 Case #4: Chiến Thuật Nâng Cao - Entry Trong Lòng Tam Giác</h2>
+                <p>Đây là kỹ thuật dành cho Pro Trader: Tìm kiếm Zone nằm <strong>bên trong</strong> mô hình tam giác để vào lệnh sớm với R:R cực tốt, thay vì đợi breakout muộn màng.</p>
+
+                <div class="case-card">
+                    <div class="case-header asc">
+                        <div class="case-title">AVAX/USDT 4H - Triangle + LFZ</div>
+                        <div class="case-badge win">✓ WIN +28%</div>
+                    </div>
+                    <div class="case-body">
+                        <div class="case-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Entry</div>
+                                <div class="stat-value">$32.50</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Stop</div>
+                                <div class="stat-value">$30.80</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Target</div>
+                                <div class="stat-value">$40.00</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">R:R</div>
+                                <div class="stat-value green">1:4.4</div>
+                            </div>
+                        </div>
+
+                        <div class="case-analysis">
+                            <h4>Phân Tích Setup "Nested Zone":</h4>
+                            <p><strong>1. Nhận diện cấu trúc:</strong> AVAX đang hình thành Ascending Triangle trong Uptrend. Theo lý thuyết thường, bạn sẽ đợi giá phá $34.00 để mua.</p>
+                            <p><strong>2. Tìm kiếm LFZ:</strong> Nhưng nếu nhìn kỹ vào cạnh dưới (Rising Support), bạn sẽ thấy một pattern <strong>UPU (Up-Pause-Up)</strong> nhỏ hình thành ngay trên trendline support. Vùng Pause của pattern này tạo thành một <strong>LFZ (Vùng Mua)</strong> tại $31.80 - $32.80.</p>
+                            <p><strong>3. Chiến thuật Entry Sớm:</strong>
+                                <br>• Thay vì đợi breakout $34.00 (lúc đó Stoploss sẽ rất xa), chúng ta đặt lệnh mua ngay tại LFZ $32.50 khi giá hồi về cạnh dưới tam giác.
+                                <br>• <strong>Confluence Score 5/6:</strong> Ascending Triangle + LFZ + Trendline Support + EMA hỗ trợ + HTF Uptrend.
+                            </p>
+                            <p><strong>4. Kết quả:</strong> Giá bật tăng từ LFZ, xuyên thủng Resistance $34.00 và bay thẳng lên $40.00. Vì entry sớm ở $32.50 thay vì $34.00, tỷ lệ R:R của chúng ta tăng vọt từ 1:2 lên 1:4.4.</p>
+                        </div>
+
+                        <div class="highlight-box success">
+                            <div class="highlight-title">💡 Pro Tip: Sniper Entry</div>
+                            <p>Đừng chỉ nhìn vào đường viền tam giác. Hãy nhìn vào <strong>BÊN TRONG</strong> tam giác. Nếu bạn tìm thấy một LFZ (đối với tam giác tăng) hoặc HFZ (đối với tam giác giảm) còn Fresh nằm ngay cạnh trendline, đó là cơ hội để có vị thế "Sniper" - Rủi ro thấp nhất, Lợi nhuận cao nhất.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">🔥</div>
+                    <div class="label">Hình 3.5.4: AVAX Triangle + LFZ Combo Trade</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+
+            <!-- 4. APPLICATION -->
+            <div class="content-card">
+                <h2>4. Áp Dụng Vào Thực Tế: Kế Hoạch Tuần Này</h2>
+                <p>Bạn đã thấy cả thành công và thất bại. Giờ là lúc biến kiến thức này thành kỹ năng của riêng bạn.</p>
+                
+                <h3>🎯 Nhiệm vụ của bạn:</h3>
+                <p>Trong tuần tới, tôi muốn bạn tìm kiếm <strong>5 mô hình Triangle</strong> trên chart (bất kỳ cặp tiền nào). Với mỗi mô hình, hãy trả lời 3 câu hỏi này vào Trading Journal trước khi quyết định trade:</p>
+                <ul>
+                    <li><strong>Câu 1: Context là gì?</strong> (Tam giác này có thuận xu hướng lớn không?)</li>
+                    <li><strong>Câu 2: Volume có xác nhận không?</strong> (Volume có giảm dần khi nén và tăng khi break không?)</li>
+                    <li><strong>Câu 3: Có Zone nào hỗ trợ không?</strong> (Có HFZ/LFZ nào trùng với điểm breakout hoặc retest không?)</li>
+                </ul>
+                <p>Nếu câu trả lời là "KHÔNG" cho bất kỳ câu nào trong 3 câu trên → <strong>SKIP TRADE</strong>. Hãy tập thói quen nói "Không" với những setup hạng B để dành vốn cho những setup hạng A.</p>
+            </div>
+
+        </main>
+
+        <!-- SUMMARY -->
+        <div class="summary-box">
+            <h3>📋 Tổng Kết Bài Học</h3>
+            <ul>
+                <li>Ascending Triangle hoạt động tốt nhất khi chờ Breakout + Retest và có Volume xác nhận (Case BTC).</li>
+                <li>Descending Triangle + HFZ trong Downtrend là setup có xác suất thắng cực cao (Case ETH).</li>
+                <li>Tuyệt đối tránh Symmetrical Triangle breakout nếu giá đã đi quá sát Apex hoặc Volume yếu (Bài học từ SOL).</li>
+                <li>Kỹ thuật nâng cao: Tìm LFZ/HFZ nằm bên trong tam giác để Entry sớm, tối ưu hóa R:R (Case AVAX).</li>
+            </ul>
+        </div>
+
+        <!-- QUIZ -->
+        <div class="quiz-section">
+            <div class="quiz-header">
+                <h3>🎯 Kiểm Tra Kiến Thức</h3>
+                <p>Hãy thử sức với 2 câu hỏi tình huống dựa trên bài học hôm nay</p>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <div class="question-text">Câu 1: Tại sao trong Case Study #3 (SOL), lệnh Long lại thất bại dù giá đã vượt qua cạnh trên tam giác?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Do Stoploss đặt quá sát nên bị quét.</div>
+                    <div class="quiz-option" data-index="1">Do Entry vội vàng khi nến chưa đóng cửa, Volume yếu và Breakout xảy ra quá gần mũi tam giác (Apex).</div>
+                    <div class="quiz-option" data-index="2">Do Target đặt quá xa so với khả năng của thị trường.</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <div class="question-text">Câu 2: Lợi thế lớn nhất của việc Entry tại LFZ nằm bên trong Ascending Triangle (như Case #4 AVAX) là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Có được mức giá tốt hơn (mua thấp hơn) và Stoploss gần hơn, giúp tỷ lệ R:R tăng vọt.</div>
+                    <div class="quiz-option" data-index="1">Đảm bảo chắc chắn thắng 100% vì LFZ không bao giờ bị phá vỡ.</div>
+                    <div class="quiz-option" data-index="2">Không cần phải quan tâm đến Volume hay xu hướng thị trường nữa.</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-text">🎉 Bạn trả lời đúng <span id="correct-count">0</span>/2 câu!</div>
+                <button class="retake-btn" onclick="resetQuiz()">Làm Lại Quiz</button>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <div class="footer-logo">
+                <span class="gem">GEM</span> Trading Academy
+            </div>
+            <div class="footer-text">© 2024 GEM Trading Academy. All rights reserved.</div>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 2;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác! Bạn đã nắm vững bài học.';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy xem lại phần phân tích Case Study để hiểu rõ hơn.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function resetQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                question.querySelector('.quiz-result').className = 'quiz-result';
+            });
+
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

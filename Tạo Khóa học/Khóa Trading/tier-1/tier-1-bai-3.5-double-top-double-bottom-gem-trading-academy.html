@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.5: Double Top & Double Bottom - GEM Trading Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>:root{--navy:#112250;--navy-dark:#0a1628;--gold:#FFBD59;--gold-dark:#E5A73D;--cyan:#00F0FF;--purple:#6A5BFF;--burgundy:#9C0612;--burgundy-light:#C41E2A;--success:#00C853;--error:#FF5252;--bg-primary:#0a1628;--bg-card:rgba(17,34,80,0.6);--text-primary:#FFFFFF;--text-secondary:rgba(255,255,255,0.85);--text-muted:rgba(255,255,255,0.6);--glass-bg:rgba(17,34,80,0.4);--glass-border:rgba(255,189,89,0.2);--space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--radius-md:12px;--radius-lg:16px}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}body{font-family:'Montserrat',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.7}img{max-width:100%;height:auto;display:block}.background-container{position:fixed;inset:0;z-index:-1}.bg-layer-base{position:absolute;inset:0;background:linear-gradient(180deg,var(--navy-dark) 0%,var(--navy) 50%,var(--navy-dark) 100%)}.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.3}.orb-1{width:400px;height:400px;background:var(--gold);top:-100px;right:-100px}.orb-2{width:300px;height:300px;background:var(--cyan);bottom:20%;left:-100px}.orb-3{width:250px;height:250px;background:var(--success);bottom:-50px;right:20%}.lesson-container{max-width:800px;margin:0 auto;padding:1.5rem}@media(max-width:600px){.lesson-container{padding:0}}.lesson-header{text-align:center;padding:var(--space-xl);margin-bottom:var(--space-xl);background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:0 4px 24px rgba(0,0,0,0.2)}@media(max-width:600px){.lesson-header{padding:var(--space-lg) 16px;margin-bottom:0;border:none;border-radius:0;box-shadow:none;border-bottom:8px solid var(--bg-primary)}}.lesson-badge{display:inline-flex;align-items:center;gap:var(--space-sm);padding:var(--space-sm) var(--space-md);background:linear-gradient(135deg,var(--purple),var(--cyan));border-radius:50px;font-size:0.75rem;font-weight:700;text-transform:uppercase;margin-bottom:var(--space-md);color:var(--navy-dark)}.lesson-chapter{font-size:0.875rem;color:var(--gold);font-weight:600;margin-bottom:var(--space-sm);text-transform:uppercase;letter-spacing:1px}.lesson-title{font-size:clamp(1.75rem,5vw,2.5rem);font-weight:800;color:var(--text-primary);margin-bottom:var(--space-md);line-height:1.2;background:linear-gradient(135deg,#FFF,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.lesson-meta{display:flex;justify-content:center;gap:var(--space-lg);font-size:0.875rem;color:var(--text-muted);margin-top:var(--space-md)}.meta-item{display:flex;align-items:center;gap:var(--space-xs)}.section{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin-bottom:var(--space-xl)}@media(max-width:600px){.section{padding:var(--space-lg) 16px;margin-bottom:var(--space-md);border-radius:0;border:none;border-bottom:8px solid var(--bg-primary)}}.section-title{font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-lg);display:flex;align-items:center;gap:var(--space-sm)}.highlight-box{background:linear-gradient(135deg,rgba(255,189,89,0.1),rgba(255,189,89,0.05));border:1px solid rgba(255,189,89,0.3);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}.highlight-box-title{font-weight:700;color:var(--gold);margin-bottom:var(--space-sm);display:flex;align-items:center;gap:var(--space-sm)}.definition-box{background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(0,240,255,0.05));border:1px solid rgba(0,240,255,0.3);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}.definition-box-title{font-weight:700;color:var(--cyan);margin-bottom:var(--space-sm)}.image-container{margin:var(--space-lg) 0;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--glass-border)}.image-caption{text-align:center;font-size:0.875rem;color:var(--text-muted);padding:var(--space-sm);background:rgba(0,0,0,0.2)}.summary-box{background:linear-gradient(135deg,rgba(0,200,83,0.1),rgba(0,200,83,0.05));border:1px solid rgba(0,200,83,0.3);border-radius:var(--radius-lg);padding:var(--space-xl);margin-top:var(--space-xl)}.summary-title{font-size:1.25rem;font-weight:700;color:var(--success);margin-bottom:var(--space-md)}.summary-list{list-style:none}.summary-list li{position:relative;padding-left:1.5rem;margin-bottom:var(--space-sm);color:var(--text-secondary)}.summary-list li::before{content:"✓";position:absolute;left:0;color:var(--success);font-weight:bold}.quiz-section{margin-top:var(--space-xl)}.quiz-header{text-align:center;margin-bottom:var(--space-lg)}.quiz-title{font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-xs)}.quiz-subtitle{color:var(--text-muted)}.quiz-question{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:var(--space-lg);margin-bottom:var(--space-lg)}.question-number{display:inline-block;background:var(--purple);color:white;width:24px;height:24px;border-radius:50%;text-align:center;line-height:24px;font-size:0.875rem;margin-bottom:var(--space-sm)}.question-text{font-weight:600;font-size:1.1rem;margin-bottom:var(--space-md);color:var(--text-primary)}.quiz-options{display:grid;gap:var(--space-sm)}.quiz-option{background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:var(--space-md);cursor:pointer;transition:all 0.2s ease;display:flex;align-items:center;gap:var(--space-md)}.quiz-option:hover{background:rgba(255,255,255,0.1);border-color:var(--cyan)}.quiz-option.selected{background:rgba(0,240,255,0.1);border-color:var(--cyan)}.quiz-option.correct{background:rgba(0,200,83,0.2);border-color:var(--success)}.quiz-option.incorrect{background:rgba(255,82,82,0.2);border-color:var(--error)}.option-marker{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--text-muted)}.quiz-option.selected .option-marker{background:var(--cyan);color:var(--navy)}.quiz-option.correct .option-marker{background:var(--success);color:white}.quiz-option.incorrect .option-marker{background:var(--error);color:white}.question-feedback{margin-top:var(--space-md);padding:var(--space-md);border-radius:var(--radius-md);display:none}.question-feedback.show{display:block}.question-feedback.correct{background:rgba(0,200,83,0.1);border:1px solid var(--success);color:var(--success)}.question-feedback.incorrect{background:rgba(255,82,82,0.1);border:1px solid var(--error);color:var(--error)}.quiz-result{text-align:center;margin-top:var(--space-xl);padding:var(--space-lg);background:var(--bg-card);border:1px solid var(--gold);border-radius:var(--radius-lg);display:none}.quiz-result.show{display:block}.result-score{font-size:2.5rem;font-weight:800;color:var(--gold);margin-bottom:var(--space-sm)}.quiz-btn{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--navy);border:none;padding:12px 24px;border-radius:50px;font-weight:700;cursor:pointer;transition:transform 0.2s ease;display:inline-block;margin-top:var(--space-md)}.quiz-btn:hover{transform:translateY(-2px)}</style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>📊</span>
+                <span>Reversal Pattern</span>
+            </div>
+            <div class="lesson-chapter">Chapter 3 - Classic Patterns</div>
+            <h1 class="lesson-title">Double Top & Double Bottom</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 3.5</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title">🎯 Khi Thị Trường Test Giới Hạn</h2>
+            <p>Tháng 1 năm 2024, Solana (SOL) đang trong một uptrend mạnh mẽ sau khi tăng từ $20 lên đến $120 trong vòng vài tháng. Nhiều trader kỳ vọng SOL sẽ tiếp tục tăng vượt mức $120 để tiến tới $150. Tuy nhiên, sau khi đạt $120 lần đầu tiên vào cuối tháng 12, giá pullback về $95 rồi lại cố gắng test $120 lần thứ hai vào giữa tháng 1 - nhưng thất bại. Kết quả là một Double Top hoàn hảo hình thành, và những trader nhận ra pattern này đã có cơ hội SHORT từ vùng $115 xuống đến $80, thu được lợi nhuận hơn 30% trong vòng 2 tuần.</p>
+            <p>Double Top và Double Bottom là hai trong những reversal patterns phổ biến và dễ nhận diện nhất trong phân tích kỹ thuật. Chúng xuất hiện khi thị trường test một mức giá quan trọng hai lần và thất bại, báo hiệu rằng xu hướng hiện tại đang suy yếu và có khả năng đảo chiều. Bài học hôm nay sẽ giúp bạn nắm vững cách nhận diện, xác nhận, và giao dịch hai pattern cổ điển nhưng cực kỳ hiệu quả này.</p>
+        </section>
+
+        <!-- MỤC TIÊU -->
+        <section class="section">
+            <h2 class="section-title">📚 Mục Tiêu Bài Học</h2>
+            <div class="definition-box">
+                <div class="definition-box-title">📖 Định Nghĩa</div>
+                <p><strong>Double Top</strong> là một bearish reversal pattern có hình dạng giống chữ "M", hình thành khi giá test một vùng kháng cự hai lần liên tiếp nhưng không thể vượt qua. <strong>Double Bottom</strong> là bản đảo ngược với hình dạng giống chữ "W", hình thành khi giá test một vùng hỗ trợ hai lần nhưng không thể phá vỡ. Cả hai pattern đều báo hiệu sự đảo chiều của xu hướng hiện tại khi neckline bị phá vỡ.</p>
+            </div>
+            <p>Sau khi hoàn thành bài học này, bạn sẽ có khả năng nhận diện chính xác Double Top và Double Bottom trên biểu đồ, phân biệt giữa valid pattern với noise thị trường thông thường, và thiết lập chiến lược giao dịch với entry, stop loss, và target rõ ràng. Bạn cũng sẽ hiểu mối liên hệ giữa Double patterns với UPD và DPU trong GEM Method để tăng độ tin cậy của tín hiệu.</p>
+        </section>
+
+        <!-- DOUBLE TOP CHI TIẾT -->
+        <section class="section">
+            <h2 class="section-title">📉 Double Top - Hình Chữ "M"</h2>
+            <p>Double Top là pattern đánh dấu sự kết thúc của một uptrend khi người mua không còn đủ sức đẩy giá lên cao mới. Pattern này hình thành qua một chuỗi các diễn biến tâm lý thị trường rõ ràng, và việc hiểu được từng giai đoạn sẽ giúp bạn giao dịch tự tin hơn.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🔄 Giai Đoạn 1: Đỉnh Thứ Nhất</div>
+                <p>Trong một uptrend đang diễn ra, giá tăng mạnh và đạt được một đỉnh mới. Đây là thời điểm mà sentiment thị trường cực kỳ bullish - hầu hết trader tin rằng xu hướng tăng vẫn còn tiếp tục. Volume thường khá cao trong giai đoạn này vì nhiều người tham gia mua theo đà. Sau khi đạt đỉnh, giá bắt đầu pullback xuống một vùng hỗ trợ - đây sẽ trở thành neckline của pattern.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🔄 Giai Đoạn 2: Pullback Về Neckline</div>
+                <p>Giá điều chỉnh từ đỉnh thứ nhất xuống vùng neckline. Giai đoạn này thường đi kèm với volume thấp hơn vì đây chỉ được coi là một đợt điều chỉnh bình thường trong uptrend. Nhiều trader sử dụng pullback này như cơ hội "mua vào giá rẻ", không nhận ra rằng đây có thể là dấu hiệu suy yếu đầu tiên của xu hướng.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🔄 Giai Đoạn 3: Đỉnh Thứ Hai (Quan Trọng Nhất)</div>
+                <p>Giá rally trở lại và cố gắng vượt qua đỉnh thứ nhất. Đây là giai đoạn quyết định của pattern. Nếu giá KHÔNG THỂ tạo được high mới và bắt đầu quay đầu giảm, Double Top được xác nhận sơ bộ. Điều quan trọng cần chú ý là volume ở đỉnh thứ hai thường THẤP HƠN đỉnh thứ nhất - đây là bearish divergence cho thấy người mua đã mất hứng thú, không còn đủ conviction để đẩy giá cao hơn.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🔄 Giai Đoạn 4: Break Neckline</div>
+                <p>Pattern chỉ hoàn thành khi giá phá vỡ neckline xuống phía dưới. Breakout lý tưởng sẽ đi kèm với volume spike, xác nhận rằng áp lực bán đã thực sự chiếm ưu thế. Đây là trigger để vào lệnh SHORT. Entry có thể thực hiện ngay khi break hoặc chờ retest neckline từ phía dưới để có xác nhận thêm.</p>
+            </div>
+
+            <!-- HÌNH 3.5.1 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.5/6-5-1.webp" alt="Double Top Structure - M Pattern">
+                <div class="image-caption">Hình 3.5.1: Cấu trúc Double Top (M Pattern) với 2 đỉnh tương đương và neckline - Bearish Reversal Signal</div>
+            </div>
+        </section>
+
+        <!-- DOUBLE BOTTOM CHI TIẾT -->
+        <section class="section">
+            <h2 class="section-title">📈 Double Bottom - Hình Chữ "W"</h2>
+            <p>Double Bottom là bản đảo ngược hoàn toàn của Double Top, xuất hiện sau một downtrend và báo hiệu khả năng đảo chiều từ giảm sang tăng. Pattern này đặc biệt phổ biến ở các vùng đáy thị trường khi người bán đã cạn kiệt lực bán và người mua bắt đầu tích lũy.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🔄 Cấu Trúc Double Bottom</div>
+                <p><strong>Đáy thứ nhất:</strong> Trong một downtrend, giá giảm xuống và đạt một low mới. Đây thường là vùng panic selling khi nhiều trader bán cắt lỗ. Volume có thể cao vì đây là climax của đợt bán tháo.</p>
+                <p><strong>Bounce lên neckline:</strong> Giá hồi phục từ đáy, tạo ra neckline. Giai đoạn này thường đi kèm với volume trung bình vì nhiều người vẫn còn nghi ngờ về sự đảo chiều.</p>
+                <p><strong>Đáy thứ hai:</strong> Giá lại giảm và test lại vùng đáy thứ nhất. Nếu đáy thứ hai KHÔNG thấp hơn đáy thứ nhất (thường trong khoảng ±1-3%), đây là dấu hiệu cho thấy người bán đã kiệt sức. Volume ở đáy thứ hai thường thấp hơn đáy thứ nhất - buyers đang âm thầm tích lũy.</p>
+                <p><strong>Break neckline:</strong> Khi giá phá vỡ neckline lên trên với volume tăng, Double Bottom hoàn thành và tín hiệu LONG được kích hoạt.</p>
+            </div>
+
+            <!-- HÌNH 3.5.2 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.5/6-5-2.webp" alt="Double Bottom Structure - W Pattern">
+                <div class="image-caption">Hình 3.5.2: Cấu trúc Double Bottom (W Pattern) với 2 đáy tương đương - Bullish Reversal Signal</div>
+            </div>
+        </section>
+
+        <!-- CÁCH TÍNH TARGET -->
+        <section class="section">
+            <h2 class="section-title">📐 Chiến Lược Entry, SL, và Target</h2>
+            <p>Một trong những ưu điểm lớn của Double patterns là khả năng xác định rõ ràng các mức giá quan trọng để quản lý vị thế. Việc có kế hoạch giao dịch chi tiết trước khi vào lệnh sẽ giúp bạn kiểm soát được cảm xúc và tối ưu hóa kết quả.</p>
+
+            <h3>📊 Chiến Lược Cho Double Top (SHORT)</h3>
+            <p><strong>Entry:</strong> Có hai cách entry phổ biến. Entry aggressive là SHORT ngay khi giá phá vỡ neckline, giúp bạn có được giá entry tốt nhưng có risk cao hơn vì có thể là fake breakout. Entry conservative là chờ giá retest neckline từ phía dưới (neckline giờ trở thành resistance) rồi SHORT khi giá bị reject, giúp giảm risk nhưng có thể bỏ lỡ nếu giá không retest.</p>
+            <p><strong>Stop Loss:</strong> Đặt SL trên đỉnh thứ hai với một buffer nhỏ khoảng 1-2% để tránh bị stop out bởi noise. Nếu giá vượt qua đỉnh thứ hai, pattern bị invalid và bạn nên thoát khỏi vị thế.</p>
+            <p><strong>Target:</strong> Đo khoảng cách từ đỉnh xuống neckline, gọi là H (Height). Target = Breakout point - H. Đây là measured move tối thiểu mà pattern có thể đạt được.</p>
+
+            <h3>📊 Chiến Lược Cho Double Bottom (LONG)</h3>
+            <p><strong>Entry:</strong> LONG khi giá phá vỡ neckline lên trên (aggressive) hoặc chờ retest neckline thành support rồi LONG khi giá bounce (conservative).</p>
+            <p><strong>Stop Loss:</strong> Đặt SL dưới đáy thứ hai với buffer 1-2%. Nếu giá phá vỡ đáy thứ hai, pattern bị invalid.</p>
+            <p><strong>Target:</strong> Đo khoảng cách từ neckline xuống đáy, gọi là H. Target = Breakout point + H.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title">💰 Ví Dụ Tính Toán Cụ Thể</div>
+                <p><strong>Double Top trên SOL:</strong> Đỉnh 1 và đỉnh 2 đều ở khoảng $120, neckline ở $95. H = $120 - $95 = $25. Khi giá break neckline tại $95, Target = $95 - $25 = $70. Entry SHORT $94 | SL $122 | TP $70. Risk:Reward = 1:0.86 - cần cân nhắc size vì R:R không quá cao.</p>
+                <p><strong>Double Bottom trên BTC:</strong> Đáy 1 và đáy 2 đều ở khoảng $25,000, neckline ở $31,000. H = $31,000 - $25,000 = $6,000. Khi giá break neckline, Target = $31,000 + $6,000 = $37,000. Entry LONG $31,500 | SL $24,500 | TP $37,000. Risk:Reward = 1:0.79.</p>
+            </div>
+
+            <!-- HÌNH 3.5.3 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.5/6-5-3.webp" alt="Chiến Lược Vào Lệnh Double Top/Bottom">
+                <div class="image-caption">Hình 3.5.3: Chiến lược vào lệnh cho Double Top (SHORT) và Double Bottom (LONG) với Entry, SL, TP</div>
+            </div>
+        </section>
+
+        <!-- VALIDATION RULES -->
+        <section class="section">
+            <h2 class="section-title">✅ Tiêu Chí Validation - Phân Biệt Pattern Thật</h2>
+            <p>Không phải tất cả các hình dạng trông giống Double Top hoặc Double Bottom đều là valid pattern. Thị trường thường tạo ra nhiều "noise" có thể đánh lừa trader thiếu kinh nghiệm. Dưới đây là các tiêu chí quan trọng để xác định một Double pattern hợp lệ.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🔍 Tiêu Chí 1: Xu Hướng Trước Đó Phải Rõ Ràng</div>
+                <p>Double Top chỉ có ý nghĩa sau một uptrend rõ ràng - nếu thị trường đang đi ngang, việc tạo hai đỉnh gần bằng nhau chỉ là phần của consolidation range, không phải reversal signal. Tương tự, Double Bottom chỉ có ý nghĩa sau một downtrend rõ ràng. Quy tắc chung là uptrend hoặc downtrend trước đó nên di chuyển ít nhất 15-20% để pattern có đủ "năng lượng" để đảo chiều.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🔍 Tiêu Chí 2: Hai Đỉnh/Đáy Phải Tương Đương</div>
+                <p>Khoảng cách giữa đỉnh 1 và đỉnh 2 (hoặc đáy 1 và đáy 2) không nên vượt quá 3% để được coi là valid. Nếu đỉnh 2 cao hơn đỉnh 1 quá nhiều, đó có thể là higher high trong uptrend tiếp diễn, không phải Double Top. Nếu đáy 2 thấp hơn đáy 1 quá nhiều, đó có thể là lower low trong downtrend tiếp diễn.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🔍 Tiêu Chí 3: Khoảng Cách Thời Gian Đủ Xa</div>
+                <p>Hai đỉnh hoặc hai đáy cần cách nhau đủ xa về mặt thời gian để thể hiện rằng thị trường đã thực sự test mức giá đó hai lần riêng biệt. Nếu hai đỉnh/đáy chỉ cách nhau vài nến, đó có thể chỉ là price congestion trong một phạm vi nhỏ. Quy tắc chung là khoảng cách tối thiểu nên là 10-15 nến trên timeframe bạn đang phân tích.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🔍 Tiêu Chí 4: Volume Confirmation</div>
+                <p>Volume là yếu tố xác nhận quan trọng. Trong Double Top, volume ở đỉnh 2 nên THẤP hơn đỉnh 1 - cho thấy sự thiếu conviction của người mua. Volume nên TĂNG khi break neckline để confirm áp lực bán. Trong Double Bottom, volume ở đáy 2 có thể thấp hơn hoặc tương đương đáy 1, nhưng volume PHẢI tăng khi break neckline để confirm sự quay trở lại của người mua.</p>
+            </div>
+        </section>
+
+        <!-- LIÊN HỆ GEM PATTERNS -->
+        <section class="section">
+            <h2 class="section-title">🔗 Mối Liên Hệ Với GEM Patterns</h2>
+            <p>Nếu bạn đã học về GEM Pattern System trong các bài trước, bạn sẽ nhận thấy có sự tương đồng đáng kể giữa Double patterns với UPD và DPU. Việc kết hợp cả hai hệ thống phân tích sẽ tăng đáng kể độ tin cậy của tín hiệu giao dịch.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title">📈 Double Top ≈ UPD (Up-Pause-Down)</div>
+                <p>Cả Double Top và UPD đều mô tả quá trình thị trường đảo chiều từ uptrend sang downtrend. Trong Double Top, vùng neckline tương đương với HFZ (High Frequency Zone) trong UPD - đây là vùng giá mà thị trường "tạm dừng" trước khi tiếp tục di chuyển. Khi bạn thấy một Double Top đồng thời cũng thỏa mãn cấu trúc UPD của GEM Method, đó là high-confidence SHORT setup vì hai hệ thống phân tích độc lập đều đồng ý với nhau.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title">📉 Double Bottom ≈ DPU (Down-Pause-Up)</div>
+                <p>Tương tự, Double Bottom và DPU đều mô tả quá trình đảo chiều từ downtrend sang uptrend. Vùng neckline của Double Bottom tương đương với LFZ (Low Frequency Zone) trong DPU. Khi Double Bottom trùng với DPU setup, đó là high-confidence LONG setup. Trong thực tế, những setup mà cả Classic patterns và GEM patterns đều confirm thường có win rate cao hơn đáng kể so với chỉ dựa vào một hệ thống.</p>
+            </div>
+        </section>
+
+        <!-- CÂU HỎI THƯỜNG GẶP -->
+        <section class="section">
+            <h2 class="section-title">❓ Câu Hỏi Thường Gặp</h2>
+
+            <h3>1. Đỉnh/đáy thứ hai có thể cao/thấp hơn một chút được không?</h3>
+            <p>Có, và thực tế đây là trường hợp phổ biến. Đỉnh 2 có thể cao hơn đỉnh 1 một chút (1-3%) và pattern vẫn valid - thực chất đây còn được gọi là "false breakout" và là dấu hiệu bearish mạnh hơn vì bulls đã cố gắng break nhưng thất bại. Tương tự, đáy 2 thấp hơn đáy 1 một chút mà không tiếp tục giảm là dấu hiệu sellers đã kiệt sức. Tuy nhiên, nếu chênh lệch quá 3-5%, nên xem xét lại xem có phải pattern hay không.</p>
+
+            <h3>2. Có nên trade cả hai hướng khi thấy Double pattern?</h3>
+            <p>Không khuyến nghị. Double patterns là reversal patterns, nghĩa là chúng đi NGƯỢC lại xu hướng trước đó. Trading theo hướng của pattern (SHORT với Double Top, LONG với Double Bottom) có xác suất thành công cao hơn. Cố gắng LONG ở đỉnh Double Top hoặc SHORT ở đáy Double Bottom là "catching falling knife" - rất nguy hiểm.</p>
+
+            <h3>3. Thời gian hình thành pattern có quan trọng không?</h3>
+            <p>Rất quan trọng. Pattern hình thành trên timeframe càng lớn (D1, W1) thì càng có ý nghĩa và target càng lớn. Double Top trên chart 5 phút có thể chỉ là noise ngắn hạn, trong khi Double Top trên chart Daily có thể báo hiệu sự thay đổi xu hướng kéo dài nhiều tuần. Quy tắc chung là trade Double patterns từ H4 trở lên để có độ tin cậy cao hơn.</p>
+        </section>
+
+        <!-- HÀNH ĐỘNG THỰC HÀNH -->
+        <section class="section">
+            <h2 class="section-title">🎯 Hành Động Thực Hành</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">⚡ Làm Ngay Hôm Nay</div>
+                <p>Mở TradingView và chọn 10 altcoin trong top 50 theo vốn hóa. Xem biểu đồ D1 và H4 của mỗi đồng để tìm các Double patterns đã hoàn thành hoặc đang hình thành. Với mỗi pattern bạn tìm được, hãy kiểm tra 4 tiêu chí validation: xu hướng trước đó, khoảng cách hai đỉnh/đáy, thời gian hình thành, và volume pattern. Ghi chép lại những gì bạn tìm được.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📋 Bài Tập Tuần Này</div>
+                <p>Backtest 10 Double patterns đã hoàn thành trong lịch sử của BTC và ETH (5 Double Top, 5 Double Bottom). Với mỗi pattern, ghi lại: (1) Vị trí entry lý tưởng, (2) SL và TP theo phương pháp đã học, (3) R:R ratio, (4) Giá thực tế đi được bao xa so với target, (5) Pattern có đồng thời là UPD/DPU của GEM Method hay không. Tổng hợp kết quả để đánh giá hiệu quả của chiến lược.</p>
+            </div>
+        </section>
+
+        <!-- TỔNG KẾT -->
+        <div class="summary-box">
+            <div class="summary-title">📝 Tổng Kết Bài Học</div>
+            <ul class="summary-list">
+                <li>Double Top có hình chữ "M", xuất hiện sau uptrend và báo hiệu bearish reversal với tín hiệu SHORT khi break neckline.</li>
+                <li>Double Bottom có hình chữ "W", xuất hiện sau downtrend và báo hiệu bullish reversal với tín hiệu LONG khi break neckline.</li>
+                <li>Target được tính bằng chiều cao pattern (khoảng cách từ đỉnh/đáy đến neckline), áp dụng từ điểm breakout.</li>
+                <li>4 tiêu chí validation: xu hướng trước đó rõ ràng, hai đỉnh/đáy tương đương (±3%), thời gian đủ xa (>10 nến), volume giảm ở đỉnh/đáy 2.</li>
+                <li>Double Top ≈ UPD và Double Bottom ≈ DPU trong GEM Method - kết hợp cả hai tăng độ tin cậy.</li>
+            </ul>
+
+            <div style="margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--glass-border);">
+                <p style="color: var(--gold); font-weight: 700;">🎯 BÀI HỌC LỚN</p>
+                <p style="color: var(--text-secondary);">Double patterns là cách thị trường "nói" với bạn rằng xu hướng hiện tại đang gặp khó khăn. Khi giá test một mức giá quan trọng lần thứ hai mà không thể vượt qua, đó là dấu hiệu rõ ràng nhất cho thấy một bên (bulls hoặc bears) đã cạn kiệt năng lượng. Nhận diện được thời điểm này sẽ giúp bạn đứng đúng phía của thị trường.</p>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="section" style="text-align: center; padding: var(--space-xl);">
+            <p style="color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm);">✅ Hoàn thành Bài 3.5</p>
+            <p style="color: var(--text-muted);">Tiếp theo: <strong style="color: var(--text-primary);">Bài 3.6 - Classic Patterns Tổng Kết</strong></p>
+        </footer>
+
+        <!-- QUIZ -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">🎯 Kiểm Tra Hiểu Biết</h2>
+                <p class="quiz-subtitle">Trả lời 3 câu hỏi để củng cố kiến thức</p>
+            </div>
+
+            <div class="quiz-question" data-question="1">
+                <div class="question-number">1</div>
+                <p class="question-text">Double Top có hình dạng giống chữ gì và báo hiệu điều gì?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="a">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Chữ "M", báo hiệu bearish reversal (đảo chiều xuống)</span>
+                    </div>
+                    <div class="quiz-option" data-option="b">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Chữ "W", báo hiệu bullish reversal (đảo chiều lên)</span>
+                    </div>
+                    <div class="quiz-option" data-option="c">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Chữ "M", báo hiệu xu hướng tăng tiếp tục</span>
+                    </div>
+                    <div class="quiz-option" data-option="d">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Chữ "V", báo hiệu sideway</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2">
+                <div class="question-number">2</div>
+                <p class="question-text">Đặc điểm volume ở đỉnh 2 của Double Top CHUẨN là gì?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="a">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Volume cao hơn đỉnh 1 vì đây là đỉnh quan trọng hơn</span>
+                    </div>
+                    <div class="quiz-option" data-option="b">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Volume THẤP hơn đỉnh 1, cho thấy sức mua suy yếu</span>
+                    </div>
+                    <div class="quiz-option" data-option="c">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Volume bằng đỉnh 1</span>
+                    </div>
+                    <div class="quiz-option" data-option="d">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Volume không quan trọng trong Double Top</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="3">
+                <div class="question-number">3</div>
+                <p class="question-text">Double Bottom tương đương với pattern nào trong GEM Method?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="a">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">UPD (Up-Pause-Down)</span>
+                    </div>
+                    <div class="quiz-option" data-option="b">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">DPD (Down-Pause-Down)</span>
+                    </div>
+                    <div class="quiz-option" data-option="c">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">DPU (Down-Pause-Up)</span>
+                    </div>
+                    <div class="quiz-option" data-option="d">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">UPU (Up-Pause-Up)</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score"><span id="score">0</span>/3</div>
+                <p style="color: var(--text-secondary); margin-bottom: var(--space-lg);">Bạn đã hoàn thành bài kiểm tra!</p>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" onclick="resetQuiz()">Làm Lại Quiz</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const correctAnswers = { 1: 'a', 2: 'b', 3: 'c' };
+        const explanations = {
+            1: {
+                correct: "Chính xác! Double Top có hình chữ 'M' (hai đỉnh) và báo hiệu bearish reversal - sự đảo chiều từ uptrend sang downtrend.",
+                incorrect: "Double Top có hình chữ 'M' (hai đỉnh) và xuất hiện SAU uptrend, báo hiệu bearish reversal. Double Bottom mới có hình chữ 'W'."
+            },
+            2: {
+                correct: "Chính xác! Volume ở đỉnh 2 THẤP hơn đỉnh 1 là dấu hiệu bearish - cho thấy người mua đã mất hứng thú và không còn conviction để đẩy giá cao hơn.",
+                incorrect: "Volume ở đỉnh 2 phải THẤP hơn đỉnh 1 để xác nhận Double Top. Đây là bearish divergence quan trọng cho thấy sức mua đang suy yếu."
+            },
+            3: {
+                correct: "Chính xác! Double Bottom ≈ DPU vì cả hai đều mô tả quá trình đảo chiều từ downtrend sang uptrend - giá giảm, tạm dừng (test đáy 2 lần), rồi tăng.",
+                incorrect: "Double Bottom tương đương với DPU (Down-Pause-Up) vì cả hai đều báo hiệu bullish reversal sau downtrend. Neckline của Double Bottom ≈ LFZ của DPU."
+            }
+        };
+        let answered = {};
+        let score = 0;
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const question = this.closest('.quiz-question');
+                const questionNum = question.dataset.question;
+                if (answered[questionNum]) return;
+                answered[questionNum] = true;
+                const selectedAnswer = this.dataset.option;
+                const isCorrect = selectedAnswer === correctAnswers[questionNum];
+                const feedback = question.querySelector('.question-feedback');
+                const feedbackTitle = feedback.querySelector('.feedback-title');
+                const feedbackText = feedback.querySelector('.feedback-text');
+                question.querySelectorAll('.quiz-option').forEach(opt => opt.classList.add('disabled'));
+                if (isCorrect) {
+                    this.classList.add('correct');
+                    feedback.classList.add('correct', 'show');
+                    feedbackTitle.textContent = '✓ Chính xác!';
+                    feedbackText.textContent = explanations[questionNum].correct;
+                    score++;
+                } else {
+                    this.classList.add('incorrect');
+                    question.querySelector(`[data-option="${correctAnswers[questionNum]}"]`).classList.add('correct');
+                    feedback.classList.add('incorrect', 'show');
+                    feedbackTitle.textContent = '✗ Chưa đúng';
+                    feedbackText.textContent = explanations[questionNum].incorrect;
+                }
+                if (Object.keys(answered).length === 3) {
+                    document.getElementById('score').textContent = score;
+                    document.querySelector('.quiz-result').classList.add('show');
+                }
+            });
+        });
+        function resetQuiz() {
+            answered = {};
+            score = 0;
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('correct', 'incorrect', 'disabled');
+            });
+            document.querySelectorAll('.question-feedback').forEach(fb => {
+                fb.classList.remove('correct', 'incorrect', 'show');
+            });
+            document.querySelector('.quiz-result').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

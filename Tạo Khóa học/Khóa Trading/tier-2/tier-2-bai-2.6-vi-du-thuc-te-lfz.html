@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 2.6: Ví Dụ Thực Tế LFZ | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-navy: #112250;
+            --accent-gold: #FFBD59;
+            --accent-cyan: #00F0FF;
+            --accent-purple: #6A5BFF;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0AEC0;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --bg-card-hover: rgba(255, 255, 255, 0.08);
+            --border-subtle: rgba(255, 255, 255, 0.1);
+            --gradient-gold: linear-gradient(135deg, #FFBD59 0%, #FFCF87 100%);
+            --gradient-green: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--primary-navy);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--primary-navy);
+        }
+
+        /* HEADER */
+        .lesson-header {
+            padding: 2rem 1.5rem;
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.15) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border-subtle);
+            text-align: center;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--gradient-green);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #000;
+            margin-bottom: 1rem;
+        }
+
+        .lesson-chapter {
+            font-size: 0.875rem;
+            color: var(--success-green);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .lesson-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* CONTENT SECTION */
+        .content-section {
+            padding: 0;
+        }
+
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            margin: 1rem;
+            padding: 1.5rem;
+            border-left: 4px solid var(--success-green);
+        }
+
+        .content-card h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--success-green);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .content-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.25rem 0 0.75rem 0;
+            color: var(--text-primary);
+        }
+
+        .content-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9375rem;
+        }
+
+        .content-card ul, .content-card ol {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .content-card li {
+            margin-bottom: 0.5rem;
+            font-size: 0.9375rem;
+        }
+
+        /* IMAGE PLACEHOLDER */
+        .image-placeholder {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+            border: 2px dashed var(--success-green);
+            border-radius: 0.75rem;
+            padding: 3rem 1.5rem;
+            text-align: center;
+            margin: 1.25rem 0;
+        }
+
+        .image-placeholder .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .image-placeholder .label {
+            font-size: 0.875rem;
+            color: var(--success-green);
+            font-weight: 600;
+        }
+
+        .image-placeholder .dimensions {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* CASE STUDY CARD */
+        .case-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 1rem;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .case-header {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0.1) 100%);
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .case-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .case-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .case-badge.win {
+            background: rgba(16, 185, 129, 0.3);
+            color: var(--success-green);
+        }
+
+        .case-badge.loss {
+            background: rgba(239, 68, 68, 0.3);
+            color: var(--error-red);
+        }
+
+        .case-body {
+            padding: 1.25rem;
+        }
+
+        .case-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-item {
+            background: var(--bg-card);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.6875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .stat-value.green {
+            color: var(--success-green);
+        }
+
+        .stat-value.red {
+            color: var(--error-red);
+        }
+
+        .case-analysis {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .case-analysis h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .case-analysis ol {
+            padding-left: 1.25rem;
+            margin: 0.5rem 0;
+        }
+
+        .case-analysis li {
+            margin-bottom: 0.25rem;
+        }
+
+        /* LESSON BOX */
+        .lesson-box {
+            background: rgba(255, 189, 89, 0.1);
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .lesson-box-title {
+            font-weight: 600;
+            color: var(--accent-gold);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lesson-box p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* SUMMARY BOX */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 1rem;
+        }
+
+        .summary-box h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--success-green);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .summary-box li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.625rem;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        }
+
+        .summary-box li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success-green);
+            font-weight: bold;
+        }
+
+        /* QUIZ SECTION */
+        .quiz-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            margin: 1.5rem 1rem;
+            padding: 1.5rem;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 0.25rem;
+        }
+
+        .quiz-header p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .quiz-question {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .quiz-option {
+            padding: 0.875rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+        }
+
+        .quiz-option:hover:not(.correct):not(.incorrect) {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-gold);
+        }
+
+        .quiz-option.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--success-green);
+            color: var(--success-green);
+        }
+
+        .quiz-option.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--error-red);
+            color: var(--error-red);
+        }
+
+        .quiz-result {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .quiz-result.show {
+            display: block;
+        }
+
+        .quiz-result.correct {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+        }
+
+        .quiz-result.incorrect {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-red);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .quiz-score.show {
+            display: block;
+        }
+
+        .score-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .retake-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-gold);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #000;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .retake-btn:hover {
+            transform: scale(1.02);
+        }
+
+        /* FOOTER */
+        .lesson-footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-logo .gem {
+            color: var(--accent-gold);
+        }
+
+        .footer-text {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 600px) {
+            .content-card {
+                margin: 0.75rem 0;
+                border-radius: 0;
+                border-left: 4px solid var(--success-green);
+                border-right: none;
+                border-top: none;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+
+            .summary-box,
+            .quiz-section {
+                margin: 1rem 0;
+                border-radius: 0;
+            }
+
+            .lesson-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .lesson-title {
+                font-size: 1.5rem;
+            }
+
+            .case-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="header-badge">
+                <span>📈</span>
+                <span>Tier 2 - Nâng Cao</span>
+            </div>
+            <div class="lesson-chapter">Chapter 2 - LFZ Mastery</div>
+            <h1 class="lesson-title">Ví Dụ Thực Tế LFZ</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 2.6</span></div>
+                <div class="meta-item"><span>⏱️</span><span>15 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- CONTENT -->
+        <main class="content-section">
+            <!-- 📌 1. OPENING HOOK -->
+            <div class="content-card">
+                <h2><span class="icon">🎯</span> Học Từ Những "Vết Sẹo" Và Chiến Công Thực Tế</h2>
+                <p>Bạn đã nắm vững lý thuyết về LFZ, đã biết cách vẽ zone và hiểu về tâm lý Smart Money. Nhưng bạn có bao giờ tự hỏi: "Tại sao lý thuyết thì hay, mà khi áp dụng vào biểu đồ thực tế lại thấy rối đến vậy?". Đó là bởi vì thị trường không bao giờ "sạch sẽ" như trong các sơ đồ vẽ tay. Nó đầy rẫy những biến động nhiễu, tin tức bất ngờ và những cú lừa thanh khoản tinh vi.</p>
+                <p>Trong bài học này, tôi sẽ không chỉ cho bạn thấy những lệnh thắng rực rỡ để "tô hồng" phương pháp. Chúng ta sẽ cùng nhau mổ xẻ 5 Case Study thực tế – bao gồm cả những lệnh <strong>WIN rực rỡ</strong> và cả những lệnh <strong>LOSS đau đớn</strong>. Tại sao? Bởi vì trong trading, bạn học được nhiều nhất từ những sai lầm của mình (và của người khác). Đến cuối bài học này, bạn sẽ hình thành được một "trực giác nhạy bén" để nhận diện đâu là một cơ hội thực sự và đâu là một cái bẫy cần tránh xa.</p>
+                <div class="info-box">
+                    <div class="info-box-title">💡 Insight Nâng Cao</div>
+                    <p>Một trader chuyên nghiệp không phải là người không bao giờ thua, mà là người có <strong>Nhật ký giao dịch</strong> đầy rẫy những phân tích sâu sắc về từng lệnh. Hãy coi 5 ví dụ này là 5 trang nhật ký quý giá giúp bạn rút ngắn con đường đến với lợi nhuận bền vững.</p>
+                </div>
+            </div>
+
+            <!-- 📌 2. CONCEPT INTRODUCTION -->
+            <div class="content-card">
+                <h2>📊 Phân Tích Thực Chiến Đa Chiều</h2>
+                <p>Bài học này phân tích 5 case study thực tế về trade LFZ - bao gồm cả lệnh WIN và LOSS. Mục đích là hiểu rõ khi nào LFZ hoạt động tốt và khi nào cần cẩn thận. Chúng ta sẽ đánh giá dựa trên 4 yếu tố cốt lõi: <strong>Pattern xác thực, Chất lượng Zone, Nến xác nhận (Confirmation) và Bối cảnh thị trường (Context).</strong></p>
+                
+                <p>Hãy nhớ rằng: "Context is King" (Bối cảnh là vua). Một LFZ dù đẹp đến đâu nhưng nằm trong một xu hướng giảm mạnh của khung lớn thì xác suất thất bại vẫn rất cao. Hãy cùng tôi đi vào chi tiết từng trường hợp.</p>
+            </div>
+
+            <!-- 📌 3. DEEP DIVE - CASE STUDY 1 -->
+            <div class="content-card">
+                <h2>📈 Case Study #1: BTC/USDT 4H - Sức Mạnh Của UPU</h2>
+
+                <div class="case-card">
+                    <div class="case-header">
+                        <div class="case-title">BTC/USDT - LONG tại LFZ Tiếp Diễn</div>
+                        <div class="case-badge win">✓ WIN +18.5% (Spot)</div>
+                    </div>
+                    <div class="case-body">
+                        <div class="case-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Entry</div>
+                                <div class="stat-value">$42,150</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Stop</div>
+                                <div class="stat-value">$41,400</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Target</div>
+                                <div class="stat-value">$44,400</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">R:R</div>
+                                <div class="stat-value green">1:3</div>
+                            </div>
+                        </div>
+
+                        <div class="case-analysis">
+                            <h4>Phân Tích Chuyên Sâu:</h4>
+                            <ol>
+                                <li><strong>Pattern:</strong> UPU (Up-Pause-Up) hình thành rất rõ ràng trên 4H. Điều này cho thấy xu hướng tăng đang cực kỳ mạnh mẽ và Smart Money đang "nghỉ ngơi" để tiếp tục đẩy giá.</li>
+                                <li><strong>Chất lượng LFZ:</strong> Vùng $41,800 - $42,300 là một <strong>FRESH zone</strong> (chưa bao giờ được test). Theo quy tắc vòng đời, đây là vùng có xác suất bật cao nhất.</li>
+                                <li><strong>Confirmation:</strong> Khi giá pullback về zone, một cây nến <strong>Hammer</strong> (Búa) xuất hiện với volume cao gấp đôi trung bình 20 phiên. Đây là bằng chứng thép cho thấy lực mua đã nhập cuộc.</li>
+                                <li><strong>Confluence:</strong> LFZ này trùng khít với đường Daily EMA 21, tạo nên một "bức tường thép" hỗ trợ.</li>
+                                <li><strong>Kết quả:</strong> Giá bật lên ngay sau khi chạm entry và đạt TP sau 48 giờ.</li>
+                            </ol>
+                        </div>
+
+                        <div class="lesson-box">
+                            <div class="lesson-box-title">💡 Bài Học Rút Ra</div>
+                            <p>Khi bạn có sự hội tụ của 3 yếu tố: <strong>Fresh Zone + Strong Rejection + Trend Alignment</strong>, xác suất thắng của lệnh đó lên tới trên 80%. Hãy kiên nhẫn đợi những setup "vàng" này thay vì trade mọi zone bạn thấy.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">📈</div>
+                    <div class="label">Hình 2.6.1: BTC/USDT 4H - Phân tích lệnh WIN với UPU Pattern</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+
+            <!-- 📌 4. REAL-WORLD EXAMPLES - CASE STUDY 2 -->
+            <div class="content-card">
+                <h2>📈 Case Study #2: ETH/USDT 1D - Nghệ Thuật Bắt Đáy</h2>
+
+                <div class="case-card">
+                    <div class="case-header">
+                        <div class="case-title">ETH/USDT - LONG tại LFZ Đảo Chiều (DPU)</div>
+                        <div class="case-badge win">✓ WIN +24%</div>
+                    </div>
+                    <div class="case-body">
+                        <div class="case-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Entry</div>
+                                <div class="stat-value">$2,180</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Stop</div>
+                                <div class="stat-value">$2,050</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Target</div>
+                                <div class="stat-value">$2,570</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">R:R</div>
+                                <div class="stat-value green">1:3</div>
+                            </div>
+                        </div>
+
+                        <div class="case-analysis">
+                            <h4>Phân Tích Chuyên Sâu:</h4>
+                            <ol>
+                                <li><strong>Pattern:</strong> DPU (Down-Pause-Up) – một pattern đảo chiều kinh điển. Giá đã giảm trong thời gian dài và bắt đầu hình thành vùng tích lũy tại đáy.</li>
+                                <li><strong>LFZ:</strong> Vùng $2,100 - $2,200. Đây là vùng có độ dày vừa phải, bao phủ toàn bộ vùng râu nến tranh chấp trước đó.</li>
+                                <li><strong>Confirmation:</strong> Cụm nến <strong>Morning Star</strong> (Sao Mai) xuất hiện trên khung Daily. Đây là tín hiệu đảo chiều mạnh mẽ nhất trong phân tích kỹ thuật. Đồng thời, RSI cho thấy tín hiệu <strong>Phân kỳ dương (Bullish Divergence)</strong>.</li>
+                                <li><strong>Confluence:</strong> Vùng này trùng với đáy cũ của năm ngoái (Previous Support) tạo thành mô hình Double Bottom khổng lồ.</li>
+                                <li><strong>Kết quả:</strong> Một đợt Rally mạnh mẽ xảy ra, mang về lợi nhuận 24% chỉ sau 1 tuần giữ lệnh.</li>
+                            </ol>
+                        </div>
+
+                        <div class="lesson-box">
+                            <div class="lesson-box-title">💡 Bài Học Rút Ra</div>
+                            <p>Đừng bao giờ bắt đáy khi chưa có nến xác nhận. DPU + LFZ tại đáy cũ + Phân kỳ RSI là một "Combo tử thần" đối với phe Gấu. Hãy học cách tin tưởng vào khung thời gian lớn (Daily).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">🔄</div>
+                    <div class="label">Hình 2.6.2: ETH/USDT Daily - Chiến thuật DPU Reversal thành công</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+
+            <!-- 📌 5. MISTAKES - CASE STUDY 3 (THE LOSS) -->
+            <div class="content-card">
+                <h2>📉 Case Study #3: SOL/USDT 4H - Khi Zone Bị "Bào Mòn"</h2>
+
+                <div class="case-card">
+                    <div class="case-header">
+                        <div class="case-title">SOL/USDT - Thất bại vì bỏ qua Vòng đời Zone</div>
+                        <div class="case-badge loss">✗ LOSS -1.8%</div>
+                    </div>
+                    <div class="case-body">
+                        <div class="case-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Entry</div>
+                                <div class="stat-value">$98.50</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Stop</div>
+                                <div class="stat-value">$96.70</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Target</div>
+                                <div class="stat-value">$104.00</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Result</div>
+                                <div class="stat-value red">SL Hit</div>
+                            </div>
+                        </div>
+
+                        <div class="case-analysis">
+                            <h4>Mổ xẻ sai lầm (Post-mortem):</h4>
+                            <ol>
+                                <li><strong>Vấn đề 1 (Vòng đời):</strong> LFZ này đã được test tới 2 lần trước đó (TESTED_2X). Như bạn đã học, mỗi lần giá chạm zone, lệnh BUY lại bị hấp thụ bớt. Lần chạm thứ 3 rủi ro bị phá vỡ là cực cao.</li>
+                                <li><strong>Vấn đề 2 (Market Context):</strong> Lúc này BTC đang "rơi tự do" trên khung Daily. Không có đồng Altcoin nào có thể giữ được hỗ trợ khi "anh cả" đang sụp đổ.</li>
+                                <li><strong>Vấn đề 3 (Volume):</strong> Nến Rejection tại zone có volume cực thấp (chỉ 0.8x trung bình). Điều này cho thấy không có "ông lớn" nào thực sự muốn bảo vệ vùng giá này nữa.</li>
+                                <li><strong>Vấn đề 4 (Tâm lý):</strong> Trader đã entry quá sớm theo kiểu Set & Forget, không đợi nến 4H đóng cửa để xác nhận.</li>
+                            </ol>
+                        </div>
+
+                        <div class="lesson-box warning">
+                            <div class="lesson-box-title">⚠️ Bài Học Đắt Giá</div>
+                            <p>Hãy dũng cảm xóa bỏ những zone đã test quá nhiều lần khỏi biểu đồ. Một vùng hỗ trợ được chạm nhiều lần không phải là "cứng", mà nó đang "mỏng dần" và chuẩn bị vỡ. Đừng bao giờ trade ngược dòng thác đổ của BTC.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">📉</div>
+                    <div class="label">Hình 2.6.3: SOL/USDT - Phân tích nguyên nhân zone thất bại</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+
+            <!-- 📌 6. ADDITIONAL EXAMPLES - CASE STUDY 4 -->
+            <div class="content-card">
+                <h2>📈 Case Study #4: BNB/USDT 1H - Đánh Nhanh Rút Gọn (Scalping)</h2>
+
+                <div class="case-card">
+                    <div class="case-header">
+                        <div class="case-title">BNB/USDT - Quick Scalp tại LFZ khung nhỏ</div>
+                        <div class="case-badge win">✓ WIN +4.2%</div>
+                    </div>
+                    <div class="case-body">
+                        <div class="case-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Entry</div>
+                                <div class="stat-value">$312.50</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Stop</div>
+                                <div class="stat-value">$308.00</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Target</div>
+                                <div class="stat-value">$321.50</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">R:R</div>
+                                <div class="stat-value green">1:2</div>
+                            </div>
+                        </div>
+
+                        <div class="case-analysis">
+                            <h4>Phân Tích Chiến Thuật:</h4>
+                            <ol>
+                                <li><strong>Bối cảnh:</strong> BNB đang trong một xu hướng tăng mạnh trên khung 4H. Trên khung 1H, một pattern UPU nhỏ hình thành (Mini pattern).</li>
+                                <li><strong>LFZ:</strong> Đây là một <strong>FRESH zone</strong>, độ dày cực kỳ lý tưởng (~1.2%).</li>
+                                <li><strong>Confirmation:</strong> Ngay khi giá vừa chạm vào Entry Line, một nến <strong>Bullish Engulfing</strong> (Nhấn chìm tăng) xuất hiện, đóng cửa dứt khoát trên đỉnh zone.</li>
+                                <li><strong>Thực thi:</strong> Vì là Scalp trade nên trader chốt lời ngay tại đỉnh cũ (Previous High) thay vì kỳ vọng quá xa.</li>
+                                <li><strong>Kết quả:</strong> Lệnh đạt TP chỉ sau 4 cây nến 1H (4 giờ đồng hồ).</li>
+                            </ol>
+                        </div>
+
+                        <div class="lesson-box">
+                            <div class="lesson-box-title">💡 Bài Học Rút Ra</div>
+                            <p>LFZ trên khung nhỏ (1H) hoạt động cực tốt nếu nó <strong>thuận theo xu hướng</strong> của khung lớn hơn (4H). Với Scalping, kỷ luật chốt lời theo R:R mục tiêu là quan trọng nhất, đừng để lòng tham làm mất lợi nhuận nhanh.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">⚡</div>
+                    <div class="label">Hình 2.6.4: BNB/USDT 1H - Kỹ thuật Scalp theo dòng tiền nóng</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+
+            <!-- 📌 7. ADDITIONAL EXAMPLES - CASE STUDY 5 -->
+            <div class="content-card">
+                <h2>📈 Case Study #5: AVAX/USDT 4H - Để Lợi Nhuận Chạy (Trailing Stop)</h2>
+
+                <div class="case-card">
+                    <div class="case-header">
+                        <div class="case-title">AVAX/USDT - Tối ưu hóa lợi nhuận với LFZ</div>
+                        <div class="case-badge win">✓ WIN +32% (Leverage 3x)</div>
+                    </div>
+                    <div class="case-body">
+                        <div class="case-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Entry</div>
+                                <div class="stat-value">$28.50</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Initial SL</div>
+                                <div class="stat-value">$27.00</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Final Exit</div>
+                                <div class="stat-value">$37.60</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">R:R</div>
+                                <div class="stat-value green">1:6</div>
+                            </div>
+                        </div>
+
+                        <div class="case-analysis">
+                            <h4>Phân Tích Quản Lý Vị Thế:</h4>
+                            <ol>
+                                <li><strong>Setup:</strong> DPU đảo chiều tại vùng hỗ trợ lớn của khung Daily. Đây là một setup có xác suất cực cao.</li>
+                                <li><strong>Chiến lược quản lý:</strong> Khi giá đạt R:R 1:2, trader chốt 50% lợi nhuận và dời SL về điểm Entry (Breakeven). Đây là quy tắc bảo toàn vốn sắt đá của GEM.</li>
+                                <li><strong>Trailing Stop:</strong> Thay vì chốt hết tại Target cố định, trader dời Stop Loss theo các đáy (Swing Lows) mới hình thành khi giá tăng.</li>
+                                <li><strong>Exit:</strong> Lệnh cuối cùng bị khớp khi giá quay đầu dính Trailing SL, mang về lợi nhuận tổng cộng 32%.</li>
+                            </ol>
+                        </div>
+
+                        <div class="lesson-box">
+                            <div class="lesson-box-title">💡 Bài Học Rút Ra</div>
+                            <p>Khi bạn bắt được một cú đảo chiều từ LFZ khung lớn, đừng vội vã chốt lời "non". Hãy dùng <strong>Trailing Stop</strong> để cưỡi trên lưng con sóng mạnh nhất. Hãy để "winners run"!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">🎯</div>
+                    <div class="label">Hình 2.6.5: AVAX/USDT - Kỹ thuật dời Stop Loss để tối ưu lợi nhuận</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+
+            <!-- 📌 8. PRACTICAL APPLICATION - TỔNG KẾT & HÀNH ĐỘNG -->
+            <div class="content-card">
+                <h2>📋 Checklist Hành Động Của Bạn</h2>
+                <p>Sau khi đã đi qua 5 ví dụ này, tôi muốn bạn hãy thực hiện ngay quy trình 3 bước sau mỗi khi định mở một vị thế LONG tại LFZ:</p>
+                <ol>
+                    <li><strong>Kiểm tra độ tươi mới:</strong> Zone này đã bị test chưa? Nếu đã test 2 lần, hãy cực kỳ cẩn trọng hoặc bỏ qua.</li>
+                    <li><strong>Kiểm tra bối cảnh:</strong> BTC đang xanh hay đỏ? Khung Daily của coin đó có đang ủng hộ lệnh BUY không?</li>
+                    <li><strong>Kiểm tra xác nhận:</strong> Bạn đã thấy Pin Bar hay Engulfing chưa? Volume nến đó có cao hơn trung bình không?</li>
+                </ol>
+                <div class="info-box warning">
+                    <div class="info-box-title">🚨 Lời khuyên từ Mentor</div>
+                    <p>Trading thành công không phải là dự đoán đúng 100%, mà là <strong>Kỷ luật tuân thủ quy trình</strong> ngay cả khi bạn cảm thấy hưng phấn nhất hay sợ hãi nhất. Hãy coi lệnh thua của SOL là một học phí rẻ tiền để bảo vệ hàng ngàn đô la sau này của bạn.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- SUMMARY -->
+        <div class="summary-box">
+            <h3>📋 Tóm Tắt & Ghi Nhớ</h3>
+            <ul>
+                <li>✓ <strong>Case 1 (BTC):</strong> FRESH LFZ + Strong volume = Công thức chiến thắng kinh điển.</li>
+                <li>✓ <strong>Case 2 (ETH):</strong> DPU + Double Bottom + Divergence = Sự hội tụ mạnh nhất cho lệnh đảo chiều.</li>
+                <li>✓ <strong>Case 3 (SOL):</strong> TESTED zone + Market context xấu = Bài học đắt giá về việc bỏ qua quy tắc.</li>
+                <li>✓ <strong>Case 4 (BNB):</strong> Khung nhỏ phải thuận theo khung lớn. Đừng bao giờ trade ngược trend Daily.</li>
+                <li>✓ <strong>Case 5 (AVAX):</strong> Dùng Trailing Stop để biến một lệnh thắng bình thường thành một siêu lợi nhuận.</li>
+            </ul>
+            <p><strong>BÀI HỌC LỚN NHẤT:</strong> Một trader giỏi không chỉ giỏi vẽ zone, mà phải giỏi trong việc <strong>Chọn lọc trận đánh</strong>. Hãy chỉ chọn những trận đấu mà ở đó bạn có mọi lợi thế về phía mình.</p>
+        </div>
+
+        <!-- QUIZ -->
+        <div class="quiz-section">
+            <div class="quiz-header">
+                <h3>🎯 Kiểm Tra Kiến Thức</h3>
+                <p>Trả lời các câu hỏi sau để chắc chắn bạn đã rút ra được bài học thực chiến nhé!</p>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <div class="question-text">Câu 1: Trong Case Study #3 (SOL LOSS), đâu là nguyên nhân quan trọng nhất dẫn đến thất bại của lệnh LONG?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Do trader đặt mục tiêu Take Profit quá cao khiến giá không chạm tới được.</div>
+                    <div class="quiz-option" data-index="1">Do zone đã bị test tới lần thứ 3 (yếu đi), cộng với bối cảnh BTC đang giảm mạnh và volume xác nhận yếu.</div>
+                    <div class="quiz-option" data-index="2">Do trader sử dụng đòn bẩy quá cao dẫn đến tâm lý hoảng loạn.</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <div class="question-text">Câu 2: Qua Case Study #5 (AVAX), khi nào chúng ta nên bắt đầu thực hiện dời Stop Loss về điểm hòa vốn (Entry)?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Ngay lập tức sau khi vào lệnh để không bao giờ bị lỗ.</div>
+                    <div class="quiz-option" data-index="1">Khi giá đã đi ngược lại 50% khoảng cách đến Stop Loss.</div>
+                    <div class="quiz-option" data-index="2">Khi giá đã di chuyển theo đúng hướng và đạt được tỷ lệ lợi nhuận R:R khoảng 1:1.5 đến 1:2.</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-text">🎉 Chúc mừng bạn! Bạn đã trả lời đúng <span id="correct-count">0</span>/2 câu!</div>
+                <p style="margin-top: 0.5rem; color: var(--text-secondary);">Bạn đã hoàn thành Chapter 2 một cách xuất sắc. Hãy sẵn sàng để bước sang Chapter 3 – Khám phá bí ẩn của các mô hình giá nâng cao nhé!</p>
+                <button class="retake-btn" onclick="resetQuiz()">Làm Lại Quiz</button>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <div class="footer-logo">
+                <span class="gem">GEM</span> Trading Academy
+            </div>
+            <div class="footer-text">© 2024 GEM Trading Academy. Chúc bạn giao dịch kỷ luật và thành công trên thị trường!</div>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 2;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác! Bạn đã thấu hiểu bài học thực tế này.';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy nhớ kỹ: Vòng đời zone và bối cảnh thị trường là 2 thứ quan trọng nhất.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function resetQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                question.querySelector('.quiz-result').className = 'quiz-result';
+            });
+
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

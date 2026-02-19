@@ -1,0 +1,47 @@
+  🏆 HÌNH 1.8.4.1: MINH TUẤN - TỪ NEWBIE ĐẾN PRO
+  Tên file: 1.8.4.1-success-story-minhtuan.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Profile card của học viên Minh Tuấn.
+  NỘI DUNG HÌNH:
+   - Ảnh đại diện (avatar) nam giới, 30 tuổi, phong cách kỹ sư IT.
+   - Text chính: "Minh Tuấn - Kỹ sư IT, Hà Nội".
+   - Quote nổi bật: "Từ mất 50 triệu đến +127% ROI sau 6 tháng."
+   - Biểu đồ nhỏ bên cạnh thể hiện đường cong equity tăng trưởng đều.
+   - Các huy hiệu: "TIER 3 Member", "Disciplined Trader".
+
+  ---
+
+  👩‍💻 HÌNH 1.8.4.2: LINH NGUYỄN - MẸ ĐƠN THÂN & TRADER
+  Tên file: 1.8.4.2-success-story-linhnguyen.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Profile card của học viên Linh Nguyễn.
+  NỘI DUNG HÌNH:
+   - Ảnh đại diện nữ giới, 35 tuổi, phong cách hiện đại, năng động.
+   - Text chính: "Linh Nguyễn - Freelancer, TP.HCM".
+   - Quote nổi bật: "Chỉ 2h/ngày, thu nhập trading bằng 60% lương chính."
+   - Hình ảnh phụ: Điện thoại mở GEM App với thông báo "Trade Executed".
+   - Các huy hiệu: "TIER 2 Member", "Scanner User".
+
+  ---
+
+  🤝 HÌNH 1.8.4.3: HOÀNG ANH - KOL PARTNER
+  Tên file: 1.8.4.3-success-story-hoanganh.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Profile card của đối tác Hoàng Anh.
+  NỘI DUNG HÌNH:
+   - Ảnh đại diện nam giới, 25 tuổi, phong cách YouTuber/Content Creator.
+   - Text chính: "Hoàng Anh - Content Creator, Đà Nẵng".
+   - Quote nổi bật: "25M+ thu nhập thụ động mỗi tháng từ việc chia sẻ giá trị."
+   - Hình ảnh phụ: Biểu tượng YouTube và biểu đồ thu nhập referral tăng trưởng.
+   - Các huy hiệu: "KOL Partner", "Community Leader".
+
+  ---
+
+  🔑 HÌNH 1.8.4.4: 5 ĐIỂM CHUNG NGƯỜI THÀNH CÔNG
+  Tên file: 1.8.4.4-common-traits-success.png | Tỷ lệ: 3:4 (Vertical)
+  Bối cảnh: Infographic tóm tắt các phẩm chất chung.
+  NỘI DUNG HÌNH:
+   - 5 biểu tượng xếp vòng tròn hoặc danh sách dọc:
+     1. Committed (Cam kết) - Hình mỏ neo.
+     2. Patient (Kiên nhẫn) - Hình đồng hồ cát.
+     3. Disciplined (Kỷ luật) - Hình cái khiên.
+     4. Community-driven (Hướng cộng đồng) - Hình nhóm người.
+     5. Invested (Đầu tư) - Hình cây mầm mọc trên đồng tiền.
+   - Text tóm tắt ngắn gọn cho mỗi phẩm chất.

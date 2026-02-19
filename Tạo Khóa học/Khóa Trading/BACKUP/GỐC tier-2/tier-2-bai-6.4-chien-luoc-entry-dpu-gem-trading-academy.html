@@ -1,0 +1,993 @@
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.4: Chiến Lược Entry DPU - GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section {
+                padding: 0;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .section-title {
+                padding: var(--space-lg) 16px var(--space-md) 16px;
+                margin-bottom: 0;
+            }
+        }
+
+        .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > p {
+                padding: 0 16px;
+            }
+        }
+
+        .section > ul, .section > ol {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > ul, .section > ol {
+                padding-left: calc(16px + 1.5em);
+                padding-right: 16px;
+            }
+        }
+        .section li { margin-bottom: var(--space-sm); }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-container {
+                margin: var(--space-md) 0;
+                border-radius: 0;
+                border: none;
+            }
+        }
+        .image-caption {
+            padding: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        .pattern-flow {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .pattern-flow {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .flow-phase {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .flow-phase {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+        .flow-phase.up { border-left-color: var(--success); }
+        .flow-phase.pause { border-left-color: var(--gold); }
+        .phase-icon {
+            font-size: 2rem;
+            min-width: 50px;
+            text-align: center;
+        }
+        .phase-content { flex: 1; }
+        .phase-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .flow-phase.up .phase-title { color: var(--success); }
+        .flow-phase.pause .phase-title { color: var(--gold); }
+        .phase-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-md);
+            }
+        }
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--cyan), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @media (max-width: 600px) {
+            .stat-value { font-size: 1.25rem; }
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .stat-card.green .stat-value {
+            background: linear-gradient(135deg, var(--success), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-card.gold .stat-value {
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .summary-list { list-style: none; }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: 0;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-header {
+                padding: var(--space-lg) 16px var(--space-md);
+                margin-bottom: 0;
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+        }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+        .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+            line-height: 1.6;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .quiz-options {
+                gap: 1px;
+                background: var(--glass-border);
+                margin-left: -16px;
+                margin-right: -16px;
+                margin-left: calc(-16px - 4px);
+            }
+        }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .quiz-option {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid transparent;
+                padding: var(--space-md) 16px;
+            }
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        @media (max-width: 600px) {
+            .quiz-option:hover:not(.disabled) {
+                border-left-color: var(--gold);
+            }
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.correct {
+                border-left-color: var(--success) !important;
+            }
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.incorrect {
+                border-left-color: var(--error) !important;
+            }
+        }
+        .quiz-option.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .option-marker {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .quiz-option.correct .option-marker {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        .quiz-option.incorrect .option-marker {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+        }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--space-sm);
+            display: none;
+        }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+        }
+        .question-feedback.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+        }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result {
+            text-align: center;
+            padding: var(--space-xl);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .result-score {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-md);
+        }
+
+        .quiz-buttons {
+            display: flex;
+            justify-content: center;
+            padding: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-buttons { padding: var(--space-lg) 16px; }
+        }
+        .quiz-btn {
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--glass-border);
+        }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+
+
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>📈</span>
+                <span>Reversal Pattern</span>
+            </div>
+            <div class="lesson-chapter">Chapter 5 - DPU Pattern Mastery</div>
+            <h1 class="lesson-title">Chiến Lược Entry DPU</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 5.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>15 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Mở Đầu - Entry Là Khâu Quyết Định Profit</h2>
+            <p>Bạn đã biết cách nhận diện DPU pattern và vẽ LFZ chính xác từ các bài học trước. Nhưng kiến thức đó chỉ thực sự mang lại lợi nhuận khi bạn biết CÁCH VÀ KHI NÀO entry vào lệnh. Entry quá sớm có thể bị stop out bởi nhiễu thị trường, entry quá muộn thì Risk:Reward không còn hấp dẫn.</p>
+
+            <p>Trong bài học này, bạn sẽ học 3 phương pháp entry khác nhau cho DPU pattern - mỗi phương pháp phù hợp với mức độ chấp nhận rủi ro và phong cách giao dịch khác nhau. Bạn sẽ biết chính xác điểm entry, Stop Loss, và cách đặt Take Profit để tối ưu hóa lợi nhuận.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Nguyên Tắc Vàng Về Entry</div>
+                <p>Entry tốt nhất KHÔNG PHẢI là khi giá break LFZ, mà là khi giá RETEST LFZ sau breakout. Lý do: Retest cho bạn xác nhận rằng LFZ thực sự là support mạnh, đồng thời cho phép entry với giá tốt hơn và Risk:Reward cao hơn. Khoảng 70% các DPU thành công đều có retest - hãy kiên nhẫn chờ đợi.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title selected-for-delete"><span>📊</span> Tổng Quan 3 Phương Pháp Entry</h2>
+            <p>Có 3 cách tiếp cận entry cho DPU pattern. Mỗi cách phù hợp với một risk profile khác nhau, và bạn nên chọn phương pháp phù hợp với tính cách giao dịch của mình.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.4/5-4-1.webp" alt="3 DPU Entry Methods">
+            </div>
+            <div class="image-caption">Hình 1: So sánh 3 phương pháp entry cho DPU pattern</div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #EF4444;">Aggressive</div>
+                    <div class="stat-label">Entry trong LFZ</div>
+                </div>
+                <div class="stat-card gold">
+                    <div class="stat-value">Standard</div>
+                    <div class="stat-label">Break + Retest</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-value">Conservative</div>
+                    <div class="stat-label">Confirm Retest</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>⚡</span> Entry #1: Aggressive - Entry Trong LFZ</h2>
+            <p>Phương pháp Aggressive entry ngay trong vùng LFZ khi xuất hiện tín hiệu đảo chiều, trước khi giá break khỏi vùng. Đây là cách entry với Risk:Reward cao nhất nhưng cũng rủi ro nhất.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.4/5-4-2.webp" alt="Aggressive Entry trong LFZ">
+            </div>
+            <div class="image-caption">Hình 2: Aggressive Entry - Entry trong vùng LFZ khi có nến reversal</div>
+
+            <div class="pattern-flow">
+                <div class="flow-phase">
+                    <div class="phase-icon">⚡</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Điều Kiện Entry Aggressive</div>
+                        <div class="phase-desc">
+                            <strong>Tín hiệu:</strong> Nến reversal mạnh (hammer, bullish engulfing, morning star) xuất hiện TRONG vùng LFZ, kèm volume tăng so với các nến trước đó.<br><br>
+                            <strong>Entry:</strong> Close của nến reversal hoặc giá mở cửa nến tiếp theo.<br><br>
+                            <strong>Stop Loss:</strong> Dưới đáy LFZ 1-2% (buffer cho nhiễu thị trường).<br><br>
+                            <strong>Win Rate:</strong> 50-55% - thấp hơn các phương pháp khác vì entry trước khi có confirmation.<br><br>
+                            <strong>R:R tiềm năng:</strong> 4:1 đến 5:1 - cao nhất trong 3 phương pháp.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Ví Dụ: BTC/USDT 4H - Aggressive Entry</div>
+                <p>
+                    <strong>LFZ:</strong> $52,500 - $54,200 (range 3.2%)<br><br>
+                    <strong>Tín hiệu:</strong> Nến hammer tại $53,100, volume tăng 1.6x so với trung bình<br><br>
+                    <strong>Entry:</strong> $53,200 (close của hammer)<br><br>
+                    <strong>Stop Loss:</strong> $51,800 (-2.6% từ entry, dưới đáy LFZ)<br><br>
+                    <strong>Target:</strong> $59,000 (+10.9% từ entry)<br><br>
+                    <strong>Risk:Reward:</strong> 1:4.2
+                </p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⚠️</span> Cảnh Báo Về Aggressive Entry</div>
+                <p>Phương pháp này CHỈ phù hợp với trader có kinh nghiệm và quản lý rủi ro tốt. Tỷ lệ bị stop out cao hơn vì bạn entry trước khi pattern được xác nhận. Nếu bạn mới bắt đầu, hãy sử dụng Standard hoặc Conservative entry để có win rate ổn định hơn.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>✅</span> Entry #2: Standard - Break LFZ (Khuyến Nghị)</h2>
+            <p>Phương pháp Standard entry khi giá break khỏi LFZ với volume xác nhận. Đây là phương pháp được khuyến nghị cho đa số trader vì cân bằng tốt giữa win rate và Risk:Reward.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.4/5-4-3.webp" alt="Standard Entry Break LFZ">
+            </div>
+            <div class="image-caption">Hình 3: Standard Entry - Entry khi nến đóng cửa trên LFZ với volume</div>
+
+            <div class="pattern-flow">
+                <div class="flow-phase up">
+                    <div class="phase-icon">✅</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Điều Kiện Entry Standard</div>
+                        <div class="phase-desc">
+                            <strong>Tín hiệu:</strong> Nến đóng cửa TRÊN cạnh trên của LFZ với volume tăng ít nhất 1.5x so với trung bình 5 nến trước. Nến breakout có thân lớn, bóng nhỏ.<br><br>
+                            <strong>Entry:</strong> Close của nến breakout hoặc pullback nhẹ sau đó (trong vòng 1-2 nến).<br><br>
+                            <strong>Stop Loss:</strong> Dưới đáy LFZ hoặc giữa LFZ (tùy theo mức rủi ro chấp nhận được).<br><br>
+                            <strong>Win Rate:</strong> 60-65% - cao hơn Aggressive vì có xác nhận breakout.<br><br>
+                            <strong>R:R tiềm năng:</strong> 2.5:1 đến 3:1 - cân bằng tốt.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Ví Dụ: ETH/USDT 4H - Standard Entry</div>
+                <p>
+                    <strong>LFZ:</strong> $2,380 - $2,480 (range 4.2%)<br><br>
+                    <strong>Tín hiệu:</strong> Nến 4H đóng cửa tại $2,510, vượt LFZ top $2,480. Volume tăng 1.8x.<br><br>
+                    <strong>Entry:</strong> $2,520 (pullback nhẹ sau breakout)<br><br>
+                    <strong>Stop Loss:</strong> $2,360 (-6.3% từ entry, dưới đáy LFZ)<br><br>
+                    <strong>Target:</strong> $2,850 (+13.1% từ entry)<br><br>
+                    <strong>Risk:Reward:</strong> 1:2.1
+                </p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Volume Confirmation Là Bắt Buộc</div>
+                <p>Nến breakout PHẢI có volume tăng đáng kể so với các nến trong Phase PAUSE. Nếu breakout với volume yếu, đây có thể là false breakout - giá sẽ quay lại trong vùng LFZ. Trong trường hợp này, đợi xem giá có retest và bounce không, sau đó mới entry.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🛡️</span> Entry #3: Conservative - Retest LFZ</h2>
+            <p>Phương pháp Conservative đợi giá break LFZ, sau đó pullback retest vùng LFZ rồi mới entry. Đây là cách entry an toàn nhất với win rate cao nhất, nhưng có nhược điểm là không phải lúc nào giá cũng retest.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.4/5-4-4.webp" alt="Conservative Entry Retest">
+            </div>
+            <div class="image-caption">Hình 4: Conservative Entry - Đợi giá retest LFZ sau breakout rồi mới entry</div>
+
+            <div class="pattern-flow">
+                <div class="flow-phase pause">
+                    <div class="phase-icon">🛡️</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Điều Kiện Entry Conservative</div>
+                        <div class="phase-desc">
+                            <strong>Tín hiệu:</strong> Giá break LFZ → Pullback về test vùng đỉnh LFZ → Nến bounce (nến xanh với thân đóng cửa phía trên) từ vùng này.<br><br>
+                            <strong>Entry:</strong> Close của nến bounce từ LFZ top, hoặc giá mở cửa nến tiếp theo.<br><br>
+                            <strong>Stop Loss:</strong> Dưới đáy LFZ (entry gần LFZ top nên SL ngắn hơn).<br><br>
+                            <strong>Win Rate:</strong> 65-70% - cao nhất vì có double confirmation (break + retest hold).<br><br>
+                            <strong>R:R tiềm năng:</strong> 3:1 đến 4:1 - cao hơn Standard vì entry giá tốt hơn.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Ví Dụ: SOL/USDT 4H - Conservative Entry</div>
+                <p>
+                    <strong>LFZ:</strong> $128 - $135 (range 5.5%)<br><br>
+                    <strong>Breakout:</strong> Giá break $135 với volume cao, tăng lên $142<br><br>
+                    <strong>Retest:</strong> 3 nến sau, giá pullback về $136 (gần LFZ top $135)<br><br>
+                    <strong>Entry:</strong> $137 (nến bounce từ vùng retest)<br><br>
+                    <strong>Stop Loss:</strong> $126 (-8% từ entry, dưới đáy LFZ)<br><br>
+                    <strong>Target:</strong> $165 (+20.4% từ entry)<br><br>
+                    <strong>Risk:Reward:</strong> 1:2.5
+                </p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⚠️</span> Nhược Điểm: Có Thể Miss Trade</div>
+                <p>Không phải DPU nào cũng có retest. Khoảng 30% các DPU sẽ break mạnh và tiếp tục tăng mà không pullback. Trong trường hợp này, nếu bạn chỉ dùng Conservative entry, bạn sẽ miss trade. Giải pháp: Kết hợp Standard và Conservative - entry 50% khi break, entry thêm 50% khi retest.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Stop Loss Và Take Profit</h2>
+            <p>Entry đúng chỉ là một phần của thành công. Quản lý vị thế đúng cách với Stop Loss và Take Profit hợp lý mới quyết định profitability dài hạn của bạn.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.4/5-4-5.webp" alt="SL TP Management">
+            </div>
+            <div class="image-caption">Hình 5: Chiến lược quản lý Stop Loss và Take Profit trong DPU trade</div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🛑</span> 4 Quy Tắc Stop Loss</div>
+                <p>
+                    <strong>Rule #1:</strong> SL luôn đặt DƯỚI đáy LFZ với buffer 1-2%. Đây là mức giá mà nếu bị phá vỡ, DPU pattern đã invalid.<br><br>
+                    <strong>Rule #2:</strong> KHÔNG BAO GIỜ move SL xuống thấp hơn vị trí ban đầu. Điều này vi phạm nguyên tắc quản lý rủi ro cơ bản.<br><br>
+                    <strong>Rule #3:</strong> Move SL lên breakeven (giá entry) sau khi profit đạt 1R. Ví dụ: Nếu SL là 3%, khi profit đạt 3% thì move SL lên breakeven.<br><br>
+                    <strong>Rule #4:</strong> Sử dụng trailing stop khi trend mạnh. Ví dụ: Trailing SL theo EMA 21 hoặc theo swing low mới.
+                </p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🎯</span> Chiến Lược Take Profit 3 Phần</div>
+                <p>
+                    <strong>TP1 (50% position):</strong> Previous resistance gần nhất hoặc Fibonacci extension 1.618. Đây là mức chốt lời đầu tiên để lock profit sớm.<br><br>
+                    <strong>TP2 (30% position):</strong> Fibonacci extension 2.618 hoặc major resistance tiếp theo. Mức này cần giá tăng thêm đáng kể.<br><br>
+                    <strong>TP3 (20% position - "Moon Bag"):</strong> Để chạy với trailing stop. Nếu trend thực sự mạnh, 20% này có thể mang lại profit lớn bất ngờ.
+                </p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Tại Sao Chia TP Thành Nhiều Phần?</div>
+                <p>Tâm lý học cho thấy trader thường chốt lời quá sớm vì sợ mất profit. Bằng cách chia thành 3 phần, bạn vừa lock profit sớm (giảm stress) vừa giữ được position cho trường hợp trend mạnh. Chiến lược này giúp bạn tránh cảm giác "chốt xong giá bay" - vì bạn vẫn còn 50% position chạy tiếp.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📋</span> Hành Động Thực Tế</h2>
+            <p>Dưới đây là bài tập để bạn áp dụng chiến lược entry vào thực tế ngay hôm nay.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🎯</span> Bài Tập - Backtest 10 DPU Trades</div>
+                <p>
+                    <strong>1. Mở TradingView</strong> và tìm 10 DPU pattern đã hoàn thành trong 6 tháng gần đây trên BTC hoặc ETH khung 4H.<br><br>
+                    <strong>2. Với mỗi pattern:</strong> Xác định 3 điểm entry (Aggressive, Standard, Conservative). Ghi lại giá entry, SL, TP cho mỗi phương pháp.<br><br>
+                    <strong>3. Đánh giá kết quả:</strong> Phương pháp nào có win rate cao nhất? Phương pháp nào có R:R tốt nhất? Phương pháp nào phù hợp với bạn?<br><br>
+                    <strong>4. Kết luận:</strong> Chọn 1 phương pháp entry làm chiến lược chính của bạn và stick với nó cho 20 trades tiếp theo.
+                </p>
+            </div>
+        </section>
+
+        <div class="summary-box">
+            <div class="summary-title"><span>📝</span> Tóm Tắt Bài Học - Key Takeaways</div>
+            <ul class="summary-list">
+                <li><strong>3 phương pháp entry:</strong> Aggressive (trong LFZ, R:R cao nhất, win rate thấp nhất), Standard (break LFZ, cân bằng), Conservative (retest LFZ, win rate cao nhất).</li>
+                <li><strong>Standard entry được khuyến nghị</strong> cho đa số trader vì cân bằng tốt giữa win rate (60-65%) và Risk:Reward (2.5:1 - 3:1).</li>
+                <li><strong>Volume confirmation là bắt buộc</strong> khi entry theo phương pháp Standard. Breakout với volume yếu = có thể là false breakout.</li>
+                <li><strong>Stop Loss luôn đặt dưới đáy LFZ</strong> với buffer 1-2%. Move SL lên breakeven sau khi profit đạt 1R.</li>
+                <li><strong>Chia Take Profit thành 3 phần:</strong> TP1 (50%) tại resistance gần, TP2 (30%) tại Fib 2.618, TP3 (20%) trailing stop cho moon bag.</li>
+            </ul>
+        </div>
+
+        <section class="quiz-section">
+            <h2 class="quiz-title">🎯 Kiểm Tra Hiểu Biết</h2>
+            <div class="quiz-content">
+                <div class="quiz-question" data-correct="1">
+                    <h4>Câu 1: Phương pháp entry nào được khuyến nghị cho đa số trader?</h4>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-index="0">A. Aggressive (trong LFZ)</div>
+                        <div class="quiz-option" data-index="1">B. Standard (break LFZ)</div>
+                        <div class="quiz-option" data-index="2">C. Conservative (retest)</div>
+                        <div class="quiz-option" data-index="3">D. Tất cả đều như nhau</div>
+                    </div>
+                    <div class="quiz-result"></div>
+                </div>
+
+                <div class="quiz-question" data-correct="2">
+                    <h4>Câu 2: Stop Loss nên đặt ở đâu trong DPU trade?</h4>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-index="0">A. Trên đỉnh LFZ</div>
+                        <div class="quiz-option" data-index="1">B. Giữa LFZ</div>
+                        <div class="quiz-option" data-index="2">C. Dưới đáy LFZ (với buffer)</div>
+                        <div class="quiz-option" data-index="3">D. Không cần SL</div>
+                    </div>
+                    <div class="quiz-result"></div>
+                </div>
+
+                <div class="quiz-question" data-correct="0">
+                    <h4>Câu 3: Khi nào nên move SL lên breakeven?</h4>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-index="0">A. Sau khi profit 1R</div>
+                        <div class="quiz-option" data-index="1">B. Ngay sau khi entry</div>
+                        <div class="quiz-option" data-index="2">C. Khi đạt TP cuối</div>
+                        <div class="quiz-option" data-index="3">D. Không bao giờ move</div>
+                    </div>
+                    <div class="quiz-result"></div>
+                </div>
+
+                <div class="quiz-score">
+                    <h3>🏆 Hoàn Thành!</h3>
+                    <p>Bạn trả lời đúng <span id="correct-count">0</span>/3 câu hỏi</p>
+                    <button class="retake-btn" onclick="retakeQuiz()">Làm Lại Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="section" style="text-align: center; padding: var(--space-xl);">
+            <p style="color: var(--gold); font-weight: 600;">Hoàn thành Bài 5.4</p>
+            <p style="color: var(--text-muted);">Tiếp theo: <strong style="color: var(--text-primary);">Bài 5.5 - DPU Checklist Kiểm Tra</strong></p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function retakeQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+            document.querySelectorAll('.quiz-question').forEach(q => {
+                q.classList.remove('answered');
+                q.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('correct', 'incorrect'));
+                q.querySelector('.quiz-result').className = 'quiz-result';
+            });
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+
+
+

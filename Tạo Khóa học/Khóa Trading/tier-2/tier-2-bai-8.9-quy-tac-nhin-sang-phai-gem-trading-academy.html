@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 8.9: Quy Tắc "Nhìn Sang Phải" | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section, .content-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section, .content-card {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: var(--space-md);
+        }
+        .card-icon { font-size: 2rem; }
+        .card-meta h3 { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin: 0; }
+        .card-meta span { font-size: 0.9rem; color: var(--text-muted); }
+
+        .card-body p { margin-bottom: var(--space-md); text-align: justify; }
+
+        .concept-box {
+            background: var(--bg-primary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+            margin: var(--space-lg) 0;
+        }
+        .concept-box.red { border-color: var(--error); background: rgba(255, 82, 82, 0.1); }
+        .concept-text { font-size: 1.25rem; font-weight: 700; color: var(--cyan); margin-bottom: var(--space-xs); }
+        .concept-box.red .concept-text { color: var(--error); }
+        .concept-desc { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .image-container { margin: var(--space-lg) 0; text-align: center; }
+        .image-container img { border-radius: var(--radius-md); border: 1px solid var(--glass-border); }
+        .image-caption { font-size: 0.85rem; color: var(--text-muted); margin-top: var(--space-sm); font-style: italic; }
+
+        .styled-list { list-style: none; padding: 0; }
+        .styled-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: var(--space-sm);
+            color: var(--text-secondary);
+        }
+        .styled-list li::before { content: "•"; color: var(--cyan); font-weight: bold; position: absolute; left: 0; }
+        .styled-list.red li::before { content: "✕"; color: var(--error); }
+        .styled-list.gold li::before { content: "➜"; color: var(--gold); }
+
+        .obstacle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        .obstacle-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            transition: transform 0.3s ease;
+        }
+        .obstacle-card:hover { transform: translateY(-5px); border-color: var(--gold); }
+        .obstacle-header { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-sm); }
+        .obstacle-icon { font-size: 1.5rem; }
+        .obstacle-name { font-weight: 700; color: var(--text-primary); }
+        .obstacle-desc { font-size: 0.85rem; color: var(--text-muted); }
+
+        .checklist-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+        }
+        .checklist-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-md); border-bottom: 1px solid rgba(0, 240, 255, 0.2); padding-bottom: var(--space-sm); }
+        .checklist-items li { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-sm); }
+        .checklist-items li::before { content: "☐"; color: var(--cyan); font-size: 1.2rem; }
+
+        .comparison-table { width: 100%; border-collapse: collapse; margin: var(--space-lg) 0; }
+        .comparison-table th, .comparison-table td { padding: var(--space-md); text-align: left; border-bottom: 1px solid var(--glass-border); color: var(--text-secondary); }
+        .comparison-table th { color: var(--gold); font-weight: 600; }
+
+        .tip-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border-left: 4px solid var(--gold);
+            padding: var(--space-md);
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin: var(--space-lg) 0;
+        }
+        .tip-header { font-weight: 700; color: var(--gold); margin-bottom: var(--space-xs); }
+        .tip-box.warning { background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05)); border-color: var(--error); }
+        .tip-box.warning .tip-header { color: var(--error); }
+
+        .decision-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin: var(--space-lg) 0; }
+        .decision-card { padding: var(--space-lg); border-radius: var(--radius-md); text-align: center; border: 1px solid transparent; }
+        .decision-card.go { background: rgba(0, 200, 83, 0.1); border-color: var(--success); }
+        .decision-card.no-go { background: rgba(255, 82, 82, 0.1); border-color: var(--error); }
+        .decision-title { font-weight: 800; font-size: 1.2rem; margin: var(--space-sm) 0; }
+        .go .decision-title { color: var(--success); }
+        .no-go .decision-title { color: var(--error); }
+        .decision-desc { font-size: 0.9rem; color: var(--text-secondary); text-align: left; }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        .summary-box h3 { font-size: 1.25rem; font-weight: 700; color: var(--success); margin-bottom: var(--space-lg); }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--success); font-weight: 700; }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        .quiz-question p { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); }
+        .quiz-option {
+            display: block; width: 100%; text-align: left; padding: var(--space-md);
+            background: var(--glass-bg); border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease;
+            color: var(--text-secondary); margin-bottom: var(--space-sm);
+        }
+        .quiz-option:hover { border-color: var(--gold); background: var(--bg-card); }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; color: var(--success); }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; color: var(--error); }
+        .quiz-result { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--radius-md); display: none; }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); color: var(--success); }
+        .quiz-result.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); color: var(--error); }
+        .quiz-score { text-align: center; padding: var(--space-xl); background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent); border: 1px solid var(--purple); border-radius: var(--radius-lg); margin-top: var(--space-lg); display: none; }
+        .quiz-score.show { display: block; }
+        .score-text { color: var(--gold); font-size: 1.5rem; font-weight: 700; margin-bottom: var(--space-sm); }
+        .retake-btn { padding: var(--space-md) var(--space-xl); background: linear-gradient(135deg, var(--purple), var(--cyan)); color: var(--navy-dark); border: none; border-radius: var(--radius-md); font-weight: 700; cursor: pointer; }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); margin-top: var(--space-xl); }
+        .footer-text { color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="lesson-header">
+            <span class="lesson-badge">🔍 Tier 2 - Bài 8.9</span>
+            <h1 class="lesson-title">Quy Tắc "Nhìn Sang Phải"</h1>
+            <p class="lesson-subtitle">Look Right - Kỹ năng sinh tồn quan trọng nhất trước khi vào lệnh</p>
+        </header>
+
+        <!-- Section 1: Opening Hook -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon cyan">🚦</div>
+                <div class="card-meta">
+                    <h3>Bạn Có Băng Qua Đường Mà Không Nhìn Xe?</h3>
+                    <span>Tại sao setup đẹp vẫn có thể giết chết tài khoản của bạn</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Hãy tưởng tượng bạn đang đứng trước vạch kẻ đường. Đèn tín hiệu dành cho người đi bộ chuyển sang màu xanh (giống như bạn nhìn thấy một Zone đẹp). Mọi thứ có vẻ hoàn hảo để bước đi. Nhưng liệu bạn có cứ thế nhắm mắt bước xuống đường không?</p>
+                <p>Chắc chắn là không. Bạn sẽ làm một việc theo bản năng: <strong>Nhìn sang trái, rồi NHÌN SANG PHẢI</strong> để đảm bảo không có chiếc xe tải mất lái nào đang lao tới.</p>
+                <p>Trong trading cũng vậy. Bạn dành 90% thời gian để nhìn sang trái chart: tìm kiếm quá khứ, xác định Zone, vẽ Pattern. Nhưng bạn lại quên mất việc quan trọng nhất: <strong>Nhìn sang phải để xem con đường phía trước có chướng ngại vật nào không.</strong></p>
+                <p>Bài học này sẽ trang bị cho bạn "kính chiếu hậu" để nhìn thấy những nguy hiểm tiềm tàng mà 80% trader nghiệp dư bỏ qua. Đây là quy tắc sẽ cứu bạn khỏi những lệnh thua oan uổng nhất.</p>
+            </div>
+        </article>
+
+        <!-- Section 2: Concept Definition -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon gold">👁️</div>
+                <div class="card-meta">
+                    <h3>Quy Tắc "Nhìn Sang Phải" Là Gì?</h3>
+                    <span>Look To The Right Rule</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p><strong>Look Right (Nhìn Sang Phải)</strong> là hành động kiểm tra khoảng trống giá (Profit Margin) từ điểm vào lệnh (Entry) đến chướng ngại vật gần nhất (Opposing Zone/Level).</p>
+                
+                <div class="concept-box">
+                    <div class="concept-text">Look Right = Xác Định Profit Margin</div>
+                    <div class="concept-desc">Không quan trọng Zone đẹp thế nào, nếu không có khoảng trống để giá chạy, trade đó là vô nghĩa.</div>
+                </div>
+
+                <p>Hãy nghĩ về nó như đường băng cất cánh. Một chiếc máy bay (giá) cần đủ đường băng (khoảng trống) để cất cánh thành công. Nếu cuối đường băng là một bức tường bê tông (cản cứng), máy bay sẽ đâm sầm vào đó trước khi kịp bay lên.</p>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x400/112250/00F0FF?text=Look+Right+Rule+Visualization" alt="Look Right Rule">
+                    <p class="image-caption">Hình 8.9.1: Minh họa "Khoảng trống giá" và "Bức tường cản"</p>
+                </div>
+                
+                <p>Mục tiêu của quy tắc này là trả lời câu hỏi: <em>"Liệu phần thưởng (Reward) có xứng đáng với rủi ro (Risk) khi tính đến tất cả các chướng ngại vật trên đường đi không?"</em></p>
+            </div>
+        </article>
+
+        <!-- Section 3: Deep Dive - The 5 Obstacles -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon red">🚧</div>
+                <div class="card-meta">
+                    <h3>5 "Sát Thủ" Chặn Đường Giá</h3>
+                    <span>Những chướng ngại vật bạn bắt buộc phải thấy</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Khi nhìn sang phải, bạn đang tìm kiếm cái gì? Dưới đây là 5 loại chướng ngại vật phổ biến nhất sẽ chặn đứng đà di chuyển của giá:</p>
+
+                <div class="obstacle-grid">
+                    <div class="obstacle-card">
+                        <div class="obstacle-header">
+                            <span class="obstacle-icon">🔄</span>
+                            <span class="obstacle-name">1. Zone Đối Diện (Opposing Zone)</span>
+                        </div>
+                        <div class="obstacle-desc">Nếu bạn đang Buy tại LFZ, hãy nhìn lên trên xem có HFZ (Supply Zone) nào gần đó không. Đây là kẻ thù số 1.</div>
+                    </div>
+
+                    <div class="obstacle-card">
+                        <div class="obstacle-header">
+                            <span class="obstacle-icon">📈</span>
+                            <span class="obstacle-name">2. Major S/R Levels</span>
+                        </div>
+                        <div class="obstacle-desc">Các ngưỡng Hỗ trợ/Kháng cự trên khung Daily/Weekly. Chúng giống như những bức tường thép không dễ phá vỡ.</div>
+                    </div>
+
+                    <div class="obstacle-card">
+                        <div class="obstacle-header">
+                            <span class="obstacle-icon">0️⃣</span>
+                            <span class="obstacle-name">3. Round Numbers</span>
+                        </div>
+                        <div class="obstacle-desc">Các số tròn tâm lý (ví dụ: Bitcoin $50,000, $100,000). Đám đông thường đặt TP/SL tại đây.</div>
+                    </div>
+
+                    <div class="obstacle-card">
+                        <div class="obstacle-header">
+                            <span class="obstacle-icon">📉</span>
+                            <span class="obstacle-name">4. Dynamic Resistance (MA)</span>
+                        </div>
+                        <div class="obstacle-desc">Đường EMA 200 hoặc SMA 50 trên khung Daily. Giá thường bật lại khi chạm các đường này.</div>
+                    </div>
+
+                    <div class="obstacle-card">
+                        <div class="obstacle-header">
+                            <span class="obstacle-icon">⚠️</span>
+                            <span class="obstacle-name">5. Gaps & FVG</span>
+                        </div>
+                        <div class="obstacle-desc">Các khoảng trống giá (Gap) hoặc Fair Value Gap chưa được lấp đầy thường đóng vai trò như nam châm hoặc cản.</div>
+                    </div>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x400/112250/EF4444?text=6+Types+of+Obstacles" alt="Types of Obstacles">
+                    <p class="image-caption">Hình 8.9.2: 5 loại chướng ngại vật cần tránh trên biểu đồ</p>
+                </div>
+
+                <div class="tip-box warning">
+                    <div class="tip-header">⚠️ Sự Thật Mất Lòng</div>
+                    <p>Rất nhiều trader vẽ Zone rất đẹp, setup rất chuẩn, nhưng lệnh vẫn thua hoặc chỉ chạy được một chút rồi quay đầu cắn SL. Lý do: Họ Buy ngay bên dưới một bức tường kháng cự Daily mà họ không hề hay biết (vì lười zoom out để nhìn sang phải).</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Section 4: The Math of Survival (R:R) -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon gold">🧮</div>
+                <div class="card-meta">
+                    <h3>Toán Học Của Sự Sống Còn: Quy Tắc R:R 1:2</h3>
+                    <span>Tại sao 1:1 là con đường dẫn đến cháy tài khoản</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Tại sao chúng ta lại ám ảnh với việc "Nhìn Sang Phải"? Đơn giản là để tính toán <strong>Risk:Reward Ratio (Tỷ lệ Rủi ro/Lợi nhuận)</strong>.</p>
+                <p>Trong hệ thống GEM Frequency, với tỷ lệ thắng (Win Rate) trung bình khoảng 50-60%, bạn <strong>BẮT BUỘC</strong> phải duy trì R:R tối thiểu là 1:2. Nghĩa là nếu bạn chấp nhận mất $1, bạn phải có khả năng kiếm được ít nhất $2.</p>
+
+                <div class="concept-box red">
+                    <div class="concept-text">Luật Bất Di Bất Dịch: R:R < 1:2 = NO TRADE</div>
+                    <div class="concept-desc">Bất kể Zone đẹp cỡ nào, nếu chướng ngại vật chặn đường khiến R:R chỉ còn 1:1.5, hãy vứt trade đó vào sọt rác.</div>
+                </div>
+
+                <p><strong>Cách tính R:R thực tế (đã trừ hao):</strong></p>
+                <ul class="styled-list gold">
+                    <li><strong>Bước 1:</strong> Xác định Entry và Stop Loss → Tính được Risk (R). Ví dụ: SL 50 pips.</li>
+                    <li><strong>Bước 2:</strong> Nhìn sang phải, tìm chướng ngại vật đầu tiên. Đó là Target tối đa.</li>
+                    <li><strong>Bước 3:</strong> Trừ đi một chút "buffer" (khoảng đệm) trước chướng ngại vật (vì giá thường đảo chiều trước khi chạm cản cứng). Ví dụ: Cản cách 120 pips, trừ buffer 20 pips = Reward khả thi 100 pips.</li>
+                    <li><strong>Bước 4:</strong> So sánh. 100 pips Reward / 50 pips Risk = 2R. → <strong>ĐẠT CHUẨN.</strong></li>
+                </ul>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x350/112250/FFBD59?text=RR+Calculation+Example" alt="R:R Calculation">
+                    <p class="image-caption">Hình 8.9.3: Cách đo R:R chính xác khi có vật cản</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Section 5: Framework Decision -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon green">🚦</div>
+                <div class="card-meta">
+                    <h3>Khung Ra Quyết Định: GO hay NO-GO?</h3>
+                    <span>Biến phân tích thành hành động</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Bạn đã nhìn sang phải. Bạn đã thấy chướng ngại vật. Giờ thì sao? Hãy dùng khung quyết định này:</p>
+
+                <div class="decision-grid">
+                    <div class="decision-card go">
+                        <div class="decision-title">✅ GO (Vào Lệnh)</div>
+                        <div class="decision-desc">
+                            <ul>
+                                <li>Không có vật cản nào trước TP1 (mức R:R 1:2).</li>
+                                <li>Vật cản nằm tít ở xa (Blue Sky Potential).</li>
+                                <li>Con đường thoáng đãng.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="decision-card no-go">
+                        <div class="decision-title">❌ NO-GO (Bỏ Lệnh)</div>
+                        <div class="decision-desc">
+                            <ul>
+                                <li>Vật cản cứng nằm ngay trước mặt (R:R < 1:2).</li>
+                                <li>Vật cản là Daily HFZ (quá mạnh để phá).</li>
+                                <li>Giá đang bị kẹp giữa 2 zone (Ping-pong).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <p><strong>Trường hợp đặc biệt: Adjustment (Điều chỉnh)</strong></p>
+                <p>Nếu vật cản nằm ở mức R:R 1:2.5 (tức là khá tốt nhưng chưa đến mức tuyệt vời), bạn có thể:</p>
+                <ul class="styled-list">
+                    <li>Vẫn vào lệnh, nhưng dời TP sớm hơn (ngay trước vật cản).</li>
+                    <li>Giảm khối lượng (Volume) để giảm rủi ro.</li>
+                    <li>Quản lý lệnh chặt hơn (dời SL về hòa vốn sớm).</li>
+                </ul>
+                <div class="tip-box warning">
+                    <div class="tip-header">Lưu ý</div>
+                    <p>Chỉ áp dụng Adjustment cho các trader có kinh nghiệm. Người mới tốt nhất chỉ nên chọn các setup "Clear Path" (Đường quang ngõ tạnh).</p>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x400/112250/10B981?text=GO+vs+NO-GO+Examples" alt="GO vs NO-GO">
+                    <p class="image-caption">Hình 8.9.4: Ví dụ thực tế các trường hợp GO và NO-GO</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Section 6: Example Case Study -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon purple">📊</div>
+                <div class="card-meta">
+                    <h3>Ví Dụ Thực Chiến: Cái Bẫy Hoàn Hảo</h3>
+                    <span>Học từ sai lầm của người khác</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Hãy xem xét ví dụ này trên cặp BTC/USDT.</p>
+                <p><strong>Tình huống:</strong> Một mẫu hình DPU (LFZ - Vùng Mua) cực đẹp xuất hiện trên khung H4. Nến Departure mạnh, Zone Fresh, điểm số Zone là 9/10. Hàng nghìn trader nhảy vào Buy Limit tại $42,000.</p>
+                
+                <p><strong>Diễn biến:</strong> Giá khớp lệnh, bật lên một chút... rồi sập mạnh, cắn Stop Loss của tất cả phe Bò.</p>
+                
+                <p><strong>Tại sao? (Look Right Analysis):</strong></p>
+                <ul class="styled-list red">
+                    <li>Ngay phía trên, tại $42,500, có một đường EMA 200 Daily đang dốc xuống.</li>
+                    <li>Đồng thời, đó cũng là vùng đáy cũ vừa bị phá vỡ (Flip Zone).</li>
+                    <li>Khoảng cách từ Entry $42,000 đến Cản $42,500 chỉ có 500 giá.</li>
+                    <li>Stop Loss yêu cầu là 400 giá.</li>
+                    <li><strong>R:R thực tế = 500/400 = 1:1.25.</strong></li>
+                </ul>
+
+                <div class="concept-box red">
+                    <div class="concept-text">KẾT LUẬN: ĐÂY LÀ MỘT CÁI BẪY</div>
+                    <div class="concept-desc">Dù Zone Mua 9/10 điểm, nhưng Obstacle quá mạnh và quá gần. Lệnh này đáng lẽ phải bị lọc bỏ ngay từ đầu.</div>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x400/112250/8B5CF6?text=Look+Right+Case+Study" alt="Case Study">
+                    <p class="image-caption">Hình 8.9.5: Case Study - Setup đẹp chết yểu vì cản cứng</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Summary Box -->
+        <div class="summary-box">
+            <h3>📝 Tổng Kết Bài Học</h3>
+            <ul class="summary-list">
+                <li><strong>Look Right Rule:</strong> Luôn kiểm tra chướng ngại vật bên phải biểu đồ trước khi vào lệnh.</li>
+                <li><strong>Profit Margin:</strong> Là khoảng trống để giá chạy. Không có khoảng trống = Không có lợi nhuận.</li>
+                <li><strong>5 Obstacles:</strong> Zone đối diện, Major S/R, Số tròn, MA, Gap.</li>
+                <li><strong>Quy tắc vàng:</strong> R:R thực tế (sau khi trừ hao vật cản) phải ≥ 1:2.</li>
+                <li><strong>Kỷ luật:</strong> Thà bỏ lỡ một cơ hội còn hơn lao đầu vào tường đá.</li>
+            </ul>
+        </div>
+
+        <!-- Quiz Section -->
+        <section class="quiz-section">
+            <h3>🎯 Kiểm Tra Kiến Thức</h3>
+
+            <div class="quiz-question" data-correct="2">
+                <p><strong>Câu 1:</strong> Bạn phát hiện một Zone Mua (LFZ) rất đẹp, nhưng ngay phía trên nó là một Zone Bán (HFZ) khung Daily. Tỷ lệ R:R đo được là 1:1.5. Bạn nên làm gì?</p>
+                <button class="quiz-option" data-index="0">Vẫn vào lệnh vì Zone Mua rất đẹp.</button>
+                <button class="quiz-option" data-index="1">Dời Stop Loss ngắn lại để ép R:R lên 1:2.</button>
+                <button class="quiz-option" data-index="2">Bỏ qua lệnh này (NO-GO) vì R:R không đạt chuẩn và cản quá mạnh.</button>
+                <button class="quiz-option" data-index="3">Vào lệnh với khối lượng gấp đôi.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <p><strong>Câu 2:</strong> "Profit Margin" (Biên lợi nhuận) trong quy tắc Look Right được định nghĩa là gì?</p>
+                <button class="quiz-option" data-index="0">Khoảng cách từ Entry đến Stop Loss.</button>
+                <button class="quiz-option" data-index="1">Khoảng cách từ Entry đến chướng ngại vật (Obstacle) đầu tiên.</button>
+                <button class="quiz-option" data-index="2">Tổng số tiền bạn muốn kiếm được.</button>
+                <button class="quiz-option" data-index="3">Khoảng cách giữa hai đường MA.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <p><strong>Câu 3:</strong> Tại sao EMA 200 Daily lại được coi là một "Chướng ngại vật" nguy hiểm?</p>
+                <button class="quiz-option" data-index="0">Vì nó đóng vai trò là Hỗ trợ/Kháng cự động rất mạnh, nơi các quỹ lớn thường tham gia.</button>
+                <button class="quiz-option" data-index="1">Vì nó chỉ xuất hiện trên khung 5 phút.</button>
+                <button class="quiz-option" data-index="2">Nó không quan trọng, có thể bỏ qua.</button>
+                <button class="quiz-option" data-index="3">Vì nó luôn báo hiệu sai xu hướng.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-text"><span id="correct-count">0</span>/3</div>
+                <div class="score-label">Câu trả lời đúng</div>
+                <button class="retake-btn" onclick="location.reload()">Làm lại Quiz</button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="lesson-footer">
+            <div class="footer-logo">GEM Trading Academy</div>
+            <p class="footer-text">Tier 2 - Advanced Trading • Bài 8.9</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Sai rồi. Xem đáp án đúng nhé!';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

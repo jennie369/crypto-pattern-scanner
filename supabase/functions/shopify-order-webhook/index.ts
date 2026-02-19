@@ -66,26 +66,24 @@ serve(async (req) => {
     const order = JSON.parse(body);
     console.log('[Shopify Order Webhook] Order received:', order.order_number);
 
-    // Chỉ xử lý đơn hàng bank transfer
+    // Detect payment method (Rule 40: handle ALL payment types)
     const paymentGateway = order.payment_gateway_names?.[0] || '';
     const isBankTransfer =
       paymentGateway.toLowerCase().includes('bank') ||
       paymentGateway.toLowerCase().includes('manual') ||
       paymentGateway.toLowerCase().includes('chuyển khoản') ||
       paymentGateway.toLowerCase().includes('chuyen khoan') ||
-      paymentGateway === '' || // Pending payment
+      paymentGateway === '' ||
       order.financial_status === 'pending';
 
-    if (!isBankTransfer) {
-      console.log('[Shopify Order Webhook] Not bank transfer, skipping:', paymentGateway);
-      return new Response(JSON.stringify({
-        success: true,
-        message: 'Not bank transfer order',
-        payment_gateway: paymentGateway,
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    // Determine payment status based on financial_status from Shopify
+    // Credit card orders arrive with financial_status = 'paid'
+    // Bank transfer orders arrive with financial_status = 'pending'
+    const isPaidAlready = order.financial_status === 'paid' || order.financial_status === 'partially_paid';
+    const paymentMethod = isBankTransfer ? 'bank_transfer' : paymentGateway || 'unknown';
+    const initialPaymentStatus = isPaidAlready ? 'paid' : 'pending';
+
+    console.log('[Shopify Order Webhook] Payment method:', paymentMethod, '| Status:', initialPaymentStatus);
 
     // Check if already exists
     const { data: existing } = await supabase
@@ -108,15 +106,15 @@ serve(async (req) => {
     const phone = order.shipping_address?.phone?.replace(/\s/g, '').replace(/^\+84/, '0') || '';
     const transferContent = `DH${order.order_number}`;
 
-    // Calculate expires_at (24 hours from now)
+    // Calculate expires_at (24 hours from now for bank transfer, already paid for credit card)
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24);
 
-    // Generate QR code URL
+    // Generate QR code URL (only useful for bank transfer, but store for all)
     const totalAmount = parseFloat(order.total_price);
     const qrCodeUrl = generateVietQRUrl(totalAmount, transferContent);
 
-    // Create pending payment record
+    // Create payment record for ALL order types (Rule 20: single system of record)
     const { data: newPayment, error: insertError } = await supabase
       .from('pending_payments')
       .insert({
@@ -130,8 +128,15 @@ serve(async (req) => {
         currency: order.currency || 'VND',
         transfer_content: transferContent,
         qr_code_url: qrCodeUrl,
-        payment_status: 'pending',
+        payment_status: initialPaymentStatus,
+        payment_method: paymentMethod,
         expires_at: expiresAt.toISOString(),
+        // If already paid (credit card), mark verified immediately
+        ...(isPaidAlready ? {
+          verified_at: new Date().toISOString(),
+          verified_amount: totalAmount,
+          verification_method: 'shopify_verified',
+        } : {}),
       })
       .select()
       .single();
@@ -145,22 +150,26 @@ serve(async (req) => {
     await supabase.from('payment_logs').insert({
       pending_payment_id: newPayment.id,
       order_number: order.order_number.toString(),
-      event_type: 'order_created',
+      event_type: isPaidAlready ? 'payment_verified' : 'order_created',
       event_data: {
         shopify_order_id: order.id,
         total_amount: totalAmount,
         payment_gateway: paymentGateway,
+        payment_method: paymentMethod,
+        financial_status: order.financial_status,
         customer_email: order.email,
       },
       source: 'shopify_webhook',
     });
 
-    console.log('[Shopify Order Webhook] Pending payment created:', newPayment.id);
+    console.log('[Shopify Order Webhook] Payment record created:', newPayment.id, '| Status:', initialPaymentStatus);
 
     return new Response(JSON.stringify({
       success: true,
       payment_id: newPayment.id,
       order_number: order.order_number,
+      payment_status: initialPaymentStatus,
+      payment_method: paymentMethod,
       transfer_content: transferContent,
       qr_code_url: qrCodeUrl,
       expires_at: expiresAt.toISOString(),

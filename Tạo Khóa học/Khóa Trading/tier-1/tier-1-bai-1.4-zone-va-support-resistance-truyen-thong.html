@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 1.4: Zone và Support/Resistance Truyền Thống | GEM Trading Academy</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;family=Noto+Sans+Display:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       🎨 GEM DESIGN SYSTEM - V5.3 FACEBOOK-STYLE
+       Full-width cards, text-only padding
+       ========================================== */
+    :root {
+      /* Colors */
+      --color-navy: #112250;
+      --color-navy-dark: #0A0F1A;
+      --color-navy-light: #1a3a6e;
+      --color-gold: #FFBD59;
+      --color-gold-dark: #E5A84D;
+      --color-burgundy: #9C0612;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-warning: #F59E0B;
+      --color-white: #FFFFFF;
+      --color-text: #E8E8E8;
+      --color-text-secondary: rgba(255, 255, 255, 0.7);
+      --color-text-muted: rgba(255, 255, 255, 0.5);
+      
+      /* Backgrounds */
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.08);
+      
+      /* Borders */
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(255, 189, 89, 0.3);
+      
+      /* V5.3: Text padding only */
+      --text-padding: 16px;
+      
+      /* Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 20px;
+      
+      /* Shadows */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --shadow-glow-cyan: 0 0 15px rgba(0, 240, 255, 0.3);
+      
+      /* Glassmorphism */
+      --glass-blur: blur(40px);
+    }
+    
+    /* Desktop (600px+) */
+    @media (min-width: 600px) {
+      :root {
+        --text-padding: 24px;
+      }
+    }
+    
+    /* ==========================================
+       🔄 RESET & BASE
+       ========================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      font-size: 15px;
+      color: var(--color-text);
+      background: linear-gradient(180deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-dark) 100%);
+      min-height: 100vh;
+    }
+    
+    @media (min-width: 600px) {
+      body {
+        font-size: 16px;
+        line-height: 1.7;
+      }
+    }
+    
+    /* Background Bokeh */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(106, 91, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    /* ==========================================
+       📐 LAYOUT - V5.3 No container padding mobile
+       ========================================== */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .container {
+        padding: 16px;
+      }
+    }
+    
+    /* ==========================================
+       🏷️ HEADER - Full width on mobile
+       ========================================== */
+    .lesson-header {
+      text-align: center;
+      padding: var(--space-lg) var(--text-padding);
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: var(--space-md);
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-header {
+        border-radius: 16px;
+        border: 1px solid var(--border-subtle);
+        margin-bottom: var(--space-xl);
+      }
+    }
+    
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-gold), var(--color-cyan), var(--color-gold));
+    }
+    
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, var(--color-burgundy), #c41e2a);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-badge {
+        font-size: 13px;
+        padding: 6px 16px;
+      }
+    }
+    
+    .lesson-header h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.5rem, 6vw, 2.5rem);
+      font-weight: 800;
+      color: var(--color-gold);
+      margin-bottom: var(--space-sm);
+      line-height: 1.2;
+      text-shadow: 0 0 30px rgba(255, 189, 89, 0.3);
+    }
+    
+    .lesson-subtitle {
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      margin-top: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-subtitle {
+        font-size: 1.1rem;
+      }
+    }
+    
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+    
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--color-text-muted);
+      font-size: 12px;
+    }
+    
+    @media (min-width: 600px) {
+      .meta-item {
+        font-size: 14px;
+      }
+    }
+    
+    .meta-icon {
+      color: var(--color-cyan);
+    }
+    
+    /* ==========================================
+       📝 SECTION - Full width mobile
+       ========================================== */
+    .section {
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      padding: var(--space-lg) 0;
+      margin-bottom: 0;
+      backdrop-filter: var(--glass-blur);
+    }
+    
+    @media (min-width: 600px) {
+      .section {
+        border-radius: 16px;
+        border: 1px solid var(--border-subtle);
+        padding: var(--space-xl);
+        margin-bottom: var(--space-lg);
+      }
+    }
+    
+    /* ==========================================
+       📝 TYPOGRAPHY - Text padding only
+       ========================================== */
+    h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.2rem;
+      color: var(--color-cyan);
+      margin-bottom: var(--space-md);
+      padding: 0 var(--text-padding);
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid rgba(0, 240, 255, 0.3);
+    }
+    
+    @media (min-width: 600px) {
+      h2 {
+        font-size: 1.75rem;
+        padding: 0;
+        padding-bottom: var(--space-sm);
+      }
+    }
+    
+    h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      color: var(--color-gold);
+      margin-top: var(--space-lg);
+      margin-bottom: var(--space-sm);
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      h3 {
+        font-size: 1.25rem;
+        padding: 0;
+      }
+    }
+    
+    .section > p {
+      margin-bottom: var(--space-md);
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .section > p {
+        padding: 0;
+      }
+    }
+    
+    strong {
+      color: var(--color-gold);
+      font-weight: 600;
+    }
+    
+    .section > ul,
+    .section > ol {
+      padding-left: calc(var(--text-padding) + 20px);
+      padding-right: var(--text-padding);
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-md);
+    }
+    
+    @media (min-width: 600px) {
+      .section > ul,
+      .section > ol {
+        padding-left: 20px;
+        padding-right: 0;
+      }
+    }
+    
+    .section > ul li,
+    .section > ol li {
+      margin-bottom: var(--space-sm);
+    }
+    
+    /* ==========================================
+       💡 HIGHLIGHT BOXES - Full width mobile
+       ========================================== */
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.05));
+      border: none;
+      border-left: 4px solid var(--color-gold);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-md) 0;
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box {
+        border: 1px solid rgba(255, 189, 89, 0.3);
+        border-left: 4px solid var(--color-gold);
+        border-radius: 12px;
+        padding: var(--space-xl);
+      }
+    }
+    
+    .highlight-box.important {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.15), rgba(156, 6, 18, 0.05));
+      border-left-color: var(--color-burgundy);
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box.important {
+        border-color: var(--color-burgundy);
+        border-left-color: var(--color-burgundy);
+      }
+    }
+    
+    .highlight-box.success {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+      border-left-color: var(--color-green);
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box.success {
+        border-color: var(--color-green);
+        border-left-color: var(--color-green);
+      }
+    }
+    
+    .highlight-box h4 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--color-gold);
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box h4 {
+        font-size: 1.1rem;
+      }
+    }
+    
+    .highlight-box.important h4 { color: var(--color-burgundy); }
+    .highlight-box.success h4 { color: var(--color-green); }
+    
+    .highlight-box p {
+      padding: 0;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .highlight-box p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .highlight-box ul,
+    .highlight-box ol {
+      padding-left: 20px;
+      margin-bottom: var(--space-md);
+      color: var(--color-text-muted);
+    }
+    
+    .highlight-box li {
+      margin-bottom: var(--space-xs);
+    }
+    
+    /* ==========================================
+       🖼️ IMAGES - Full width (Facebook style)
+       ========================================== */
+    .lesson-image {
+      margin: var(--space-md) 0;
+      text-align: center;
+      overflow: hidden;
+      border-radius: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-image {
+        border-radius: 12px;
+        margin: var(--space-lg) 0;
+      }
+    }
+    
+    .lesson-image img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-image img {
+        border-radius: 12px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-subtle);
+      }
+    }
+    
+    .image-caption {
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 12px;
+      margin-top: var(--space-sm);
+      font-style: italic;
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .image-caption {
+        font-size: 14px;
+        padding: 0;
+      }
+    }
+    
+    /* ==========================================
+       🃏 CONCEPT CARDS - Full width mobile
+       ========================================== */
+    .concept-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1px;
+      margin: var(--space-md) 0;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    @media (min-width: 500px) {
+      .concept-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (min-width: 600px) {
+      .concept-grid {
+        gap: var(--space-md);
+        background: transparent;
+      }
+    }
+    
+    .concept-card {
+      background: linear-gradient(135deg, rgba(17, 34, 80, 0.8), rgba(10, 15, 26, 0.9));
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      transition: all 0.3s ease;
+      border: none;
+      border-left: 4px solid var(--color-gold);
+    }
+    
+    @media (min-width: 600px) {
+      .concept-card {
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+        border-left: 4px solid var(--color-gold);
+        padding: var(--space-xl);
+      }
+      
+      .concept-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-glow-gold);
+        border-color: var(--color-gold);
+      }
+    }
+    
+    .concept-card.sr-card {
+      border-left-color: var(--color-red);
+    }
+    
+    .concept-card.zone-card {
+      border-left-color: var(--color-green);
+    }
+    
+    .concept-card h4 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.95rem;
+      margin-bottom: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .concept-card h4 {
+        font-size: 1.1rem;
+      }
+    }
+    
+    .concept-card.sr-card h4 { color: var(--color-red); }
+    .concept-card.zone-card h4 { color: var(--color-green); }
+    
+    .concept-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .concept-card li {
+      padding: var(--space-xs) 0;
+      padding-left: var(--space-md);
+      position: relative;
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+    }
+    
+    @media (min-width: 600px) {
+      .concept-card li {
+        font-size: 0.9rem;
+      }
+    }
+    
+    .concept-card li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--color-gold);
+    }
+    
+    /* ==========================================
+       📊 COMPARISON TABLE - Full width mobile
+       ========================================== */
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: var(--space-md) 0;
+    }
+    
+    .comparison-table {
+      width: 100%;
+      min-width: 450px;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      background: var(--bg-card);
+      border-radius: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-table {
+        font-size: 0.95rem;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+    }
+    
+    .comparison-table th {
+      background: linear-gradient(135deg, var(--color-navy-light), var(--color-navy));
+      color: var(--color-gold);
+      padding: var(--space-sm);
+      text-align: left;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      border-bottom: 2px solid var(--color-gold);
+      font-size: 0.75rem;
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-table th {
+        font-size: 0.9rem;
+        padding: var(--space-md);
+      }
+    }
+    
+    .comparison-table td {
+      padding: var(--space-sm);
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: top;
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-table td {
+        padding: var(--space-md);
+      }
+    }
+    
+    .comparison-table tr:hover {
+      background: rgba(255, 189, 89, 0.05);
+      transition: background 0.3s ease;
+    }
+    
+    .comparison-table .col-sr {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 2px solid var(--color-red);
+    }
+    
+    .comparison-table .col-zone {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 2px solid var(--color-green);
+    }
+    
+    /* ==========================================
+       📈 ZONE LIFECYCLE - Full width mobile
+       ========================================== */
+    .zone-lifecycle {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      margin: var(--space-md) 0;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    @media (min-width: 600px) {
+      .zone-lifecycle {
+        gap: var(--space-sm);
+        background: transparent;
+      }
+    }
+    
+    .lifecycle-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-md) var(--text-padding);
+      background: linear-gradient(135deg, rgba(17, 34, 80, 0.8), rgba(10, 15, 26, 0.9));
+      border-radius: 0;
+      border: none;
+      font-size: 0.85rem;
+    }
+    
+    @media (min-width: 600px) {
+      .lifecycle-item {
+        font-size: 0.95rem;
+        padding: var(--space-md) var(--space-lg);
+        gap: var(--space-md);
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+      }
+    }
+    
+    .lifecycle-stars {
+      font-size: 0.9rem;
+      min-width: 80px;
+    }
+    
+    @media (min-width: 600px) {
+      .lifecycle-stars {
+        font-size: 1.2rem;
+        min-width: 100px;
+      }
+    }
+    
+    .lifecycle-name {
+      font-weight: 600;
+      min-width: 80px;
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 600px) {
+      .lifecycle-name {
+        min-width: 100px;
+        font-size: 0.95rem;
+      }
+    }
+    
+    .lifecycle-item.fresh { border-left: 4px solid var(--color-green); }
+    .lifecycle-item.fresh .lifecycle-name { color: var(--color-green); }
+    
+    .lifecycle-item.tested-1x { border-left: 4px solid var(--color-cyan); }
+    .lifecycle-item.tested-1x .lifecycle-name { color: var(--color-cyan); }
+    
+    .lifecycle-item.tested-2x { border-left: 4px solid var(--color-gold); }
+    .lifecycle-item.tested-2x .lifecycle-name { color: var(--color-gold); }
+    
+    .lifecycle-item.weak { border-left: 4px solid var(--color-red); }
+    .lifecycle-item.weak .lifecycle-name { color: var(--color-red); }
+    
+    @media (min-width: 600px) {
+      .lifecycle-item.fresh {
+        border-color: var(--color-green);
+        background: rgba(16, 185, 129, 0.1);
+      }
+      .lifecycle-item.tested-1x {
+        border-color: var(--color-cyan);
+        background: rgba(0, 240, 255, 0.05);
+      }
+      .lifecycle-item.tested-2x {
+        border-color: var(--color-gold);
+        background: rgba(255, 189, 89, 0.05);
+      }
+      .lifecycle-item.weak {
+        border-color: var(--color-red);
+        background: rgba(239, 68, 68, 0.05);
+      }
+    }
+    
+    /* ==========================================
+       📊 SCENARIO CARDS - Full width mobile
+       ========================================== */
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1px;
+      margin: var(--space-md) 0;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    @media (min-width: 500px) {
+      .scenario-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (min-width: 600px) {
+      .scenario-grid {
+        gap: var(--space-md);
+        background: transparent;
+      }
+    }
+    
+    .scenario-card {
+      background: linear-gradient(135deg, rgba(17, 34, 80, 0.8), rgba(10, 15, 26, 0.9));
+      border: none;
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      transition: all 0.3s ease;
+    }
+    
+    @media (min-width: 600px) {
+      .scenario-card {
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: var(--space-xl);
+      }
+      
+      .scenario-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-glow-cyan);
+      }
+    }
+    
+    .scenario-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .scenario-icon {
+      font-size: 1.2rem;
+    }
+    
+    .scenario-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      color: var(--color-cyan);
+      font-size: 0.9rem;
+    }
+    
+    @media (min-width: 600px) {
+      .scenario-title {
+        font-size: 1rem;
+      }
+    }
+    
+    .scenario-content {
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+    }
+    
+    @media (min-width: 600px) {
+      .scenario-content {
+        font-size: 0.95rem;
+      }
+    }
+    
+    .scenario-content p {
+      padding: 0;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .scenario-result {
+      margin-top: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      border-radius: 8px;
+      font-weight: 600;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 600px) {
+      .scenario-result {
+        font-size: 0.9rem;
+      }
+    }
+    
+    .scenario-result.good {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--color-green);
+    }
+    
+    .scenario-result.bad {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--color-red);
+    }
+    
+    /* ==========================================
+       ❓ QUIZ SECTION - Full width mobile
+       ========================================== */
+    .quiz-section {
+      background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05));
+      border: none;
+      border-left: 4px solid var(--color-purple);
+      border-radius: 0;
+      padding: var(--space-lg) 0;
+      margin: var(--space-lg) 0;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-section {
+        border: 2px solid var(--color-purple);
+        border-radius: 16px;
+        padding: var(--space-xl);
+      }
+    }
+    
+    .quiz-section h2 {
+      color: var(--color-purple);
+      border-bottom-color: var(--color-purple);
+      margin-top: 0;
+    }
+    
+    .quiz-section > p {
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-section > p {
+        padding: 0;
+      }
+    }
+    
+    .quiz-question {
+      background: rgba(17, 34, 80, 0.4);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin-bottom: 1px;
+      border: none;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-question {
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+        margin-bottom: var(--space-md);
+        padding: var(--space-xl);
+      }
+    }
+    
+    .quiz-question h4 {
+      color: var(--color-gold);
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      font-size: 0.9rem;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-question h4 {
+        font-size: 1rem;
+      }
+    }
+    
+    .question-number {
+      background: var(--color-purple);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .question-number {
+        width: 28px;
+        height: 28px;
+        font-size: 0.85rem;
+      }
+    }
+    
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-options {
+        gap: var(--space-xs);
+        background: transparent;
+      }
+    }
+    
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-md);
+      background: rgba(17, 34, 80, 0.6);
+      border: none;
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.85rem;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-option {
+        font-size: 0.9rem;
+        padding: var(--space-md) var(--space-lg);
+        gap: var(--space-md);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px;
+      }
+    }
+    
+    .quiz-option:hover {
+      background: rgba(106, 91, 255, 0.2);
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-option:hover {
+        border-color: var(--color-purple);
+      }
+    }
+    
+    .quiz-option input[type="radio"] {
+      accent-color: var(--color-purple);
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+    
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: var(--color-green);
+    }
+    
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--color-red);
+    }
+    
+    .quiz-feedback {
+      margin-top: var(--space-sm);
+      padding: var(--space-md);
+      border-radius: 8px;
+      display: none;
+      font-size: 0.85rem;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-feedback {
+        font-size: 0.9rem;
+      }
+    }
+    
+    .quiz-feedback.show {
+      display: block;
+    }
+    
+    .quiz-feedback.correct {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--color-green);
+      color: var(--color-green);
+    }
+    
+    .quiz-feedback.incorrect {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--color-red);
+      color: var(--color-red);
+    }
+    
+    .btn-check-answer {
+      background: linear-gradient(135deg, var(--color-purple), #5346d9);
+      color: white;
+      border: none;
+      padding: var(--space-sm) var(--space-lg);
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: var(--space-md);
+      transition: all 0.3s ease;
+      font-size: 0.85rem;
+      width: 100%;
+    }
+    
+    @media (min-width: 600px) {
+      .btn-check-answer {
+        font-size: 0.9rem;
+        width: auto;
+      }
+      
+      .btn-check-answer:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(106, 91, 255, 0.4);
+      }
+    }
+    
+    /* ==========================================
+       📱 FOOTER - Full width
+       ========================================== */
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-xl) var(--text-padding);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: var(--space-lg);
+      background: var(--bg-card);
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-footer {
+        background: transparent;
+        padding: var(--space-xl) 0;
+      }
+    }
+    
+    .footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--color-gold);
+      margin-bottom: 4px;
+    }
+    
+    .footer-link {
+      color: var(--color-text-muted);
+      font-size: 13px;
+    }
+    
+    .footer-link a {
+      color: var(--color-cyan);
+      text-decoration: none;
+    }
+    
+    .footer-link a:hover {
+      text-decoration: underline;
+    }
+    
+    /* ==========================================
+       📱 MOBILE RESPONSIVE FIXES
+       ========================================== */
+    @media (max-width: 599px) {
+      .lifecycle-item {
+        flex-wrap: wrap;
+      }
+      
+      .lifecycle-stars,
+      .lifecycle-name {
+        min-width: auto;
+      }
+    }
+  </style>
+
+
+
+  <div class="container">
+    
+    <!-- HEADER -->
+    <header class="lesson-header">
+      <span class="lesson-badge">📚 TIER 1 • Chapter 1 • Bài 1.4</span>
+      <h1>Zone và Support/Resistance Truyền Thống</h1>
+      <p class="lesson-subtitle">Tại sao 90% trader thua lỗ vì vẽ sai cản và cách GEM Zones thay đổi cuộc chơi</p>
+      
+      <div class="lesson-meta">
+        <div class="meta-item">
+          <span class="meta-icon">⏱️</span>
+          <span>15 phút đọc</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">📝</span>
+          <span>3 câu quiz</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">🖼️</span>
+          <span>5 hình minh họa</span>
+        </div>
+      </div>
+    </header>
+    
+    <!-- SECTION 1: GIỚI THIỆU -->
+    <section class="section">
+      <h2>1. Mở Đầu: Bạn Có Đang Vẽ "Tranh Trừu Tượng" Trên Chart?</h2>
+      
+      <p>Hãy thành thật với nhau nhé: Khi mới bắt đầu trading, có phải biểu đồ của bạn trông giống như một mạng nhện chằng chịt các đường ngang dọc không? Bạn vẽ Support (Hỗ trợ) ở mọi đáy, Resistance (Kháng cự) ở mọi đỉnh. Kết quả là giá chạy đến đâu cũng thấy cản, và bạn không biết nên tin vào đường nào.</p>
+      
+      <p>Đó là sai lầm kinh điển mà tôi và hầu hết mọi người đều từng mắc phải. Chúng ta được dạy rằng: "Cứ nối các đỉnh đáy lại là ra cản". Nhưng thị trường không vận hành đơn giản như sách giáo khoa lớp 1. Thị trường là nơi diễn ra cuộc chiến khốc liệt giữa Cung và Cầu, giữa Phe Mua và Phe Bán.</p>
+
+      <div class="highlight-box">
+        <h4>💡 Sự Thật Về "Cản"</h4>
+        <p>Support và Resistance không phải là những đường kẻ vô tri vô giác để giá bật nảy như quả bóng bàn. Chúng là những <strong>vùng chiến sự</strong> nơi Smart Money (Dòng tiền thông minh) đã để lại dấu vết. Nếu bạn chỉ vẽ đường, bạn đang nhìn thấy vỏ bọc. Nếu bạn vẽ Zone, bạn đang nhìn thấy bản chất.</p>
+      </div>
+
+      <p>Trong bài học này, chúng ta sẽ đập đi xây lại tư duy về cản. Tôi sẽ chỉ cho bạn thấy tại sao Support/Resistance truyền thống thường xuyên thất bại (và giết chết tài khoản của bạn), và tại sao <strong>GEM Zones</strong> lại là vũ khí tối thượng giúp bạn đọc vị được ý đồ của Cá Mập.</p>
+    </section>
+    
+    <!-- SECTION 2: S/R TRUYỀN THỐNG -->
+    <section class="section">
+      <h2>2. Support/Resistance Truyền Thống: Cái Bẫy Của Sự Đơn Giản</h2>
+      
+      <h3>Định Nghĩa Phổ Thông</h3>
+      <p>Nếu bạn Google "Support and Resistance", bạn sẽ nhận được hàng triệu kết quả giống nhau:</p>
+      
+      <div class="concept-grid">
+        <div class="concept-card sr-card">
+          <h4>📉 Support (Hỗ Trợ)</h4>
+          <ul>
+            <li>Là một mức giá (hoặc vùng nhỏ) nằm dưới giá hiện tại.</li>
+            <li>Được cho là "sàn nhà" đỡ giá không rơi thêm.</li>
+            <li>Tâm lý: Tại đây phe Mua được cho là mạnh hơn phe Bán.</li>
+          </ul>
+        </div>
+        
+        <div class="concept-card sr-card">
+          <h4>📈 Resistance (Kháng Cự)</h4>
+          <ul>
+            <li>Là một mức giá (hoặc vùng nhỏ) nằm trên giá hiện tại.</li>
+            <li>Được cho là "trần nhà" cản giá không tăng thêm.</li>
+            <li>Tâm lý: Tại đây phe Bán được cho là mạnh hơn phe Mua.</li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- HÌNH 1: S/R truyền thống với nhiều đường chằng chịt -->
+      <div class="lesson-image">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlc6o9k-jkmdh4-img1.webp" alt="Minh họa Support Resistance truyền thống với nhiều đường kẻ gây rối mắt">
+        <div class="image-caption">Hình 1.4.1: Biểu đồ rối rắm khi áp dụng S/R truyền thống một cách máy móc.</div>
+      </div>
+      
+      <h3>Tại Sao S/R Truyền Thống Thường "Phản Bội" Bạn?</h3>
+      <p>Vấn đề không nằm ở khái niệm, mà nằm ở <strong>cách áp dụng</strong> và <strong>logic đằng sau nó</strong>. Hãy xem xét 3 tử huyệt của phương pháp cũ:</p>
+
+      <div class="highlight-box important">
+        <h4>🚫 Tử Huyệt 1: Tư Duy "Đường Kẻ Mỏng Manh"</h4>
+        <p>Giá là một dòng chảy liên tục, không phải là tia laser. Việc kỳ vọng giá dừng lại chính xác tại mức 1.23456 là điều không tưởng. Khi bạn vẽ một đường kẻ mỏng, bạn thường bị "quét Stop Loss" oan uổng chỉ vì giá nhúng qua đường đó vài pip rồi mới đảo chiều.</p>
+      </div>
+
+      <div class="highlight-box important">
+        <h4>🚫 Tử Huyệt 2: Ảo Tưởng "Càng Chạm Nhiều Càng Mạnh"</h4>
+        <p>Đây là lời nói dối lớn nhất trong sách giáo khoa trading cũ. Họ dạy bạn rằng: "Một mức cản càng được test (chạm) nhiều lần thì càng mạnh". <strong>SAI LẦM!</strong></p>
+        <p>Hãy tưởng tượng mức cản như một bức tường gỗ, và giá là một chiếc búa tạ. Mỗi lần búa đập vào tường, bức tường có chắc lên không? Không, nó nứt vỡ dần. Đến lần đập thứ 4, thứ 5, bức tường sẽ sụp đổ. Trong trading cũng vậy, mỗi lần giá chạm cản là một lần orders (lệnh chờ) được hấp thụ bớt. Càng chạm nhiều, cản càng yếu (Rỗng ruột).</p>
+      </div>
+
+      <div class="highlight-box important">
+        <h4>🚫 Tử Huyệt 3: Vẽ Theo Cảm Tính</h4>
+        <p>Đưa biểu đồ cho 10 trader vẽ S/R, bạn sẽ nhận lại 10 bức tranh khác nhau. Người thì nối râu nến, người nối thân nến, người vẽ ở đỉnh cũ, người vẽ ở đáy cũ. Không có quy tắc chuẩn hóa đồng nghĩa với việc không thể backtest và tối ưu hóa.</p>
+      </div>
+    </section>
+    
+    <!-- SECTION 3: GEM ZONES -->
+    <section class="section">
+      <h2>3. GEM Zones: Cách Tiếp Cận Của Smart Money</h2>
+      
+      <h3>Định Nghĩa Lại Cuộc Chơi</h3>
+      <p>Để khắc phục hoàn toàn nhược điểm của S/R truyền thống, GEM Frequency Method sử dụng khái niệm <strong>Zone (Vùng)</strong>. Chúng ta không tìm một mức giá, chúng ta tìm một <strong>khu vực giá trị</strong>.</p>
+      
+      <div class="concept-grid">
+        <div class="concept-card zone-card">
+          <h4>🔴 HFZ - High Frequency Zone (Vùng Bán)</h4>
+          <ul>
+            <li><strong>Bản chất:</strong> Vùng Cung (Supply) nơi Smart Money để lại dấu chân BÁN.</li>
+            <li><strong>Vị trí:</strong> Nằm TRÊN giá hiện tại.</li>
+            <li><strong>Hành động:</strong> Chỉ canh SELL khi giá quay lại đây.</li>
+            <li><strong>Đặc điểm:</strong> Giá thường giảm mạnh sau khi rời khỏi vùng này.</li>
+          </ul>
+        </div>
+        
+        <div class="concept-card zone-card">
+          <h4>🟢 LFZ - Low Frequency Zone (Vùng Mua)</h4>
+          <ul>
+            <li><strong>Bản chất:</strong> Vùng Cầu (Demand) nơi Smart Money để lại dấu chân MUA.</li>
+            <li><strong>Vị trí:</strong> Nằm DƯỚI giá hiện tại.</li>
+            <li><strong>Hành động:</strong> Chỉ canh BUY khi giá quay lại đây.</li>
+            <li><strong>Đặc điểm:</strong> Giá thường tăng mạnh sau khi rời khỏi vùng này.</li>
+          </ul>
+        </div>
+      </div>
+      
+      <h3>Giải Phẫu Một GEM Zone</h3>
+      <p>Khác với một đường kẻ đơn độc, một Zone trong hệ thống GEM là một cấu trúc hoàn chỉnh với 2 giới hạn rõ ràng, giúp bạn quản lý rủi ro chính xác đến từng pip:</p>
+      
+      <div class="highlight-box success">
+        <h4>📐 Cấu Trúc Zone Chuẩn</h4>
+        <ul>
+          <li><strong>Proximal Line (Giá Entry):</strong> Đường biên GẦN giá hiện tại nhất. Đây là nơi bạn đặt lệnh Limit hoặc chờ tín hiệu đảo chiều để vào lệnh.</li>
+          <li><strong>Distal Line (Giá Stop):</strong> Đường biên XA giá hiện tại nhất. Đây là giới hạn cuối cùng của Zone. Nếu giá phá qua đường này, Zone coi như vỡ (Broken) -> Bạn phải cắt lỗ ngay lập tức.</li>
+          <li><strong>Độ Dày (Zone Width):</strong> Khoảng cách giữa Proximal và Distal. Zone càng mỏng (Tight) thì rủi ro càng thấp và R:R (Lợi nhuận/Rủi ro) càng cao.</li>
+        </ul>
+      </div>
+    </section>
+    
+    <!-- SECTION 4: SO SÁNH CHI TIẾT -->
+    <section class="section">
+      <h2>4. So Sánh: Tại Sao Zone "Ăn Đứt" Đường Kẻ?</h2>
+      <p>Hãy đặt hai phương pháp lên bàn cân để thấy rõ sự vượt trội của tư duy Zone:</p>
+      
+      <div class="table-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Tiêu Chí</th>
+              <th class="col-sr">S/R Truyền Thống</th>
+              <th class="col-zone">GEM Zones (HFZ/LFZ)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Hình dạng</strong></td>
+              <td class="col-sr">Đường ngang mỏng manh (Line)</td>
+              <td class="col-zone">Vùng giá có độ dày cụ thể (Area)</td>
+            </tr>
+            <tr>
+              <td><strong>Cơ sở xác định</strong></td>
+              <td class="col-sr">Nối các đỉnh/đáy lịch sử (Quá khứ)</td>
+              <td class="col-zone">Dựa trên mất cân bằng Cung/Cầu (Hiện tại)</td>
+            </tr>
+            <tr>
+              <td><strong>Độ chính xác</strong></td>
+              <td class="col-sr">Thấp, dễ bị quét Stop Loss</td>
+              <td class="col-zone">Cao, bao trọn biến động giá</td>
+            </tr>
+            <tr>
+              <td><strong>Tư duy về sức mạnh</strong></td>
+              <td class="col-sr">"Càng test nhiều càng mạnh" (Sai lầm)</td>
+              <td class="col-zone">"Càng mới (Fresh) càng mạnh" (Chuẩn xác)</td>
+            </tr>
+            <tr>
+              <td><strong>Điểm Stop Loss</strong></td>
+              <td class="col-sr">Mơ hồ, thường đặt sau râu nến cũ</td>
+              <td class="col-zone">Rõ ràng, đặt sau Distal Line</td>
+            </tr>
+            <tr>
+              <td><strong>Tính khách quan</strong></td>
+              <td class="col-sr">Phụ thuộc mắt người vẽ (Chủ quan)</td>
+              <td class="col-zone">Có quy tắc vẽ cứng (Khách quan)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- SECTION 5: DEEP DIVE - LOGIC UNFILLED ORDERS -->
+    <section class="section">
+      <h2>5. Deep Dive: Bí Mật Của Những Lệnh Chưa Khớp (Unfilled Orders)</h2>
+      
+      <p>Đây là phần quan trọng nhất của bài học này. Hãy đọc kỹ. Tại sao giá lại đảo chiều tại Zone mà không phải chỗ khác?</p>
+      
+      <h3>Cơ Chế Của Cá Mập</h3>
+      <p>Hãy tưởng tượng một ngân hàng lớn (Big Bank) muốn mua 1 tỷ USD cặp EUR/USD. Họ không thể bấm nút "BUY" một phát là xong. Tại sao? Vì thị trường không có đủ người bán 1 tỷ USD ngay lập tức tại mức giá đó. Nếu họ cố mua hết, giá sẽ bắn thẳng lên trời (Slippage), và họ phải mua với giá rất đắt.</p>
+      
+      <p>Họ buộc phải chia nhỏ lệnh ra. Ví dụ:</p>
+      <ol>
+        <li>Họ đặt mua 200 triệu USD tại giá 1.1000. Giá khớp và bay lên 1.1050.</li>
+        <li>Họ ngừng mua. Giá rơi từ từ về lại 1.1000.</li>
+        <li>Tại 1.1000, họ VẪN CÒN 800 triệu USD lệnh chờ mua chưa khớp (Pending Orders).</li>
+        <li>Ngay khi giá chạm 1.1000 lần 2, khối lượng 800 triệu USD này kích hoạt -> BÙM! Giá đảo chiều mạnh mẽ.</li>
+      </ol>
+      
+      <div class="highlight-box success">
+        <h4>💡 Kết Luận Logic</h4>
+        <p>GEM Zones hoạt động không phải vì đó là "cản tâm lý", mà vì đó là nơi <strong>tồn đọng thanh khoản (Liquidity)</strong> của Cá Mập. Chúng ta trade dựa trên sự mất cân bằng Cung Cầu thực tế, không phải dựa trên hình vẽ.</p>
+      </div>
+      
+      <!-- HÌNH 2: Minh họa cơ chế Unfilled Orders -->
+      <div class="lesson-image">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlc6o9k-jkmdh4-img2.webp" alt="Minh họa cơ chế lệnh chưa khớp của Smart Money tạo ra Zone">
+        <div class="image-caption">Hình 1.4.2: Cơ chế tích lũy lệnh của Smart Money tạo nên sức mạnh cho Zone.</div>
+      </div>
+      
+    </section>
+    
+    <!-- SECTION 6: ZONE LIFECYCLE -->
+    <section class="section">
+      <h2>6. Vòng Đời Của Zone: Khi Nào Nên "Buông Tay"?</h2>
+      
+      <p>Hiểu được logic về Unfilled Orders ở trên, bạn sẽ tự suy luận ra được khái niệm <strong>Zone Lifecycle (Vòng Đời Zone)</strong>. Đây là kim chỉ nam để bạn biết Zone nào nên trade, Zone nào nên né.</p>
+      
+      <div class="zone-lifecycle">
+        <div class="lifecycle-item fresh">
+          <span class="lifecycle-stars">⭐⭐⭐⭐⭐</span>
+          <span class="lifecycle-name">FRESH (Mới Tinh)</span>
+          <span>Zone chưa từng bị giá quay lại test lần nào. Lệnh chờ còn nguyên 100%. Đây là Zone <strong>mạnh nhất</strong> và an toàn nhất để trade.</span>
+        </div>
+        
+        <div class="lifecycle-item tested-1x">
+          <span class="lifecycle-stars">⭐⭐⭐⭐</span>
+          <span class="lifecycle-name">TESTED 1X</span>
+          <span>Đã bị test 1 lần. Một phần lệnh chờ đã khớp. Zone vẫn còn hiệu lực nhưng rủi ro cao hơn Fresh một chút.</span>
+        </div>
+        
+        <div class="lifecycle-item tested-2x">
+          <span class="lifecycle-stars">⭐⭐⭐</span>
+          <span class="lifecycle-name">TESTED 2X</span>
+          <span>Đã bị test 2 lần. Kho lệnh chờ đã vơi đi nhiều. Chỉ nên trade nếu có thêm các yếu tố xác nhận (Confirmation) mạnh mẽ khác.</span>
+        </div>
+        
+        <div class="lifecycle-item weak">
+          <span class="lifecycle-stars">❌</span>
+          <span class="lifecycle-name">WEAK (Yếu)</span>
+          <span>Đã test từ 3 lần trở lên. Bức tường đã nứt toác. Khả năng cao giá sẽ phá qua (Breakout) trong lần chạm tới. <strong>TUYỆT ĐỐI KHÔNG ĐẶT LIMIT Ở ĐÂY.</strong></span>
+        </div>
+      </div>
+      
+      <div class="highlight-box warning">
+        <h4>⚠️ Cảnh Báo</h4>
+        <p>Đừng bao giờ cố gắng bắt dao rơi tại một Zone đã bị test quá nhiều lần (Old Zone). Đám đông ngoài kia thích trade ở đó vì họ thấy "lịch sử lặp lại", nhưng Smart Money sẽ dùng chỗ đó để thanh lý (Liquidate) đám đông.</p>
+      </div>
+    </section>
+    
+    <!-- SECTION 7: VÍ DỤ THỰC TẾ -->
+    <section class="section">
+      <h2>7. Ví Dụ Thực Tế: Sự Khác Biệt Giữa Sống Và Chết</h2>
+      
+      <div class="scenario-grid">
+        <div class="scenario-card">
+          <div class="scenario-header">
+            <span class="scenario-icon">📉</span>
+            <span class="scenario-title">Trader Truyền Thống (Ông A)</span>
+          </div>
+          <div class="scenario-content">
+            <p><strong>Tư duy:</strong> "Vàng đã chạm mốc 1900 ba lần và đều bật lên. 1900 là hỗ trợ cứng. Lần thứ 4 chạm, tôi sẽ All-in Buy!"</p>
+            <p><strong>Hành động:</strong> Đặt lệnh Buy Limit lớn tại 1900.</p>
+            <p><strong>Kết quả:</strong> Giá chạm 1900, nhưng không bật lên mà xuyên thủng như tờ giấy. Ông A cháy tài khoản vì bắt dao rơi.</p>
+          </div>
+          <div class="scenario-result bad">❌ THUA LỖ NẶNG</div>
+        </div>
+        
+        <div class="scenario-card">
+          <div class="scenario-header">
+            <span class="scenario-icon">📈</span>
+            <span class="scenario-title">GEM Trader (Bạn)</span>
+          </div>
+          <div class="scenario-content">
+            <p><strong>Tư duy:</strong> "Vùng Demand 1900 đã bị test 3 lần rồi (Weak Zone). Lệnh mua của Cá Mập đã khớp hết. Lần này về khả năng cao là để phá vỡ."</p>
+            <p><strong>Hành động:</strong> Ngồi im quan sát hoặc chờ giá phá qua 1900 để tìm setup Sell (Breakout).</p>
+            <p><strong>Kết quả:</strong> Bảo toàn vốn và bắt được con sóng giảm mạnh sau đó.</p>
+          </div>
+          <div class="scenario-result good">✅ BẢO TOÀN VỐN</div>
+        </div>
+      </div>
+      
+      <!-- HÌNH 3: Ví dụ chart Fresh vs Used Zone -->
+      <div class="lesson-image">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlc6o9k-jkmdh4-img3.webp" alt="Chart ví dụ so sánh Fresh Zone và Zone đã bị test nhiều lần">
+        <div class="image-caption">Hình 1.4.3: Fresh Zone (bên trái) phản ứng mạnh, trong khi Used Zone (bên phải) bị xuyên thủng.</div>
+      </div>
+    </section>
+    
+    <!-- SECTION 8: ỨNG DỤNG -->
+    <section class="section">
+      <h2>8. Ứng Dụng: Thay Đổi Cách Bạn Nhìn Biểu Đồ Ngay Hôm Nay</h2>
+      
+      <p>Kiến thức chỉ là sức mạnh tiềm năng. Hành động mới tạo ra kết quả. Hãy bắt đầu thay đổi thói quen trading của bạn ngay từ bây giờ:</p>
+      
+      <ol>
+        <li><strong>Ngưng vẽ đường thẳng:</strong> Xóa hết các đường line đơn lẻ trên chart của bạn. Bắt đầu tập vẽ các hộp chữ nhật (Box) để đại diện cho Zone.</li>
+        <li><strong>Kiểm tra độ tươi (Freshness):</strong> Trước khi đặt lệnh tại một Zone, hãy đếm xem giá đã chạm vào đó bao nhiêu lần. Nếu > 2 lần, hãy bỏ qua hoặc giảm khối lượng đi một nửa.</li>
+        <li><strong>Tôn trọng Distal Line:</strong> Luôn đặt Stop Loss cách xa Distal Line một chút (buffer) để tránh bị quét râu nến.</li>
+        <li><strong>Tư duy "Săn Mồi":</strong> Đừng giao dịch ở giữa dòng (giữa 2 Zones). Hãy kiên nhẫn chờ giá đi vào HFZ hoặc LFZ mới bóp cò.</li>
+      </ol>
+      
+      <div class="highlight-box success">
+        <h4>✅ Bài Tập Về Nhà</h4>
+        <p>Mở biểu đồ Gold (Vàng) hoặc BTC khung H4. Tìm và vẽ 3 HFZ (Vùng Bán) và 3 LFZ (Vùng Mua) gần nhất. Đánh dấu xem Zone nào là Fresh, Zone nào đã bị test. Bạn sẽ ngạc nhiên về độ chính xác của phản ứng giá tại các Fresh Zone!</p>
+      </div>
+      
+      <!-- HÌNH 4: Ví dụ bài tập về nhà -->
+      <div class="lesson-image">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlc6o9k-jkmdh4-img4.webp" alt="Ví dụ minh họa cách vẽ Zone trên biểu đồ thực tế">
+        <div class="image-caption">Hình 1.4.4: Cách xác định và vẽ Zone chuẩn trên biểu đồ H4.</div>
+      </div>
+    </section>
+    
+    <!-- SECTION 9: TÓM TẮT -->
+    <section class="section">
+      <h2>📋 Tóm Tắt Bài Học</h2>
+      
+      <div class="highlight-box">
+        <h4>🎯 Key Takeaways</h4>
+        <ul>
+          <li><strong>S/R truyền thống (Line)</strong> đã lỗi thời và chứa nhiều rủi ro do tính chủ quan và thiếu logic về thanh khoản.</li>
+          <li><strong>GEM Zones (Area)</strong> ưu việt hơn nhờ xác định rõ vùng giá trị, điểm vào lệnh và điểm cắt lỗ dựa trên hành vi Smart Money.</li>
+          <li><strong>Cơ chế Unfilled Orders</strong> là lý do tại sao giá đảo chiều tại Zone.</li>
+          <li><strong>Fresh Zone (Mới)</strong> là vua. Zone càng bị test nhiều càng yếu và dễ vỡ.</li>
+        </ul>
+      </div>
+      
+      <p>Bạn đã nắm được vũ khí bí mật để phân biệt vùng cản "xịn" và vùng cản "rởm". Nhưng làm thế nào để vẽ chính xác các Zone này? Làm sao biết đâu là điểm bắt đầu và kết thúc của một Zone? Đừng lo, trong bài tiếp theo, chúng ta sẽ đi vào phần kỹ thuật chi tiết: <strong>6 Công Thức Frequency Độc Quyền</strong> để kiến tạo nên một tấm bản đồ lợi nhuận.</p>
+    </section>
+    
+    <!-- QUIZ SECTION -->
+    <section class="quiz-section">
+      <h2>❓ Kiểm Tra Kiến Thức</h2>
+      <p style="color: var(--color-text-muted); margin-bottom: var(--space-lg);">Trả lời 3 câu hỏi sau để chắc chắn bạn đã hiểu đúng bản chất:</p>
+      
+      <!-- Quiz Question 1 -->
+      <div class="quiz-question" id="quiz-1">
+        <h4>
+          <span class="question-number">1</span>
+          Sự khác biệt cốt lõi về mặt logic giữa S/R truyền thống và GEM Zones là gì?
+        </h4>
+        <div class="quiz-options">
+          <label class="quiz-option">
+            <input type="radio" name="q1" value="a">
+            <span>S/R dùng màu đỏ, Zone dùng màu xanh.</span>
+          </label>
+          <label class="quiz-option" data-correct="true">
+            <input type="radio" name="q1" value="b">
+            <span>S/R dựa trên lịch sử giá đã đảo chiều (Quá khứ), Zone dựa trên lượng lệnh chờ chưa khớp (Thanh khoản hiện tại).</span>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q1" value="c">
+            <span>S/R chỉ dùng cho chứng khoán, Zone dùng cho Crypto.</span>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q1" value="d">
+            <span>Không có sự khác biệt, chỉ là cách gọi tên cho sang.</span>
+          </label>
+        </div>
+        <div class="quiz-feedback" id="feedback-1"></div>
+        <button class="btn-check-answer" onclick="checkAnswer(1, 'b', 'Chính xác! S/R nhìn vào quá khứ (đã xảy ra), còn Zone nhìn vào động lực hiện tại (lệnh pending còn lại).')">Kiểm tra đáp án</button>
+      </div>
+      
+      <!-- Quiz Question 2 -->
+      <div class="quiz-question" id="quiz-2">
+        <h4>
+          <span class="question-number">2</span>
+          Theo nguyên lý Zone Lifecycle, Zone nào có xác suất thắng cao nhất?
+        </h4>
+        <div class="quiz-options">
+          <label class="quiz-option">
+            <input type="radio" name="q2" value="a">
+            <span>Zone đã được test 5 lần (Rất uy tín).</span>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q2" value="b">
+            <span>Zone đã được test 3 lần (Vững chắc).</span>
+          </label>
+          <label class="quiz-option" data-correct="true">
+            <input type="radio" name="q2" value="c">
+            <span>Fresh Zone (Chưa từng bị test).</span>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q2" value="d">
+            <span>Zone ở khung thời gian 1 phút (M1).</span>
+          </label>
+        </div>
+        <div class="quiz-feedback" id="feedback-2"></div>
+        <button class="btn-check-answer" onclick="checkAnswer(2, 'c', 'Chuẩn xác! Fresh Zone là nơi Smart Money còn nguyên "kho đạn" (lệnh chờ), nên phản ứng giá sẽ mạnh mẽ nhất.')">Kiểm tra đáp án</button>
+      </div>
+      
+      <!-- Quiz Question 3 -->
+      <div class="quiz-question" id="quiz-3">
+        <h4>
+          <span class="question-number">3</span>
+          Tại sao chúng ta không nên giao dịch tại các Zone đã bị test nhiều lần (Weak Zone)?
+        </h4>
+        <div class="quiz-options">
+          <label class="quiz-option">
+            <input type="radio" name="q3" value="a">
+            <span>Vì nhìn nó không đẹp.</span>
+          </label>
+          <label class="quiz-option" data-correct="true">
+            <input type="radio" name="q3" value="b">
+            <span>Vì lệnh chờ (thanh khoản) tại đó đã bị hấp thụ hết, không còn lực để đẩy giá đảo chiều nữa.</span>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q3" value="c">
+            <span>Vì sàn giao dịch cấm.</span>
+          </label>
+          <label class="quiz-option">
+            <input type="radio" name="q3" value="d">
+            <span>Vì tin tức cơ bản đã thay đổi.</span>
+          </label>
+        </div>
+        <div class="quiz-feedback" id="feedback-3"></div>
+        <button class="btn-check-answer" onclick="checkAnswer(3, 'b', 'Đúng rồi! Giống như bức tường bị đập nhiều lần, nó sẽ vỡ. Hết lệnh chờ = Hết cản.')">Kiểm tra đáp án</button>
+      </div>
+    </section>
+    
+    <!-- FOOTER -->
+    <footer class="lesson-footer">
+      <div class="footer-logo">GEM Trading Academy</div>
+      <div class="footer-link">
+        <a href="https://gemral.com" target="_blank">gemral.com</a>
+      </div>
+    </footer>
+    
+  </div>
+  
+  <!-- JAVASCRIPT -->
+  <script>
+    function checkAnswer(questionNum, correctAnswer, explanation) {
+      const questionDiv = document.getElementById(`quiz-${questionNum}`);
+      const options = questionDiv.querySelectorAll('.quiz-option');
+      const feedback = document.getElementById(`feedback-${questionNum}`);
+      const selectedOption = questionDiv.querySelector(`input[name="q${questionNum}"]:checked`);
+      
+      // Reset previous styles
+      options.forEach(opt => {
+        opt.classList.remove('correct', 'incorrect');
+      });
+      
+      if (!selectedOption) {
+        feedback.textContent = '⚠️ Vui lòng chọn một đáp án!';
+        feedback.className = 'quiz-feedback show incorrect';
+        return;
+      }
+      
+      const userAnswer = selectedOption.value;
+      
+      // Highlight correct and incorrect
+      options.forEach(opt => {
+        const input = opt.querySelector('input');
+        if (input.value === correctAnswer) {
+          opt.classList.add('correct');
+        } else if (input.value === userAnswer && userAnswer !== correctAnswer) {
+          opt.classList.add('incorrect');
+        }
+      });
+      
+      // Show feedback
+      if (userAnswer === correctAnswer) {
+        feedback.innerHTML = `✅ <strong>Chính xác!</strong> ${explanation}`;
+        feedback.className = 'quiz-feedback show correct';
+      } else {
+        feedback.innerHTML = `❌ <strong>Chưa đúng.</strong> ${explanation}`;
+        feedback.className = 'quiz-feedback show incorrect';
+      }
+    }
+  </script>
+
+</body>
+</html>

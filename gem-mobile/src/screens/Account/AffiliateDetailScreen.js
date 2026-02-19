@@ -100,6 +100,7 @@ export default function AffiliateDetailScreen({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [referralCode, setReferralCode] = useState(null);
   const [stats, setStats] = useState({
     totalCommission: 0,
     pendingCommission: 0,
@@ -115,14 +116,20 @@ export default function AffiliateDetailScreen({ route, navigation }) {
     if (!user?.id) return;
 
     try {
-      // Get affiliate profile
-      const { data: profileData } = await supabase
-        .from('affiliate_profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      // Get affiliate profile + centralized referral code in parallel (Rule 20 fix)
+      const { affiliateService } = require('../../services/affiliateService');
+      const [profileResult, code] = await Promise.all([
+        supabase
+          .from('affiliate_profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single(),
+        affiliateService.getReferralCode(user.id).catch(() => null),
+      ]);
+      const profileData = profileResult?.data;
 
       setProfile(profileData);
+      setReferralCode(code);
 
       // Get commission stats
       const { data: commissions } = await supabase
@@ -267,8 +274,8 @@ export default function AffiliateDetailScreen({ route, navigation }) {
     );
   }
 
-  // Referral code display - uses profile data if available, fallback for render
-  const referralCode = profile?.referral_code || profile?.affiliate_code || 'GEM' + (user?.id?.slice(0, 6) || '').toUpperCase();
+  // Referral code display - uses centralized getReferralCode() loaded during data fetch (Rule 20 fix)
+  const displayReferralCode = referralCode || profile?.referral_code || profile?.affiliate_code || 'GEM' + (user?.id?.slice(0, 6) || '').toUpperCase();
   const currentTier = getCurrentTier();
   const nextTier = getNextTier();
   const tierProgress = getTierProgress();
@@ -300,7 +307,7 @@ export default function AffiliateDetailScreen({ route, navigation }) {
               <Share2 size={28} color={COLORS.gold} />
               <View style={styles.referralInfo}>
                 <Text style={styles.referralLabel}>Mã giới thiệu của bạn</Text>
-                <Text style={styles.referralCode}>{referralCode}</Text>
+                <Text style={styles.referralCode}>{displayReferralCode}</Text>
               </View>
             </View>
 

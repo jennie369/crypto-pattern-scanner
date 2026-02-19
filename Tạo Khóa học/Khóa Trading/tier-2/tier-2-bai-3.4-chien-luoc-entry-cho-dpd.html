@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.4: Chiến Lược Entry Cho DPD | GEM Trading Academy</title>
+<style>
+        /* ==================== CSS VARIABLES ==================== */
+        :root {
+            /* Brand Colors */
+            --navy: #112250;
+            --navy-light: #1a3a6e;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-light: #FFD085;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --purple-light: #8B7FFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            
+            /* Semantic */
+            --success: #00C853;
+            --error: #FF5252;
+            
+            /* Background */
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            
+            /* Text */
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            
+            /* Glass */
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-2xl: 48px;
+            
+            /* Radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            
+            /* Font */
+            --font-family: 'Montserrat', sans-serif;
+        }
+
+        /* ==================== RESET ==================== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* ==================== BACKGROUND ==================== */
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+
+        .bg-layer-orbs {
+            position: absolute;
+            inset: 0;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--gold);
+            top: -100px;
+            right: -100px;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--cyan);
+            bottom: 20%;
+            left: -100px;
+        }
+
+        .orb-3 {
+            width: 250px;
+            height: 250px;
+            background: var(--burgundy);
+            bottom: -50px;
+            right: 20%;
+        }
+
+        /* ==================== CONTAINER ==================== */
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        /* ==================== HEADER ==================== */
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-2xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .lesson-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: var(--space-md);
+        }
+
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        /* ==================== SECTION ==================== */
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+
+        @media (max-width: 600px) {
+            .section {
+                padding: 0;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        @media (max-width: 600px) {
+            .section-title {
+                padding: var(--space-lg) 16px var(--space-md);
+                margin-bottom: 0;
+            }
+        }
+
+        /* Section Text - ONLY text có padding trên mobile */
+        .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        @media (max-width: 600px) {
+            .section > p {
+                padding: 0 16px;
+            }
+        }
+
+        .section > ul, .section > ol {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+
+        @media (max-width: 600px) {
+            .section > ul, .section > ol {
+                padding-left: calc(16px + 1.5em);
+                padding-right: 16px;
+            }
+        }
+
+        .section li {
+            margin-bottom: var(--space-sm);
+        }
+
+        /* ==================== HIGHLIGHT BOXES ==================== */
+        /* Desktop: Full border + radius */
+        /* Mobile: FULL WIDTH edge-to-edge + border-left 4px */
+        
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-left: 4px solid var(--gold);
+                border-radius: 0;
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+
+        .highlight-box-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .highlight-box p {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* Definition Box */
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-left: 4px solid var(--cyan);
+                border-radius: 0;
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+
+        .definition-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        /* Warning Box */
+        .warning-box {
+            background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05));
+            border: 1px solid rgba(156, 6, 18, 0.4);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-left: 4px solid var(--burgundy);
+                border-radius: 0;
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+
+        .warning-box-title {
+            font-weight: 700;
+            color: var(--burgundy-light);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        /* ==================== IMAGE CONTAINER ==================== */
+        /* Desktop: border + radius + shadow */
+        /* Mobile: FULL WIDTH edge-to-edge, no radius */
+        
+        .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 600px) {
+            .image-container {
+                margin: var(--space-md) 0;
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+            }
+        }
+
+        .image-caption {
+            padding: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        /* ==================== FLOW STEPS ==================== */
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (max-width: 600px) {
+            .flow-steps {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+
+        .flow-step {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+
+        .flow-step:hover {
+            border-color: var(--gold);
+            transform: translateX(8px);
+        }
+
+        @media (max-width: 600px) {
+            .flow-step {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+            }
+            .flow-step:hover {
+                transform: none;
+            }
+        }
+
+        .flow-step-number {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--navy-dark);
+        }
+
+        .flow-step-content {
+            flex: 1;
+        }
+
+        .flow-step-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+
+        .flow-step-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* ==================== PATTERNS GRID ==================== */
+        .patterns-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (max-width: 600px) {
+            .patterns-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+
+        .pattern-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .pattern-card:hover {
+            border-color: var(--burgundy);
+            transform: translateY(-4px);
+        }
+
+        @media (max-width: 600px) {
+            .pattern-card {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-md);
+            }
+            .pattern-card:hover {
+                transform: none;
+            }
+        }
+
+        .pattern-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .pattern-name {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+
+        .pattern-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* ==================== STATS GRID ==================== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .stat-card {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-md);
+            }
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-xs);
+        }
+
+        @media (max-width: 600px) {
+            .stat-value {
+                font-size: 1.25rem;
+            }
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ==================== FORMULA BOX ==================== */
+        .formula-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05));
+            border: 2px solid var(--purple);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .formula-box {
+                border: none;
+                border-left: 4px solid var(--purple);
+                border-radius: 0;
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+
+        .formula-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--purple-light);
+            margin-bottom: var(--space-lg);
+        }
+
+        .formula-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: var(--space-md);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .formula-item {
+            background: var(--bg-card);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--glass-border);
+        }
+
+        .formula-operator {
+            color: var(--gold);
+            font-size: 1.5rem;
+        }
+
+        /* ==================== COMPARISON TABLE ==================== */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-lg) 0;
+            font-size: 0.9rem;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+
+        @media (max-width: 600px) {
+            .comparison-table {
+                border-radius: 0;
+                border: none;
+                margin: var(--space-md) 0;
+            }
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: var(--space-md);
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        @media (max-width: 600px) {
+            .comparison-table th,
+            .comparison-table td {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        .comparison-table th {
+            background: var(--bg-card);
+            color: var(--gold);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        .comparison-table td {
+            color: var(--text-secondary);
+        }
+
+        /* ==================== EXAMPLE BOX ==================== */
+        .example-box {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin: var(--space-xl) 0;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 600px) {
+            .example-box {
+                border: none;
+                border-radius: 0;
+                margin: var(--space-md) 0;
+                box-shadow: none;
+            }
+        }
+
+        .example-header {
+            background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light));
+            padding: var(--space-md) var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        @media (max-width: 600px) {
+            .example-header {
+                padding: var(--space-md) 16px;
+            }
+        }
+
+        .example-header-text {
+            font-weight: 700;
+        }
+
+        .example-content {
+            padding: var(--space-lg);
+        }
+
+        @media (max-width: 600px) {
+            .example-content {
+                padding: var(--space-md) 16px;
+            }
+        }
+
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+        }
+
+        @media (max-width: 600px) {
+            .example-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-sm);
+            }
+        }
+
+        .example-detail-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .example-detail-value {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .example-detail-value.entry { color: var(--burgundy-light); }
+        .example-detail-value.stop { color: var(--error); }
+        .example-detail-value.target { color: var(--success); }
+
+        /* ==================== CHECKLIST ==================== */
+        .checklist {
+            list-style: none;
+            margin: var(--space-lg) 0;
+        }
+
+        @media (max-width: 600px) {
+            .checklist {
+                margin: var(--space-md) 0;
+                background: var(--glass-border);
+            }
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-sm);
+            transition: all 0.3s ease;
+        }
+
+        .checklist-item:hover {
+            border-color: var(--gold);
+        }
+
+        @media (max-width: 600px) {
+            .checklist-item {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                margin-bottom: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+
+        .checklist-icon {
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            background: var(--glass-bg);
+            border: 2px solid var(--gold);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: var(--gold);
+        }
+
+        .checklist-text {
+            color: var(--text-secondary);
+            flex: 1;
+        }
+
+        /* ==================== SUMMARY BOX ==================== */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02));
+            border: 2px solid var(--gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-left: 4px solid var(--gold);
+                border-radius: 0;
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+
+        .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .summary-list {
+            list-style: none;
+        }
+
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+
+        .summary-list li::before {
+            content: "✓";
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        /* ==================== QUIZ SECTION ==================== */
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            margin-top: var(--space-2xl);
+        }
+
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: 0;
+                box-shadow: none;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+
+        @media (max-width: 600px) {
+            .quiz-header {
+                padding: var(--space-lg) 16px var(--space-md);
+                margin-bottom: 0;
+            }
+        }
+
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+        }
+
+        .quiz-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Quiz Question */
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+
+        .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+            line-height: 1.6;
+        }
+
+        /* Quiz Options */
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        @media (max-width: 600px) {
+            .quiz-options {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: 0 -16px;
+            }
+        }
+
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+
+        @media (max-width: 600px) {
+            .quiz-option {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid transparent;
+                padding: var(--space-md) 16px;
+            }
+            .quiz-option:hover:not(.disabled) {
+                border-left-color: var(--gold);
+            }
+        }
+
+        .quiz-option.selected {
+            border-color: var(--gold);
+            background: rgba(255, 189, 89, 0.1);
+        }
+
+        @media (max-width: 600px) {
+            .quiz-option.selected {
+                border-left-color: var(--gold);
+            }
+        }
+
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+        }
+
+        @media (max-width: 600px) {
+            .quiz-option.correct {
+                border-left-color: var(--success) !important;
+            }
+        }
+
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+        }
+
+        @media (max-width: 600px) {
+            .quiz-option.incorrect {
+                border-left-color: var(--error) !important;
+            }
+        }
+
+        .quiz-option.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .option-marker {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option.selected .option-marker {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: var(--navy-dark);
+        }
+
+        .quiz-option.correct .option-marker {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .quiz-option.incorrect .option-marker {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+        }
+
+        .option-text {
+            flex: 1;
+            color: var(--text-secondary);
+        }
+
+        /* Question Feedback - INSTANT */
+        .question-feedback {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-sm);
+            display: none;
+        }
+
+        .question-feedback.show {
+            display: block;
+        }
+
+        .question-feedback.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+        }
+
+        .question-feedback.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: var(--space-xs);
+        }
+
+        .question-feedback.correct .feedback-title {
+            color: var(--success);
+        }
+
+        .question-feedback.incorrect .feedback-title {
+            color: var(--error);
+        }
+
+        .feedback-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Quiz Result */
+        .quiz-result {
+            text-align: center;
+            padding: var(--space-xl);
+            display: none;
+        }
+
+        .quiz-result.show {
+            display: block;
+        }
+
+        .result-score {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-md);
+        }
+
+        .result-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-sm);
+        }
+
+        .result-message {
+            color: var(--text-muted);
+        }
+
+        /* Quiz Buttons */
+        .quiz-buttons {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-md);
+            padding: var(--space-lg);
+        }
+
+        @media (max-width: 600px) {
+            .quiz-buttons {
+                padding: var(--space-lg) 16px;
+            }
+        }
+
+        .quiz-btn {
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-family: var(--font-family);
+        }
+
+        .quiz-btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--navy-dark);
+        }
+
+        .quiz-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(255, 189, 89, 0.4);
+        }
+
+        .quiz-btn-secondary {
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--glass-border);
+        }
+
+        .quiz-btn-secondary:hover {
+            border-color: var(--gold);
+        }
+
+        /* ==================== DESKTOP HOVER EFFECTS ==================== */
+        @media (min-width: 601px) {
+            .flow-step:hover {
+                transform: translateX(8px);
+            }
+            .pattern-card:hover {
+                transform: translateY(-4px);
+            }
+            .stat-card:hover {
+                transform: translateY(-2px);
+            }
+        }
+        
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            border-top: 1px solid var(--glass-border);
+            margin-top: var(--space-2xl);
+        }
+        
+        .footer-brand {
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: var(--space-xs);
+        }
+        
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="bg-layer-orbs">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            <div class="orb orb-3"></div>
+        </div>
+    </div>
+
+    <div class="lesson-container">
+        <!-- ========== HEADER ========== -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>📉</span>
+                <span>Bearish Pattern</span>
+            </div>
+            <div class="lesson-chapter">Chapter 3 - DPD Pattern Mastery</div>
+            <h1 class="lesson-title">Bài 3.4: Chiến Lược Entry Cho DPD</h1>
+            <div class="lesson-meta">
+                <div class="meta-item">
+                    <span class="icon">📚</span>
+                    <span>Bài 3.4</span>
+                </div>
+                <div class="meta-item">
+                    <span class="icon">⏱️</span>
+                    <span>15 phút đọc</span>
+                </div>
+                <div class="meta-item">
+                    <span class="icon">📝</span>
+                    <span>3 câu quiz</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 📌 1. OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title">
+                <span>🎯</span>
+                Mở Đầu: Nghệ Thuật Của Sự Kiên Nhẫn
+            </h2>
+            <p>Bạn đã bao giờ rơi vào tình huống này chưa: Bạn xác định đúng pattern DPD, giá bắt đầu Phase 3 lao dốc mạnh mẽ. Vì sợ lỡ cơ hội, bạn đặt lệnh SHORT đuổi theo giá ngay lập tức. Kết quả là gì? Giá bỗng nhiên "quay xe" hồi phục mạnh, quét sạch Stop Loss của bạn rồi mới... thực sự sụp đổ đúng như dự đoán.</p>
+            <p>Đây là nỗi đau của hàng ngàn trader nghiệp dư. Trong bài học này, tôi sẽ không dạy bạn cách trở thành người nhanh nhất, mà sẽ dạy bạn cách trở thành người <strong>chính xác nhất</strong>. Chiến lược entry cho DPD không phải là đánh đuổi theo nến, mà là nghệ thuật đặt bẫy và chờ đợi Smart Money quay lại. Đến cuối bài học này, bạn sẽ nắm vững quy trình 5 bước để "bắn tỉa" một lệnh SHORT với tỷ lệ thắng lên tới 68% và bảo vệ tài khoản của mình một cách chuyên nghiệp.</p>
+            
+            <div class="highlight-box">
+                <div class="highlight-box-title">
+                    <span>💡</span>
+                    Nguyên Tắc Vàng
+                </div>
+                <p><strong>KHÔNG entry khi giá phá vỡ (breakout) ở Phase 3.</strong> Luôn đợi giá quay lại kiểm tra vùng HFZ (Retest) và có nến xác nhận Rejection trước khi vào lệnh SHORT. Kiên nhẫn là lợi thế lớn nhất của bạn.</p>
+            </div>
+        </section>
+
+        <!-- 📌 2. CONCEPT INTRODUCTION -->
+        <section class="section">
+            <h2 class="section-title">
+                <span>📖</span>
+                Khái Niệm: Tại Sao Phải Đợi Retest?
+            </h2>
+            <p>Để tôi giải thích cho bạn rõ hơn tại sao chúng ta không bao giờ entry đuổi (chasing price). Khi Phase 3 của DPD diễn ra, momentum đang cực mạnh. Tuy nhiên, thị trường luôn vận hành theo quy luật "hồi quy". Những lệnh SHORT khổng lồ của Smart Money đã được đặt tại vùng Pause (Phase 2), tạo ra một vùng <strong>HFZ (High Frequency Zone)</strong>.</p>
+            <p>Việc đợi giá quay lại HFZ có 3 mục đích cốt lõi:
+                <br>• <strong>Tối ưu tỷ lệ R:R:</strong> Entry tại zone giúp bạn có điểm cắt lỗ (Stop Loss) cực ngắn và mục tiêu (Target) cực xa.
+                <br>• <strong>Xác nhận lực bán:</strong> Một cú chạm và rút chân tại HFZ chứng minh rằng "những lệnh chờ bán" của cá mập vẫn còn ở đó để bảo vệ zone.
+                <br>• <strong>Loại bỏ Fakeout:</strong> Nếu giá xuyên thủng zone và đóng nến phía trên, đó là dấu hiệu pattern đã bị phá hủy, giúp bạn tránh được một lệnh thua không đáng có.
+            </p>
+            <div class="definition-box">
+                <div class="definition-box-title">🔍 Insight Nâng Cao</div>
+                <p>Vùng HFZ được tạo ra từ Phase 2 của DPD chính là nơi Smart Money phân phối nốt lượng hàng cuối cùng. Khi giá retest, họ sẽ "đạp" giá xuống một lần nữa để bảo vệ vị thế của mình. Chúng ta đơn giản là đi theo dấu chân của họ.</p>
+            </div>
+        </section>
+
+        <!-- 📌 3. DEEP DIVE: QUY TRÌNH 5 BƯỚC -->
+        <section class="section">
+            <h2 class="section-title">
+                <span>📋</span>
+                Quy Trình Entry 5 Bước "Sát Thủ"
+            </h2>
+            <p>Chiến lược entry cho DPD tuân theo quy trình 5 bước nghiêm ngặt. Hãy coi đây là bản checklist bắt buộc, thiếu 1 bước bạn không được phép bóp cò.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nhận Diện DPD Pattern</div>
+                        <div class="flow-step-desc">Xác nhận đủ 3 phases: Phase 1 DOWN mạnh (≥2%, 10+ nến) → Phase 2 PAUSE nén chặt (1-5 nến, range &lt;1.5%) → Phase 3 DOWN xác nhận sụp đổ (≥2%). Đánh dấu vùng HFZ từ Phase 2.</div>
+                    </div>
+                </div>
+                <div class="image-container">
+                    <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjvuvi7c-6ykq6g-img1.webp" alt="Nhận diện DPD Pattern">
+                    <p class="image-caption">Bước 1: Xác lập cấu trúc DPD và vùng HFZ</p>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đợi Giá Retest HFZ</div>
+                        <div class="flow-step-desc">Sau khi Phase 3 hoàn tất, đừng nóng vội. Hãy kiên nhẫn đợi giá hồi phục (Pullback) quay lại chạm vào mép dưới của vùng HFZ. Đây là vùng "đặt bẫy" của chúng ta.</div>
+                    </div>
+                </div>
+                <div class="image-container">
+                    <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjvuvi7c-6ykq6g-img2.webp" alt="Đợi giá retest HFZ">
+                    <p class="image-caption">Bước 2: Chờ đợi nhịp hồi kỹ thuật về vùng tần số cao</p>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đợi Nến Xác Nhận (Rejection)</div>
+                        <div class="flow-step-desc">Đây là bước then chốt. Khi giá chạm HFZ, KHÔNG vào lệnh ngay. Hãy đợi xuất hiện 1 trong 4 mẫu nến xác nhận Bearish Rejection (Pin Bar, Shooting Star, Engulfing...) để chứng minh zone đang hoạt động.</div>
+                    </div>
+                </div>
+                <div class="image-container">
+                    <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjvuvi7c-6ykq6g-img3.webp" alt="Đợi nến xác nhận">
+                    <p class="image-caption">Bước 3: Nhận diện dấu vết Smart Money bảo vệ zone</p>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Vào Lệnh SHORT</div>
+                        <div class="flow-step-desc">Thực hiện Entry SHORT ngay khi nến xác nhận ở bước 3 ĐÓNG CỬA hoàn toàn. Đặt Stop Loss (SL) cách đỉnh của vùng HFZ khoảng 0.5% (Vùng đệm an toàn).</div>
+                    </div>
+                </div>
+                <div class="image-container">
+                    <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjvuvi7c-6ykq6g-img4.webp" alt="Vào lệnh SHORT">
+                    <p class="image-caption">Bước 4: Thực thi lệnh và thiết lập rào chắn rủi ro</p>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thiết Lập Take Profit</div>
+                        <div class="flow-step-desc">Target tối thiểu 1:2 R:R. Hãy dùng quy tắc Measured Move (độ dài Phase 3 bằng Phase 1) hoặc chốt lời từng phần tại các vùng LFZ tươi mới gần nhất ở phía dưới.</div>
+                    </div>
+                </div>
+                <div class="image-container">
+                    <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjvuvi7c-6ykq6g-img5.webp" alt="Đặt Target Profit">
+                    <p class="image-caption">Bước 5: Gặt hái lợi nhuận theo kế hoạch</p>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjvuvi7c-6ykq6g-img6.webp" alt="Tổng quan quy trình entry DPD">
+                <p class="image-caption">Hình 3.4.1: Tổng quan chiến lược "Bắn tỉa" tại HFZ</p>
+            </div>
+        </section>
+
+        <!-- 📌 DEEP DIVE: REJECTION CANDLES -->
+        <section class="section">
+            <h2 class="section-title">
+                <span>🕯️</span>
+                Các Nến Xác Nhận Bearish: Ngôn Ngữ Của Thị Trường
+            </h2>
+            <p>Tôi muốn bạn hiểu rằng nến Rejection chính là bằng chứng cho thấy lực mua đã kiệt sức và lực bán đang quay lại nắm quyền kiểm soát tại HFZ. Nếu không có nến này, zone của bạn chỉ là một đường kẻ vô hồn.</p>
+
+            <div class="patterns-grid">
+                <div class="pattern-card">
+                    <div class="pattern-icon">📍</div>
+                    <div class="pattern-name">Bearish Pin Bar</div>
+                    <div class="pattern-desc">Bấc trên dài (ít nhất gấp 2 lần thân), thân nến nhỏ đóng ở phía dưới. Cho thấy giá bị từ chối mạnh mẽ tại HFZ.</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🌠</div>
+                    <div class="pattern-name">Shooting Star</div>
+                    <div class="pattern-desc">Tương tự Pin Bar nhưng xuất hiện sau một nhịp tăng. Một tín hiệu "đảo ngược tần số" cực kỳ uy tín.</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🔻</div>
+                    <div class="pattern-name">Bearish Engulfing</div>
+                    <div class="pattern-desc">Một cây nến đỏ bao trùm hoàn toàn cây nến xanh trước đó ngay tại vùng zone. Đây là sự áp đảo hoàn toàn của phe Gấu.</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🌆</div>
+                    <div class="pattern-name">Evening Star</div>
+                    <div class="pattern-desc">Cụm 3 nến: Tăng -> Do dự (Doji) -> Giảm mạnh. Xác nhận Smart Money đã hoàn tất việc thoát hàng.</div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjvuvi7c-6ykq6g-img7.webp" alt="Các mẫu nến xác nhận">
+                <p class="image-caption">Hình 3.4.2: 4 mẫu hình nến Rejection phổ biến nhất tại vùng HFZ</p>
+            </div>
+        </section>
+
+        <!-- 📌 4. REAL-WORLD EXAMPLES -->
+        <section class="section">
+            <h2 class="section-title">
+                <span>📊</span>
+                Phân Tích Ví Dụ Thực Tế: BTC/USDT H4
+            </h2>
+            <p>Hãy cùng mổ xẻ một lệnh giao dịch thực tế trên cặp BTC/USDT khung 4H để bạn hiểu cách vận hành của hệ thống trong thực chiến.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">1:2.5</div>
+                    <div class="stat-label">R:R Thực Tế</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0.5%</div>
+                    <div class="stat-label">Buffer SL</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">68%</div>
+                    <div class="stat-label">Win Rate TB</div>
+                </div>
+            </div>
+
+            <div class="formula-box">
+                <div class="formula-title">📌 Công Thức Quản Lý Targets</div>
+                <div class="formula-content">
+                    <span class="formula-item">TP1: 1:1 R:R (Dời SL về BE)</span>
+                    <span class="formula-operator">→</span>
+                    <span class="formula-item">TP2: 1:2 R:R</span>
+                    <span class="formula-operator">→</span>
+                    <span class="formula-item">TP3: Vùng LFZ đối diện</span>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <div class="example-header">
+                    <span>📈</span>
+                    <span class="example-header-text">Case Study: Lệnh Short BTC "Chuẩn Sách Giáo Khoa"</span>
+                </div>
+                <div class="example-content">
+                    <p>Vào ngày [X], BTC hình thành pattern DPD trên H4. Phase 1 giảm mạnh 4%, vùng Pause nén chặt giữa $42,400 - $42,800. Sau khi giá sập về $41,500 (Phase 3), chúng ta không đuổi theo mà kiên nhẫn đợi 3 cây nến hồi phục.</p>
+                    <div class="example-grid">
+                        <div class="example-detail">
+                            <div class="example-detail-label">Entry Price (Tại nến Pin Bar close)</div>
+                            <div class="example-detail-value entry">$42,400</div>
+                        </div>
+                        <div class="example-detail">
+                            <div class="example-detail-label">Stop Loss (Đỉnh HFZ + 0.5% buffer)</div>
+                            <div class="example-detail-value stop">$43,014</div>
+                        </div>
+                        <div class="example-detail">
+                            <div class="example-detail-label">Target 1 (Chốt 50%)</div>
+                            <div class="example-detail-value target">$41,786 (1:1 R:R)</div>
+                        </div>
+                        <div class="example-detail">
+                            <div class="example-detail-label">Target 2 (Chốt hết)</div>
+                            <div class="example-detail-value target">$40,558 (1:3 R:R)</div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 15px;">Kết quả: Giá chạm đúng Target 2 sau 36 giờ. Lợi nhuận ròng mang về là +3R (nếu rủi ro $100, bạn kiếm được $300).</p>
+                </div>
+            </div>
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjvuvi7c-6ykq6g-img8.webp" alt="Biểu đồ thực tế BTC/USDT">
+                <p class="image-caption">Hình 3.4.3: Minh họa lệnh thực tế với các mốc Entry, SL và TP rõ ràng</p>
+            </div>
+        </section>
+
+        <!-- 📌 5. COMMON MISTAKES -->
+        <section class="section">
+            <h2 class="section-title">
+                <span>🚨</span>
+                Những "Cái Bẫy" Chết Người Cần Tránh
+            </h2>
+            <p>Ngay cả khi bạn biết quy trình, tâm lý vẫn có thể khiến bạn mắc sai lầm. Đây là 3 lỗi phổ biến nhất mà học viên của tôi hay gặp:</p>
+            <ul>
+                <li><strong>Lỗi "Vào lệnh sớm":</strong> Entry ngay khi râu nến vừa chạm vào mép dưới HFZ. Hãy nhớ: giá có thể xuyên qua zone bất cứ lúc nào. Nếu không đợi nến đóng cửa, bạn đang đánh bạc với sự hên xui.</li>
+                <li><strong>Lỗi "Quên Buffer SL":</strong> Đặt Stop Loss ngay sát đỉnh zone. Trong thị trường crypto đầy biến động, những cú "quét râu" (Stop hunt) 0.1-0.3% diễn ra như cơm bữa. Luôn dùng buffer 0.5% để bảo vệ vị thế.</li>
+                <li><strong>Lỗi "Trade Zone Cũ":</strong> Zone đã bị test quá 2 lần. Càng nhiều lần chạm, vùng lệnh chờ càng bị cạn kiệt (Absorption). Hãy chỉ ưu tiên các <strong>Fresh Zone</strong> (chưa test lần nào).</li>
+            </ul>
+            <div class="warning-box">
+                <div class="warning-box-title">🛑 Sai Lầm Chí Mạng</div>
+                <p>Entry ngược xu hướng khung lớn (Daily). Nếu Daily đang Uptrend mạnh, DPD trên H4 chỉ là một nhịp chỉnh nhỏ. Đừng bao giờ chặn đầu xe tải nếu không có sự ủng hộ từ khung thời gian cao hơn!</p>
+            </div>
+        </section>
+
+        <!-- 📌 6. PRACTICAL APPLICATION -->
+        <section class="section">
+            <h2 class="section-title">
+                <span>✅</span>
+                Ứng Dụng Thực Tế: Checklist 8 Điều Kiện
+            </h2>
+            <p>Trước khi nhấn nút "Sell", hãy bình tĩnh kiểm tra 8 điều kiện sau. Chỉ cần 1 điều kiện không đạt, hãy bỏ qua trade. Thà lỡ một cơ hội còn hơn mất tiền vô ích.</p>
+
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <span class="checklist-icon">✓</span>
+                    <span class="checklist-text"><strong>Xác nhận cấu trúc:</strong> Pattern DPD có Phase 1 và Phase 3 giảm ≥2% không?</span>
+                </li>
+                <li class="checklist-item">
+                    <span class="checklist-icon">✓</span>
+                    <span class="checklist-text"><strong>Kiểm tra Pause:</strong> Vùng Phase 2 có nén chặt (1-5 nến) và range &lt;1.5% không?</span>
+                </li>
+                <li class="checklist-item">
+                    <span class="checklist-icon">✓</span>
+                    <span class="checklist-text"><strong>Trạng thái Zone:</strong> Vùng HFZ này còn tươi mới (Fresh) hoặc mới test tối đa 1 lần không?</span>
+                </li>
+                <li class="checklist-item">
+                    <span class="checklist-icon">✓</span>
+                    <span class="checklist-text"><strong>Retest:</strong> Giá thực sự đã quay lại chạm vào vùng HFZ chưa?</span>
+                </li>
+                <li class="checklist-item">
+                    <span class="checklist-icon">✓</span>
+                    <span class="checklist-text"><strong>Xác nhận nến:</strong> Có mẫu nến Bearish Rejection nào xuất hiện và ĐÃ ĐÓNG CỬA chưa?</span>
+                </li>
+                <li class="checklist-item">
+                    <span class="checklist-icon">✓</span>
+                    <span class="checklist-text"><strong>Tỷ lệ R:R:</strong> Khoảng cách đến target gần nhất có đạt tối thiểu 1:2 không?</span>
+                </li>
+                <li class="checklist-item">
+                    <span class="checklist-icon">✓</span>
+                    <span class="checklist-text"><strong>Market Context:</strong> Xu hướng khung lớn (Daily) có đang ủng hộ lệnh SHORT không?</span>
+                </li>
+                <li class="checklist-item">
+                    <span class="checklist-icon">✓</span>
+                    <span class="checklist-text"><strong>Tin tức:</strong> Có tin tức đỏ (NFP, FOMC...) sắp diễn ra trong 1-2 giờ tới không?</span>
+                </li>
+            </ul>
+            <div class="highlight-box tip">
+                <div class="highlight-title">🎯 Hành động ngay tuần này</div>
+                <p>Mở chart TradingView, tìm 5 ví dụ DPD đã diễn ra trong quá khứ. Vẽ HFZ và kiểm tra xem giá có retest đúng như lý thuyết không. Ghi lại tỷ lệ thắng của 5 ví dụ đó vào nhật ký giao dịch của bạn.</p>
+            </div>
+        </section>
+
+        <!-- 📌 7. SUMMARY -->
+        <section class="section">
+            <h2 class="section-title">
+                <span>📝</span>
+                Tổng Kết Bài Học
+            </h2>
+
+            <div class="summary-box">
+                <div class="summary-title">
+                    <span>🎯</span>
+                    Những Điểm Cốt Lõi Phải Nhớ
+                </div>
+                <ul class="summary-list">
+                    <li>✓ <strong>Quy trình entry là bất biến:</strong> Nhận diện → Đợi Retest → Đợi Nến Xác Nhận → Entry khi nến đóng cửa → Quản lý rủi ro.</li>
+                    <li>✓ <strong>Nến xác nhận là bắt buộc:</strong> Pin Bar, Shooting Star, Bearish Engulfing là những "phát súng hiệu" của Smart Money.</li>
+                    <li>✓ <strong>Stop Loss là ranh giới sống còn:</strong> Luôn đặt trên đỉnh HFZ và cộng thêm 0.5% buffer để tránh nhiễu thị trường.</li>
+                    <li>✓ <strong>Kỷ luật chọn lọc:</strong> Chỉ trade những setup có R:R ≥ 1:2 và thuận xu hướng khung thời gian lớn.</li>
+                    <li>✓ <strong>Học cách đứng ngoài:</strong> Nếu giá không retest hoặc xuyên qua zone mà không có Rejection, tuyệt đối không vào lệnh.</li>
+                </ul>
+                <p style="margin-top: 20px;"><strong>Bài học tiếp theo:</strong> Chúng ta sẽ cùng nghiên cứu cách <strong>Xác nhận hợp lưu (Confluence)</strong> với các chỉ báo kỹ thuật khác để nâng tỷ lệ thắng của DPD lên một tầm cao mới. Hẹn gặp lại bạn!</p>
+            </div>
+        </section>
+
+        <!-- 📌 8. QUIZ SECTION -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Chọn đáp án đúng nhất để kiểm tra mức độ thấu hiểu của bạn nhé!</p>
+            </div>
+
+            
+            <div class="quiz-question" data-question="1" data-correct="B">
+                <div class="question-number">1</div>
+                <div class="question-text">Trong chiến lược entry DPD chuyên nghiệp, đâu là thời điểm ĐÚNG để thực thi lệnh SHORT?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Ngay khi râu nến vừa chạm vào mép dưới của vùng HFZ để có giá tốt nhất.</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Sau khi xuất hiện nến xác nhận bearish (rejection) và nến đó đã đóng cửa hoàn toàn.</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Ngay khi giá phá vỡ đáy của Phase 2 (vào lệnh breakout).</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Vào lệnh bất cứ lúc nào khi giá đang nằm trong vùng HFZ.</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            
+            <div class="quiz-question" data-question="2" data-correct="C">
+                <div class="question-number">2</div>
+                <div class="quiz-question">Stop Loss (SL) trong chiến lược DPD chuẩn GEM Academy nên được đặt ở đâu?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Ngay tại điểm entry để bảo vệ vốn 100%.</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Tại đường Giá Stop (đỉnh vùng Pause) mà không cần thêm buffer.</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Trên đỉnh vùng HFZ (đường Giá Stop) cộng thêm 0.5% buffer để tránh quét râu nến.</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Tại đỉnh cao nhất của Phase 1.</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            
+            <div class="quiz-question" data-question="3" data-correct="D">
+                <div class="question-number">3</div>
+                <div class="question-text">Mẫu hình nến nào dưới đây KHÔNG được coi là nến xác nhận Rejection cho lệnh SHORT tại HFZ?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Bearish Pin Bar (Râu trên dài).</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Bearish Engulfing (Nến đỏ nhấn chìm nến xanh).</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Shooting Star (Ngôi sao đổi ngôi).</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Hammer (Nến búa có râu dưới dài).</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            
+            <div class="quiz-result">
+                <div class="result-score">0/3</div>
+                <div class="result-text">Hoàn thành bài kiểm tra!</div>
+                <div class="result-message"></div>
+            </div>
+
+            
+            <div class="quiz-buttons">
+                <button class="quiz-btn quiz-btn-secondary" id="retakeQuiz" style="display: none;">Làm Lại</button>
+            </div>
+        </section>
+
+        <!-- ========== FOOTER ========== -->
+        <footer class="lesson-footer">
+            <div class="footer-brand">GEM Trading Academy</div>
+            <div class="footer-text">© 2024 GEM Trading Academy. Hệ thống đào tạo phân tích tần số dòng tiền chuyên nghiệp.</div>
+        </footer>
+
+    </div>
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+            
+            let answeredCount = 0;
+            let correctCount = 0;
+            const totalQuestions = questions.length;
+            
+            // Answer explanations
+            const explanations = {
+                1: {
+                    correct: 'Chính xác! Để đảm bảo an toàn, bạn phải luôn đợi nến xác nhận đóng cửa để tránh bị quét bởi momentum tăng hưng phấn.',
+                    incorrect: 'Sai rồi! Việc vào lệnh sớm khi giá vừa chạm hoặc nến chưa đóng cửa là vô cùng rủi ro vì tín hiệu chưa được xác thực.'
+                },
+                2: {
+                    correct: 'Tuyệt vời! Khoảng buffer 0.5% là vô cùng quan trọng trong crypto để tránh bị quét Stop Loss bởi các biến động nhiễu.',
+                    incorrect: 'Chưa đúng. Đặt SL quá sát zone là sai lầm phổ biến khiến bạn bị văng khỏi cuộc chơi trước khi giá sập thực sự.'
+                },
+                3: {
+                    correct: 'Chính xác! Hammer là nến xác nhận Bullish (tăng giá) vì có râu dưới dài, không phù hợp để đánh SHORT tại HFZ.',
+                    incorrect: 'Sai rồi! Pin Bar, Shooting Star và Engulfing đều là các tín hiệu giảm giá mạnh. Chỉ có Hammer là tín hiệu tăng giá.'
+                }
+            };
+            
+            // INSTANT FEEDBACK - Click option = immediate result
+            questions.forEach(question => {
+                const options = question.querySelectorAll('.quiz-option');
+                const correctAnswer = question.dataset.correct;
+                const questionNum = question.dataset.question;
+                const feedbackDiv = question.querySelector('.question-feedback');
+                const feedbackTitle = feedbackDiv.querySelector('.feedback-title');
+                const feedbackText = feedbackDiv.querySelector('.feedback-text');
+                
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        // Prevent re-answering
+                        if (question.classList.contains('answered')) return;
+                        
+                        // Mark question as answered
+                        question.classList.add('answered');
+                        answeredCount++;
+                        
+                        const selectedOption = this.dataset.option;
+                        const isCorrect = selectedOption === correctAnswer;
+                        
+                        // Disable all options
+                        options.forEach(opt => opt.classList.add('disabled'));
+                        
+                        // Mark selected and correct
+                        this.classList.add('selected');
+                        
+                        if (isCorrect) {
+                            this.classList.add('correct');
+                            correctCount++;
+                            feedbackDiv.classList.add('correct');
+                            feedbackTitle.textContent = '✓ Chính xác!';
+                            feedbackText.textContent = explanations[questionNum].correct;
+                        } else {
+                            this.classList.add('incorrect');
+                            feedbackDiv.classList.add('incorrect');
+                            feedbackTitle.textContent = '✗ Sai rồi!';
+                            feedbackText.textContent = explanations[questionNum].incorrect;
+                            
+                            // Highlight correct answer
+                            options.forEach(opt => {
+                                if (opt.dataset.option === correctAnswer) {
+                                    opt.classList.add('correct');
+                                }
+                            });
+                        }
+                        
+                        // Show feedback
+                        feedbackDiv.classList.add('show');
+                        
+                        // Check if all questions answered
+                        if (answeredCount === totalQuestions) {
+                            showResults();
+                        }
+                    });
+                });
+            });
+            
+            function showResults() {
+                const scoreDiv = resultDiv.querySelector('.result-score');
+                const messageDiv = resultDiv.querySelector('.result-message');
+                
+                scoreDiv.textContent = `${correctCount}/${totalQuestions}`;
+                
+                if (correctCount === totalQuestions) {
+                    messageDiv.textContent = '🎉 Xuất sắc! Bạn đã nắm vững chiến lược entry DPD!';
+                } else if (correctCount >= totalQuestions * 0.7) {
+                    messageDiv.textContent = '👍 Tốt lắm! Bạn đã hiểu phần lớn nội dung.';
+                } else {
+                    messageDiv.textContent = '📚 Hãy xem lại bài học để củng cố kiến thức nhé!';
+                }
+                
+                resultDiv.classList.add('show');
+                retakeBtn.style.display = 'inline-block';
+            }
+            
+            // Retake quiz
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0;
+                correctCount = 0;
+                
+                questions.forEach(question => {
+                    question.classList.remove('answered');
+                    const options = question.querySelectorAll('.quiz-option');
+                    const feedbackDiv = question.querySelector('.question-feedback');
+                    
+                    options.forEach(opt => {
+                        opt.classList.remove('selected', 'correct', 'incorrect', 'disabled');
+                    });
+                    
+                    feedbackDiv.classList.remove('show', 'correct', 'incorrect');
+                });
+                
+                resultDiv.classList.remove('show');
+                retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+<div style="background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px; padding: 40px 20px; margin: 12px 0; text-align: center;">
+          <span style="font-size: 40px; opacity: 0.5; display: block; margin-bottom: 8px;">🖼️</span>
+          <p style="margin: 0; color: rgba(255,255,255,0.5); font-size: 13px;">Kéo thả hình ảnh vào đây</p>
+        </div>
+</body>
+</html>

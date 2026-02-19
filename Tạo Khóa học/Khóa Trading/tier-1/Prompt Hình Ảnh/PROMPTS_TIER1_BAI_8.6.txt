@@ -1,0 +1,53 @@
+  🧠 HÌNH 1.8.6.1: 5 CÂU HỎI TỰ ĐÁNH GIÁ
+  Tên file: 1.8.6.1-self-assessment-questions.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Minh họa 5 câu hỏi cốt lõi để xác định nhu cầu của học viên.
+  NỘI DUNG HÌNH:
+   - Một hình ảnh infographic dạng danh sách kiểm tra (checklist) với 5 icon đại diện cho 5 câu hỏi:
+     1. Thời gian (Đồng hồ cát)
+     2. Thu nhập (Túi tiền)
+     3. Đầu tư (Heo đất)
+     4. Hướng dẫn (Người thầy/Mentor)
+     5. Partnership (Cái bắt tay)
+   - Bên cạnh mỗi icon là câu hỏi tóm tắt ngắn gọn.
+   - Text nổi bật: "BẠN ĐANG Ở ĐÂU?"
+
+  ---
+
+  📊 HÌNH 1.8.6.2: MA TRẬN QUYẾT ĐỊNH
+  Tên file: 1.8.6.2-decision-matrix.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Giúp học viên chọn TIER phù hợp dựa trên nguồn lực.
+  NỘI DUNG HÌNH:
+   - Một bảng ma trận 2 trục: Trục tung là "Thời gian/Ngân sách", Trục hoành là "Mục tiêu".
+   - Các ô trong ma trận:
+     - Thấp/Thấp -> TIER 1 (Học miễn phí)
+     - Trung bình -> TIER 2 (Thực chiến)
+     - Cao/Cao -> TIER 3 (Chuyên sâu & Mentoring)
+   - Có thêm phần "Partnership" nằm riêng biệt hoặc bao trùm.
+   - Subtitle: "Lựa chọn tối ưu cho nguồn lực của bạn."
+
+  ---
+
+  🚀 HÌNH 1.8.6.3: VƯỢT QUA NỖI SỢ (COMFORT ZONE)
+  Tên file: 1.8.6.3-overcoming-fear.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Minh họa việc bước ra khỏi vùng an toàn để phát triển.
+  NỘI DUNG HÌNH:
+   - Biểu đồ vòng tròn đồng tâm:
+     - Vòng trong cùng: "Vùng An Toàn" (Thoải mái nhưng không phát triển).
+     - Vòng giữa: "Vùng Sợ Hãi" (Lý do trì hoãn: Sợ mất tiền, chưa sẵn sàng).
+     - Vòng ngoài cùng: "Vùng Phát Triển" (Học hỏi, Kỹ năng mới, Lợi nhuận).
+   - Một nhân vật đang bước từ vòng trong ra vòng ngoài.
+   - Text: "Hành động là liều thuốc giải cho nỗi sợ."
+
+  ---
+
+  🧭 HÌNH 1.8.6.4: TÓM TẮT QUYẾT ĐỊNH (FLOWCHART)
+  Tên file: 1.8.6.4-decision-flowchart.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Tổng hợp quy trình ra quyết định cuối cùng.
+  NỘI DUNG HÌNH:
+   - Sơ đồ cây (Decision Tree) đơn giản:
+     - Bắt đầu: "Bạn đã sẵn sàng hành động?"
+     - Nhánh "Có, nhưng ít vốn" -> Chọn TIER 2.
+     - Nhánh "Có, muốn đi nhanh" -> Chọn TIER 3.
+     - Nhánh "Có, muốn thêm thu nhập" -> Đăng ký Partner.
+     - Nhánh "Chưa" -> Xem lại mục tiêu -> Quay lại bắt đầu.
+   - Màu sắc tươi sáng, hướng tới hành động tích cực.

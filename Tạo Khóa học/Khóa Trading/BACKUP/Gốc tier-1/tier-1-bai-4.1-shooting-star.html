@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 4.1: Shooting Star (Sao Băng)</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================
+       🎨 GEM DESIGN SYSTEM - V5.3 FACEBOOK-STYLE
+       ========================================== */
+    :root {
+      --color-navy: #112250;
+      --color-navy-dark: #0A0F1A;
+      --color-gold: #FFBD59;
+      --color-gold-dark: #E5A84D;
+      --color-burgundy: #9C0612;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-warning: #F59E0B;
+      --color-white: #FFFFFF;
+      --color-text: #E8E8E8;
+      --color-text-secondary: rgba(255, 255, 255, 0.7);
+      --color-text-muted: rgba(255, 255, 255, 0.5);
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.08);
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(255, 189, 89, 0.3);
+      --text-padding: 16px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 20px;
+      --radius-sm: 0;
+      --radius-md: 0;
+      --radius-lg: 0;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --glass-blur: blur(40px);
+    }
+
+    @media (min-width: 600px) {
+      :root {
+        --text-padding: 24px;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      font-size: 15px;
+      color: var(--color-text);
+      background: linear-gradient(180deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-dark) 100%);
+      min-height: 100vh;
+    }
+
+    @media (min-width: 600px) { body { font-size: 16px; line-height: 1.7; } }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(106, 91, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .lesson-container { max-width: 900px; margin: 0 auto; padding: 0; }
+    @media (min-width: 600px) { .lesson-container { padding: 16px; } }
+
+    .lesson-header {
+      text-align: center;
+      padding: var(--space-lg) var(--text-padding);
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: var(--space-md);
+    }
+
+    @media (min-width: 600px) {
+      .lesson-header {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        margin-bottom: var(--space-xl);
+      }
+    }
+
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-gold), var(--color-cyan), var(--color-gold));
+    }
+
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, var(--color-burgundy), #c41e2a);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+    }
+
+    @media (min-width: 600px) { .lesson-badge { font-size: 13px; padding: 6px 16px; } }
+
+    .lesson-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.5rem, 6vw, 2.5rem);
+      font-weight: 800;
+      color: var(--color-gold);
+      margin-bottom: var(--space-sm);
+      line-height: 1.2;
+      text-shadow: 0 0 30px rgba(255, 189, 89, 0.3);
+    }
+
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    .lesson-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--color-text-muted);
+      font-size: 12px;
+    }
+
+    @media (min-width: 600px) { .lesson-meta-item { font-size: 14px; } }
+    .lesson-meta-icon { color: var(--color-cyan); }
+
+    .lesson-content { background: transparent; border-radius: 0; padding: 0; backdrop-filter: none; border: none; }
+
+    @media (min-width: 600px) {
+      .lesson-content {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        padding: var(--text-padding);
+        backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--border-subtle);
+      }
+    }
+
+    .section { margin-bottom: var(--space-xl); }
+
+    h2, h3, p, ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      h2, h3, p, ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+
+    h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.25rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid rgba(255, 189, 89, 0.3);
+    }
+
+    @media (min-width: 600px) { h2 { font-size: 1.75rem; } }
+
+    h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-cyan);
+      margin-top: var(--space-lg);
+      margin-bottom: var(--space-sm);
+    }
+
+    @media (min-width: 600px) { h3 { font-size: 1.25rem; } }
+
+    p { margin-bottom: var(--space-md); }
+    strong { color: var(--color-gold); font-weight: 600; }
+
+    ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+      margin-bottom: var(--space-md);
+      padding-left: calc(var(--text-padding) + 20px);
+    }
+
+    @media (min-width: 600px) {
+      ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) { padding-left: 24px; }
+    }
+
+    ul li { margin-bottom: var(--space-xs); }
+
+    .opening-hook {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(17, 34, 80, 0.4));
+      border-left: 4px solid var(--color-burgundy);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin-bottom: var(--space-lg);
+      font-size: 15px;
+      font-style: italic;
+    }
+
+    @media (min-width: 600px) { .opening-hook { border-radius: var(--radius-md); font-size: 17px; } }
+    .opening-hook p { padding-left: 0; padding-right: 0; }
+    .opening-hook p:last-child { margin-bottom: 0; }
+
+    .highlight-box {
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-md) 0;
+      border-left: 4px solid;
+    }
+
+    @media (min-width: 600px) { .highlight-box { border-radius: var(--radius-md); } }
+    .highlight-box p, .highlight-box ul { padding-left: 0 !important; padding-right: 0 !important; }
+
+    .highlight-box.important { background: rgba(255, 189, 89, 0.1); border-color: var(--color-gold); }
+    .highlight-box.tip { background: rgba(0, 240, 255, 0.1); border-color: var(--color-cyan); }
+    .highlight-box.warning { background: rgba(245, 158, 11, 0.1); border-color: var(--color-warning); }
+    .highlight-box.success { background: rgba(16, 185, 129, 0.1); border-color: var(--color-green); }
+    .highlight-box.definition { background: rgba(106, 91, 255, 0.1); border-color: var(--color-purple); }
+
+    .highlight-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (min-width: 600px) { .highlight-title { font-size: 17px; } }
+
+    .highlight-box.important .highlight-title { color: var(--color-gold); }
+    .highlight-box.tip .highlight-title { color: var(--color-cyan); }
+    .highlight-box.warning .highlight-title { color: var(--color-warning); }
+    .highlight-box.success .highlight-title { color: var(--color-green); }
+    .highlight-box.definition .highlight-title { color: var(--color-purple); }
+
+    .lesson-image {
+      margin: var(--space-md) 0;
+      text-align: center;
+      overflow: hidden;
+      border-radius: 0;
+    }
+
+    @media (min-width: 600px) { .lesson-image { border-radius: var(--radius-md); margin: var(--space-lg) 0; } }
+
+    .lesson-image img { width: 100%; height: auto; display: block; border-radius: 0; }
+
+    @media (min-width: 600px) {
+      .lesson-image img {
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-subtle);
+      }
+    }
+
+    .image-caption {
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 12px;
+      margin-top: var(--space-sm);
+      font-style: italic;
+      padding: 0 var(--text-padding);
+    }
+
+    @media (min-width: 600px) { .image-caption { font-size: 14px; padding: 0; } }
+
+    .key-concept-box {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.15), rgba(17, 34, 80, 0.3));
+      border: none;
+      border-left: 4px solid var(--color-burgundy);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .key-concept-box {
+        border: 2px solid var(--color-burgundy);
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl);
+      }
+    }
+
+    .key-concept-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (min-width: 600px) { .key-concept-title { font-size: 1.25rem; } }
+
+    .key-concept-list { list-style: none; padding: 0; margin: 0; }
+
+    .key-concept-list li {
+      padding: 6px 0;
+      padding-left: 24px;
+      position: relative;
+      color: var(--color-text);
+      font-size: 14px;
+    }
+
+    @media (min-width: 600px) { .key-concept-list li { font-size: 16px; padding: 8px 0; padding-left: 28px; } }
+    .key-concept-list li::before { content: "✓"; position: absolute; left: 0; color: var(--color-green); font-weight: bold; }
+
+    .quiz-section {
+      background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05));
+      border: none;
+      border-left: 4px solid var(--color-purple);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .quiz-section {
+        border: 2px solid var(--color-purple);
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl);
+      }
+    }
+
+    .quiz-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.2rem;
+      color: var(--color-purple);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (min-width: 600px) { .quiz-title { font-size: 1.5rem; } }
+
+    .quiz-question {
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-lg);
+      border-bottom: 1px solid rgba(106, 91, 255, 0.2);
+    }
+
+    .quiz-question:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+    .quiz-question-text {
+      font-weight: 600;
+      color: var(--color-white);
+      margin-bottom: var(--space-sm);
+      font-size: 15px;
+    }
+
+    @media (min-width: 600px) { .quiz-question-text { font-size: 17px; } }
+
+    .quiz-options { list-style: none; padding: 0; }
+
+    .quiz-option {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      margin-bottom: 6px;
+      background: rgba(17, 34, 80, 0.4);
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    @media (min-width: 600px) { .quiz-option { font-size: 15px; padding: var(--space-md); } }
+    .quiz-option:hover { background: rgba(17, 34, 80, 0.6); border-color: var(--color-purple); }
+
+    .quiz-option-letter {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      background: rgba(106, 91, 255, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--color-purple);
+    }
+
+    @media (min-width: 600px) { .quiz-option-letter { width: 30px; height: 30px; font-size: 14px; } }
+
+    .quiz-answer {
+      margin-top: var(--space-sm);
+      padding: var(--space-md);
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 3px solid var(--color-green);
+      border-radius: 8px;
+      display: none;
+      font-size: 14px;
+    }
+
+    @media (min-width: 600px) { .quiz-answer { font-size: 15px; } }
+    .quiz-answer.show { display: block; }
+    .quiz-answer-label { font-weight: 600; color: var(--color-green); margin-bottom: 4px; }
+
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-xl) var(--text-padding);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: var(--space-lg);
+      background: var(--bg-card);
+    }
+
+    @media (min-width: 600px) { .lesson-footer { background: transparent; padding: var(--space-xl) 0; } }
+
+    .footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--color-gold);
+      margin-bottom: 4px;
+    }
+
+    .footer-link { color: var(--color-text-muted); font-size: 13px; }
+    .footer-link a { color: var(--color-cyan); text-decoration: none; }
+    .footer-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+
+<body>
+  <div class="lesson-container">
+
+    <!-- HEADER -->
+    <header class="lesson-header">
+      <span class="lesson-badge">📚 TIER 1 • Chương 4 • Bài 4.1</span>
+      <h1 class="lesson-title">Shooting Star (Sao Băng)</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">⏱️</span>
+          15 phút đọc
+        </span>
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">📚</span>
+          ~1500 từ
+        </span>
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">✅</span>
+          3 câu quiz
+        </span>
+      </div>
+    </header>
+
+    <!-- LESSON CONTENT -->
+    <div class="lesson-content">
+
+      <div class="opening-hook">
+        <p>Hãy tưởng tượng bạn đang ngắm bầu trời đêm và thấy một ngôi sao băng lướt qua. Nó bay lên cao rồi rơi xuống nhanh chóng, để lại một vệt sáng dài phía sau. Pattern Shooting Star trên biểu đồ hoạt động y hệt như vậy. Giá cố gắng bay lên cao nhưng bị đẩy xuống mạnh mẽ, để lại một cái bóng dài phía trên.</p>
+        <p>Đây là một trong những tín hiệu đảo chiều mạnh nhất mà bạn cần nắm vững trong hành trình trading của mình.</p>
+      </div>
+
+      <section class="section">
+        <h2>Shooting Star Là Gì?</h2>
+
+        <p><strong>Shooting Star</strong> là một mẫu nến đảo chiều giảm xuất hiện sau một xu hướng tăng. Nến này có thân nhỏ nằm ở phần dưới và bóng trên rất dài. Bóng trên thường dài gấp ít nhất 2-3 lần thân nến. Điều này cho thấy phe mua đã cố gắng đẩy giá lên cao nhưng thất bại hoàn toàn.</p>
+
+        <div class="highlight-box definition">
+          <div class="highlight-title">📖 Định Nghĩa Shooting Star</div>
+          <p><strong>Shooting Star</strong> là nến có thân nhỏ ở dưới, bóng trên dài ít nhất gấp 2 lần thân nến, và bóng dưới rất ngắn hoặc không có. Nến này xuất hiện sau xu hướng tăng và báo hiệu khả năng đảo chiều giảm. Màu của thân nến có thể là xanh hoặc đỏ, nhưng đỏ cho tín hiệu mạnh hơn.</p>
+        </div>
+
+        <h3>Tại Sao Shooting Star Là Tín Hiệu Mạnh?</h3>
+
+        <p>Khi bạn thấy Shooting Star, hãy hình dung câu chuyện đằng sau nến đó. Trong phiên giao dịch, phe mua đã rất hưng phấn và đẩy giá lên cao. Tuy nhiên, tại vùng giá cao đó, phe bán bất ngờ xuất hiện với lực rất mạnh. Họ đẩy giá quay ngược xuống gần mức giá mở cửa.</p>
+
+        <p>Điều này giống như một trận đấu kéo co vậy. Phe mua tưởng như đang thắng thế, nhưng phe bán đột nhiên dồn hết sức và kéo ngược toàn bộ thành quả của đối thủ. Kết quả là phe mua mất hoàn toàn đà tấn công.</p>
+
+        <div class="highlight-box important">
+          <div class="highlight-title">⭐ Điều Kiện Hình Thành Shooting Star Chuẩn</div>
+          <p>Để Shooting Star được coi là hợp lệ, bạn cần kiểm tra các điều kiện sau. Thứ nhất, phải có xu hướng tăng rõ ràng trước đó với ít nhất 3-5 nến tăng liên tiếp. Thứ hai, bóng trên phải dài ít nhất gấp 2 lần thân nến, càng dài càng mạnh. Thứ ba, bóng dưới rất ngắn hoặc không có, tối đa bằng 10% chiều cao nến.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Cách Nhận Diện Shooting Star Trên Biểu Đồ</h2>
+
+        <p>Khi quan sát biểu đồ, bạn cần tập trung vào vị trí và hình dạng của nến. Shooting Star thường xuất hiện tại các vùng kháng cự quan trọng hoặc tại HFZ mà bạn đã học ở chương trước. Đây là nơi mà Smart Money chờ sẵn để bán ra.</p>
+
+        <h3>Đặc Điểm Hình Dạng</h3>
+
+        <p>Hãy nhìn vào thân nến trước tiên. Thân nến của Shooting Star rất nhỏ, thường chỉ chiếm khoảng 20-30% tổng chiều cao của nến. Phần còn lại là bóng trên dài vút lên phía trên. Bóng dưới gần như không có hoặc rất ngắn.</p>
+
+        <p>Một số trader mới thường nhầm lẫn Shooting Star với Doji có bóng trên dài. Sự khác biệt chính là Shooting Star có thân nến nhỏ nhưng vẫn nhìn thấy được, trong khi Doji gần như không có thân nến.</p>
+
+        <div class="highlight-box tip">
+          <div class="highlight-title">💡 Mẹo Nhận Diện Nhanh</div>
+          <p>Bạn có thể dùng quy tắc 1-2-3 để nhận diện Shooting Star nhanh chóng. Bước 1: Xác nhận có xu hướng tăng trước đó. Bước 2: Tìm nến có bóng trên dài gấp ít nhất 2 lần thân. Bước 3: Kiểm tra bóng dưới phải rất ngắn hoặc không có. Nếu đủ cả 3 điều kiện, bạn có một Shooting Star hợp lệ.</p>
+        </div>
+
+        <h3>Vị Trí Xuất Hiện</h3>
+
+        <p>Shooting Star có ý nghĩa nhất khi xuất hiện tại các vùng kháng cự mạnh. Vùng kháng cự có thể là đỉnh cũ của thị trường, đường MA quan trọng, hoặc vùng HFZ mà bạn đã xác định. Khi Shooting Star xuất hiện đúng tại những vùng này, xác suất đảo chiều tăng lên đáng kể.</p>
+
+        <div class="highlight-box warning">
+          <div class="highlight-title">⚠️ Cảnh Báo Quan Trọng</div>
+          <p>Shooting Star xuất hiện giữa xu hướng đi ngang không có nhiều ý nghĩa. Bạn chỉ nên chú ý đến pattern này khi nó xuất hiện sau một đợt tăng giá rõ ràng. Nếu không có xu hướng tăng trước đó, Shooting Star có thể chỉ là một nến nhiễu bình thường.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Tâm Lý Thị Trường Đằng Sau Shooting Star</h2>
+
+        <p>Hiểu được tâm lý thị trường sẽ giúp bạn giao dịch tự tin hơn. Khi Shooting Star hình thành, câu chuyện diễn ra như sau. Phiên giao dịch bắt đầu với phe mua chiếm ưu thế. Họ đẩy giá lên cao, tạo ra cảm giác hưng phấn trong thị trường.</p>
+
+        <p>Tuy nhiên, tại vùng giá cao, Smart Money bắt đầu bán ra. Lực bán này mạnh đến mức đẩy giá quay ngược xuống. Khi phiên kết thúc, giá đóng cửa gần mức mở cửa hoặc thậm chí thấp hơn. Toàn bộ nỗ lực tăng giá bị xóa sạch.</p>
+
+        <p>Đây là dấu hiệu cho thấy phe bán đã kiểm soát được tình hình. Những trader đã mua ở mức giá cao trong phiên đó giờ bị kẹt lệnh. Họ có thể sẽ cut loss trong các phiên tiếp theo, tạo thêm áp lực giảm giá.</p>
+
+        <div class="highlight-box important">
+          <div class="highlight-title">⭐ Bài Học Từ Tâm Lý Thị Trường</div>
+          <p>Shooting Star không chỉ là một hình dạng nến, mà còn phản ánh sự thay đổi quyền lực trong thị trường. Khi bạn thấy pattern này, hãy nhớ rằng Smart Money có thể đã bắt đầu phân phối tài sản. Đây là lúc bạn nên cẩn thận với các lệnh mua và tìm kiếm cơ hội bán.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Xác Nhận Tín Hiệu Shooting Star</h2>
+
+        <p>Một Shooting Star đơn lẻ chưa đủ để bạn vào lệnh ngay. Bạn cần đợi nến xác nhận ở phiên tiếp theo. Nến xác nhận lý tưởng là một nến giảm mạnh, đóng cửa thấp hơn đáy của Shooting Star.</p>
+
+        <h3>Các Yếu Tố Tăng Độ Tin Cậy</h3>
+
+        <p>Độ tin cậy của Shooting Star tăng lên khi kết hợp với các yếu tố khác. Đầu tiên là volume giao dịch cao trong phiên Shooting Star cho thấy có nhiều giao dịch xảy ra tại vùng giá đó. Tiếp theo là vị trí tại vùng HFZ hoặc kháng cự quan trọng càng làm tăng xác suất đảo chiều.</p>
+
+        <p>Ngoài ra, nếu Shooting Star có thân màu đỏ, điều này cho thấy giá đóng cửa thấp hơn giá mở cửa. Tín hiệu này mạnh hơn so với Shooting Star thân xanh. Cuối cùng, nến xác nhận ở phiên sau đóng cửa thấp hơn đáy của Shooting Star là tín hiệu entry rõ ràng nhất.</p>
+
+        <div class="highlight-box tip">
+          <div class="highlight-title">💡 Quy Tắc Xác Nhận</div>
+          <p>Đừng vội vàng vào lệnh ngay khi thấy Shooting Star hình thành. Hãy đợi đến cuối phiên để nến hoàn chỉnh. Sau đó, quan sát phiên tiếp theo. Nếu nến tiếp theo là nến giảm và đóng cửa dưới đáy của Shooting Star, đây là lúc bạn có thể cân nhắc vào lệnh SHORT.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Tóm Tắt Bài Học</h2>
+
+        <div class="key-concept-box">
+          <div class="key-concept-title">🔑 Khái Niệm Cốt Lõi Cần Nhớ</div>
+          <ul class="key-concept-list">
+            <li><strong>Shooting Star</strong> là nến đảo chiều giảm với thân nhỏ ở dưới và bóng trên dài</li>
+            <li>Bóng trên phải dài ít nhất gấp 2 lần thân nến, bóng dưới rất ngắn hoặc không có</li>
+            <li>Pattern này chỉ có ý nghĩa khi xuất hiện sau xu hướng tăng rõ ràng</li>
+            <li>Cần đợi nến xác nhận ở phiên sau trước khi vào lệnh SHORT</li>
+            <li>Độ tin cậy tăng khi xuất hiện tại HFZ hoặc vùng kháng cự quan trọng</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- QUIZ SECTION -->
+      <div class="quiz-section">
+        <div class="quiz-title">📝 Kiểm Tra Kiến Thức</div>
+
+        <div class="quiz-question">
+          <div class="quiz-question-text">Câu 1: Đặc điểm chính của nến Shooting Star là gì?</div>
+          <ul class="quiz-options">
+            <li class="quiz-option">
+              <span class="quiz-option-letter">A</span>
+              <span>Thân nến lớn và bóng dưới dài</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">B</span>
+              <span>Thân nến nhỏ ở dưới và bóng trên dài</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">C</span>
+              <span>Thân nến nhỏ ở trên và bóng dưới dài</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">D</span>
+              <span>Không có thân nến và hai bóng bằng nhau</span>
+            </li>
+          </ul>
+          <div class="quiz-answer">
+            <div class="quiz-answer-label">✓ Đáp án đúng: B</div>
+            <p>Shooting Star có thân nến nhỏ nằm ở phần dưới và bóng trên rất dài, ít nhất gấp 2 lần thân nến. Bóng dưới rất ngắn hoặc không có.</p>
+          </div>
+        </div>
+
+        <div class="quiz-question">
+          <div class="quiz-question-text">Câu 2: Shooting Star báo hiệu điều gì về xu hướng thị trường?</div>
+          <ul class="quiz-options">
+            <li class="quiz-option">
+              <span class="quiz-option-letter">A</span>
+              <span>Xu hướng tăng sẽ tiếp tục</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">B</span>
+              <span>Khả năng đảo chiều từ tăng sang giảm</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">C</span>
+              <span>Thị trường sẽ đi ngang</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">D</span>
+              <span>Khả năng đảo chiều từ giảm sang tăng</span>
+            </li>
+          </ul>
+          <div class="quiz-answer">
+            <div class="quiz-answer-label">✓ Đáp án đúng: B</div>
+            <p>Shooting Star là pattern đảo chiều giảm (bearish reversal). Khi xuất hiện sau xu hướng tăng, nó báo hiệu khả năng thị trường sẽ đảo chiều từ tăng sang giảm.</p>
+          </div>
+        </div>
+
+        <div class="quiz-question">
+          <div class="quiz-question-text">Câu 3: Khi nào Shooting Star có độ tin cậy cao nhất?</div>
+          <ul class="quiz-options">
+            <li class="quiz-option">
+              <span class="quiz-option-letter">A</span>
+              <span>Khi xuất hiện giữa xu hướng đi ngang</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">B</span>
+              <span>Khi xuất hiện sau xu hướng giảm</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">C</span>
+              <span>Khi xuất hiện tại HFZ sau xu hướng tăng và có nến xác nhận</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">D</span>
+              <span>Khi xuất hiện với volume thấp</span>
+            </li>
+          </ul>
+          <div class="quiz-answer">
+            <div class="quiz-answer-label">✓ Đáp án đúng: C</div>
+            <p>Shooting Star có độ tin cậy cao nhất khi xuất hiện tại vùng HFZ hoặc kháng cự quan trọng, sau một xu hướng tăng rõ ràng, và có nến xác nhận giảm ở phiên tiếp theo.</p>
+          </div>
+        </div>
+
+        <p style="text-align: center; color: var(--color-text-muted); margin-top: var(--space-lg);">
+          <em>💡 Click vào đáp án để kiểm tra</em>
+        </p>
+      </div>
+
+      <!-- NEXT LESSON -->
+      <div class="highlight-box tip">
+        <div class="highlight-title">📚 Bài Tiếp Theo</div>
+        <p>Trong <strong>Bài 4.2: Hanging Man (Người Treo Cổ)</strong>, bạn sẽ học về một pattern đảo chiều giảm khác có hình dạng tương tự nhưng cơ chế hình thành khác biệt. Đừng bỏ lỡ nhé!</p>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="lesson-footer">
+      <div class="footer-logo">GEM Trading Academy</div>
+      <div class="footer-link">
+        <a href="https://gemral.com" target="_blank">gemral.com</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    document.querySelectorAll('.quiz-option').forEach(option => {
+      option.addEventListener('click', function() {
+        const question = this.closest('.quiz-question');
+        const answer = question.querySelector('.quiz-answer');
+        answer.classList.toggle('show');
+        question.querySelectorAll('.quiz-option').forEach(opt => { opt.style.opacity = '0.5'; });
+        this.style.opacity = '1';
+        this.style.borderColor = 'var(--color-purple)';
+      });
+    });
+  </script>
+</body>
+</html>

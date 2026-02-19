@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.2: Flag & Pennant Patterns - Mô Hình Cờ | GEM Trading Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --navy: #112250; --navy-dark: #0a1628; --gold: #FFBD59; --gold-dark: #E5A73D; --cyan: #00F0FF; --purple: #6A5BFF; --burgundy: #9C0612; --burgundy-light: #C41E2A; --success: #00C853; --error: #FF5252; --bg-primary: #0a1628; --bg-card: rgba(17, 34, 80, 0.6); --text-primary: #FFFFFF; --text-secondary: rgba(255, 255, 255, 0.85); --text-muted: rgba(255, 255, 255, 0.6); --glass-bg: rgba(17, 34, 80, 0.4); --glass-border: rgba(255, 189, 89, 0.2); --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px; --radius-md: 12px; --radius-lg: 16px; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--success), var(--cyan)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); color: var(--navy-dark); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .warning-box { background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05)); border: 1px solid rgba(156, 6, 18, 0.4); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .warning-box { border: none; border-radius: 0; border-left: 4px solid var(--burgundy); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .warning-box-title { font-weight: 700; color: var(--burgundy-light); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+        .summary-box { background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02)); border: 2px solid var(--success); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--success); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--success); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--success); font-weight: 700; }
+        .quiz-section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; padding: 0; margin-top: 0; border-top: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: var(--space-lg) 16px var(--space-md); margin-bottom: 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-question { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin-bottom: 0; border-bottom: 1px solid var(--glass-border); } }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; font-weight: 700; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); line-height: 1.6; }
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        @media (max-width: 600px) { .quiz-options { gap: 1px; background: var(--glass-border); margin-left: calc(-16px - 4px); margin-right: -16px; } }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; }
+        @media (max-width: 600px) { .quiz-option { border: none; border-radius: 0; border-left: 4px solid transparent; padding: var(--space-md) 16px; } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.correct { border-left-color: var(--success) !important; } }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.incorrect { border-left-color: var(--error) !important; } }
+        .quiz-option.disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-marker { width: 28px; height: 28px; min-width: 28px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; }
+        .quiz-option.incorrect .option-marker { background: var(--error); border-color: var(--error); color: white; }
+        .option-text { flex: 1; color: var(--text-secondary); }
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--space-sm); display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-buttons { padding: var(--space-lg) 16px; } }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container"><div class="bg-layer-base"></div><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge"><span>🚩</span><span>Classic Patterns</span></div>
+            <div class="lesson-chapter">Chapter 3 - Continuation Patterns</div>
+            <h1 class="lesson-title">Bài 3.2: Flag & Pennant Patterns - Mô Hình Cờ</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 3.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🔥</span> Sức Mạnh Của Sự "Tạm Nghỉ"</h2>
+            <p>Bạn đã bao giờ thấy một vận động viên điền kinh chạy nước rút chưa? Sau khi chạy hết tốc lực 100m, họ sẽ cần một khoảng thời gian đi bộ chậm lại, hít thở sâu để hồi phục năng lượng trước khi tiếp tục đợt chạy tiếp theo.</p>
+
+            <p>Thị trường cũng vận hành y hệt như vậy. Sau một đợt tăng giá hoặc giảm giá mạnh mẽ (gọi là "impulse move"), giá thường sẽ đi vào một giai đoạn "nghỉ ngơi" ngắn hạn. Đây là lúc Smart Money tích lũy lại vị thế, loại bỏ những tay mơ yếu tâm lý, trước khi đẩy giá tiếp tục xu hướng chính.</p>
+
+            <p>Giai đoạn "nghỉ ngơi" này tạo ra hai mô hình tiếp diễn (continuation patterns) kinh điển và mạnh mẽ nhất: <strong>Flag (Cờ Chữ Nhật)</strong> và <strong>Pennant (Cờ Đuôi Nheo)</strong>. Nếu bạn biết cách nhận diện chúng, bạn sẽ không còn sợ hãi khi giá đi ngang sau một đợt pump mạnh, mà thay vào đó, bạn sẽ mỉm cười và chuẩn bị cho cú trade tiếp theo.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Tại Sao Flag & Pennant Quan Trọng?</div>
+                <p>Theo thống kê từ Thomas Bulkowski - "ông trùm" về mô hình giá, Flag và Pennant có tỷ lệ thắng (Win Rate) lên tới <strong>67%</strong> và thường dẫn đến những cú breakout bùng nổ nhất. Lý do rất đơn giản: Chúng đại diện cho sự tạm dừng ngắn hạn trong một xu hướng mạnh, nơi phe thắng thế đang nạp lại đạn dược.</p>
+            </div>
+        </section>
+
+        <!-- MỤC TIÊU BÀI HỌC -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Mục Tiêu Bài Học</h2>
+            <p>Sau bài học này, bạn sẽ nắm vững:</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📋</span> Checklist Kiến Thức</div>
+                <p>• Phân biệt rõ ràng giữa Flag (kênh song song) và Pennant (tam giác hội tụ).<br>
+                • Hiểu sâu về cấu trúc "Cột Cờ" (Pole) - linh hồn của mô hình.<br>
+                • Nắm vững chiến lược Entry, Stop Loss, và Take Profit chuẩn xác.<br>
+                • Biết cách tránh "bẫy" False Breakout thường gặp.<br>
+                • Thấy được sự tương đồng thú vị giữa Flag/Pennant và UPU/DPD của GEM Method.</p>
+            </div>
+        </section>
+
+        <!-- DEEP DIVE: FLAG PATTERN -->
+        <section class="section">
+            <h2 class="section-title"><span>🚩</span> Flag Pattern - Lá Cờ Bay Trong Gió</h2>
+            <p><strong>Flag Pattern</strong> (Mô hình Cờ) xuất hiện khi giá đi vào một kênh giá nhỏ (channel) song song, nghiêng ngược chiều với xu hướng chính trước đó.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.2/6-2-1.webp" alt="Cấu Trúc Bull Flag Pattern">
+            </div>
+            <div class="image-caption">Hình 1: Cấu trúc Bull Flag chuẩn - Pole mạnh + Flag nghiêng xuống</div>
+
+            <h3>Cấu Trúc Giải Phẫu Một Flag Pattern:</h3>
+            <p>Một Flag chuẩn bao gồm 3 phần không thể tách rời:</p>
+            <ol style="padding-left: 1.5rem; color: var(--text-secondary);">
+                <li style="margin-bottom: 0.5rem;"><strong>The Pole (Cột Cờ):</strong> Đây là điều kiện tiên quyết. Phải có một đợt di chuyển giá mạnh, dốc đứng (gần như thẳng đứng), kèm theo volume lớn. Không có Pole, không có Flag.</li>
+                <li style="margin-bottom: 0.5rem;"><strong>The Flag (Lá Cờ):</strong> Giai đoạn giá tích lũy trong một kênh song song hẹp. Quan trọng: Lá cờ nên nghiêng <strong>ngược chiều</strong> với Cột cờ.
+                    <br>• Bull Flag: Cột tăng → Lá cờ nghiêng xuống.
+                    <br>• Bear Flag: Cột giảm → Lá cờ nghiêng lên.
+                </li>
+                <li style="margin-bottom: 0.5rem;"><strong>The Breakout:</strong> Giá phá vỡ kênh giá theo hướng của Cột cờ, xác nhận mô hình hoàn tất.</li>
+            </ol>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📈</span> Bull Flag (Cờ Tăng)</div>
+                <p>Bull Flag hình thành trong uptrend. Đầu tiên là một đợt tăng mạnh tạo ra "pole", sau đó giá pullback nhẹ trong một channel nghiêng xuống - đây là "flag". Khi giá break lên trên đường resistance của flag với volume tăng, đó là tín hiệu entry LONG. Target được tính bằng chiều dài của pole tính từ điểm breakout.<br>
+                <strong>Ví dụ:</strong> Pole từ $100 lên $120 = $20, breakout tại $115 → Target = $115 + $20 = $135.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📉</span> Bear Flag (Cờ Giảm)</div>
+                <p>Bear Flag hình thành trong downtrend. Đầu tiên là một đợt giảm mạnh tạo ra "pole", sau đó giá rebound nhẹ trong một channel nghiêng lên - đây là "flag". Khi giá break xuống dưới đường support của flag với volume tăng, đó là tín hiệu entry SHORT. Target được tính bằng chiều dài của pole tính từ điểm breakout.<br>
+                <strong>Ví dụ:</strong> Pole từ $100 xuống $80 = $20, breakout tại $85 → Target = $85 - $20 = $65.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🔍</span> Insight Về Volume (Cực Quan Trọng)</div>
+                <p>Trong giai đoạn hình thành Cột cờ (Pole), volume phải <strong>TĂNG MẠNH</strong>. Nhưng khi giá đi vào Lá cờ (Flag), volume phải <strong>GIẢM DẦN</strong> (cạn kiệt). Điều này cho thấy phe đối lập đang yếu thế và phe chủ đạo chỉ đang nghỉ ngơi. Nếu volume tăng cao trong giai đoạn Flag, hãy cẩn thận - đó có thể là đảo chiều chứ không phải tiếp diễn!</p>
+            </div>
+        </section>
+
+        <!-- DEEP DIVE: PENNANT PATTERN -->
+        <section class="section">
+            <h2 class="section-title"><span>🔺</span> Pennant Pattern - Cờ Đuôi Nheo</h2>
+            <p><strong>Pennant</strong> rất giống Flag về bản chất tâm lý và cách giao dịch, chỉ khác nhau về hình dáng. Thay vì một kênh song song, Pennant co cụm lại trong một <strong>tam giác cân nhỏ</strong> (Symmetrical Triangle).</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.2/6-2-2.webp" alt="So sánh Flag và Pennant">
+            </div>
+            <div class="image-caption">Hình 2: Sự khác biệt hình học giữa Flag (hình chữ nhật) và Pennant (tam giác)</div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>⚖️</span> So Sánh Nhanh: Flag vs. Pennant</div>
+                <p><strong>• Hình dạng:</strong> Flag giống hình chữ nhật nghiêng. Pennant giống hình tam giác nhọn.<br>
+                <strong>• Thời gian:</strong> Pennant thường hình thành nhanh hơn Flag (chỉ 1-3 tuần trên chart D1).<br>
+                <strong>• Volume:</strong> Cả hai đều yêu cầu volume giảm dần, nhưng Pennant thường thấy volume "chết hẳn" (cực thấp) ngay trước khi breakout.</p>
+            </div>
+        </section>
+
+        <!-- CHIẾN LƯỢC GIAO DỊCH -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Chiến Lược Giao Dịch (Battle Plan)</h2>
+            <p>Dù là Flag hay Pennant, chúng ta đều áp dụng cùng một bộ quy tắc giao dịch chuẩn mực sau đây.</p>
+
+            <h3>1. Entry (Điểm Vào Lệnh)</h3>
+            <p>Chúng ta có 2 cách tiếp cận:</p>
+            <p><strong>• Conservative (An toàn):</strong> Đợi nến đóng cửa (Close) rõ ràng bên ngoài mô hình theo hướng breakout. Điều này giúp tránh "Râu nến quét" (Fakeout). Volume tại cây nến breakout phải tăng vọt.<br>
+            <strong>• Aggressive (Rủi ro):</strong> Entry ngay khi giá chạm trendline dưới của Bull Flag (hoặc trendline trên của Bear Flag) lần thứ 3. Cách này cho R:R cực tốt nhưng dễ bị Stop Loss nếu mô hình thất bại.</p>
+
+            <h3>2. Stop Loss (Cắt Lỗ)</h3>
+            <p>Đừng bao giờ quên SL. Đặt SL ngay phía bên kia của mô hình.</p>
+            <div class="warning-box">
+                <div class="warning-box-title"><span>🛡️</span> Quy Tắc SL</div>
+                <p>• Với Bull Flag: SL dưới đáy thấp nhất của lá cờ.<br>
+                • Với Bear Flag: SL trên đỉnh cao nhất của lá cờ.<br>
+                • <strong>Pro Tip:</strong> Cộng thêm một chút buffer (khoảng đệm) 0.5% - 1% để tránh bị Market Maker quét stop loss (Stop Hunt).</p>
+            </div>
+
+            <h3>3. Take Profit (Chốt Lời) - Tuyệt Kỹ "Pole Projection"</h3>
+            <p>Đây là phần thú vị nhất. Target của mô hình này thường rất lớn và được tính toán khoa học:</p>
+            <p><strong>Công thức:</strong> Target = Điểm Breakout + Chiều dài Cột cờ (Pole)</p>
+            <p>Ví dụ: Giá tăng từ $10 lên $20 (Pole = $10). Sau đó tạo Flag và Breakout tại $18. Target sẽ là $18 + $10 = $28.</p>
+        </section>
+
+        <!-- VÍ DỤ THỰC TẾ -->
+        <section class="section">
+            <h2 class="section-title"><span>📈</span> Ví Dụ Thực Tế</h2>
+            <p>Phân tích case study Bull Flag trên BTC trong tháng 11/2024:</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.2/6-2-3.webp" alt="Ví dụ BTC Bull Flag">
+            </div>
+            <div class="image-caption">Hình 3: Bull Flag trên BTC/USDT khung H4, tháng 11/2024</div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📊</span> Case Study: BTC Bull Flag 11/2024</div>
+                <p><strong>Bối cảnh:</strong> BTC đang trong uptrend mạnh sau kết quả bầu cử Mỹ<br><br>
+                <strong>Pole:</strong> 5-11/11/2024, BTC tăng từ $67,000 lên $89,000 (+33%)<br>
+                <strong>Flag:</strong> 11-13/11/2024, giá consolidate trong channel từ $89,000 xuống $85,000<br>
+                <strong>Breakout:</strong> 14/11/2024, nến H4 đóng cửa tại $90,000 với volume 2x<br><br>
+                <strong>Trade Setup:</strong><br>
+                • Entry: $90,000 (breakout confirmed)<br>
+                • SL: $83,500 (dưới đáy flag $85,000, buffer 2%)<br>
+                • Pole = $22,000 ($89K - $67K)<br>
+                • Target = $90,000 + $22,000 = $112,000<br>
+                • TP1: $101,000 (50% pole), TP2: $112,000 (full pole)<br><br>
+                <strong>Kết quả:</strong> BTC đạt $99,500 ngày 22/11, TP1 hit (+12.2%). Pattern không chạm full target do có pullback lớn sau đó, nhưng đã chốt lời tốt tại TP1.</p>
+            </div>
+        </section>
+
+        <!-- LIÊN HỆ VỚI GEM METHOD -->
+        <section class="section">
+            <h2 class="section-title"><span>🔗</span> Liên Hệ Với GEM Patterns</h2>
+            <p>Bạn có nhận ra điều gì quen thuộc không? Flag và Pennant thực chất chính là những người anh em sinh đôi của các pattern độc quyền trong GEM Method.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔄</span> Sự Tương Đồng</div>
+                <p><strong>• Bull Flag ≈ UPU (Up-Pause-Up):</strong> Cả hai đều mô tả quá trình: Tăng mạnh (Up) → Nghỉ ngơi (Pause/Flag) → Tăng tiếp (Up).<br>
+                <strong>• Bear Flag ≈ DPD (Down-Pause-Down):</strong> Giảm mạnh (Down) → Nghỉ ngơi (Pause/Flag) → Giảm tiếp (Down).</p>
+            </div>
+
+            <p>Khi bạn nhìn thấy một Bull Flag, hãy bật ngay tư duy tìm kiếm vùng <strong>LFZ (Low Frequency Zone)</strong> trùng với đáy của lá cờ. Sự hợp lưu (Confluence) giữa Classic Pattern và GEM Zone sẽ tạo ra những setup có xác suất thắng cực cao (High Probability Setups).</p>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Lưu Ý Khi Trade Flag/Pennant</div>
+                <p>• Không có pole thì KHÔNG phải Flag/Pennant - đây là điều kiện bắt buộc.<br>
+                • Volume phải giảm trong consolidation, nếu volume cao = có thể là distribution/accumulation.<br>
+                • Nếu flag kéo dài quá 4 tuần, nó có thể đã chuyển thành channel/rectangle thay vì flag.<br>
+                • Breakout không có volume là red flag - có thể là false breakout.</p>
+            </div>
+        </section>
+
+        <!-- CÂU HỎI THƯỜNG GẶP -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+            <p>Những thắc mắc phổ biến khi trade Flag và Pennant:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>❓</span> Flag pullback bao nhiêu phần trăm là bình thường?</div>
+                <p>Một flag chất lượng thường pullback 30-50% của pole. Ví dụ: pole tăng $20, flag pullback $6-$10 là bình thường. Nếu pullback hơn 50%, pattern yếu đi vì phe đối lập đang mạnh hơn dự kiến. Nếu pullback dưới 30%, pattern quá tight và có thể break sớm nhưng cũng dễ bị false breakout.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>❓</span> Nên entry trên breakout hay đợi retest?</div>
+                <p>Cả hai đều có ưu và nhược điểm. Entry trên breakout giúp bạn không bỏ lỡ move, nhưng rủi ro false breakout cao hơn. Đợi retest an toàn hơn nhưng có khoảng 40% trường hợp không có retest - giá chạy thẳng. Cách tốt nhất là chia position: 50% entry breakout, 50% đợi retest. Nếu có retest, average down và có giá entry trung bình tốt hơn.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>❓</span> Làm sao phân biệt flag với reversal pattern?</div>
+                <p>Flag là continuation, nằm trong trend và giá tiếp tục theo hướng cũ. Reversal pattern (như Head & Shoulders) đánh dấu sự kết thúc của trend. Điểm khác biệt chính: (1) Flag có pole trước đó, reversal có xu hướng dài hạn trước đó, (2) Flag consolidation nhỏ và ngắn, reversal consolidation lớn và dài hơn, (3) Volume trong flag giảm đều, trong reversal có spike bất thường.</p>
+            </div>
+        </section>
+
+        <!-- HÀNH ĐỘNG THỰC HÀNH -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Hành Động Thực Hành</h2>
+            <p>Để thành thạo Flag và Pennant, hãy thực hành ngay:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Làm Ngay Hôm Nay</div>
+                <p>1. Mở TradingView → BTC/USDT khung H4<br>
+                2. Cuộn về tháng 11/2024 và tìm Bull Flag đã phân tích ở trên<br>
+                3. Tự đo pole và tính target xem có khớp với bài học không<br>
+                4. Tìm thêm 2-3 Flag/Pennant khác trong quý 4/2024 trên BTC, ETH, SOL<br>
+                5. Ghi chép vào journal: Ngày, Coin, Pole size, Flag depth, Breakout hay fail</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📋</span> Bài Tập Tuần Này</div>
+                <p>1. Tạo "Flag Spotting Checklist" với các tiêu chí: Có pole không? Volume giảm trong flag? Pullback 30-50%?<br>
+                2. Scan 10 coin top market cap, tìm tất cả Flag/Pennant trong 3 tháng gần nhất<br>
+                3. Phân loại: Bull Flag, Bear Flag, Bull Pennant, Bear Pennant<br>
+                4. Đếm: Bao nhiêu breakout thành công? Bao nhiêu fail?<br>
+                5. Mục tiêu: Tìm được ít nhất 5 patterns và backtest tính target accuracy</p>
+            </div>
+        </section>
+
+        <!-- TỔNG KẾT -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Tổng Kết Bài Học</h2>
+            <div class="summary-box">
+                <div class="summary-title"><span>💎</span> Key Takeaways</div>
+                <ul class="summary-list">
+                    <li>Flag là channel hẹp nghiêng ngược trend, Pennant là tam giác hội tụ - cả hai đều cần có pole trước</li>
+                    <li>Bull Flag/Pennant cho tín hiệu LONG, Bear Flag/Pennant cho tín hiệu SHORT</li>
+                    <li>Target được tính bằng Pole Projection: Breakout + Chiều dài pole = Target</li>
+                    <li>Volume phải giảm trong consolidation và spike khi breakout - đây là confirmation quan trọng</li>
+                    <li>Bull Flag ≈ UPU, Bear Flag ≈ DPD trong GEM Method - kết hợp cả hai để tăng accuracy</li>
+                    <li>Pullback chuẩn là 30-50% của pole, hơn 50% = pattern yếu đi</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎓</span> Tiếp Theo</div>
+                <p>Trong bài 3.3, chúng ta sẽ học về Triangle Patterns - Ascending, Descending, và Symmetrical. Đây là những continuation patterns phổ biến khi thị trường đang trong giai đoạn tích lũy trước các đợt breakout lớn!</p>
+            </div>
+        </section>
+
+        <footer class="section" style="text-align: center; padding: var(--space-xl);">
+            <p style="color: var(--gold); font-weight: 600;">Hoàn thành Bài 3.2 - Flag & Pennant Patterns</p>
+            <p style="color: var(--text-muted);">Tiếp theo: <strong style="color: var(--text-primary);">Bài 3.3 - Triangle Patterns</strong></p>
+        </footer>
+
+        <!-- QUIZ SECTION -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Chọn đáp án để nhận phản hồi ngay lập tức</p>
+            </div>
+            
+            <div class="quiz-question" data-question="1" data-correct="B">
+                <div class="question-number">1</div>
+                <div class="question-text">Đặc điểm quan trọng nhất về Volume trong giai đoạn hình thành lá cờ (Flag) là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Volume tăng dần đều.</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Volume giảm dần (cạn kiệt).</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Volume giữ nguyên không đổi.</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Volume biến động mạnh thất thường.</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="C">
+                <div class="question-number">2</div>
+                <div class="question-text">Cách tính Target chuẩn cho mô hình Flag là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Bằng chiều rộng của lá cờ.</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Gấp đôi chiều rộng của lá cờ.</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Cộng chiều dài Cột cờ (Pole) vào điểm Breakout.</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Target cố định 50 pips.</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+
+            <div class="quiz-question" data-question="3" data-correct="A">
+                <div class="question-number">3</div>
+                <div class="question-text">Mô hình Bear Flag có đặc điểm nhận dạng nào sau đây?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Cột cờ giảm mạnh, lá cờ là kênh giá hướng lên nhẹ.</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Cột cờ giảm mạnh, lá cờ là kênh giá hướng xuống.</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Cột cờ tăng mạnh, lá cờ là kênh giá hướng xuống.</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Cột cờ đi ngang, lá cờ hình tam giác.</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+
+            <div class="quiz-result"><div class="result-score">0/3</div><div class="result-text">Hoàn thành!</div><div class="result-message"></div></div>
+            <div class="quiz-buttons"><button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button></div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+            let answeredCount = 0, correctCount = 0;
+            const totalQuestions = 3;
+            const explanations = {
+                1: { correct: '✓ Chính xác! Volume giảm dần trong giai đoạn Flag cho thấy phe đối lập đang yếu thế và phe chủ đạo đang tích lũy lại năng lượng.', incorrect: '✗ Sai rồi. Trong giai đoạn Flag, volume phải GIẢM DẦN. Nếu volume tăng, đó có thể là dấu hiệu đảo chiều.' },
+                2: { correct: '✓ Chính xác! Phương pháp "Pole Projection" lấy chiều dài của Cột cờ cộng vào điểm phá vỡ để tìm target tối thiểu.', incorrect: '✗ Sai rồi. Target của Flag được đo bằng chiều dài của Cột cờ (Pole) trước đó, không phải chiều rộng của lá cờ.' },
+                3: { correct: '✓ Chính xác! Bear Flag xuất hiện trong xu hướng giảm (Cột cờ giảm), và giai đoạn nghỉ (Lá cờ) thường là một kênh hồi phục nhẹ hướng lên trên trước khi sập tiếp.', incorrect: '✗ Sai rồi. Bear Flag phải có Cột cờ GIẢM và Lá cờ thường hướng LÊN (ngược chiều xu hướng chính).' }
+            };
+            questions.forEach(q => {
+                const opts = q.querySelectorAll('.quiz-option');
+                opts.forEach(o => {
+                    o.addEventListener('click', function() {
+                        if (q.classList.contains('answered')) return;
+                        q.classList.add('answered'); answeredCount++;
+                        const sel = this.dataset.option, corr = q.dataset.correct, isCor = sel === corr;
+                        opts.forEach(op => op.classList.add('disabled'));
+                        if (isCor) { this.classList.add('correct'); correctCount++; q.querySelector('.question-feedback').classList.add('correct'); }
+                        else { this.classList.add('incorrect'); q.querySelector('.question-feedback').classList.add('incorrect'); opts.forEach(op => { if(op.dataset.option === corr) op.classList.add('correct'); }); }
+                        q.querySelector('.feedback-title').textContent = isCor ? '✓ Chính xác!' : '✗ Sai rồi!';
+                        q.querySelector('.feedback-text').textContent = explanations[q.dataset.question][isCor ? 'correct' : 'incorrect'];
+                        q.querySelector('.question-feedback').classList.add('show');
+                        if (answeredCount === totalQuestions) {
+                            resultDiv.querySelector('.result-score').textContent = `${correctCount}/${totalQuestions}`;
+                            resultDiv.querySelector('.result-message').textContent = correctCount === totalQuestions ? '🎉 Xuất sắc!' : '📚 Ôn lại bài nhé!';
+                            resultDiv.classList.add('show'); retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0; correctCount = 0;
+                questions.forEach(q => { q.classList.remove('answered'); q.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('correct', 'incorrect', 'disabled')); q.querySelector('.question-feedback').classList.remove('show', 'correct', 'incorrect'); });
+                resultDiv.classList.remove('show'); retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

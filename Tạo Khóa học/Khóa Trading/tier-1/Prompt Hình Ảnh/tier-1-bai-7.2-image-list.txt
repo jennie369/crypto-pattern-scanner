@@ -1,0 +1,52 @@
+  🗺️ HÌNH 1.7.2.1: TỔNG QUAN LỘ TRÌNH TRADER
+  Tên file: 1.7.2.1-trader-roadmap-overview.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Minh họa toàn cảnh con đường phát triển của một trader.
+  NỘI DUNG HÌNH:
+   - Một con đường uốn lượn đi lên đỉnh núi, chia làm 4 chặng rõ rệt.
+   - Chặng 1 (Chân núi): "TIER 1 - Nền Tảng" (Hình ảnh người leo núi đang chuẩn bị đồ nghề).
+   - Chặng 2 (Lưng chừng): "TIER 2 - Thực Hành & Kỷ Luật" (Người leo núi đang vượt chướng ngại vật).
+   - Chặng 3 (Gần đỉnh): "TIER 3 - Tinh Thông & Tối Ưu" (Người leo núi điêu luyện, nhanh nhẹn).
+   - Chặng 4 (Đỉnh núi): "PROFITABLE TRADER - Tự Do & Làm Chủ" (Cắm cờ trên đỉnh, view rộng mở).
+   - Các biển báo nhỏ dọc đường: "Kiên nhẫn", "Quản lý vốn", "Tâm lý", "Phương pháp".
+
+  ---
+
+  📊 HÌNH 1.7.2.2: THANG ĐÁNH GIÁ NĂNG LỰC
+  Tên file: 1.7.2.2-competence-scale.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Bảng tiêu chí để học viên tự chấm điểm bản thân.
+  NỘI DUNG HÌNH:
+   - Một bảng (table) hoặc radar chart với các trục kỹ năng chính:
+     1. Nhận diện Pattern (DPU/UPU/DPD/UPD).
+     2. Xác định Zone (HFZ/LFZ).
+     3. Hiểu về Cấu trúc thị trường.
+     4. Kỷ luật & Tâm lý.
+   - Các mức độ đánh giá: "Mới biết" -> "Hiểu sơ" -> "Làm được (có hướng dẫn)" -> "Thành thạo".
+   - Highlight vùng hiện tại của học viên sau Tier 1: Tập trung ở mức "Hiểu sơ" đến "Làm được (có hướng dẫn)".
+
+  ---
+
+  🚀 HÌNH 1.7.2.3: 4 GIAI ĐOẠN PHÁT TRIỂN
+  Tên file: 1.7.2.3-four-stages-growth.png | Tỷ lệ: 3:4 (Vertical)
+  Bối cảnh: Chi tiết hóa 4 giai đoạn tâm lý và kỹ năng.
+  NỘI DUNG HÌNH:
+   - 4 ô (blocks) xếp dọc hoặc lưới 2x2, mỗi ô đại diện 1 giai đoạn:
+   - Giai đoạn 1: Unconscious Incompetence (Không biết mình không biết gì) -> Đã qua.
+   - Giai đoạn 2: Conscious Incompetence (Biết mình còn yếu kém) -> **Vị trí hiện tại (Tier 1 completed)**. Biểu tượng: Người đang gãi đầu nhìn chart, có dấu chấm hỏi nhưng cũng có bóng đèn sáng.
+   - Giai đoạn 3: Conscious Competence (Làm được nhưng cần nỗ lực) -> Mục tiêu Tier 2. Biểu tượng: Người đang tập trung cao độ, soi chart kỹ càng.
+   - Giai đoạn 4: Unconscious Competence (Thành thạo như bản năng) -> Mục tiêu Tier 3/Pro. Biểu tượng: Trader thư thái uống cafe, chart chạy đúng ý.
+
+  ---
+
+  ✅ HÌNH 1.7.2.4: CHECKLIST HÀNH ĐỘNG HÀNG NGÀY
+  Tên file: 1.7.2.4-daily-action-checklist.png | Tỷ lệ: 3:4 (Vertical)
+  Bối cảnh: Một tờ giấy ghi chú (checklist) dán trên màn hình máy tính.
+  NỘI DUNG HÌNH:
+   - Tiêu đề: "DAILY TRADING ROUTINE"
+   - Các mục cần tick:
+     [ ] 30 phút soi chart đầu ngày (Top-down analysis).
+     [ ] Vẽ lại các Key Zones (HFZ/LFZ).
+     [ ] Xác định xu hướng chính (Trend).
+     [ ] Tìm kiếm Pattern tiềm năng.
+     [ ] Ghi chép Nhật ký giao dịch (Trading Journal).
+     [ ] Review lệnh thắng/thua cuối ngày.
+   - Hình ảnh minh họa phụ: Một cây bút và cốc cafe bên cạnh tờ giấy checklist.

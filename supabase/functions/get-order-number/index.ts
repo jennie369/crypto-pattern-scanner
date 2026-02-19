@@ -57,7 +57,7 @@ serve(async (req) => {
 
     let orderNumber: string | null = null;
 
-    // Strategy 1: Query by shopify_order_id (most reliable)
+    // Query by shopify_order_id (Rule 10: no dangerous fallbacks that return wrong data)
     if (numericId) {
       console.log('[Get Order Number] Searching by shopify_order_id:', numericId);
 
@@ -73,41 +73,10 @@ serve(async (req) => {
       }
     }
 
-    // Strategy 2: Query recent order with matching amount (fallback)
-    if (!orderNumber && totalAmount) {
-      console.log('[Get Order Number] Searching by total_amount:', totalAmount);
-
-      const { data, error } = await supabase
-        .from('pending_payments')
-        .select('order_number, total_amount, created_at')
-        .eq('total_amount', totalAmount)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (data && !error) {
-        orderNumber = data.order_number;
-        console.log('[Get Order Number] Found by total_amount:', orderNumber);
-      }
-    }
-
-    // Strategy 3: Get most recent pending order (last resort)
-    if (!orderNumber) {
-      console.log('[Get Order Number] Getting most recent order');
-
-      const { data, error } = await supabase
-        .from('pending_payments')
-        .select('order_number, created_at')
-        .eq('payment_status', 'pending')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (data && !error) {
-        orderNumber = data.order_number;
-        console.log('[Get Order Number] Found most recent:', orderNumber);
-      }
-    }
+    // NOTE: Removed Strategy 2 (match by total_amount) and Strategy 3 (most recent pending)
+    // These fallbacks caused Bug DH4754/DH4757: when an order was missing from pending_payments,
+    // Strategy 3 returned a DIFFERENT order's number, causing wrong QR code to be displayed.
+    // Rule 10 (Troubleshooting_Tips): Fallback values that mask failures are worse than explicit errors.
 
     if (!orderNumber) {
       console.log('[Get Order Number] Order not found in database');

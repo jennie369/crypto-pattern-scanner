@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 10.5: Lợi Thế Đi Sớm - Tier 2</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section, .content-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section, .content-card {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title, .card-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p, .card-body p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul, .card-body ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li, .card-body li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        .image-caption {
+            text-align: center;
+            font-size: 0.9em;
+            color: var(--text-muted);
+            margin-top: -10px;
+            margin-bottom: var(--space-lg);
+            font-style: italic;
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4, .highlight-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: 8px;}
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .warning-box h4 { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .definition-box h4 { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .success-box h4 { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+        .success-box p { color: var(--text-secondary); margin: 0; }
+
+        /* Custom for this lesson */
+        .card-icon {
+            font-size: 2rem;
+            margin-right: var(--space-md);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: var(--space-md);
+        }
+        .card-meta span {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .quote-box {
+            border-left: 4px solid var(--purple);
+            padding-left: var(--space-md);
+            margin: var(--space-lg) 0;
+            font-style: italic;
+            color: var(--text-primary);
+        }
+        .quote-author {
+            margin-top: var(--space-sm);
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+        }
+        .advantage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        .advantage-card {
+            background: var(--bg-primary);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            text-align: center;
+            border: 1px solid var(--glass-border);
+            transition: transform 0.3s ease;
+        }
+        .advantage-card:hover { transform: translateY(-5px); border-color: var(--cyan); }
+        .advantage-icon { font-size: 2rem; margin-bottom: var(--space-sm); }
+        .advantage-title { color: var(--gold); font-weight: 700; margin-bottom: var(--space-xs); }
+        .advantage-desc { font-size: 0.9rem; color: var(--text-muted); }
+        
+        .urgency-box {
+            background: rgba(255, 82, 82, 0.1);
+            border: 1px solid var(--error);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            margin-bottom: var(--space-lg);
+            text-align: center;
+        }
+        .urgency-title { color: var(--error); font-weight: 700; margin-bottom: var(--space-xs); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+        }
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        .quiz-question h4 {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+        }
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+            color: var(--error);
+        }
+        .quiz-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .quiz-result.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent);
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .retake-btn {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-xl);
+        }
+        .footer-text { color: var(--text-muted); }
+        .footer-logo { color: var(--gold); font-weight: 700; font-size: 1.2rem; margin-bottom: var(--space-xs); }
+
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="lesson-header">
+            <span class="lesson-badge">⚡ Tier 2 - Bài 10.5</span>
+            <h1 class="lesson-title">Lợi Thế Đi Sớm</h1>
+            <p class="lesson-subtitle">First Mover Advantage - Tại sao timing quyết định vị thế của bạn</p>
+        </header>
+
+        <!-- 1. OPENING HOOK -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon gold">❓</div>
+                <div class="card-meta">
+                    <h3>Câu Hỏi Mở Đầu</h3>
+                    <span>Bạn có đang lãng phí thời gian?</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Hãy tưởng tượng bạn quay lại năm 2009 và biết về Bitcoin. Hoặc năm 1995 và biết về Amazon. Cuộc sống của bạn sẽ khác biệt như thế nào ngày hôm nay? Chúng ta thường nhìn lại quá khứ với sự tiếc nuối: "Giá như mình biết sớm hơn".</p>
+                
+                <p>Nhưng bạn có nhận ra rằng, ngay lúc này, bạn đang đứng trước một cơ hội tương tự? Trong thị trường tài chính và đặc biệt là crypto, <strong>Timing (Thời điểm)</strong> không chỉ là một yếu tố - nó là TẤT CẢ. Người đi sớm không chỉ "may mắn", họ có những lợi thế cấu trúc mà người đi sau KHÔNG BAO GIỜ có được, dù có nỗ lực gấp 10 lần.</p>
+                
+                <p>Bài học này không phải để tạo FOMO (sợ bỏ lỡ). Nó là một lời cảnh tỉnh lạnh lùng về chi phí thực sự của việc chờ đợi. Nếu bạn đang chần chừ, bài học này dành cho bạn.</p>
+            </div>
+        </article>
+
+        <!-- 2. CONCEPT INTRODUCTION -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon cyan">⏰</div>
+                <div class="card-meta">
+                    <h3>Khái Niệm: First Mover Advantage</h3>
+                    <span>Người tiên phong lấy tất cả</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="definition-box">
+                    <h4>💡 First Mover Advantage (Lợi thế người đi đầu)</h4>
+                    <p>Trong kinh tế học và đầu tư, <strong>First Mover Advantage</strong> là lợi thế cạnh tranh to lớn mà một cá nhân hoặc tổ chức đạt được bằng cách tham gia vào một thị trường hoặc lĩnh vực mới TRƯỚC khi nó trở nên bão hòa.</p>
+                </div>
+
+                <p>Tại sao điều này quan trọng trong trading và hệ sinh thái GEM? Bởi vì thị trường tài chính là một cuộc chơi có tổng bằng không (Zero-sum game) trong ngắn hạn, nhưng là cuộc chơi tăng trưởng (Positive-sum game) trong dài hạn cho những người nắm giữ vị thế sớm.</p>
+
+                <p>Khi bạn tham gia sớm:</p>
+                <ul class="styled-list">
+                    <li><strong>Early Adopters:</strong> Bạn học được kỹ năng khi thị trường còn "dễ thở", ít sự cạnh tranh từ các thuật toán AI phức tạp.</li>
+                    <li><strong>Market Growth:</strong> Bạn được "thủy triều nâng thuyền". Khi thị trường growth x10, tài sản và vị thế của bạn cũng x10 mà không cần nỗ lực thêm.</li>
+                    <li><strong>GEM Ecosystem:</strong> Là một partner đi sớm, bạn xây dựng được mạng lưới (network) trước khi "đất chật người đông".</li>
+                </ul>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x350/112250/00F0FF?text=First+Mover+Advantage" alt="First Mover">
+                    <p class="image-caption">Hình 10.5.1: Sự khác biệt về vị thế giữa người đi sớm và kẻ đến sau</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 3. DEEP DIVE -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon gold">🚀</div>
+                <div class="card-meta">
+                    <h3>Phân Tích Sâu: 4 Lợi Thế Cốt Lõi</h3>
+                    <span>Tại sao bạn cần hành động NGAY BÂY GIỜ</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Hãy phân tích chi tiết 4 đòn bẩy mà bạn sẽ có được khi bắt đầu ngay hôm nay, thay vì chờ đến "tháng sau" hay "năm sau".</p>
+
+                <div class="advantage-grid">
+                    <div class="advantage-card">
+                        <div class="advantage-icon">📈</div>
+                        <div class="advantage-title">1. Lãi Suất Kép (Compound Time)</div>
+                        <div class="advantage-desc">
+                            <p>Einstein gọi lãi suất kép là kỳ quan thứ 8. Nhưng nó cần một nguyên liệu: <strong>THỜI GIAN</strong>.</p>
+                            <p>Bắt đầu sớm 1 năm không chỉ cho bạn thêm 1 năm lợi nhuận, mà nó nhân đôi sức mạnh của chuỗi lãi suất kép trong 10 năm tới. Mỗi ngày bạn trì hoãn là bạn đang "cắt ngắn" chuỗi lãi kép của mình.</p>
+                        </div>
+                    </div>
+                    <div class="advantage-card">
+                        <div class="advantage-icon">🎯</div>
+                        <div class="advantage-title">2. Ít Cạnh Tranh (Less Competition)</div>
+                        <div class="advantage-desc">
+                            <p>Khi mọi người đều biết đến một phương pháp, hiệu quả của nó sẽ giảm (Alpha decay). Hiện tại, GEM Frequency vẫn là một "vũ khí bí mật".</p>
+                            <p>Bạn đang có cơ hội khai thác thị trường khi đám đông retail trader vẫn đang dùng các chỉ báo trễ (lagging indicators) lỗi thời.</p>
+                        </div>
+                    </div>
+                    <div class="advantage-card">
+                        <div class="advantage-icon">💰</div>
+                        <div class="advantage-title">3. Phần Thưởng Đối Tác (Partner Rewards)</div>
+                        <div class="advantage-desc">
+                            <p>Trong bất kỳ hệ sinh thái nào, những Early Partners luôn nhận được ưu đãi tốt nhất: hoa hồng cao hơn, hỗ trợ trực tiếp từ founder, và quyền truy cập các công cụ Beta.</p>
+                            <p>Khi cộng đồng đã quá lớn, rào cản gia nhập sẽ cao hơn rất nhiều.</p>
+                        </div>
+                    </div>
+                    <div class="advantage-card">
+                        <div class="advantage-icon">🌟</div>
+                        <div class="advantage-title">4. Vị Thế & Uy Tín (Status)</div>
+                        <div class="advantage-desc">
+                            <p>Trở thành "OG" (Original Gangster - Thành viên kỳ cựu) mang lại uy tín cực lớn.</p>
+                            <p>Khi cộng đồng phát triển, bạn sẽ là người mà các newbie nhìn lên, lắng nghe và tin tưởng. Uy tín này có thể chuyển hóa thành tiền bạc và mối quan hệ chất lượng.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- 4. EXAMPLES / MARKET CONTEXT -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon green">📊</div>
+                <div class="card-meta">
+                    <h3>Bối Cảnh Thị Trường: Crypto Vẫn Còn Quá Sớm</h3>
+                    <span>Đừng tin vào FUD "đã quá muộn"</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Bạn thường nghe: "Bitcoin giá cao quá rồi, vào làm gì nữa?". Đây là một sự hiểu lầm tai hại về quy mô thị trường (Market Size).</p>
+
+                <div class="success-box">
+                    <h4>🔍 Thực Tế Số Liệu (Fact Check)</h4>
+                    <ul class="styled-list">
+                        <li><strong>Global Adoption:</strong> Hiện tại chỉ có khoảng ~4-5% dân số thế giới sở hữu crypto. Chúng ta vẫn đang ở giai đoạn "Early Adopters" trên đường cong S-Curve.</li>
+                        <li><strong>So sánh với Internet:</strong> Crypto năm 2024-2025 tương đương với Internet năm 1998-1999. Bạn có nghĩ vào Internet năm 1999 là "quá muộn" không? Hay đó là thời điểm vàng để bắt đầu Google, Amazon?</li>
+                        <li><strong>Dòng tiền tổ chức (Institutional Money):</strong> Các quỹ ETF, quỹ hưu trí chỉ mới BẮT ĐẦU phân bổ vốn vào. Dòng tiền khổng lồ vẫn chưa thực sự đổ bộ.</li>
+                    </ul>
+                </div>
+
+                <p>Cơ hội không phải là "đã qua", mà nó đang "tăng tốc". Nhưng cửa sổ cơ hội này sẽ không mở mãi mãi. Khi thị trường bão hòa (Mass Adoption), lợi nhuận siêu ngạch sẽ biến mất.</p>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x300/112250/10B981?text=Crypto+Adoption+Curve" alt="Adoption">
+                    <p class="image-caption">Hình 10.5.2: Vị trí của chúng ta trên đường cong chấp nhận công nghệ</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 5. MISTAKES (COST OF WAITING) -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon purple">⚠️</div>
+                <div class="card-meta">
+                    <h3>Chi Phí Vô Hình Của Việc Chờ Đợi</h3>
+                    <span>Cost of Inaction</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Chúng ta thường tính toán rủi ro khi <strong>làm</strong> một việc gì đó (Sợ thua lỗ). Nhưng chúng ta hiếm khi tính toán rủi ro của việc <strong>KHÔNG làm</strong> gì cả.</p>
+
+                <div class="urgency-box">
+                    <div class="urgency-title">⏳ Cái Giá Phải Trả Cho Sự Trì Hoãn</div>
+                    <div class="urgency-text">"Một năm trôi qua rất nhanh. Nhưng khoảng cách tạo ra sau một năm giữa người hành động và người chờ đợi là cả một đại dương."</div>
+                </div>
+
+                <p>Nếu bạn quyết định "đợi thêm 1 năm nữa xem sao", bạn sẽ mất những gì?</p>
+                <ul class="styled-list gold">
+                    <li><strong>Chi phí cơ hội (Opportunity Cost):</strong> Số tiền bạn LẼ RA đã kiếm được nếu bắt đầu trade từ hôm nay. Với lãi suất kép, con số này sau 5 năm là khổng lồ.</li>
+                    <li><strong>Độ trễ kỹ năng (Learning Delay):</strong> Trading là kỹ năng thực chiến. Đọc sách 1 năm không bằng trade thực tế 1 tháng. Bạn đang hoãn lại ngày mình trở thành Master.</li>
+                    <li><strong>Lỡ nhịp thị trường (Missing Cycles):</strong> Crypto chạy theo chu kỳ 4 năm (Halving). Lỡ một chu kỳ Bull Run nghĩa là bạn phải chờ 4 năm thanh xuân nữa. Bạn có bao nhiêu lần 4 năm?</li>
+                    <li><strong>Mất vị thế (Lost Networking):</strong> Những người bạn (Partners) tiềm năng của bạn sẽ được người khác tiếp cận và kết nối.</li>
+                </ul>
+            </div>
+        </article>
+
+        <!-- 6. APPLICATION -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon cyan">🎯</div>
+                <div class="card-meta">
+                    <h3>Hành Động Ngay: Action Beats Perfection</h3>
+                    <span>Đừng đợi hoàn hảo mới bắt đầu</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Sai lầm lớn nhất là tư duy: "Tôi cần học hết, hiểu hết, chuẩn bị tiền bạc đầy đủ rồi mới bắt đầu". Đó là cái bẫy của sự trì hoãn.</p>
+                
+                <p>Hãy áp dụng tư duy <strong>"Ready, Fire, Aim" (Sẵn sàng, Bắn, Điều chỉnh)</strong>. Bạn cần hành động để có dữ liệu, từ đó mới điều chỉnh để hoàn hảo hơn.</p>
+
+                <div class="highlight-box">
+                    <h4>🚀 Kế Hoạch Hành Động 24h</h4>
+                    <p>Đừng để ngày hôm nay trôi qua mà không làm gì. Hãy thực hiện ngay:</p>
+                    <ul class="styled-list">
+                        <li><strong>Start Paper Trading:</strong> Mở TradingView, vẽ zone, đặt lệnh ảo NGAY HÔM NAY. Không tốn tiền, chỉ tốn công.</li>
+                        <li><strong>Join Community:</strong> Vào Discord/Telegram, chào hỏi mọi người, tìm một "accountability partner" (người cùng tiến).</li>
+                        <li><strong>Commit TIER 3:</strong> Nếu bạn nghiêm túc muốn rút ngắn thời gian thành công, hãy cân nhắc nâng cấp lên Tier 3 để tiếp cận kiến thức cá voi (Whale) sớm nhất.</li>
+                        <li><strong>Share Value:</strong> Chia sẻ bài học này cho 1 người bạn. Đó là bước đầu tiên của việc xây dựng Partnership.</li>
+                    </ul>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x300/112250/00F0FF?text=Take+Action+Now" alt="Action">
+                    <p class="image-caption">Hình 10.5.3: Hành động ngay hôm nay để kiến tạo tương lai</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 7. SUMMARY -->
+        <div class="summary-box">
+            <h3>📝 Tóm Tắt Bài Học</h3>
+            <ul class="summary-list">
+                <li><strong>First Mover Advantage</strong> là lợi thế cấu trúc không thể sao chép của người đi sớm.</li>
+                <li>Thị trường Crypto vẫn đang ở giai đoạn <strong>Early Adoption (~5%)</strong>, cơ hội tăng trưởng còn rất dài.</li>
+                <li>4 lợi thế cốt lõi: <strong>Lãi kép thời gian, Ít cạnh tranh, Phần thưởng đối tác, và Vị thế uy tín.</strong></li>
+                <li>Chi phí của việc chờ đợi (Cost of Waiting) đắt hơn nhiều so với rủi ro khi hành động.</li>
+                <li><strong>Hành động ngay (Imperfect Action)</strong> luôn tốt hơn sự trì hoãn hoàn hảo.</li>
+            </ul>
+        </div>
+
+        <!-- 8. QUIZ -->
+        <section class="quiz-section">
+            <h3>🎯 Kiểm Tra Kiến Thức</h3>
+
+            <div class="quiz-question" data-correct="1">
+                <h4>Câu 1: Tỷ lệ chấp nhận (Adoption) của Crypto trên toàn cầu hiện tại ước tính khoảng bao nhiêu?</h4>
+                <div class="quiz-options">
+                    <button class="quiz-option" data-index="0">Khoảng 50% (Đã bão hòa)</button>
+                    <button class="quiz-option" data-index="1">Khoảng 4-5% (Giai đoạn Early Adopters)</button>
+                    <button class="quiz-option" data-index="2">Khoảng 0.1% (Chưa ai biết tới)</button>
+                    <button class="quiz-option" data-index="3">Khoảng 90% (Quá muộn để tham gia)</button>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <h4>Câu 2: "First Mover Advantage" trong bối cảnh GEM Trading mang lại lợi ích gì lớn nhất?</h4>
+                <div class="quiz-options">
+                    <button class="quiz-option" data-index="0">Tận dụng lãi suất kép thời gian và xây dựng vị thế uy tín trong cộng đồng.</button>
+                    <button class="quiz-option" data-index="1">Được đảm bảo không bao giờ thua lỗ.</button>
+                    <button class="quiz-option" data-index="2">Có thể điều khiển được thị trường.</button>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <h4>Câu 3: Chi phí lớn nhất của việc trì hoãn (Waiting) là gì?</h4>
+                <div class="quiz-options">
+                    <button class="quiz-option" data-index="0">Tốn tiền phí giao dịch.</button>
+                    <button class="quiz-option" data-index="1">Mất thời gian ngủ.</button>
+                    <button class="quiz-option" data-index="2">Chi phí cơ hội, sự chậm trễ trong phát triển kỹ năng và lỡ nhịp chu kỳ thị trường.</button>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-text"><span id="correct-count">0</span>/3</div>
+                <div class="score-label">Câu trả lời đúng</div>
+                <button class="retake-btn" onclick="resetQuiz()">Làm lại Quiz</button>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <div class="footer-logo">GEM Trading Academy</div>
+            <p class="footer-text">Tier 2 - Bài 10.5: Lợi Thế Đi Sớm</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        function resetQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                const result = question.querySelector('.quiz-result');
+                result.classList.remove('show', 'correct', 'incorrect');
+                result.textContent = '';
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect', 'disabled');
+                });
+            });
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach((option, index) => {
+                option.setAttribute('data-index', index);
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    
+                    question.classList.add('answered');
+                    answeredCount++;
+                    
+                    // Disable all options
+                    options.forEach(opt => opt.classList.add('disabled'));
+
+                    const selectedIndex = parseInt(this.getAttribute('data-index'));
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.classList.add('show', 'correct');
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Xem lại bài học nhé!';
+                        result.classList.add('show', 'incorrect');
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

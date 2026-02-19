@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.5: Từ Paper Trading Đến Giao Dịch Thật - GEM Trading Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>:root{--navy:#112250;--navy-dark:#0a1628;--gold:#FFBD59;--gold-dark:#E5A73D;--cyan:#00F0FF;--purple:#6A5BFF;--burgundy:#9C0612;--success:#00C853;--error:#FF5252;--bg-primary:#0a1628;--bg-card:rgba(17,34,80,0.6);--text-primary:#FFFFFF;--text-secondary:rgba(255,255,255,0.85);--text-muted:rgba(255,255,255,0.6);--glass-bg:rgba(17,34,80,0.4);--glass-border:rgba(255,189,89,0.2);--space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--radius-md:12px;--radius-lg:16px}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}body{font-family:'Montserrat',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.7}img{max-width:100%;height:auto;display:block}.background-container{position:fixed;inset:0;z-index:-1}.bg-layer-base{position:absolute;inset:0;background:linear-gradient(180deg,var(--navy-dark) 0%,var(--navy) 50%,var(--navy-dark) 100%)}.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.3}.orb-1{width:400px;height:400px;background:var(--gold);top:-100px;right:-100px}.orb-2{width:300px;height:300px;background:var(--cyan);bottom:20%;left:-100px}.orb-3{width:250px;height:250px;background:var(--success);bottom:-50px;right:20%}.lesson-container{max-width:800px;margin:0 auto;padding:1.5rem}@media(max-width:600px){.lesson-container{padding:0}}.lesson-header{text-align:center;padding:var(--space-xl);margin-bottom:var(--space-xl);background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:0 4px 24px rgba(0,0,0,0.2)}@media(max-width:600px){.lesson-header{padding:var(--space-lg) 16px;margin-bottom:0;border:none;border-radius:0;box-shadow:none;border-bottom:8px solid var(--bg-primary)}}.lesson-badge{display:inline-flex;align-items:center;gap:var(--space-sm);padding:var(--space-sm) var(--space-md);background:linear-gradient(135deg,var(--success),var(--cyan));border-radius:50px;font-size:0.75rem;font-weight:700;text-transform:uppercase;margin-bottom:var(--space-md);color:var(--navy-dark)}.lesson-chapter{font-size:0.875rem;color:var(--gold);font-weight:600;margin-bottom:var(--space-sm);text-transform:uppercase;letter-spacing:1px}.lesson-title{font-size:clamp(1.75rem,5vw,2.5rem);font-weight:800;color:var(--text-primary);margin-bottom:var(--space-md);line-height:1.2;background:linear-gradient(135deg,#FFF,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.lesson-meta{display:flex;justify-content:center;gap:var(--space-lg);font-size:0.875rem;color:var(--text-muted);margin-top:var(--space-md)}.meta-item{display:flex;align-items:center;gap:var(--space-xs)}.section{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin-bottom:var(--space-xl)}@media(max-width:600px){.section{padding:var(--space-lg) 16px;margin-bottom:var(--space-md);border-radius:0;border:none;border-bottom:8px solid var(--bg-primary)}}.section-title{font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-lg);display:flex;align-items:center;gap:var(--space-sm)}.highlight-box{background:linear-gradient(135deg,rgba(255,189,89,0.1),rgba(255,189,89,0.05));border:1px solid rgba(255,189,89,0.3);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}.highlight-box-title{font-weight:700;color:var(--gold);margin-bottom:var(--space-sm);display:flex;align-items:center;gap:var(--space-sm)}.definition-box{background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(0,240,255,0.05));border:1px solid rgba(0,240,255,0.3);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}.definition-box-title{font-weight:700;color:var(--cyan);margin-bottom:var(--space-sm)}.image-container{margin:var(--space-lg) 0;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--glass-border)}.image-caption{text-align:center;font-size:0.875rem;color:var(--text-muted);padding:var(--space-sm);background:rgba(0,0,0,0.2)}.summary-box{background:linear-gradient(135deg,rgba(0,200,83,0.1),rgba(0,200,83,0.05));border:1px solid rgba(0,200,83,0.3);border-radius:var(--radius-lg);padding:var(--space-xl);margin-top:var(--space-xl)}.summary-title{font-size:1.25rem;font-weight:700;color:var(--success);margin-bottom:var(--space-md)}.summary-list{list-style:none}.summary-list li{position:relative;padding-left:1.5rem;margin-bottom:var(--space-sm);color:var(--text-secondary)}.summary-list li::before{content:"✓";position:absolute;left:0;color:var(--success);font-weight:bold}.quiz-section{margin-top:var(--space-xl)}.quiz-header{text-align:center;margin-bottom:var(--space-lg)}.quiz-title{font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-xs)}.quiz-subtitle{color:var(--text-muted)}.quiz-question{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:var(--space-lg);margin-bottom:var(--space-lg)}.question-number{display:inline-block;background:var(--purple);color:white;width:24px;height:24px;border-radius:50%;text-align:center;line-height:24px;font-size:0.875rem;margin-bottom:var(--space-sm)}.question-text{font-weight:600;font-size:1.1rem;margin-bottom:var(--space-md);color:var(--text-primary)}.quiz-options{display:grid;gap:var(--space-sm)}.quiz-option{background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:var(--space-md);cursor:pointer;transition:all 0.2s ease;display:flex;align-items:center;gap:var(--space-md)}.quiz-option:hover{background:rgba(255,255,255,0.1);border-color:var(--cyan)}.quiz-option.selected{background:rgba(0,240,255,0.1);border-color:var(--cyan)}.quiz-option.correct{background:rgba(0,200,83,0.2);border-color:var(--success)}.quiz-option.incorrect{background:rgba(255,82,82,0.2);border-color:var(--error)}.option-marker{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--text-muted)}.quiz-option.selected .option-marker{background:var(--cyan);color:var(--navy)}.quiz-option.correct .option-marker{background:var(--success);color:white}.quiz-option.incorrect .option-marker{background:var(--error);color:white}.question-feedback{margin-top:var(--space-md);padding:var(--space-md);border-radius:var(--radius-md);display:none}.question-feedback.show{display:block}.question-feedback.correct{background:rgba(0,200,83,0.1);border:1px solid var(--success);color:var(--success)}.question-feedback.incorrect{background:rgba(255,82,82,0.1);border:1px solid var(--error);color:var(--error)}.quiz-result{text-align:center;margin-top:var(--space-xl);padding:var(--space-lg);background:var(--bg-card);border:1px solid var(--gold);border-radius:var(--radius-lg);display:none}.quiz-result.show{display:block}.result-score{font-size:2.5rem;font-weight:800;color:var(--gold);margin-bottom:var(--space-sm)}.quiz-btn{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--navy);border:none;padding:12px 24px;border-radius:50px;font-weight:700;cursor:pointer;transition:transform 0.2s ease;display:inline-block;margin-top:var(--space-md)}.quiz-btn:hover{transform:translateY(-2px)}.btn-secondary{background:rgba(255,255,255,0.1);border:1px solid var(--glass-border);color:var(--text-primary)}.lesson-footer{text-align:center;margin-top:var(--space-xl);padding-top:var(--space-lg);border-top:1px solid var(--glass-border)}.footer-completion{font-weight:600;color:var(--success);margin-bottom:var(--space-sm)}.footer-next{color:var(--text-muted)}</style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🚀</span>
+                <span>Go Live</span>
+            </div>
+            <div class="lesson-chapter">Chapter 5 - Paper Trading</div>
+            <h1 class="lesson-title">Từ Paper Trading Đến Giao Dịch Thật</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 5.5</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title">🎯 Khoảnh Khắc Quyết Định: Bạn Đã Sẵn Sàng Chưa?</h2>
+
+            <p>Bạn có nhớ lần đầu tiên học lái xe không? Sau hàng chục buổi tập trong bãi đỗ xe an toàn, cuối cùng cũng đến ngày bạn phải ra đường thật, với xe cộ qua lại và áp lực thực sự. Trading cũng giống như vậy. Paper trading là "bãi đỗ xe" của bạn, nhưng rồi sẽ đến lúc bạn phải bước ra "đường lớn" với tiền thật.</p>
+
+            <p>Sự khác biệt lớn nhất không nằm ở kỹ thuật mà nằm ở TÂM LÝ. Khi bạn nhìn thấy số tiền thật đang giảm trên màn hình, cảm xúc sẽ hoàn toàn khác với việc nhìn số ảo trong paper trading. Đây là lý do tại sao 70% traders có lợi nhuận trong paper trading lại thua lỗ khi chuyển sang tiền thật. Nhưng đừng lo, bài học này sẽ giúp bạn chuẩn bị kỹ càng cho bước chuyển quan trọng này.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">💡 Sự Thật Về Quá Trình Chuyển Đổi</div>
+                <p>Trong cộng đồng GEM Trading, những traders thành công nhất không phải là những người chuyển sang tiền thật sớm nhất, mà là những người chuẩn bị kỹ lưỡng nhất. Dữ liệu cho thấy traders dành ít nhất 30 ngày paper trading có tỷ lệ profitable sau 6 tháng cao hơn 2.5 lần so với những người chỉ paper trade 1-2 tuần. Kiên nhẫn trong giai đoạn này sẽ quyết định cả sự nghiệp trading của bạn.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: Mục Tiêu Bài Học -->
+        <section class="section">
+            <h2 class="section-title">📚 Mục Tiêu Bài Học</h2>
+
+            <p>Sau khi hoàn thành bài học này, bạn sẽ biết chính xác khi nào mình thực sự sẵn sàng để chuyển từ paper trading sang giao dịch tiền thật. Bạn sẽ hiểu rõ cần bắt đầu với số vốn bao nhiêu, lộ trình 4 giai đoạn để chuyển đổi an toàn, và quan trọng nhất là các quy tắc bảo vệ vốn giúp bạn tồn tại đủ lâu để trở thành trader profitable.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title">📖 Nguyên Tắc Vàng Khi Chuyển Đổi</div>
+                <p>Khi paper trading không còn thú vị nữa và trở thành thói quen tự nhiên như đánh răng buổi sáng, đó là dấu hiệu cho thấy bạn đã sẵn sàng. Nếu bạn vẫn còn hồi hộp mỗi lần vào paper trade, điều đó có nghĩa là bạn chưa đủ kinh nghiệm và cần luyện tập thêm. Hãy nhớ rằng, mục tiêu của paper trading không chỉ là học kỹ thuật, mà còn là xây dựng một quy trình trading có thể lặp lại một cách máy móc, không cảm xúc.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Deep Explanation - Checklist và Tiêu Chí -->
+        <section class="section">
+            <h2 class="section-title">✅ 10 Tiêu Chí Sẵn Sàng Giao Dịch Thật</h2>
+
+            <p>Dưới đây là 10 tiêu chí mà bạn cần đạt được trước khi đặt lệnh đầu tiên với tiền thật. Mỗi tiêu chí đều được xây dựng từ kinh nghiệm của hàng trăm traders trong cộng đồng GEM. Nếu bạn đạt được ít nhất 8 trong 10 tiêu chí này, bạn đã sẵn sàng.</p>
+
+            <h3>Nhóm 1: Kinh Nghiệm và Kỹ Năng (4 tiêu chí)</h3>
+            <p><strong>Tiêu chí 1:</strong> Bạn đã paper trade ít nhất 30 ngày liên tục mà không bỏ lỡ ngày nào, chứng tỏ sự cam kết và kỷ luật cần thiết cho trading thật.</p>
+            <p><strong>Tiêu chí 2:</strong> Win Rate của bạn đạt ít nhất 55% trên tổng cộng 50 trades trở lên, đủ để đảm bảo edge thống kê có ý nghĩa.</p>
+            <p><strong>Tiêu chí 3:</strong> Bạn có thể nhận diện nhanh ít nhất 3 patterns GEM (UPU, DPU, Flag) trong vòng 30 giây khi nhìn vào chart.</p>
+            <p><strong>Tiêu chí 4:</strong> Bạn đã hoàn thành backtest ít nhất 30 trades cho pattern chính của mình và tự tin với kết quả.</p>
+
+            <h3>Nhóm 2: Kỷ Luật và Tâm Lý (3 tiêu chí)</h3>
+            <p><strong>Tiêu chí 5:</strong> Bạn đã tuân thủ 100% các quy tắc trading (không di chuyển SL, không trade ngoài giờ định sẵn) trong ít nhất 2 tuần gần nhất.</p>
+            <p><strong>Tiêu chí 6:</strong> Bạn có thể chấp nhận chuỗi 3-4 trades thua liên tiếp mà không thay đổi chiến lược hay cảm thấy muốn "gỡ" lại ngay lập tức.</p>
+            <p><strong>Tiêu chí 7:</strong> Bạn có Trading Journal ghi chép đầy đủ ít nhất 30 trades gần nhất với phân tích chi tiết.</p>
+
+            <h3>Nhóm 3: Tài Chính và Quản Lý Rủi Ro (3 tiêu chí)</h3>
+            <p><strong>Tiêu chí 8:</strong> Bạn có một số tiền cụ thể sẵn sàng mất HOÀN TOÀN mà không ảnh hưởng đến cuộc sống, tiền này không phải tiền tiết kiệm, tiền học phí, hay tiền sinh hoạt.</p>
+            <p><strong>Tiêu chí 9:</strong> Bạn biết cách tính Position Size chính xác dựa trên số vốn và mức rủi ro cho phép (tối đa 2% mỗi trade).</p>
+            <p><strong>Tiêu chí 10:</strong> Bạn đã có kế hoạch quản lý vốn bằng văn bản, bao gồm giới hạn thua trong ngày và trong tuần.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📊 Đánh Giá Nhanh</div>
+                <p><strong>8-10 tiêu chí:</strong> Bạn đã sẵn sàng! Có thể bắt đầu với Giai đoạn 1 (Micro Position).</p>
+                <p><strong>5-7 tiêu chí:</strong> Gần sẵn sàng. Tập trung vào các tiêu chí còn thiếu trong 1-2 tuần tới.</p>
+                <p><strong>Dưới 5 tiêu chí:</strong> Chưa sẵn sàng. Tiếp tục paper trading và xây dựng kỹ năng cần thiết.</p>
+            </div>
+
+            <!-- HÌNH 5.5.1 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch7/7.5/7-5-1.webp" alt="Checklist 10 tiêu chí sẵn sàng">
+                <div class="image-caption">Hình 5.5.1: Checklist 10 tiêu chí sẵn sàng giao dịch thật - 3 nhóm: Kỹ năng, Tâm lý và Tài chính</div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Lộ Trình 4 Giai Đoạn -->
+        <section class="section">
+            <h2 class="section-title">📈 Lộ Trình 4 Giai Đoạn Chuyển Đổi An Toàn</h2>
+
+            <p>Thay vì nhảy thẳng từ paper trading vào real trading với full size, hãy đi qua 4 giai đoạn chuyển đổi dần dần. Mỗi giai đoạn có mục tiêu và tiêu chí riêng để đảm bảo bạn sẵn sàng cho giai đoạn tiếp theo.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title">🔹 Giai Đoạn 1: Micro Position (Tuần 1-2)</div>
+                <p><strong>Mục tiêu:</strong> Làm quen với cảm giác trading tiền thật, hiểu sự khác biệt về mặt tâm lý so với paper trading.</p>
+                <p><strong>Size:</strong> Chỉ trade $5-10 mỗi lệnh, tương đương với rủi ro dưới $0.50 mỗi trade.</p>
+                <p><strong>Tiêu chí chuyển lên:</strong> Hoàn thành 10 trades mà không vi phạm bất kỳ quy tắc nào (không di chuyển SL, không overtrade).</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title">🔹 Giai Đoạn 2: Small Position (Tuần 3-6)</div>
+                <p><strong>Mục tiêu:</strong> Kiểm soát cảm xúc khi số tiền bắt đầu có ý nghĩa hơn, xây dựng thói quen quản lý lệnh chuyên nghiệp.</p>
+                <p><strong>Size:</strong> Tăng lên $20-50 mỗi lệnh, rủi ro khoảng $1-3 mỗi trade.</p>
+                <p><strong>Tiêu chí chuyển lên:</strong> Có ít nhất 15 trades profitable trong tổng số 25 trades (Win Rate 60%), không có ngày nào trade revenge.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title">🔹 Giai Đoạn 3: Regular Position (Tháng 2-3)</div>
+                <p><strong>Mục tiêu:</strong> Áp dụng đầy đủ quy tắc quản lý vốn 1-2% risk per trade, tối ưu hóa chiến lược dựa trên kết quả thực tế.</p>
+                <p><strong>Size:</strong> Risk 1-2% vốn mỗi trade. Với $500 vốn, risk $5-10 mỗi lệnh.</p>
+                <p><strong>Tiêu chí chuyển lên:</strong> Profitable trong 2 tháng liên tiếp với Profit Factor trên 1.5.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🔹 Giai Đoạn 4: Scale Up (Sau 3 tháng profitable)</div>
+                <p><strong>Mục tiêu:</strong> Tăng vốn và position size một cách có kiểm soát để maximize lợi nhuận.</p>
+                <p><strong>Quy tắc tăng vốn:</strong> Chỉ nạp thêm vốn sau khi profitable 3 tháng liên tiếp. Mỗi lần nạp không quá 50% số vốn hiện tại. Tiếp tục giữ nguyên quy tắc risk 1-2% per trade.</p>
+                <p><strong>Cảnh báo:</strong> Đây KHÔNG phải là lúc để "chơi lớn". Scaling up cần được thực hiện từ từ và có kỷ luật. Nhiều traders thất bại ở giai đoạn này vì quá tự tin sau một chuỗi thắng.</p>
+            </div>
+
+            <!-- HÌNH 5.5.2 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch7/7.5/7-5-2.webp" alt="Lộ trình 4 giai đoạn chuyển đổi">
+                <div class="image-caption">Hình 5.5.2: Lộ trình 4 giai đoạn chuyển đổi an toàn - từ Micro ($5-10) đến Scale Up sau 3 tháng profitable</div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: Câu Hỏi Thường Gặp -->
+        <section class="section">
+            <h2 class="section-title">❓ Câu Hỏi Thường Gặp Về Chuyển Đổi</h2>
+
+            <h3>1. Nên bắt đầu với bao nhiêu vốn?</h3>
+            <p>Với người mới, chúng tôi khuyến nghị bắt đầu với $100-500. Đây là số tiền đủ nhỏ để không gây áp lực tâm lý quá lớn, nhưng đủ lớn để bạn cảm thấy "có ý nghĩa" khi trading. Quan trọng nhất, đây phải là số tiền bạn có thể mất hoàn toàn mà không ảnh hưởng đến cuộc sống. Với $500 và quy tắc risk 2%, bạn có thể chịu được 50 trades thua liên tiếp trước khi hết vốn, đủ để học hỏi và cải thiện.</p>
+
+            <h3>2. Khi nào nên dừng trading và quay lại paper?</h3>
+            <p>Có 4 dấu hiệu cảnh báo bạn cần dừng lại và quay về paper trading để điều chỉnh. Thứ nhất là khi bạn thua 3 trades liên tiếp, hãy nghỉ ít nhất 24 giờ. Thứ hai là khi mất 10% vốn trong 1 tuần, dừng lại và review chiến lược. Thứ ba là khi bạn không ngủ được vì lo lắng về positions, giảm size ngay lập tức. Và thứ tư là khi bạn bắt đầu trade revenge tức gấp đôi lệnh để gỡ lại sau khi thua, đây là lúc cần quay về paper trading cho đến khi kiểm soát được cảm xúc.</p>
+
+            <h3>3. Làm sao để quản lý tâm lý khi trade thật?</h3>
+            <p>Sự khác biệt lớn nhất giữa paper và real trading là yếu tố tâm lý. Có 3 kỹ thuật giúp bạn quản lý tốt hơn. Đầu tiên là Pre-trade Ritual, trước mỗi trade hãy hít thở sâu 3 lần và tự nhắc nhở rằng đây chỉ là 1 trong 100 trades, kết quả của 1 trade không quyết định sự nghiệp của bạn. Thứ hai là Size theo cảm xúc, nếu bạn cảm thấy lo lắng hoặc phấn khích quá mức, giảm size xuống 50%. Và thứ ba là Journal cảm xúc, ghi lại cảm xúc trước và sau mỗi trade để nhận diện pattern tâm lý của bản thân.</p>
+
+            <!-- HÌNH 5.5.3 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch7/7.5/7-5-3.webp" alt="3 kỹ thuật quản lý tâm lý trading">
+                <div class="image-caption">Hình 5.5.3: 3 kỹ thuật quản lý tâm lý khi trading thật - Pre-trade Ritual, Size theo cảm xúc, Journal cảm xúc</div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: Thực Hành - Quy Tắc Bảo Vệ Vốn -->
+        <section class="section">
+            <h2 class="section-title">🛡️ Quy Tắc Bảo Vệ Vốn (Bắt Buộc)</h2>
+
+            <p>Dưới đây là 3 quy tắc bảo vệ vốn KHÔNG THỂ THƯƠNG LƯỢNG. Hãy in ra và dán trên bàn làm việc. Mỗi khi vi phạm, bạn phải dừng trading ngay lập tức.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title">🔒 Quy Tắc #1: Giới Hạn Thua Hàng Ngày</div>
+                <p><strong>Quy định:</strong> Không bao giờ thua quá 5% vốn trong 1 ngày. Với $500 vốn, giới hạn thua là $25/ngày.</p>
+                <p><strong>Hành động:</strong> Khi chạm giới hạn, DỪNG trading ngay lập tức và không được mở lệnh nào khác trong ngày hôm đó, dù có setup đẹp đến đâu.</p>
+                <p><strong>Lý do:</strong> Giới hạn này giúp bạn tồn tại đủ lâu để học hỏi. 5%/ngày có nghĩa là bạn cần 20 ngày thua liên tiếp để mất toàn bộ vốn, đủ thời gian để nhận ra vấn đề và điều chỉnh.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title">📊 Quy Tắc #2: Giới Hạn Thua Hàng Tuần</div>
+                <p><strong>Quy định:</strong> Không bao giờ thua quá 15% vốn trong 1 tuần. Với $500 vốn, giới hạn thua là $75/tuần.</p>
+                <p><strong>Hành động:</strong> Khi chạm giới hạn, DỪNG trading cả tuần và dành thời gian review lại tất cả các trades trong tuần để tìm nguyên nhân.</p>
+                <p><strong>Lý do:</strong> Chuỗi thua có thể xảy ra với bất kỳ ai. Giới hạn tuần giúp bạn có thời gian nghỉ ngơi, reset tâm lý và phân tích lỗi sai một cách khách quan.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📅 Quy Tắc #3: Review Hàng Tuần</div>
+                <p><strong>Quy định:</strong> Vào Chủ nhật hàng tuần, dành 30-60 phút để review TẤT CẢ trades trong tuần.</p>
+                <p><strong>Nội dung review:</strong> Pattern nào cho Win Rate cao nhất? Trade nào vi phạm quy tắc? Cảm xúc nào xuất hiện nhiều nhất khi trading? Điều gì cần cải thiện cho tuần sau?</p>
+                <p><strong>Lý do:</strong> Trading không chỉ là vào lệnh và chờ kết quả. Sự cải thiện đến từ việc phân tích và rút kinh nghiệm liên tục. Traders không review sẽ lặp lại cùng một lỗi nhiều lần.</p>
+            </div>
+
+            <!-- HÌNH 5.5.4 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch7/7.5/7-5-4.webp" alt="3 quy tắc bảo vệ vốn">
+                <div class="image-caption">Hình 5.5.4: 3 quy tắc bảo vệ vốn bắt buộc - Giới hạn thua ngày (5%), tuần (15%) và Weekly Review</div>
+            </div>
+        </section>
+
+        <!-- SECTION 7: Tóm Tắt -->
+        <div class="summary-box">
+            <h3 class="summary-title">📝 Tóm Tắt Bài 5.5 - Chương 5 Hoàn Thành!</h3>
+            <ul class="summary-list">
+                <li>Cần đạt ít nhất 8 trong 10 tiêu chí để thực sự sẵn sàng chuyển từ paper trading sang tiền thật, bao gồm 30 ngày paper trade và Win Rate trên 55%.</li>
+                <li>Bắt đầu với vốn nhỏ từ $100-500 và áp dụng quy tắc risk tối đa 1-2% cho mỗi trade để có thể chịu được chuỗi thua mà vẫn còn vốn để tiếp tục.</li>
+                <li>Đi qua 4 giai đoạn chuyển đổi an toàn là Micro ($5-10), Small ($20-50), Regular (1-2% risk), và Scale Up (sau 3 tháng profitable) thay vì nhảy thẳng vào full size.</li>
+                <li>Quản lý tâm lý là yếu tố quan trọng nhất khi chuyển đổi sang tiền thật vì cảm xúc sẽ mạnh hơn gấp nhiều lần so với paper trading.</li>
+                <li>Tuân thủ 3 quy tắc bảo vệ vốn bắt buộc là thua tối đa 5% trong ngày, 15% trong tuần và review bắt buộc mỗi Chủ nhật.</li>
+            </ul>
+            <p style="margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--glass-border); color: var(--gold); font-weight: 600;">🎓 Chúc mừng bạn đã hoàn thành Chương 5 - Paper Trading! Bạn đã có đầy đủ kiến thức để bắt đầu hành trình trading một cách an toàn và có phương pháp.</p>
+        </div>
+
+        <!-- SECTION 8: Quiz -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">❓ Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Trả lời 3 câu hỏi để củng cố kiến thức về chuyển đổi sang trading thật</p>
+            </div>
+
+            <div class="quiz-question" id="question-1">
+                <div class="question-number">1</div>
+                <p class="question-text">Nên paper trade ít nhất bao nhiêu ngày liên tục trước khi chuyển sang real trading?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-question="1" data-answer="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">7 ngày là đủ</span>
+                    </div>
+                    <div class="quiz-option" data-question="1" data-answer="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Ít nhất 30 ngày</span>
+                    </div>
+                    <div class="quiz-option" data-question="1" data-answer="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Không cần paper trade, có thể bắt đầu ngay</span>
+                    </div>
+                </div>
+                <div class="question-feedback" id="feedback-1">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" id="question-2">
+                <div class="question-number">2</div>
+                <p class="question-text">Theo quy tắc quản lý vốn, risk tối đa cho mỗi trade nên là bao nhiêu phần trăm vốn?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-question="2" data-answer="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">10% vốn</span>
+                    </div>
+                    <div class="quiz-option" data-question="2" data-answer="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">5% vốn</span>
+                    </div>
+                    <div class="quiz-option" data-question="2" data-answer="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">1-2% vốn</span>
+                    </div>
+                </div>
+                <div class="question-feedback" id="feedback-2">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" id="question-3">
+                <div class="question-number">3</div>
+                <p class="question-text">Khi thua 3 trades liên tiếp trong ngày, bạn nên làm gì?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-question="3" data-answer="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Dừng trading và nghỉ ít nhất 24 giờ</span>
+                    </div>
+                    <div class="quiz-option" data-question="3" data-answer="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Gấp đôi position size để gỡ lại nhanh hơn</span>
+                    </div>
+                    <div class="quiz-option" data-question="3" data-answer="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Tiếp tục trade bình thường vì chuỗi thua sẽ sớm kết thúc</span>
+                    </div>
+                </div>
+                <div class="question-feedback" id="feedback-3">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result" id="quiz-result">
+                <div class="result-score"><span id="score">0</span>/3</div>
+                <p class="result-message" id="result-message"></p>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn btn-secondary" onclick="resetQuiz()">Làm Lại</button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="lesson-footer">
+            <p class="footer-completion">🎉 Chúc mừng! Bạn đã hoàn thành Chương 5: Paper Trading!</p>
+            <p class="footer-next">Tiếp theo: <strong>Chương 6 - GEM Master AI</strong></p>
+        </footer>
+    </div>
+
+    <script>
+        const correctAnswers = {
+            1: 'B',
+            2: 'C',
+            3: 'A'
+        };
+
+        const explanations = {
+            1: {
+                correct: 'Chính xác! Dữ liệu từ cộng đồng GEM Trading cho thấy traders dành ít nhất 30 ngày paper trading có tỷ lệ profitable sau 6 tháng cao hơn 2.5 lần so với những người chỉ paper trade 1-2 tuần. 30 ngày là đủ để xây dựng thói quen và trải nghiệm nhiều điều kiện thị trường khác nhau.',
+                incorrect: 'Chưa đúng. Paper trading 7 ngày hoặc không paper trade đều là những cách tiếp cận nguy hiểm. Bạn cần ít nhất 30 ngày để xây dựng kỹ năng và thói quen cần thiết. Đây là khoản đầu tư thời gian quan trọng nhất cho sự nghiệp trading của bạn.'
+            },
+            2: {
+                correct: 'Chính xác! Quy tắc 1-2% risk per trade là tiêu chuẩn vàng trong quản lý vốn. Với mức này, bạn có thể chịu được 50-100 trades thua liên tiếp trước khi hết vốn, đủ để học hỏi và cải thiện. Risk 5-10% là quá cao và sẽ nhanh chóng cháy tài khoản chỉ sau vài chuỗi thua.',
+                incorrect: 'Chưa đúng. Risk 5% hoặc 10% per trade là quá cao và nguy hiểm. Với risk 10%, chỉ cần 10 trades thua liên tiếp là bạn mất hết vốn. Quy tắc an toàn là risk tối đa 1-2% vốn mỗi trade, giúp bạn tồn tại đủ lâu để trở thành trader profitable.'
+            },
+            3: {
+                correct: 'Chính xác! Khi thua 3 trades liên tiếp, điều quan trọng nhất là DỪNG LẠI và nghỉ ít nhất 24 giờ. Tiếp tục trading trong trạng thái này thường dẫn đến trade revenge và thua thêm. Nghỉ ngơi giúp reset tâm lý và đưa ra quyết định sáng suốt hơn.',
+                incorrect: 'Chưa đúng. Gấp đôi position size để gỡ lại (trade revenge) là một trong những lỗi nghiêm trọng nhất và là nguyên nhân hàng đầu khiến traders cháy tài khoản. Khi thua 3 trades liên tiếp, bạn cần DỪNG LẠI và nghỉ ít nhất 24 giờ để reset tâm lý.'
+            }
+        };
+
+        let answered = {1: false, 2: false, 3: false};
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const questionNum = parseInt(this.dataset.question);
+                const selectedAnswer = this.dataset.answer;
+
+                if (answered[questionNum]) return;
+                answered[questionNum] = true;
+
+                const questionEl = document.getElementById(`question-${questionNum}`);
+                const feedbackEl = document.getElementById(`feedback-${questionNum}`);
+                const options = questionEl.querySelectorAll('.quiz-option');
+
+                options.forEach(opt => opt.classList.add('disabled'));
+
+                const isCorrect = selectedAnswer === correctAnswers[questionNum];
+
+                if (isCorrect) {
+                    this.classList.add('correct');
+                    correctCount++;
+                    feedbackEl.classList.add('correct');
+                    feedbackEl.querySelector('.feedback-title').textContent = '✓ Chính xác!';
+                    feedbackEl.querySelector('.feedback-text').textContent = explanations[questionNum].correct;
+                } else {
+                    this.classList.add('incorrect');
+                    options.forEach(opt => {
+                        if (opt.dataset.answer === correctAnswers[questionNum]) {
+                            opt.classList.add('correct');
+                        }
+                    });
+                    feedbackEl.classList.add('incorrect');
+                    feedbackEl.querySelector('.feedback-title').textContent = '✗ Chưa đúng';
+                    feedbackEl.querySelector('.feedback-text').textContent = explanations[questionNum].incorrect;
+                }
+
+                feedbackEl.classList.add('show');
+
+                if (answered[1] && answered[2] && answered[3]) {
+                    showResult();
+                }
+            });
+        });
+
+        function showResult() {
+            const resultEl = document.getElementById('quiz-result');
+            const scoreEl = document.getElementById('score');
+            const messageEl = document.getElementById('result-message');
+
+            scoreEl.textContent = correctCount;
+
+            if (correctCount === 3) {
+                messageEl.textContent = 'Xuất sắc! Bạn đã hoàn thành Chương 5 và sẵn sàng cho Chương 6 - GEM Master AI!';
+            } else if (correctCount === 2) {
+                messageEl.textContent = 'Tốt lắm! Hãy xem lại phần giải thích để nắm vững kiến thức trước khi tiến lên.';
+            } else {
+                messageEl.textContent = 'Bạn cần đọc lại bài học này. Kiến thức về chuyển đổi an toàn rất quan trọng!';
+            }
+
+            resultEl.classList.add('show');
+        }
+
+        function resetQuiz() {
+            answered = {1: false, 2: false, 3: false};
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('correct', 'incorrect', 'disabled');
+            });
+
+            document.querySelectorAll('.question-feedback').forEach(fb => {
+                fb.classList.remove('show', 'correct', 'incorrect');
+            });
+
+            document.getElementById('quiz-result').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

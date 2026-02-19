@@ -1,0 +1,56 @@
+📐 HÌNH 8.7.1: ON LẠI KIẾN THỨC CỐT LÕI (MINDMAP)
+Tên file: 8.7.1-core-knowledge-mindmap.png | Tỷ lệ: 16:9 (Landscape)
+Bối cảnh: Minh họa tổng quan kiến thức Tier 1 cần ôn lại.
+NỘI DUNG HÌNH:
+ - Sơ đồ tư duy 4 nhánh chính tỏa ra từ trung tâm "TIER 1 FOUNDATION":
+   1. Pattern: UPU, DPD, UPD, DPU.
+   2. Zone: HFZ (Bán), LFZ (Mua), Freshness (Độ mới).
+   3. Risk: R:R tối thiểu 1:2, SL 1-2%, Volume.
+   4. Mindset: Probability (Xác suất), Discipline (Kỷ luật).
+ - Hình ảnh trực quan, màu sắc phân biệt rõ các nhánh.
+
+---
+
+📐 HÌNH 8.7.2: ĐĂNG KÝ TÀI KHOẢN DEMO (SCREENSHOT)
+Tên file: 8.7.2-demo-account-setup.png | Tỷ lệ: 16:9 (Landscape)
+Bối cảnh: Hướng dẫn bước đầu thực hành không rủi ro.
+NỘI DUNG HÌNH:
+ - Screenshot giao diện đăng ký tài khoản Demo (ví dụ: Binance Futures Demo hoặc TradingView Paper Trading).
+ - Mũi tên chỉ vào nút "Open Demo Account" hoặc khu vực chọn chế độ "Paper Trading".
+ - Ghi chú nổi bật: "Không rủi ro, trải nghiệm thật."
+ - Một biểu đồ mẫu bên cạnh đang chạy với số dư ảo.
+
+---
+
+📐 HÌNH 8.7.3: THAM GIA CỘNG ĐỒNG (SOCIAL PROOF)
+Tên file: 8.7.3-community-join.png | Tỷ lệ: 16:9 (Landscape)
+Bối cảnh: Khuyến khích kết nối và học hỏi từ cộng đồng.
+NỘI DUNG HÌNH:
+ - Collage (ghép ảnh) các hoạt động sôi nổi trong group Telegram/Discord của GEM.
+ - Các thành viên chia sẻ chart, thảo luận điểm vào lệnh, support nhau.
+ - Icon Telegram và Discord nổi bật ở trung tâm.
+ - Text: "Bạn không đơn độc trên hành trình này."
+
+---
+
+📐 HÌNH 8.7.4: NÂNG CẤP TÀI KHOẢN (TIER COMPARISON)
+Tên file: 8.7.4-tier-upgrade-benefits.png | Tỷ lệ: 3:4 (Vertical)
+Bối cảnh: Minh họa lợi ích vượt trội khi nâng cấp lên Tier 2.
+NỘI DUNG HÌNH:
+ - Bảng so sánh 3 cột: Tier 1 (Cơ bản) vs Tier 2 (Nâng cao) vs Tier 3 (Chuyên sâu).
+ - Cột Tier 2 được highlight (làm nổi bật) với các tính năng:
+   - Scanner tự động 24/7.
+   - Pattern nâng cao & Đa khung thời gian.
+   - Mentor support trực tiếp.
+ - Nút "Upgrade Now" (Nâng cấp ngay) giả lập ở dưới cột Tier 2.
+
+---
+
+📐 HÌNH 8.7.5: PARTNERSHIP PROGRAM (NETWORK)
+Tên file: 8.7.5-partnership-network.png | Tỷ lệ: 16:9 (Landscape)
+Bối cảnh: Giới thiệu cơ hội kiếm tiền thụ động thông qua Partnership.
+NỘI DUNG HÌNH:
+ - Sơ đồ mô phỏng mạng lưới Partner đơn giản.
+ - Icon người kết nối ở giữa -> Mũi tên tỏa ra các người dùng mới -> Icon $ hoa hồng quay lại người kết nối.
+ - Text slogan: "Chia sẻ giá trị, nhận lại thịnh vượng."
+ - Thông điệp kêu gọi: "Trở thành đối tác của GEM ngay hôm nay."

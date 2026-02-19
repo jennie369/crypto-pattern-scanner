@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 7.4: Điều Khiến Bạn Khác Biệt</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================
+       GEM DESIGN SYSTEM - V5.3 FACEBOOK-STYLE
+       ========================================== */
+    :root {
+      --color-navy: #112250;
+      --color-navy-dark: #0A0F1A;
+      --color-gold: #FFBD59;
+      --color-gold-dark: #E5A84D;
+      --color-burgundy: #9C0612;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-warning: #F59E0B;
+      --color-white: #FFFFFF;
+      --color-text: #E8E8E8;
+      --color-text-secondary: rgba(255, 255, 255, 0.7);
+      --color-text-muted: rgba(255, 255, 255, 0.5);
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.08);
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(255, 189, 89, 0.3);
+      --text-padding: 16px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 20px;
+      --radius-sm: 0;
+      --radius-md: 0;
+      --radius-lg: 0;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --glass-blur: blur(40px);
+    }
+
+    @media (min-width: 600px) {
+      :root {
+        --text-padding: 24px;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      font-size: 15px;
+      color: var(--color-text);
+      background: linear-gradient(180deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-dark) 100%);
+      min-height: 100vh;
+    }
+
+    @media (min-width: 600px) { body { font-size: 16px; line-height: 1.7; } }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(106, 91, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .lesson-container { max-width: 900px; margin: 0 auto; padding: 0; }
+    @media (min-width: 600px) { .lesson-container { padding: 16px; } }
+
+    .lesson-header {
+      text-align: center;
+      padding: var(--space-lg) var(--text-padding);
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: var(--space-md);
+    }
+
+    @media (min-width: 600px) {
+      .lesson-header {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        margin-bottom: var(--space-xl);
+      }
+    }
+
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-gold), var(--color-cyan), var(--color-gold));
+    }
+
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, var(--color-burgundy), #c41e2a);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+    }
+
+    @media (min-width: 600px) { .lesson-badge { font-size: 13px; padding: 6px 16px; } }
+
+    .lesson-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.5rem, 6vw, 2.5rem);
+      font-weight: 800;
+      color: var(--color-gold);
+      margin-bottom: var(--space-sm);
+      line-height: 1.2;
+      text-shadow: 0 0 30px rgba(255, 189, 89, 0.3);
+    }
+
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    .lesson-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--color-text-muted);
+      font-size: 12px;
+    }
+
+    @media (min-width: 600px) { .lesson-meta-item { font-size: 14px; } }
+    .lesson-meta-icon { color: var(--color-cyan); }
+
+    .lesson-content { background: transparent; border-radius: 0; padding: 0; backdrop-filter: none; border: none; }
+
+    @media (min-width: 600px) {
+      .lesson-content {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        padding: var(--text-padding);
+        backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--border-subtle);
+      }
+    }
+
+    .section { margin-bottom: var(--space-xl); }
+
+    h2, h3, p, ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      h2, h3, p, ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+
+    h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.25rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid rgba(255, 189, 89, 0.3);
+    }
+
+    @media (min-width: 600px) { h2 { font-size: 1.75rem; } }
+
+    h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-cyan);
+      margin-top: var(--space-lg);
+      margin-bottom: var(--space-sm);
+    }
+
+    @media (min-width: 600px) { h3 { font-size: 1.25rem; } }
+
+    p { margin-bottom: var(--space-md); }
+    strong { color: var(--color-gold); font-weight: 600; }
+
+    ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+      margin-bottom: var(--space-md);
+      padding-left: calc(var(--text-padding) + 20px);
+    }
+
+    @media (min-width: 600px) {
+      ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) { padding-left: 24px; }
+    }
+
+    ul li { margin-bottom: var(--space-xs); }
+
+    .opening-hook {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(17, 34, 80, 0.4));
+      border-left: 4px solid var(--color-burgundy);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin-bottom: var(--space-lg);
+      font-size: 15px;
+      font-style: italic;
+    }
+
+    @media (min-width: 600px) { .opening-hook { border-radius: var(--radius-md); font-size: 17px; } }
+    .opening-hook p { padding-left: 0; padding-right: 0; }
+    .opening-hook p:last-child { margin-bottom: 0; }
+
+    .highlight-box {
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-md) 0;
+      border-left: 4px solid;
+    }
+
+    @media (min-width: 600px) { .highlight-box { border-radius: var(--radius-md); } }
+    .highlight-box p, .highlight-box ul { padding-left: 0 !important; padding-right: 0 !important; }
+
+    .highlight-box.important { background: rgba(255, 189, 89, 0.1); border-color: var(--color-gold); }
+    .highlight-box.tip { background: rgba(0, 240, 255, 0.1); border-color: var(--color-cyan); }
+    .highlight-box.warning { background: rgba(245, 158, 11, 0.1); border-color: var(--color-warning); }
+    .highlight-box.success { background: rgba(16, 185, 129, 0.1); border-color: var(--color-green); }
+    .highlight-box.definition { background: rgba(106, 91, 255, 0.1); border-color: var(--color-purple); }
+
+    .highlight-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (min-width: 600px) { .highlight-title { font-size: 17px; } }
+
+    .highlight-box.important .highlight-title { color: var(--color-gold); }
+    .highlight-box.tip .highlight-title { color: var(--color-cyan); }
+    .highlight-box.warning .highlight-title { color: var(--color-warning); }
+    .highlight-box.success .highlight-title { color: var(--color-green); }
+    .highlight-box.definition .highlight-title { color: var(--color-purple); }
+
+    .key-concept-box {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.15), rgba(17, 34, 80, 0.3));
+      border: none;
+      border-left: 4px solid var(--color-burgundy);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .key-concept-box {
+        border: 2px solid var(--color-burgundy);
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl);
+      }
+    }
+
+    .key-concept-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (min-width: 600px) { .key-concept-title { font-size: 1.25rem; } }
+
+    .key-concept-list { list-style: none; padding: 0; margin: 0; }
+
+    .key-concept-list li {
+      padding: 6px 0;
+      padding-left: 24px;
+      position: relative;
+      color: var(--color-text);
+      font-size: 14px;
+    }
+
+    @media (min-width: 600px) { .key-concept-list li { font-size: 16px; padding: 8px 0; padding-left: 28px; } }
+    .key-concept-list li::before { content: "✓"; position: absolute; left: 0; color: var(--color-green); font-weight: bold; }
+
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-xl) var(--text-padding);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: var(--space-lg);
+      background: var(--bg-card);
+    }
+
+    @media (min-width: 600px) { .lesson-footer { background: transparent; padding: var(--space-xl) 0; } }
+
+    .footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--color-gold);
+      margin-bottom: 4px;
+    }
+
+    .footer-link { color: var(--color-text-muted); font-size: 13px; }
+    .footer-link a { color: var(--color-cyan); text-decoration: none; }
+    .footer-link a:hover { text-decoration: underline; }
+
+    .completion-box {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(17, 34, 80, 0.4));
+      border: 2px solid var(--color-green);
+      border-radius: 0;
+      padding: var(--space-xl) var(--text-padding);
+      margin: var(--space-xl) 0;
+      text-align: center;
+    }
+
+    @media (min-width: 600px) { .completion-box { border-radius: var(--radius-lg); } }
+
+    .completion-icon {
+      font-size: 48px;
+      margin-bottom: var(--space-md);
+    }
+
+    .completion-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--color-green);
+      margin-bottom: var(--space-sm);
+    }
+
+    .completion-text {
+      color: var(--color-text);
+      font-size: 16px;
+      margin-bottom: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="lesson-container">
+
+    <!-- HEADER -->
+    <header class="lesson-header">
+      <span class="lesson-badge">📚 TIER 1 • Chương 7 • Bài 7.4</span>
+      <h1 class="lesson-title">Điều Khiến Bạn Khác Biệt</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">⏱️</span>
+          12 phút đọc
+        </span>
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">📚</span>
+          Module A - Hành Trình Chuyển Hóa
+        </span>
+      </div>
+    </header>
+
+    <!-- LESSON CONTENT -->
+    <div class="lesson-content">
+
+      <div class="opening-hook">
+        <p>Trong một thế giới mà hàng triệu người đều học cùng một phương pháp trading, điều gì sẽ giúp bạn thành công? Câu trả lời không nằm ở việc tìm được chiến lược bí mật nào đó. Nó nằm ở chính bạn - những điểm độc đáo mà không ai khác có được.</p>
+      </div>
+
+      <section class="section">
+        <h2>Mỗi Người Một Thế Mạnh</h2>
+
+        <p>Không có hai traders nào giống hệt nhau trên thế giới này. Mỗi người có background, tính cách, và hoàn cảnh sống khác nhau. Những yếu tố này không phải điểm yếu mà là thế mạnh nếu bạn biết cách khai thác.</p>
+
+        <p>Có người kiên nhẫn có thể chờ đợi setup hoàn hảo trong nhiều ngày. Có người quyết đoán có thể vào lệnh ngay khi thấy tín hiệu xuất hiện. Có người cẩn thận luôn kiểm tra kỹ mọi yếu tố trước khi giao dịch. Không có kiểu tính cách nào tốt hơn kiểu nào.</p>
+
+        <div class="highlight-box definition">
+          <div class="highlight-title">Khám Phá Thế Mạnh</div>
+          <p>Hãy tự hỏi bản thân: Bạn là người kiên nhẫn hay nóng vội? Bạn thích phân tích chi tiết hay ra quyết định nhanh? Bạn thoải mái với rủi ro cao hay thích an toàn? Câu trả lời sẽ giúp bạn xác định phong cách trading phù hợp.</p>
+        </div>
+
+        <h3>Tính Cách Và Phong Cách Trading</h3>
+
+        <p>Nếu bạn là người kiên nhẫn và thích chắc chắn, swing trading có thể phù hợp. Bạn vào lệnh ít hơn nhưng giữ lâu hơn và có thời gian phân tích kỹ. Nếu bạn nhanh nhẹn và thích hành động, scalping có thể là lựa chọn. Nhưng hãy nhớ scalping đòi hỏi kỹ năng cao hơn.</p>
+
+        <p>Đừng cố ép bản thân vào phong cách không phù hợp chỉ vì thấy người khác thành công. Một trader kiên nhẫn cố gắng scalp sẽ bị stress và thua lỗ. Một trader năng động cố gắng swing trade sẽ nóng ruột và đóng lệnh sớm.</p>
+      </section>
+
+      <section class="section">
+        <h2>Biến Điểm Yếu Thành Lợi Thế</h2>
+
+        <p>Điều thú vị là ngay cả những gì bạn cho là điểm yếu cũng có thể trở thành lợi thế. Bạn hay lo lắng ư? Điều đó giúp bạn luôn đặt stop loss và quản lý rủi ro tốt. Bạn thiếu tự tin ư? Điều đó khiến bạn không vội vàng và cân nhắc kỹ hơn.</p>
+
+        <div class="highlight-box success">
+          <div class="highlight-title">Ví Dụ Chuyển Hóa</div>
+          <p>Một trader hay sợ thua lỗ có thể biến nỗi sợ thành kỷ luật quản lý vốn nghiêm ngặt. Một trader hay FOMO có thể biến năng lượng đó thành sự chăm chỉ tìm kiếm setup mỗi ngày. Chìa khóa là nhận diện và định hướng lại thay vì chống lại bản chất của mình.</p>
+        </div>
+
+        <h3>Câu Chuyện Của Những Traders Khác</h3>
+
+        <p>Trong cộng đồng GEM, có những traders thành công với background rất đa dạng. Có người là bác sĩ dùng tư duy chẩn đoán để phân tích thị trường. Có người là nghệ sĩ với khả năng nhận diện pattern bằng trực giác. Có người là kỹ sư với tư duy logic và hệ thống.</p>
+
+        <p>Mỗi người đều mang theo những kỹ năng từ nghề nghiệp trước của họ vào trading. Và đó chính là điều làm họ khác biệt và thành công theo cách riêng.</p>
+      </section>
+
+      <section class="section">
+        <h2>Xây Dựng Hệ Thống Phù Hợp Với Bạn</h2>
+
+        <p>Phương pháp GEM Frequency mà bạn đang học chỉ là khung nền tảng. Bạn cần customize nó để phù hợp với cá nhân mình. Đây là lý do tại sao hai traders học cùng phương pháp có thể có kết quả rất khác nhau.</p>
+
+        <div class="highlight-box important">
+          <div class="highlight-title">Các Yếu Tố Cần Điều Chỉnh</div>
+          <p>Timeframe nào phù hợp với lịch trình của bạn? Bạn có thể xem biểu đồ bao nhiêu lần mỗi ngày? Bạn chấp nhận mức rủi ro bao nhiêu phần trăm cho mỗi lệnh? Risk/Reward ratio nào phù hợp với tâm lý của bạn?</p>
+        </div>
+
+        <p>Ở TIER 2 và TIER 3, bạn sẽ được học chi tiết về cách xây dựng hệ thống cá nhân. Nhưng ngay từ bây giờ, hãy bắt đầu suy nghĩ về những gì phù hợp với bạn. Quan sát bản thân khi xem biểu đồ và ghi chép lại những phản ứng tự nhiên của mình.</p>
+
+        <h3>Không Có Công Thức Chung</h3>
+
+        <p>Đừng copy y nguyên setup của người khác rồi mong đợi kết quả giống họ. Setup đó có thể hiệu quả với họ nhưng không phù hợp với bạn. Thay vào đó, hãy hiểu logic đằng sau và điều chỉnh cho phù hợp với phong cách của riêng mình.</p>
+
+        <p>Trading là nghệ thuật cá nhân hóa. Bạn học từ người khác nhưng cuối cùng phải tạo ra phiên bản của riêng mình. Đó là điều khiến bạn khác biệt và không thể bị thay thế.</p>
+      </section>
+
+      <section class="section">
+        <h2>Cam Kết Với Bản Thân</h2>
+
+        <p>Bạn đã đi đến cuối Module A của Chương 7 - Hành Trình Chuyển Hóa. Đây là lúc để bạn cam kết với bản thân về hành trình phía trước. Không phải cam kết với ai khác mà với chính mình.</p>
+
+        <div class="highlight-box tip">
+          <div class="highlight-title">Lời Cam Kết</div>
+          <p>Tôi cam kết tiếp tục học hỏi và phát triển mỗi ngày. Tôi cam kết kiên nhẫn với quá trình và không tìm đường tắt. Tôi cam kết kỷ luật với bản thân dù kết quả ngắn hạn thế nào. Tôi cam kết trở thành phiên bản trader tốt nhất của mình.</p>
+        </div>
+
+        <h3>Bạn Không Đơn Độc</h3>
+
+        <p>Hành trình trading có thể cô đơn nhưng bạn không đơn độc. Cộng đồng GEM luôn ở đây để hỗ trợ bạn. Những người đi trước sẵn sàng chia sẻ kinh nghiệm. Những bạn đồng hành cùng học sẽ động viên nhau qua những lúc khó khăn.</p>
+
+        <p>Hãy tận dụng cộng đồng như một nguồn lực quý giá. Đặt câu hỏi khi cần, chia sẻ khi có thể, và học hỏi từ mọi người xung quanh. Đó cũng là một phần làm nên sự khác biệt của bạn.</p>
+      </section>
+
+      <section class="section">
+        <h2>Tóm Tắt Bài Học</h2>
+
+        <div class="key-concept-box">
+          <div class="key-concept-title">Những Điểm Cốt Lõi</div>
+          <ul class="key-concept-list">
+            <li>Mỗi người có thế mạnh riêng dựa trên tính cách và background của mình</li>
+            <li>Điểm yếu có thể trở thành lợi thế nếu biết cách định hướng lại</li>
+            <li>Xây dựng hệ thống trading phù hợp với cá nhân, không copy y nguyên người khác</li>
+            <li>Cam kết với bản thân và tận dụng sức mạnh của cộng đồng</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- COMPLETION BOX -->
+      <div class="completion-box">
+        <div class="completion-icon">🎉</div>
+        <div class="completion-title">Chúc Mừng Bạn!</div>
+        <p class="completion-text">Bạn đã hoàn thành Chương 7 - Hành Trình Chuyển Hóa (Module A). Đây là bước quan trọng trong việc chuẩn bị tâm thế trước khi bước vào giai đoạn thực chiến. Hãy tự hào về những gì bạn đã đạt được!</p>
+      </div>
+
+      <!-- NEXT LESSON -->
+      <div class="highlight-box tip">
+        <div class="highlight-title">Bước Tiếp Theo</div>
+        <p>Bạn đã sẵn sàng cho <strong>TIER 2 - Thực Chiến</strong>! Ở đó, bạn sẽ học cách áp dụng tất cả kiến thức nền tảng vào giao dịch thực tế. Hãy đảm bảo bạn đã nắm vững TIER 1 trước khi tiếp tục. Nếu cần, hãy quay lại ôn tập các bài học trước.</p>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="lesson-footer">
+      <div class="footer-logo">GEM Trading Academy</div>
+      <div class="footer-link">
+        <a href="https://gemral.com" target="_blank">gemral.com</a>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

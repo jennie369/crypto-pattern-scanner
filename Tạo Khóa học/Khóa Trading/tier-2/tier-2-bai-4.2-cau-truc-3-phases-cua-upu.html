@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 4.2: Cấu Trúc 3 Phases Của UPU | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250; --navy-dark: #0a1628; --gold: #FFBD59; --gold-dark: #E5A73D;
+            --cyan: #00F0FF; --purple: #6A5BFF; --burgundy: #9C0612; --burgundy-light: #C41E2A;
+            --success: #00C853; --error: #FF5252; --bg-primary: #0a1628; --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF; --text-secondary: rgba(255, 255, 255, 0.85); --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4); --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px;
+            --radius-md: 12px; --radius-lg: 16px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); }
+        .lesson-badge { display: inline-block; padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--success), var(--cyan)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.4rem, 5vw, 2.2rem); font-weight: 800; background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: var(--space-md); }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 16px; border-radius: 0; border: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.4rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); border-bottom: 1px solid var(--glass-border); padding-bottom: var(--space-sm); }
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border-left: 4px solid var(--gold); padding: var(--space-lg); margin: var(--space-lg) 0; border-radius: 4px; }
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border-left: 4px solid var(--cyan); padding: var(--space-lg); margin: var(--space-lg) 0; border-radius: 4px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--success); }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .pattern-flow { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        .flow-phase { display: flex; flex-direction: column; gap: var(--space-sm); padding: var(--space-md); background: var(--bg-card); border-left: 4px solid var(--gold); border-radius: 4px; }
+        .phase-title { font-weight: 700; color: var(--gold); text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+        .summary-box { background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02)); border: 2px solid var(--success); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        .quiz-section { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); }
+        .quiz-option { padding: var(--space-md); background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; margin-bottom: var(--space-sm); transition: 0.3s; display: flex; gap: 12px; align-items: center; }
+        .quiz-option:hover { border-color: var(--gold); }
+        .quiz-option.correct { background: rgba(0, 200, 83, 0.2); border-color: var(--success); }
+        .quiz-option.incorrect { background: rgba(255, 82, 82, 0.2); border-color: var(--error); }
+        .option-marker { min-width: 28px; height: 28px; background: var(--navy); border: 1px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
+        .question-feedback { margin-top: 12px; padding: 12px; border-radius: 4px; display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.1); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.1); border-left: 4px solid var(--error); }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <!-- ========== HEADER ========== -->
+        <header class="lesson-header">
+            <div class="lesson-badge">📈 Tier 2 • Chapter 4</div>
+            <div class="lesson-chapter">UPU Pattern Mastery</div>
+            <h1 class="lesson-title">Bài 4.2: Cấu Trúc 3 Phases Của UPU</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 4.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- 📌 1. OPENING HOOK & OBJECTIVES -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Mục Tiêu Bài Học</h2>
+            <p>Bạn đã bao giờ tự hỏi tại sao giá đang tăng mạnh bỗng nhiên "dừng lại" rồi lại tiếp tục tăng chưa? Đa số trader nghiệp dư coi đó là dấu hiệu cạn kiệt, nhưng trader chuyên nghiệp hiểu rằng đó chính là pattern UPU - chìa khóa để tìm được những điểm entry chính xác với tỷ lệ thắng cao.</p>
+            <p>Sau khi hoàn thành bài học này, bạn sẽ:</p>
+            <ul>
+                <li><strong>Nhận diện chính xác</strong> từng phase trong pattern UPU (UP - PAUSE - UP)</li>
+                <li><strong>Hiểu tại sao</strong> Smart Money tạo ra vùng Pause và cách họ tích lũy vị thế</li>
+                <li><strong>Xác định được</strong> vùng LFZ tiềm năng để chờ entry khi giá quay lại</li>
+                <li><strong>Phân biệt</strong> giữa vùng Pause hợp lệ và vùng đảo chiều</li>
+            </ul>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Nhắc Lại Kiến Thức Cốt Lõi</div>
+                <p><strong>UPU = Up-Pause-Up</strong> là pattern tiếp diễn xu hướng tăng, một trong 4 patterns chính của hệ thống GEM Frequency. Pattern này tạo ra <strong>LFZ (Low Frequency Zone)</strong> - vùng mua tiềm năng với win rate lên đến 71%. Hiểu được cấu trúc 3 phases sẽ giúp bạn không bao giờ "đuổi theo giá" mà luôn chờ đợi được entry tại vùng tối ưu.</p>
+            </div>
+        </section>
+
+        <!-- 📌 2. THỐNG KÊ (ORIGINAL) -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Thống Kê UPU Pattern</h2>
+            <p>Trước khi đi vào chi tiết, hãy nhìn vào những con số thực tế để bạn hiểu tại sao UPU là một trong những pattern đáng tin cậy nhất. Những thống kê này được tổng hợp từ hơn 2,000 giao dịch trên các cặp BTC, ETH và altcoins trong giai đoạn 2022-2024.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">71%</div>
+                    <div class="stat-label">Win Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">1:2.8</div>
+                    <div class="stat-label">R:R</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">4H/1D</div>
+                    <div class="stat-label">Best TF</div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Giải Thích Con Số</div>
+                <p><strong>Win Rate 71%:</strong> Có nghĩa là cứ 10 lệnh trade theo UPU pattern, trung bình 7 lệnh sẽ thắng. Đây là tỷ lệ cực kỳ cao trong trading!</p>
+                <p><strong>R:R 1:2.8:</strong> Trung bình mỗi lệnh thắng sẽ cho lợi nhuận gấp 2.8 lần số tiền bạn rủi ro. Nếu bạn đặt Stop Loss là $100, target profit trung bình sẽ là $280.</p>
+                <p><strong>Best Timeframe 4H/1D:</strong> Pattern hoạt động tốt nhất trên khung thời gian 4 giờ và 1 ngày. Các khung thời gian này cân bằng giữa độ chính xác và số lượng cơ hội.</p>
+            </div>
+        </section>
+
+        <!-- 📌 3. CẤU TRÚC 3 PHASES (ORIGINAL ANALOGIES) -->
+        <section class="section">
+            <h2 class="section-title"><span>🔄</span> Cấu Trúc 3 Phases</h2>
+            <p>Pattern UPU được chia thành 3 giai đoạn rõ ràng, giống như cách một vận động viên chạy marathon: <strong>Tăng tốc → Nghỉ ngắn → Tăng tốc tiếp</strong>. Mỗi phase có đặc điểm riêng và việc nhận diện chính xác từng phase sẽ quyết định thành công của giao dịch.</p>
+
+            <p>Hãy tưởng tượng thị trường như một cuộc chạy đua: Smart Money (những tay to, cá voi) bắt đầu mua mạnh (Phase 1), sau đó họ tạm nghỉ để tích lũy thêm vị thế mà không đẩy giá lên cao (Phase 2), và cuối cùng họ tiếp tục đẩy giá lên (Phase 3). Hiểu được logic này, bạn sẽ biết chờ đợi entry tại Phase 2 thay vì đuổi theo giá ở Phase 1 hoặc Phase 3.</p>
+
+            <div class="pattern-flow">
+                <div class="flow-phase">
+                    <div class="phase-title">📈 PHASE 1: UP (Tăng Mạnh)</div>
+                    <p>Đây là đợt tăng đầu tiên - dấu hiệu Smart Money bắt đầu vào lệnh:</p>
+                    <ul>
+                        <li>• Ít nhất 2 nến tăng liên tiếp (thường 3-5 nến)</li>
+                        <li>• Tăng ≥2% trong phase này (BTC thường 2-4%, altcoins có thể 5-10%)</li>
+                        <li>• Volume cao hơn trung bình 1.5-2x (cho thấy lực mua thực sự)</li>
+                        <li>• Nến thân lớn, bóng ngắn (buyers kiểm soát hoàn toàn)</li>
+                    </ul>
+                </div>
+
+                <div class="flow-phase">
+                    <div class="phase-title">⏸️ PHASE 2: PAUSE (Tích Lũy)</div>
+                    <p>Vùng vàng - nơi Smart Money tích lũy thêm vị thế:</p>
+                    <ul>
+                        <li>• Consolidation từ 1-5 nến (tối ưu 2-3 nến)</li>
+                        <li>• Range &lt;1.5% (giá đi ngang trong biên độ hẹp)</li>
+                        <li>• Nến thân nhỏ, có thể có bóng hai đầu (cho thấy sự cân bằng mua/bán)</li>
+                        <li>• <strong>→ TẠO LFZ (LOW FREQUENCY ZONE) TẠI ĐÂY</strong></li>
+                    </ul>
+                </div>
+
+                <div class="flow-phase">
+                    <div class="phase-title">📈 PHASE 3: UP (Tiếp Tục Tăng)</div>
+                    <p>Xác nhận pattern hoàn chỉnh - Smart Money đẩy giá lên tiếp:</p>
+                    <ul>
+                        <li>• Tiếp tục tăng ≥2% (phá vỡ đỉnh Phase 1)</li>
+                        <li>• Volume tăng mạnh khi breakout (xác nhận lực mua mới vào)</li>
+                        <li>• Nến breakout thân lớn, đóng cửa gần đỉnh</li>
+                        <li>• Đây là lúc bạn biết LFZ đã được xác nhận hợp lệ</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- HÌNH 1 GỐC -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.2/3.2-1.webp" alt="UPU 3 Phases">
+                <p class="image-caption">Hình 1: Cấu trúc 3 phases của UPU pattern - UP (tăng) → PAUSE (tích lũy) → UP (tiếp tục tăng)</p>
+            </div>
+        </section>
+
+        <!-- 📌 4. PHASE 1: UP - CHI TIẾT (ORIGINAL TEXT RESTORED) -->
+        <section class="section">
+            <h2 class="section-title"><span>📈</span> Phase 1: UP - Chi Tiết</h2>
+            <p>Phase 1 là đợt tăng đầu tiên, thể hiện lực mua mạnh từ Smart Money. Đây là giai đoạn mà bạn cần <strong>quan sát chứ không phải entry</strong> - vì giá đã di chuyển nhanh và rủi ro cao.</p>
+
+            <p><strong>Tại sao Phase 1 quan trọng?</strong> Vì nó cho bạn biết xu hướng đang bullish và chuẩn bị tìm kiếm điểm entry. Nếu bạn thấy một đợt tăng mạnh với volume cao, đó là tín hiệu để bắt đầu theo dõi pattern UPU.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Đặc Điểm Nhận Diện Phase 1</div>
+                <p>
+                    <strong>1. Số nến:</strong> Tối thiểu 2 nến tăng liên tiếp (tốt nhất 3-5 nến, cho thấy momentum bền vững)<br><br>
+                    <strong>2. Biên độ:</strong> Tăng ≥2% từ đáy đến đỉnh phase. Với BTC, thường là 2-4%. Với altcoins, có thể 5-15%.<br><br>
+                    <strong>3. Volume:</strong> Cao hơn trung bình 1.5x - 2x. Volume cao xác nhận đây là lực mua thực sự, không phải bẫy.<br><br>
+                    <strong>4. Hình dạng nến:</strong> Thân lớn, bóng ngắn (cho thấy buyers kiểm soát hoàn toàn, giá đóng cửa gần đỉnh)
+                </p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Ví Dụ Thực Tế: BTC Tháng 10/2023</div>
+                <p>Ngày 23-24/10/2023, BTC tăng từ $29,500 lên $31,000 (tăng 5.1%) trong 2 nến 4H. Volume tăng gấp 2.3x so với trung bình 20 ngày. Các nến có thân rất lớn, bóng dưới gần như không có. Đây là Phase 1 điển hình của pattern UPU, sau đó giá đi ngang tạo Phase 2 tại vùng $30,800-$31,000.</p>
+            </div>
+
+            <!-- HÌNH 2 GỐC -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.2/3.2-2.webp" alt="Phase 1 Detail">
+                <p class="image-caption">Hình 2: Chi tiết Phase 1 - Đợt tăng đầu tiên với nến thân lớn và volume cao</p>
+            </div>
+        </section>
+
+        <!-- 📌 5. PHASE 2: PAUSE - VÙNG VÀNG (ORIGINAL TEXT RESTORED) -->
+        <section class="section">
+            <h2 class="section-title"><span>⏸️</span> Phase 2: PAUSE - Vùng Vàng</h2>
+            <p>Phase 2 là giai đoạn quan trọng nhất vì đây là nơi hình thành <strong>LFZ (Low Frequency Zone)</strong> - vùng mà bạn sẽ chờ đợi để entry khi giá quay lại.</p>
+
+            <p>Tại sao gọi là "Low Frequency Zone"? Vì trong vùng này, giá di chuyển rất ít (frequency thấp), tạo ra một vùng cân bằng giữa mua và bán. Đây là nơi Smart Money âm thầm tích lũy thêm vị thế mà không làm giá tăng mạnh.</p>
+
+            <div class="highlight-box gold">
+                <div class="highlight-box-title"><span>⭐</span> Tại Sao Phase 2 Là "Vùng Vàng"?</div>
+                <p>Vùng Pause là nơi Smart Money tích lũy thêm vị thế mua trước khi đẩy giá lên cao hơn. Tại đây, có rất nhiều lệnh mua chưa được khớp (unfilled orders). Khi giá quay lại kiểm tra vùng này trong tương lai, những lệnh này sẽ được kích hoạt, tạo ra lực mua mạnh đẩy giá lên. Đó là lý do tại sao LFZ là điểm entry tuyệt vời - bạn đang mua cùng với Smart Money!</p>
+            </div>
+
+            <div class="definition-box">
+                <p><strong>Tiêu chí kỹ thuật của Phase 2:</strong></p>
+                <ul>
+                    <li>• <strong>Số nến:</strong> 1-5 nến (tối ưu 2-3 nến). Nếu ít hơn 1 nến, vùng quá mỏng. Nếu quá 5 nến, có thể đang đảo chiều.</li>
+                    <li>• <strong>Range:</strong> &lt;1.5% (giá đi ngang trong biên độ hẹp). Với BTC, thường &lt;$500-700. Với altcoins, tính theo %.</li>
+                    <li>• <strong>Đặc điểm nến:</strong> Thân nhỏ, có thể có bóng hai đầu (doji, spinning top, inside bars). Cho thấy sự cân bằng mua/bán.</li>
+                    <li>• <strong>Volume:</strong> Thường giảm 50-70% so với Phase 1. Volume thấp xác nhận đây là vùng tích lũy, không phải distribution.</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📌</span> Ví Dụ Thực Tế: ETH Tháng 11/2023</div>
+                <p>Ngày 5-6/11/2023, ETH sau khi tăng từ $1,850 lên $1,920 (Phase 1), đã tạo vùng Pause trong 3 nến 4H tại $1,900-$1,920 (range chỉ 1.1%). Volume giảm còn 40% so với Phase 1. Đây là LFZ hoàn hảo. Sau đó giá tiếp tục tăng lên $2,050 (Phase 3). Khi giá retest vùng $1,900-$1,920, đã có phản ứng tăng mạnh, cho win rate 78%.</p>
+            </div>
+
+            <!-- HÌNH 3 GỐC -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.2/3.2-3.webp" alt="Phase 2 LFZ">
+                <p class="image-caption">Hình 3: Phase 2 - Vùng Pause tạo thành LFZ với nến thân nhỏ và volume thấp</p>
+            </div>
+        </section>
+
+        <!-- 📌 6. PHASE 3: UP (ORIGINAL TEXT RESTORED) -->
+        <section class="section">
+            <h2 class="section-title"><span>🚀</span> Phase 3: UP - Xác Nhận Pattern</h2>
+            <p><strong>Tại sao cần Phase 3?</strong> Vì nếu không có Phase 3, pattern chưa hoàn chỉnh và LFZ chưa được "verified". Nhiều trader mới mắc lỗi entry ngay khi thấy Phase 2 mà không chờ Phase 3 xác nhận - dẫn đến thua lỗ khi giá đảo chiều thay vì tiếp tục tăng.</p>
+
+            <div class="definition-box">
+                <p><strong>Dấu hiệu Phase 3 hoàn chỉnh:</strong></p>
+                <ul>
+                    <li>• <strong>Breakout:</strong> Giá phá vỡ đỉnh của vùng Pause với nến thân lớn đóng cửa phía trên. Không đếm các cây nến bóng dài mà body không vượt qua.</li>
+                    <li>• <strong>Volume:</strong> Tăng mạnh khi breakout (1.5-2x trung bình). Volume xác nhận đây là breakout thật, không phải fakeout.</li>
+                    <li>• <strong>Biên độ:</strong> Tiếp tục tăng ≥2% sau khi phá vỡ. Đây là target tối thiểu để xác nhận momentum vẫn còn.</li>
+                    <li>• <strong>Momentum:</strong> Nến thân lớn, đóng cửa gần đỉnh. Bóng trên nhỏ cho thấy không có lực bán đáng kể.</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box warning">
+                <div class="highlight-title"><span>⚠️</span> Lưu Ý Quan Trọng</div>
+                <p>Bạn KHÔNG entry tại Phase 3 vì giá đã cao. Thay vào đó, bạn đánh dấu LFZ (Phase 2) và chờ giá quay lại test vùng này trong tương lai. Đó mới là thời điểm entry với R:R tối ưu 1:2.8 hoặc cao hơn!</p>
+            </div>
+
+            <!-- HÌNH 4 GỐC -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.2/3.2-4.webp" alt="Phase 3 Breakout">
+                <p class="image-caption">Hình 4: Phase 3 - Xác nhận pattern hoàn chỉnh với breakout volume cao</p>
+            </div>
+        </section>
+
+        <!-- 📌 7. COMPARISON & BTC 01/2024 (ORIGINAL TEXT RESTORED) -->
+        <section class="section">
+            <h2 class="section-title"><span>📋</span> Tổng Hợp So Sánh 3 Phases</h2>
+            <p>Dưới đây là bảng so sánh nhanh để bạn dễ nhớ các tiêu chí của từng phase. Hãy lưu lại hoặc screenshot để tham khảo khi practice.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">≥2%</div>
+                    <div class="stat-label">Phase 1 Tăng</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">&lt;1.5%</div>
+                    <div class="stat-label">Phase 2 Range</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">≥2%</div>
+                    <div class="stat-label">Phase 3 Tăng</div>
+                </div>
+            </div>
+
+            <div class="highlight-box tip">
+                <div class="highlight-box-title"><span>📌</span> Ví Dụ Hoàn Chỉnh: BTC Tháng 1/2024</div>
+                <p><strong>Phase 1 (8-9/1/2024):</strong> BTC tăng từ $44,000 lên $47,500 (+7.95%) trong 4 nến 4H. Volume 2.1x trung bình.</p>
+                <p><strong>Phase 2 (10/1/2024):</strong> BTC đi ngang 3 nến tại $47,200-$47,500 (range 0.63%). Volume giảm 60%.</p>
+                <p><strong>Phase 3 (11-12/1/2024):</strong> BTC phá vỡ $47,500 và tăng lên $49,000 (+3.17%). Volume tăng 1.8x.</p>
+                <p><strong>Entry Point:</strong> Khi giá retest LFZ ($47,200-$47,500) vào ngày 15/1, entry tại $47,300, SL $46,800 (dưới vùng), TP $49,500. Kết quả: +4.65% profit, R:R 1:4.4.</p>
+            </div>
+
+            <!-- HÌNH 5 GỐC -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.2/3.2-5.webp" alt="UPU Complete Example">
+                <p class="image-caption">Hình 5: Ví dụ hoàn chỉnh UPU pattern với cả 3 phases và điểm entry retest</p>
+            </div>
+        </section>
+
+        <!-- 📌 8. SUMMARY & ACTION -->
+        <section class="section">
+            <div class="summary-box">
+                <div class="summary-title"><span>📝</span> Tóm Tắt Bài Học - Key Takeaways</div>
+                <ul class="summary-list">
+                    <li>✓ <strong>UPU có 3 phases:</strong> UP (tăng mạnh ≥2%) → PAUSE (đi ngang &lt;1.5%) → UP (tiếp tục tăng ≥2%).</li>
+                    <li>✓ <strong>Phase 1:</strong> Quan sát, không entry. Tìm nến thân lớn, volume cao (1.5-2x), tăng ≥2%.</li>
+                    <li>✓ <strong>Phase 2 là "Vùng Vàng":</strong> Nơi tạo LFZ. Range &lt;1.5%, 1-5 nến, volume giảm. Đánh dấu vùng này ngay!</li>
+                    <li>✓ <strong>Phase 3:</strong> Xác nhận pattern hoàn chỉnh. Breakout volume cao, tăng ≥2%. LFZ giờ đã verified.</li>
+                    <li>✓ <strong>Chiến lược Entry:</strong> Tuyệt đối không mua đuổi đỉnh. Chờ giá retest LFZ (Phase 2) để có R:R tối ưu.</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>🎯 Hành động của bạn:</strong> Hãy mở biểu đồ cặp coin bạn yêu thích, tìm 5 ví dụ UPU trong quá khứ và kiểm tra xem chúng có đáp ứng đủ các tiêu chuẩn kỹ thuật trên không nhé!</p>
+            </div>
+        </section>
+
+        <!-- 📌 QUIZ SECTION -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Chọn đáp án để nhận phản hồi từ Mentor</p>
+            </div>
+
+            <div class="quiz-question" data-question="1" data-correct="B">
+                <div class="question-number">1</div>
+                <div class="question-text">Vùng LFZ trong pattern UPU được tạo ra ở phase nào?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Phase 1 (UP đầu tiên)</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Phase 2 (PAUSE)</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Phase 3 (UP thứ hai)</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="C">
+                <div class="question-number">2</div>
+                <div class="question-text">Điều kiện về range của Phase 2 (PAUSE) là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Range ≥2%</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Range không quan trọng</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Range &lt;1.5%</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+
+            <div class="quiz-question" data-question="3" data-correct="A">
+                <div class="question-number">3</div>
+                <div class="question-text">Tại sao chúng ta không nên entry lệnh BUY ngay tại Phase 3?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Vì giá đã ở vùng cao, rủi ro điều chỉnh lớn và tỷ lệ R:R không còn tốt.</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Vì Phase 3 luôn là một cú lừa (Fakeout).</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Vì quy tắc của GEM Academy không cho phép trade theo xu hướng.</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+
+            <div class="quiz-result" style="text-align: center; margin-top: 24px; display: none;">
+                <div class="result-score" style="font-size: 2.5rem; font-weight: 800; color: var(--gold);"></div>
+                <button class="quiz-btn" onclick="location.reload()" style="margin-top: 16px;">Làm Lại Quiz</button>
+            </div>
+        </section>
+
+        <footer style="text-align: center; padding: 40px 0; border-top: 1px solid var(--glass-border); margin-top: 40px;">
+            <p style="font-weight: 700; color: var(--gold);">GEM Trading Academy - Tier 2</p>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px;">© 2024 Nền tảng đào tạo Trading chuyên nghiệp dựa trên hành vi giá.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const resultDiv = document.querySelector('.quiz-result');
+            let answeredCount = 0; let correctCount = 0; const totalQuestions = 3;
+
+            const explanations = {
+                1: { correct: '✓ Chính xác! Phase 2 (PAUSE) chính là mỏ vàng tạo ra LFZ nơi Smart Money tích lũy lệnh.', incorrect: '✗ Sai rồi! Nhớ nhé, nhịp nghỉ ở Phase 2 mới là nơi chúng ta xác định zone để đặt bẫy.' },
+                2: { correct: '✓ Xuất sắc! Độ nén dưới 1.5% là tiêu chuẩn vàng để đảm bảo tần số dòng tiền không bị pha loãng.', incorrect: '✗ Chưa đúng. Range phải < 1.5% thì vùng LFZ mới có lực đẩy mạnh khi giá quay lại.' },
+                3: { correct: '✓ Rất tốt! Kỷ luật chờ đợi Retest chính là chìa khóa để đạt lợi nhuận bền vững.', incorrect: '✗ Đừng nóng vội! Nhảy vào lệnh lúc này là rủi ro nhất. Hãy học cách chờ đợi vùng entry tối ưu.' }
+            };
+
+            questions.forEach(question => {
+                const options = question.querySelectorAll('.quiz-option');
+                const correctAnswer = question.dataset.correct;
+                const questionNum = question.dataset.question;
+                const feedbackDiv = question.querySelector('.question-feedback');
+                const feedbackTitle = feedbackDiv.querySelector('.feedback-title');
+                const feedbackText = feedbackDiv.querySelector('.feedback-text');
+
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        if (question.classList.contains('answered')) return;
+                        question.classList.add('answered'); answeredCount++;
+                        const selectedOption = this.dataset.option;
+                        const isCorrect = selectedOption === correctAnswer;
+                        options.forEach(opt => opt.classList.add('disabled'));
+                        if (isCorrect) {
+                            this.classList.add('correct'); correctCount++;
+                            feedbackDiv.classList.add('correct');
+                            feedbackTitle.textContent = 'Chính xác!';
+                            feedbackText.textContent = explanations[questionNum].correct;
+                        } else {
+                            this.classList.add('incorrect');
+                            feedbackDiv.classList.add('incorrect');
+                            feedbackTitle.textContent = 'Sai rồi!';
+                            feedbackText.textContent = explanations[questionNum].incorrect;
+                            options.forEach(opt => { if (opt.dataset.option === correctAnswer) opt.classList.add('correct'); });
+                        }
+                        feedbackDiv.classList.add('show');
+                        if (answeredCount === totalQuestions) {
+                            resultDiv.querySelector('.result-score').textContent = correctCount + '/' + totalQuestions;
+                            resultDiv.style.display = 'block';
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

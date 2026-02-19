@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 10.1: Ngã Ba Đường - GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section, .content-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section, .content-card {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: var(--space-md);
+        }
+        .card-icon { font-size: 2rem; }
+        .card-meta h3 { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin: 0; }
+        .card-meta span { font-size: 0.9rem; color: var(--text-muted); }
+
+        .card-body p { margin-bottom: var(--space-md); text-align: justify; }
+
+        .quote-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), rgba(106, 91, 255, 0.02));
+            border-left: 4px solid var(--purple);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        }
+        .quote-text { font-size: 1.1rem; font-style: italic; color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .quote-author { font-weight: 700; color: var(--gold); text-align: right; }
+
+        .image-container { margin: var(--space-lg) 0; text-align: center; }
+        .image-container img { border-radius: var(--radius-md); border: 1px solid var(--glass-border); width: 100%; height: auto; }
+        .image-caption { font-size: 0.85rem; color: var(--text-muted); margin-top: var(--space-sm); font-style: italic; }
+
+        .path-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .path-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .path-card:hover { transform: translateY(-5px); border-color: var(--gold); }
+        .path-icon { font-size: 2.5rem; margin-bottom: var(--space-md); }
+        .path-title { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-sm); }
+        .path-desc { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+
+        .styled-list { list-style: none; padding: 0; }
+        .styled-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: var(--space-sm);
+            color: var(--text-secondary);
+        }
+        .styled-list li::before { content: "•"; color: var(--cyan); font-weight: bold; position: absolute; left: 0; }
+        .styled-list.green li::before { content: "✓"; color: var(--success); }
+        .styled-list.purple li::before { content: "⚡"; color: var(--purple); }
+        .styled-list.gold li::before { content: "★"; color: var(--gold); }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .highlight-box h4 { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        .summary-box h3 { font-size: 1.25rem; font-weight: 700; color: var(--success); margin-bottom: var(--space-lg); }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--success); font-weight: 700; }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        .quiz-question p { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); }
+        .quiz-option {
+            display: block; width: 100%; text-align: left; padding: var(--space-md);
+            background: var(--glass-bg); border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease;
+            color: var(--text-secondary); margin-bottom: var(--space-sm);
+        }
+        .quiz-option:hover { border-color: var(--gold); background: var(--bg-card); }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; color: var(--success); }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; color: var(--error); }
+        .quiz-result { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--radius-md); display: none; }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); color: var(--success); }
+        .quiz-result.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); color: var(--error); }
+        .quiz-score { text-align: center; padding: var(--space-xl); background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent); border: 1px solid var(--purple); border-radius: var(--radius-lg); margin-top: var(--space-lg); display: none; }
+        .quiz-score.show { display: block; }
+        .score-text { color: var(--gold); font-size: 1.5rem; font-weight: 700; margin-bottom: var(--space-sm); }
+        .retake-btn { padding: var(--space-md) var(--space-xl); background: linear-gradient(135deg, var(--purple), var(--cyan)); color: var(--navy-dark); border: none; border-radius: var(--radius-md); font-weight: 700; cursor: pointer; }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); margin-top: var(--space-xl); }
+        .footer-text { color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="lesson-header">
+            <span class="lesson-badge">🚀 Module B - Chương 10</span>
+            <h1 class="lesson-title">Bài 10.1: Ngã Ba Đường</h1>
+            <p class="lesson-subtitle">Quyết định hướng đi tiếp theo sau khi hoàn thành Tier 2</p>
+        </header>
+
+        <!-- Section 1: Opening Hook -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon gold">🔀</div>
+                <div class="card-meta">
+                    <h3>Khoảnh Khắc Của Sự Thật</h3>
+                    <span>Bạn đã đi được một chặng đường dài, giờ là lúc quyết định</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Chúc mừng bạn! Bạn vừa hoàn thành một hành trình không hề dễ dàng. Bạn đã đi qua Tier 1 - nơi chúng ta xây dựng nền móng, và giờ đây là Tier 2 - nơi chúng ta đã cùng nhau khám phá những vũ khí hạng nặng của một Pro Trader: từ Zone Hierarchy, Multi-timeframe Analysis cho đến Look Right Rule.</p>
+                <p>Nhưng đây không phải là đích đến. Thực tế, đây mới chỉ là vạch xuất phát thực sự.</p>
+                <p>Bạn đang đứng trước một "Ngã Ba Đường". Giống như nhân vật Neo trong Ma Trận, bạn có quyền lựa chọn viên thuốc tiếp theo cho mình. Quyết định của bạn ngày hôm nay sẽ định hình toàn bộ sự nghiệp trading của bạn trong 3-5 năm tới. Bạn sẽ chọn đi tiếp một mình, tăng tốc với sự dẫn dắt, hay trở thành một phần của điều gì đó lớn lao hơn?</p>
+                <p>Hãy để tôi vẽ ra tấm bản đồ cho 3 con đường phía trước, để bạn có thể đưa ra lựa chọn sáng suốt nhất cho chính mình.</p>
+            </div>
+        </article>
+
+        <!-- Section 2: Concept - The Crossroads -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon cyan">🛤️</div>
+                <div class="card-meta">
+                    <h3>3 Con Đường Phía Trước</h3>
+                    <span>Lựa chọn nào phù hợp với DNA của bạn?</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Sau khi trang bị đầy đủ kiến thức nền tảng và nâng cao, hầu hết các học viên GEM Trading Academy đều rẽ sang một trong ba hướng đi sau. Không có con đường nào là "sai", chỉ có con đường "phù hợp" với mục tiêu, tính cách và nguồn lực hiện tại của bạn.</p>
+
+                <div class="quote-box">
+                    <div class="quote-text">"Hai con đường rẽ lối trong rừng thu, và tôi... tôi chọn lối đi ít người qua, và điều đó làm nên mọi sự khác biệt."</div>
+                    <div class="quote-author">— Robert Frost</div>
+                </div>
+
+                <div class="path-grid">
+                    <div class="path-card">
+                        <div class="path-icon">🐢</div>
+                        <div class="path-title">Path 1: The Solo Grinder</div>
+                        <div class="path-desc">
+                            Người độc hành.<br>
+                            Tự học, tự trải nghiệm.<br>
+                            Phù hợp với người thích tự do tuyệt đối.
+                        </div>
+                    </div>
+                    <div class="path-card">
+                        <div class="path-icon">🚀</div>
+                        <div class="path-title">Path 2: The Accelerated Pro</div>
+                        <div class="path-desc">
+                            Người tăng tốc.<br>
+                            Tiếp tục với Tier 3 Elite.<br>
+                            Phù hợp với người muốn kết quả nhanh.
+                        </div>
+                    </div>
+                    <div class="path-card">
+                        <div class="path-icon">🤝</div>
+                        <div class="path-title">Path 3: The Ecosystem Partner</div>
+                        <div class="path-desc">
+                            Người đồng hành.<br>
+                            Vừa trade, vừa xây dựng cộng đồng.<br>
+                            Phù hợp với người muốn đa dạng thu nhập.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x350/112250/FFBD59?text=The+Three+Paths+Visualization" alt="Crossroads Diagram">
+                    <p class="image-caption">Hình 8.1.1: Sơ đồ 3 hướng đi chiến lược sau Tier 2</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Section 3: Deep Dive - Path 1 -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon green">📈</div>
+                <div class="card-meta">
+                    <h3>Path 1: Con Đường Độc Hành (Solo Trader)</h3>
+                    <span>Tự do nhưng đầy chông gai</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Đây là lựa chọn mặc định của đa số mọi người. Bạn cầm lấy kiến thức từ Tier 1 và Tier 2, đóng máy tính lại và bắt đầu tự mình chiến đấu với thị trường.</p>
+                
+                <h4>Ưu điểm:</h4>
+                <ul class="styled-list green">
+                    <li><strong>Tự chủ hoàn toàn:</strong> Bạn không phụ thuộc vào ai, không cần báo cáo với ai.</li>
+                    <li><strong>Chi phí thấp ban đầu:</strong> Bạn không cần trả thêm học phí hay phí thành viên nào nữa.</li>
+                    <li><strong>Trải nghiệm thực tế:</strong> Bạn sẽ học được những bài học sâu sắc nhất từ chính những sai lầm của mình (bằng tiền thật).</li>
+                </ul>
+
+                <h4>Thách thức:</h4>
+                <ul class="styled-list red">
+                    <li><strong>Sự cô đơn:</strong> Trading là nghề cô đơn nhất thế giới. Khi gặp chuỗi thua lỗ (losing streak), bạn sẽ không có ai để tâm sự hay xin lời khuyên.</li>
+                    <li><strong>Kỷ luật lỏng lẻo:</strong> Không có ai giám sát, bạn rất dễ phá vỡ quy tắc (như dời SL, FOMO) mà không ai biết.</li>
+                    <li><strong>Thời gian dài:</strong> Mất trung bình 2-3 năm để một solo trader tự tìm ra "long mạch" và ổn định tâm lý.</li>
+                </ul>
+
+                <div class="highlight-box">
+                    <h4>💡 Lời khuyên cho Solo Trader</h4>
+                    <p>Nếu chọn con đường này, hãy đảm bảo bạn có một cuốn Nhật Ký Giao Dịch (Trading Journal) cực kỳ chi tiết. Nó sẽ là người thầy duy nhất của bạn. Và hãy quản lý vốn thật chặt, vì không ai cứu bạn khi cháy tài khoản đâu.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Section 4: Deep Dive - Path 2 -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon purple">🎓</div>
+                <div class="card-meta">
+                    <h3>Path 2: Con Đường Tăng Tốc (Tier 3 Elite)</h3>
+                    <span>Đứng trên vai người khổng lồ</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Đây là con đường dành cho những người nghiêm túc muốn biến trading thành sự nghiệp chuyên nghiệp (Full-time Career) trong thời gian ngắn nhất. Bạn chọn tiếp tục đồng hành cùng GEM Trading Academy qua chương trình huấn luyện cao cấp nhất: <strong>Tier 3 - Elite Trading</strong>.</p>
+
+                <h4>Đặc quyền của Elite Trader:</h4>
+                <ul class="styled-list purple">
+                    <li><strong>Kiến thức chuyên sâu (Deep Magic):</strong> Tiếp cận những kỹ thuật chưa từng được công bố như <em>Whale Tracking, Order Flow, Sentiment Analysis</em> và cách kết hợp AI vào trading.</li>
+                    <li><strong>Mentorship 1-1:</strong> Được sửa lỗi trực tiếp trên từng lệnh trade. Một giờ coaching có thể tiết kiệm cho bạn 6 tháng tự mò mẫm.</li>
+                    <li><strong>Cộng đồng tinh hoa:</strong> Sinh hoạt trong nhóm kín Private Signal, nơi quy tụ những trader giỏi nhất, cùng chia sẻ kèo và phân tích.</li>
+                    <li><strong>Công cụ độc quyền:</strong> Sử dụng các tool, indicator và bot được thiết kế riêng cho GEM Method.</li>
+                </ul>
+
+                <div class="highlight-box">
+                    <h4>💡 Ai nên chọn Path 2?</h4>
+                    <p>Những người coi trọng THỜI GIAN hơn tiền bạc. Bạn sẵn sàng đầu tư để rút ngắn quy trình thử-sai (trial and error) từ 3 năm xuống còn 6-12 tháng. Bạn muốn đi nhanh và đi xa.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Section 5: Deep Dive - Path 3 -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon gold">🤝</div>
+                <div class="card-meta">
+                    <h3>Path 3: Con Đường Đối Tác (Ecosystem Partner)</h3>
+                    <span>Vượt ra ngoài việc chỉ Trading</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Đây là con đường thú vị nhất và ít người biết đến nhất. Bạn không chỉ là một trader, bạn trở thành một <strong>đối tác kinh doanh (Business Partner)</strong> trong hệ sinh thái GEM.</p>
+                <p>Trading rất tuyệt, nhưng nó không phải là nguồn thu nhập duy nhất. Path 3 giúp bạn đa dạng hóa dòng tiền (Multiple Streams of Income) thông qua việc chia sẻ giá trị.</p>
+
+                <h4>Cơ hội của Partner:</h4>
+                <ul class="styled-list gold">
+                    <li><strong>Xây dựng cộng đồng:</strong> Bạn trở thành Leader, hướng dẫn người mới, và nhận hoa hồng từ việc phát triển cộng đồng.</li>
+                    <li><strong>Thu nhập thụ động (Passive Income):</strong> Kiếm tiền ngay cả khi bạn không trade, hoặc khi thị trường sideway.</li>
+                    <li><strong>Học qua việc dạy:</strong> Cách tốt nhất để master một kỹ năng là dạy lại nó cho người khác. Khi bạn hướng dẫn người khác trade, trình độ của bạn sẽ tăng vọt.</li>
+                    <li><strong>Networking:</strong> Kết nối với những người có tư duy làm chủ, mở rộng mối quan hệ chất lượng.</li>
+                </ul>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x300/112250/00F0FF?text=Trading+vs+Partner+Income" alt="Income Streams">
+                    <p class="image-caption">Hình 8.1.2: Mô hình thu nhập kép: Trading + Partnership</p>
+                </div>
+
+                <div class="highlight-box">
+                    <h4>💡 Ai nên chọn Path 3?</h4>
+                    <p>Những người có tư duy doanh nhân (Entrepreneur Mindset). Bạn muốn sự an toàn tài chính tuyệt đối bằng cách không bỏ trứng vào một giỏ. Bạn thích chia sẻ, giúp đỡ người khác và muốn xây dựng một di sản.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Section 6: Decision Framework -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon cyan">🎯</div>
+                <div class="card-meta">
+                    <h3>Quyết Định Của Bạn Là Gì?</h3>
+                    <span>Không có lựa chọn sai, chỉ có lựa chọn phù hợp</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Hãy dành thời gian suy nghĩ thật kỹ. Đừng vội vàng. Hãy tự hỏi bản thân những câu hỏi sau:</p>
+                <ul class="styled-list">
+                    <li>Mục tiêu tài chính của tôi trong 1 năm tới là gì?</li>
+                    <li>Tôi có bao nhiêu thời gian rảnh mỗi ngày để dành cho việc học và trade?</li>
+                    <li>Tôi chịu đựng sự cô đơn tốt đến mức nào?</li>
+                    <li>Tôi có muốn biến trading thành sự nghiệp cả đời hay chỉ là nghề tay trái?</li>
+                </ul>
+                <p>Dù bạn chọn con đường nào, GEM Trading Academy cũng luôn tự hào vì bạn đã đi được đến đây. Chúng tôi đã trang bị cho bạn đủ "vũ khí" để sinh tồn. Phần còn lại của câu chuyện nằm trong tay bạn.</p>
+                <p>Ở các bài học tiếp theo của Module B, chúng tôi sẽ đi sâu hơn vào các công cụ hỗ trợ và chi tiết về chương trình Đối Tác để bạn có thêm dữ liệu ra quyết định.</p>
+            </div>
+        </article>
+
+        <!-- Summary Box -->
+        <div class="summary-box">
+            <h3>📝 Tóm Tắt Bài Học</h3>
+            <ul class="summary-list">
+                <li>Bạn đang đứng trước ngã ba đường sau khi hoàn thành Tier 2.</li>
+                <li><strong>Path 1 (Solo Trader):</strong> Tự do, tiết kiệm chi phí nhưng cô đơn và mất nhiều thời gian.</li>
+                <li><strong>Path 2 (Elite Trader - Tier 3):</strong> Tăng tốc, có mentor dẫn dắt, tiếp cận kiến thức chuyên sâu và công cụ độc quyền.</li>
+                <li><strong>Path 3 (Partner):</strong> Đa dạng hóa thu nhập, xây dựng cộng đồng và phát triển tư duy kinh doanh.</li>
+                <li>Lựa chọn phụ thuộc vào mục tiêu, tính cách và nguồn lực của mỗi cá nhân.</li>
+            </ul>
+        </div>
+
+        <!-- Quiz Section -->
+        <section class="quiz-section">
+            <h3>🎯 Kiểm Tra Kiến Thức</h3>
+            
+            <div class="quiz-question" data-correct="2">
+                <p><strong>Câu 1:</strong> Lợi ích lớn nhất của việc chọn Path 2 (Tier 3 Elite) là gì?</p>
+                <button class="quiz-option" data-index="0">Được miễn phí hoàn toàn mọi khóa học.</button>
+                <button class="quiz-option" data-index="1">Không cần phải trade mà vẫn có tiền.</button>
+                <button class="quiz-option" data-index="2">Rút ngắn thời gian thành công nhờ Mentorship 1-1 và kiến thức chuyên sâu.</button>
+                <button class="quiz-option" data-index="3">Được tự do làm bất cứ điều gì mình thích mà không cần kỷ luật.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <p><strong>Câu 2:</strong> Path 3 (Partnership) phù hợp nhất với nhóm người nào?</p>
+                <button class="quiz-option" data-index="0">Những người chỉ muốn ngồi nhìn màn hình chart cả ngày và không giao tiếp với ai.</button>
+                <button class="quiz-option" data-index="1">Những người có tư duy doanh nhân, muốn đa dạng nguồn thu nhập và thích chia sẻ giá trị.</button>
+                <button class="quiz-option" data-index="2">Những người không biết gì về trading nhưng muốn kiếm tiền nhanh.</button>
+                <button class="quiz-option" data-index="3">Những người đã cháy tài khoản và muốn gỡ lại vốn.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <p><strong>Câu 3:</strong> Thách thức lớn nhất của Path 1 (Solo Trader) là gì?</p>
+                <button class="quiz-option" data-index="0">Sự cô đơn, thiếu người hướng dẫn và dễ mất kỷ luật.</button>
+                <button class="quiz-option" data-index="1">Phải trả quá nhiều tiền cho các công cụ hỗ trợ.</button>
+                <button class="quiz-option" data-index="2">Bị ràng buộc bởi quá nhiều quy tắc của cộng đồng.</button>
+                <button class="quiz-option" data-index="3">Không thể trade được trên khung thời gian lớn.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-text"><span id="correct-count">0</span>/3</div>
+                <div class="score-label">Câu trả lời đúng</div>
+                <button class="retake-btn" onclick="location.reload()">Làm lại Quiz</button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="lesson-footer">
+            <div class="footer-logo">GEM Trading Academy</div>
+            <p class="footer-text">Module B - Định Hướng & Phát Triển • Bài 10.1</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Sai rồi. Hãy xem lại nội dung bài học nhé.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

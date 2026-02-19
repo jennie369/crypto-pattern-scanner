@@ -1,0 +1,1594 @@
+<meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 2.5: Checklist Xác Nhận DPD | GEM Trading Academy</title>
+  
+  <!-- ============================================
+       🖼️ IMAGE CONFIGURATION - DỄ CHỈNH SỬA
+       ============================================
+       
+       HƯỚNG DẪN: Thay đổi URL hình ảnh trong file này
+       Mỗi hình có:
+       - Mô tả nội dung hình
+       - Kích thước gợi ý
+       - Vị trí trong bài học
+       
+       TIER: 1 | CHAPTER: 2 | LESSON: 2.5
+       TÊN BÀI: Checklist Xác Nhận DPD
+       SỐ HÌNH: 3 hình
+       ============================================ -->
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&amp;family=Noto+Sans+Display:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       🎨 GEM DESIGN SYSTEM - DESIGN TOKENS V5.1
+       ========================================== */
+    :root {
+      /* ========== COLORS ========== */
+      --color-navy: #112250;
+      --color-navy-light: #1a3a6e;
+      --color-gold: #FFBD59;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-burgundy: #9C0612;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-orange: #F59E0B;
+      --color-white: #FFFFFF;
+      --color-text: #E8E8E8;
+      --color-text-muted: #A0A0A0;
+      --color-bg-dark: #0A0F1A;
+      --color-bg-card: rgba(255, 255, 255, 0.03);
+      
+      /* ========== SPACING ========== */
+      --space-xs: 0.125rem;
+      --space-sm: 0.25rem;
+      --space-md: 0.5rem;
+      --space-lg: 0.75rem;
+      --space-xl: 1rem;
+      --space-2xl: 1.25rem;
+      --space-3xl: 1.5rem;
+      --container-padding: 0.5rem;
+      --card-padding: 0.5rem;
+      --table-padding: 0.375rem;
+      
+      /* ========== BORDER RADIUS ========== */
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      
+      /* ========== SHADOWS ========== */
+      --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --shadow-glow-cyan: 0 0 15px rgba(0, 240, 255, 0.3);
+      
+      /* ========== GLASSMORPHISM ========== */
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: blur(40px);
+    }
+    
+    @media (min-width: 600px) {
+      :root {
+        --space-md: 0.75rem;
+        --space-lg: 1rem;
+        --space-xl: 1.25rem;
+        --space-2xl: 1.5rem;
+        --space-3xl: 2rem;
+        --container-padding: 1.5rem;
+        --card-padding: 1rem;
+        --table-padding: 0.625rem;
+      }
+    }
+    
+    /* ==========================================
+       🌌 BACKGROUND & BASE
+       ========================================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      background: linear-gradient(135deg, #0A0F1A 0%, #112250 50%, #0A0F1A 100%);
+      color: var(--color-text);
+      min-height: 100vh;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(106, 91, 255, 0.05) 0%, transparent 60%);
+    }
+    
+    /* ==========================================
+       📦 CONTAINER
+       ========================================== */
+    .lesson-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: var(--container-padding);
+    }
+    
+    /* ==========================================
+       🎯 LESSON HEADER
+       ========================================== */
+    .lesson-header {
+      text-align: center;
+      padding: var(--space-2xl) 0;
+      border-bottom: 1px solid var(--glass-border);
+      margin-bottom: var(--space-2xl);
+    }
+    
+    .lesson-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--color-gold), #E5A84B);
+      color: var(--color-navy);
+      padding: var(--space-xs) var(--space-md);
+      border-radius: var(--radius-sm);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+    }
+    
+    .lesson-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.4rem, 5vw, 2rem);
+      font-weight: 700;
+      color: var(--color-white);
+      text-transform: uppercase;
+      margin-bottom: var(--space-sm);
+      line-height: 1.2;
+    }
+    
+    .lesson-subtitle {
+      color: var(--color-text-muted);
+      font-size: 0.95rem;
+      margin-bottom: var(--space-lg);
+    }
+    
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-lg);
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+    }
+    
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      color: var(--color-text-muted);
+    }
+    
+    .meta-value {
+      color: var(--color-cyan);
+      font-weight: 600;
+    }
+    
+    /* ==========================================
+       📄 CONTENT SECTIONS
+       ========================================== */
+    .content-section {
+      margin-bottom: var(--space-2xl);
+    }
+    
+    .section-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      text-transform: uppercase;
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid var(--color-gold);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    .section-icon {
+      font-size: 1.3rem;
+    }
+    
+    p {
+      margin-bottom: var(--space-md);
+      color: var(--color-text);
+    }
+    
+    strong {
+      color: var(--color-gold);
+    }
+    
+    /* ==========================================
+       🎴 INFO CARDS
+       ========================================== */
+    .info-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: var(--card-padding);
+      margin-bottom: var(--space-lg);
+      transition: all 0.3s ease;
+    }
+    
+    .info-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    
+    .info-card-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+    
+    .info-card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    
+    .info-card-icon.check {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05));
+      border: 1px solid var(--color-green);
+    }
+    
+    .info-card-icon.warning {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.05));
+      border: 1px solid var(--color-red);
+    }
+    
+    .info-card-icon.gold {
+      background: linear-gradient(135deg, rgba(255, 189, 89, 0.2), rgba(255, 189, 89, 0.05));
+      border: 1px solid var(--color-gold);
+    }
+    
+    .info-card-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-white);
+    }
+    
+    .info-card-subtitle {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+    }
+    
+    .info-card-content {
+      padding-left: calc(48px + var(--space-md));
+    }
+    
+    .info-card-content p {
+      margin-bottom: var(--space-sm);
+    }
+    
+    /* ==========================================
+       📐 FORMULA BOX
+       ========================================== */
+    .formula-box {
+      background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(0, 240, 255, 0.1));
+      border: 2px solid var(--color-purple);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      margin: var(--space-lg) 0;
+      text-align: center;
+    }
+    
+    .formula-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--color-purple);
+      text-transform: uppercase;
+      margin-bottom: var(--space-md);
+    }
+    
+    .formula-content {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--color-white);
+      margin-bottom: var(--space-sm);
+    }
+    
+    .formula-note {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+    }
+    
+    /* ==========================================
+       💡 HIGHLIGHT BOX
+       ========================================== */
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(106, 91, 255, 0.05));
+      border-left: 4px solid var(--color-cyan);
+      border-radius: var(--radius-md);
+      padding: var(--card-padding);
+      margin: var(--space-lg) 0;
+    }
+    
+    .highlight-box p {
+      margin: 0;
+      color: var(--color-text);
+    }
+    
+    .highlight-box.warning {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(156, 6, 18, 0.05));
+      border-left-color: var(--color-red);
+    }
+    
+    .highlight-box.tip {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+      border-left-color: var(--color-green);
+    }
+    
+    /* ==========================================
+       ✅ CHECKLIST GRID
+       ========================================== */
+    .checklist-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+      margin: var(--space-lg) 0;
+    }
+    
+    .checklist-item {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-left: 4px solid var(--color-gold);
+      border-radius: var(--radius-md);
+      padding: var(--card-padding);
+      display: flex;
+      gap: var(--space-md);
+      align-items: flex-start;
+      transition: all 0.3s ease;
+    }
+    
+    .checklist-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card);
+      border-color: var(--color-gold);
+    }
+    
+    .checklist-number {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      background: linear-gradient(135deg, var(--color-gold), #E5A84B);
+      color: var(--color-navy);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    
+    .checklist-content {
+      flex: 1;
+    }
+    
+    .checklist-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--color-white);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .checklist-desc {
+      color: var(--color-text);
+      font-size: 0.9rem;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .checklist-values {
+      padding: var(--space-sm);
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: var(--radius-sm);
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      color: var(--color-cyan);
+    }
+    
+    /* ==========================================
+       📊 CATEGORY TITLE
+       ========================================== */
+    .category-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--color-purple);
+      font-size: 1rem;
+      margin: var(--space-xl) 0 var(--space-md) 0;
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid var(--color-purple);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    /* ==========================================
+       📸 LESSON IMAGES
+       ========================================== */
+    .lesson-image {
+      margin: var(--space-lg) 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    
+    .lesson-image img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      display: block;
+    }
+    
+    .image-caption {
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 0.9rem;
+      font-style: italic;
+      margin-top: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+    
+    /* ==========================================
+       📋 COMPARISON TABLE
+       ========================================== */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: var(--space-md) 0;
+    }
+    
+    .comparison-table {
+      width: 100%;
+      min-width: 300px;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    
+    .comparison-table th,
+    .comparison-table td {
+      padding: var(--table-padding);
+      text-align: left;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .comparison-table th {
+      background: rgba(255, 189, 89, 0.1);
+      color: var(--color-gold);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+    
+    .comparison-table td {
+      background: var(--glass-bg);
+      color: var(--color-text);
+    }
+    
+    .comparison-table tr:hover td {
+      background: rgba(0, 240, 255, 0.05);
+    }
+    
+    .status-pass {
+      color: var(--color-green);
+      font-weight: 600;
+    }
+    
+    .status-fail {
+      color: var(--color-red);
+      font-weight: 600;
+    }
+    
+    /* ==========================================
+       📊 FLOW STEPS
+       ========================================== */
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+      margin: var(--space-lg) 0;
+    }
+    
+    .flow-step {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-left: 4px solid var(--color-gold);
+      border-radius: var(--radius-md);
+      padding: var(--card-padding);
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    
+    .flow-step-number {
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      background: var(--color-gold);
+      color: var(--color-navy);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    
+    .flow-step-content {
+      flex: 1;
+    }
+    
+    .flow-step-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      color: var(--color-white);
+    }
+    
+    .flow-step-desc {
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+    }
+    
+    .flow-arrow {
+      text-align: center;
+      color: var(--color-gold);
+      font-size: 1.25rem;
+    }
+    
+    /* ==========================================
+       📊 STATS GRID
+       ========================================== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-md);
+      margin: var(--space-lg) 0;
+    }
+    
+    .stat-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: var(--card-padding);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--color-gold);
+    }
+    
+    .stat-value {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-cyan);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .stat-label {
+      color: var(--color-text-muted);
+      font-size: 0.8rem;
+    }
+    
+    /* ==========================================
+       ✅ KEY POINTS LIST
+       ========================================== */
+    .key-points {
+      list-style: none;
+      margin: var(--space-md) 0;
+    }
+    
+    .key-points li {
+      position: relative;
+      padding-left: var(--space-xl);
+      margin-bottom: var(--space-sm);
+      color: var(--color-text);
+    }
+    
+    .key-points li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--color-green);
+      font-weight: bold;
+    }
+    
+    /* ==========================================
+       📝 SUMMARY BOX
+       ========================================== */
+    .summary-box {
+      background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(0, 240, 255, 0.1));
+      border: 2px solid var(--color-gold);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      margin: var(--space-2xl) 0;
+    }
+    
+    .summary-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      text-transform: uppercase;
+      margin-bottom: var(--space-md);
+      text-align: center;
+    }
+    
+    /* ==========================================
+       📝 QUIZ SECTION
+       ========================================== */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), rgba(0, 240, 255, 0.05));
+      border: 2px solid var(--color-purple);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      margin: var(--space-2xl) 0;
+    }
+    
+    .quiz-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-bottom: var(--space-lg);
+    }
+    
+    .quiz-icon {
+      font-size: 2rem;
+    }
+    
+    .quiz-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--color-purple);
+      text-transform: uppercase;
+    }
+    
+    .quiz-question {
+      background: var(--glass-bg);
+      border-radius: var(--radius-md);
+      padding: var(--card-padding);
+      margin-bottom: var(--space-lg);
+    }
+    
+    .question-number {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--color-cyan);
+      font-size: 0.9rem;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .question-text {
+      color: var(--color-text);
+      font-size: 1rem;
+      margin-bottom: var(--space-md);
+    }
+    
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: var(--space-md);
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    .quiz-option:hover:not(.disabled):not(.correct):not(.incorrect):not(.show-correct) {
+      background: rgba(0, 240, 255, 0.1);
+      border-color: var(--color-cyan);
+    }
+    
+    .option-letter {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--color-cyan);
+      min-width: 24px;
+    }
+    
+    .quiz-option label {
+      color: var(--color-text);
+      cursor: pointer;
+      flex: 1;
+    }
+    
+    /* Quiz States */
+    .quiz-option.correct {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: var(--color-green);
+      pointer-events: none;
+    }
+    
+    .quiz-option.correct label {
+      color: var(--color-green);
+      font-weight: 600;
+    }
+    
+    .quiz-option.correct::after {
+      content: "✓";
+      color: var(--color-green);
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-left: auto;
+    }
+    
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--color-red);
+      pointer-events: none;
+    }
+    
+    .quiz-option.incorrect label {
+      color: var(--color-red);
+      text-decoration: line-through;
+    }
+    
+    .quiz-option.incorrect::after {
+      content: "✗";
+      color: var(--color-red);
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-left: auto;
+    }
+    
+    .quiz-option.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    
+    .quiz-option.show-correct {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: var(--color-green);
+      pointer-events: none;
+    }
+    
+    .quiz-option.show-correct label {
+      color: var(--color-green);
+    }
+    
+    .quiz-feedback {
+      margin-top: var(--space-md);
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .quiz-feedback.show {
+      display: block;
+    }
+    
+    .quiz-feedback.correct {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid var(--color-green);
+    }
+    
+    .quiz-feedback.incorrect {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--color-red);
+    }
+    
+    .quiz-feedback-text {
+      color: var(--color-text);
+      font-size: 0.95rem;
+    }
+    
+    .quiz-question.answered {
+      border: 2px solid transparent;
+    }
+    
+    .quiz-question.answered.correct-answered {
+      border-color: var(--color-green);
+    }
+    
+    .quiz-question.answered.incorrect-answered {
+      border-color: var(--color-red);
+    }
+    
+    /* Retake Button */
+    .quiz-retake-container {
+      text-align: center;
+      margin-top: var(--space-lg);
+      padding-top: var(--space-lg);
+      border-top: 1px solid var(--glass-border);
+      display: none;
+    }
+    
+    .quiz-retake-container.show {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    .quiz-retake-btn {
+      background: linear-gradient(135deg, var(--color-purple), #5346E0);
+      color: var(--color-white);
+      border: none;
+      border-radius: var(--radius-md);
+      padding: var(--space-md) var(--space-xl);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      text-transform: uppercase;
+    }
+    
+    .quiz-retake-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(106, 91, 255, 0.4);
+    }
+    
+    .quiz-retake-btn:active {
+      transform: translateY(0);
+    }
+    
+    .quiz-retake-btn .btn-icon {
+      font-size: 1.1rem;
+    }
+    
+    /* ==========================================
+       🦶 FOOTER
+       ========================================== */
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-2xl) 0;
+      border-top: 1px solid var(--glass-border);
+      margin-top: var(--space-2xl);
+    }
+    
+    .footer-brand {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--color-gold);
+      font-size: 1.1rem;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .footer-link {
+      color: var(--color-cyan);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    
+    .footer-link:hover {
+      text-decoration: underline;
+    }
+    
+    /* ==========================================
+       🎬 ANIMATIONS
+       ========================================== */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+
+
+  <div class="lesson-container">
+    
+    <!-- ========== LESSON HEADER ========== -->
+    <header class="lesson-header"><span class="lesson-badge">Tier 2 • Chapter 3</span>
+      <h1 class="lesson-title">Bài 3.5: Checklist Xác Nhận DPD</h1>
+      <p class="lesson-subtitle">Bộ lọc 8 điểm cốt tử để loại bỏ tín hiệu nhiễu và bắt trọn sóng giảm của Smart Money</p>
+      
+      <div class="lesson-meta">
+        <span class="meta-item">
+          <span class="icon">⏱️</span>
+          <span class="meta-value">15 phút đọc</span>
+        </span>
+        <span class="meta-item">
+          <span class="icon">📋</span>
+          <span class="meta-value">8 điểm check</span>
+        </span>
+        <span class="meta-item">
+          <span class="icon">📝</span>
+          <span class="meta-value">3 câu quiz</span>
+        </span>
+      </div>
+    </header>
+    
+    <!-- ========== SECTION 1: OPENING HOOK ========== -->
+    <section class="content-section">
+      <h2 class="section-title">
+        <span class="section-icon">👋</span>
+        Lời Mở Đầu
+      </h2>
+      
+      <p>Bạn đã bao giờ rơi vào tình huống này chưa: Bạn nhìn thấy giá giảm mạnh, sau đó chững lại một chút (Pause), rồi tiếp tục giảm. Bạn reo lên: "Aha! DPD đây rồi!". Bạn vội vàng đặt lệnh Sell Limit tại vùng Pause, tự tin rằng mình đang đi theo dấu chân của cá mập. Nhưng rồi... BÙM! Giá quay lại, xuyên thủng qua zone của bạn như một con dao nóng cắt qua bơ, và Stop Loss của bạn bị quét sạch.</p>
+
+      <p>Tại sao lại như vậy? Rõ ràng đó là mô hình Giảm-Nghỉ-Giảm mà? Câu trả lời rất đơn giản nhưng cũng rất đau lòng: <strong>Không phải mọi DPD đều được sinh ra bình đẳng.</strong></p>
+
+      <p>Trong trading, sự khác biệt giữa một setup "triệu đô" và một cái bẫy "mất tiền" thường nằm ở những chi tiết cực nhỏ mà mắt thường dễ bỏ qua. Đó là lý do tại sao các phi công, bác sĩ phẫu thuật - những người nắm giữ sinh mạng trong tay - luôn phải dùng đến <strong>Checklist</strong>. Và với tư cách là một trader chuyên nghiệp quản lý vốn của chính mình, bạn cũng cần một danh sách kiểm tra như vậy.</p>
+
+      <div class="highlight-box tip">
+        <p>✅ <strong>Cam kết của bài học này:</strong> Tôi sẽ trang bị cho bạn "bộ lọc 8 lớp" để soi chiếu mọi setup DPD. Sau bài này, bạn sẽ không bao giờ còn phải thắc mắc "Liệu zone này có đủ mạnh không?" nữa. Bạn sẽ biết câu trả lời ngay lập tức.</p>
+      </div>
+    </section>
+    
+    <!-- ========== SECTION 2: CONCEPT INTRODUCTION ========== -->
+    <section class="content-section">
+      <h2 class="section-title">
+        <span class="section-icon">🧠</span>
+        Tại Sao Cần Một Checklist Nghiêm Ngặt?
+      </h2>
+      
+      <p>Hãy tưởng tượng DPD Checklist giống như bộ phận kiểm soát chất lượng (QC) trong một nhà máy. Nếu sản phẩm (setup) bị lỗi, nó phải bị loại bỏ ngay lập tức trước khi xuất xưởng (vào lệnh). Nếu bạn bỏ qua khâu QC này, bạn sẽ phải trả giá bằng tiền thật trong tài khoản của mình.</p>
+
+      <p>Một pattern DPD chuẩn sách giáo khoa (Grade A) có xác suất thắng lên đến 68% hoặc cao hơn. Nhưng một pattern DPD "nhìn có vẻ giống" nhưng thiếu các yếu tố xác nhận (Grade C) có thể chỉ có win rate 40% - tức là bạn càng trade càng lỗ.</p>
+
+      <div class="highlight-box warning">
+        <p>❌ <strong>Cái giá của sự vội vàng:</strong><br>
+        • Vào lệnh ở các zone "đã chết" (Over-tested)<br>
+        • Bán ngay tại đáy (Selling low)<br>
+        • Bị kẹt trong các vùng sideway không rõ ràng<br>
+        • Mất niềm tin vào phương pháp khi thua lỗ liên tiếp</p>
+      </div>
+
+      <p>Checklist này được chia làm 3 nhóm chính, đi từ cấu trúc cơ bản đến các yếu tố nâng cao:</p>
+      <ul class="key-points">
+        <li><strong>Nhóm 1: Cấu Trúc Pattern (3 điểm)</strong> - Xác định xem "Đây có phải là DPD thật không?"</li>
+        <li><strong>Nhóm 2: Chất Lượng Zone (3 điểm)</strong> - Đánh giá sức mạnh của phe Bán tại vùng này.</li>
+        <li><strong>Nhóm 3: Xác Nhận Entry (2 điểm)</strong> - Thời điểm bóp cò chính xác để tối ưu rủi ro.</li>
+      </ul>
+
+      <div class="formula-box">
+        <div class="formula-title">💡 Nguyên Tắc Vàng Của GEM</div>
+        <div class="formula-content">"Không check đủ 8 điểm = Không vào lệnh"</div>
+        <div class="formula-note">Thà bỏ lỡ một cơ hội còn hơn là mất tiền vào một setup tồi.</div>
+      </div>
+    </section>
+    
+    <!-- ========== SECTION 3: DEEP DIVE - 8 ĐIỂM CHECKLIST ========== -->
+    <section class="content-section">
+      <h2 class="section-title">
+        <span class="section-icon">✅</span>
+        Phân Tích Chuyên Sâu: 8 Điểm Checklist
+      </h2>
+      
+      <p>Chúng ta sẽ đi sâu vào từng điểm một. Tôi muốn bạn hiểu <strong>TẠI SAO</strong> (Why) chúng ta cần kiểm tra điều đó, chứ không chỉ là <strong>CÁI GÌ</strong> (What).</p>
+      
+      <!-- ============================================
+           IMAGE 1: INFOGRAPHIC
+           ============================================ -->
+      <div class="lesson-image">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjwnoii9-9b6ftr-img1.webp" alt="Checklist 8 điểm DPD" style="cursor: grab;">
+      </div>
+      
+
+      <!-- NHÓM 1 -->
+      <h3 class="category-title">📊 Nhóm 1: Cấu Trúc Pattern (Nền Móng)</h3>
+      <p>Trước khi xây nhà, móng phải vững. Nhóm này đảm bảo setup bạn đang nhìn thấy thực sự là một DPD hợp lệ.</p>
+      
+      <div class="checklist-grid">
+        <!-- ITEM 1 -->
+        <div class="checklist-item">
+          <div class="checklist-number">1</div>
+          <div class="checklist-content">
+            <div class="checklist-title">Phase 1 (DOWN) - Cú Sập Mạnh Mẽ</div>
+            <div class="checklist-desc">
+                <p><strong>Cái gì:</strong> Đợt giảm giá đầu tiên phải dứt khoát, nến đỏ thân dài, ít râu dưới.</p>
+                <p><strong>Tại sao:</strong> Đây là dấu hiệu Smart Money đang tham gia. Retail trader không thể tạo ra những cây nến giảm mạnh liên tiếp như vậy. Nếu Phase 1 yếu ớt, nến nhỏ giọt, đó chỉ là sự điều chỉnh (correction), không phải xu hướng.</p>
+            </div>
+            <div class="checklist-values">✓ Giảm ≥ 2% | ✓ Volume cao | ✓ Momentum mạnh</div>
+            <div class="lesson-image" style="margin: 0.75rem 0px; border-radius: 12px;"></div>
+          </div>
+        </div>
+        <div class="lesson-image full-width" style="margin: 0; padding: 0; width: 100%;">
+          <div style="background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.15); padding: 1rem 0.5rem; text-align: center; min-height: 80px;">
+            <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjwnoii9-9b6ftr-img2.webp" alt="Minh họa Phase 1" class="" style="cursor: grab;">
+          </div>
+        </div>
+
+        <!-- ITEM 2 -->
+        <div class="checklist-item">
+          <div class="checklist-number">2</div>
+          <div class="checklist-content">
+            <div class="checklist-title">Phase 2 (PAUSE) - Tích Lũy Ngắn Gọn</div>
+            <div class="checklist-desc">
+                <p><strong>Cái gì:</strong> Vùng giá đi ngang hẹp (Tight Consolidation). Số lượng nến lý tưởng là 1-5 nến.</p>
+                <p><strong>Tại sao:</strong> Hãy nghĩ về nó như một trạm tiếp nhiên liệu. Nếu xe dừng quá lâu, động cơ sẽ nguội. Tương tự, nếu giá đi ngang quá lâu (>6 nến), điều đó có nghĩa là lực Mua và lực Bán đang cân bằng lại, và sự mất cân bằng (Imbalance) cần thiết để đẩy giá giảm tiếp đã bị triệt tiêu.</p>
+            </div>
+            <div class="checklist-values">✓ Range &lt; 1.5% | ✓ 1-5 nến | ✓ Thân nến nhỏ</div>
+          </div>
+        </div>
+        <div class="lesson-image full-width" style="margin: 0; padding: 0; width: 100%;">
+          <div style="background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.15); padding: 1rem 0.5rem; text-align: center; min-height: 80px;">
+            <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjwnoii9-9b6ftr-img3.webp" alt="Minh họa Phase 2" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0px; padding: 0px; cursor: grab;">
+          </div>
+        </div>
+
+        <!-- ITEM 3 -->
+        <div class="checklist-item">
+          <div class="checklist-number">3</div>
+          <div class="checklist-content">
+            <div class="checklist-title">Phase 3 (DOWN) - Phá Vỡ Dứt Khoát</div>
+            <div class="checklist-desc">
+                <p><strong>Cái gì:</strong> Giá phải thoát khỏi vùng Pause một cách mạnh mẽ, phá vỡ cấu trúc gần nhất.</p>
+                <p><strong>Tại sao:</strong> Đây là bằng chứng xác nhận rằng phe Bán đã chiến thắng trong vùng tranh chấp (Phase 2). Nếu Phase 3 yếu ớt, rất có thể Phase 2 không phải là vùng tích lũy lệnh bán (accumulation of sell orders) mà là vùng hấp thụ để đảo chiều tăng.</p>
+            </div>
+            <div class="checklist-values">✓ Giảm ≥ 2% | ✓ Volume tăng | ✓ Breakout rõ</div>
+          </div>
+        </div>
+      </div>
+      <div class="lesson-image full-width" style="margin: 0; padding: 0; width: 100%;">
+        <div style="background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.15); padding: 1rem 0.5rem; text-align: center; min-height: 80px;">
+          <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjwnoii9-9b6ftr-img4.webp" alt="Minh họa Phase 3" style="cursor: grab;">
+        </div>
+      </div>
+
+      <!-- NHÓM 2 -->
+      <h3 class="category-title">🎯 Nhóm 2: Chất Lượng Zone (Sức Mạnh Phe Bán)</h3>
+      <p>Pattern đã đúng, nhưng Zone tạo ra có đủ mạnh để giữ giá không? Nhóm này đánh giá "độ cứng" của bức tường thành.</p>
+
+      <div class="checklist-grid">
+        <!-- ITEM 4 -->
+        <div class="checklist-item">
+          <div class="checklist-number">4</div>
+          <div class="checklist-content">
+            <div class="checklist-title">HFZ Đã Được Vẽ Chính Xác</div>
+            <div class="checklist-desc">
+                <p><strong>Cái gì:</strong> Xác định đúng biên giới Entry (Đáy Pause) và Stop Loss (Đỉnh Pause).</p>
+                <p><strong>Tại sao:</strong> Sai một ly đi một dặm. Vẽ sai Entry khiến bạn lỡ tàu hoặc vào lệnh giá xấu. Vẽ sai Stop Loss khiến bạn bị quét lệnh oan uổng trước khi giá chạy đúng hướng.</p>
+            </div>
+            <div class="checklist-values">✓ Entry Line = Đáy Pause | ✓ Stop Line = Đỉnh + Buffer</div>
+          </div>
+        </div>
+        <div class="lesson-image full-width" style="margin: 0; padding: 0; width: 100%;">
+             <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjwnoii9-9b6ftr-img5.webp" alt="Minh họa HFZ" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0px; padding: 0px; cursor: grab;">
+        </div>
+
+        <!-- ITEM 5 -->
+        <div class="checklist-item">
+          <div class="checklist-number">5</div>
+          <div class="checklist-content">
+            <div class="checklist-title">Freshness - Độ Tươi Mới</div>
+            <div class="checklist-desc">
+                <p><strong>Cái gì:</strong> Zone chưa được test lần nào (Fresh) là tốt nhất. Đã test 1 lần: Tạm được. Test 2 lần trở lên: Bỏ.</p>
+                <p><strong>Tại sao:</strong> Hãy tưởng tượng HFZ là một tài khoản ngân hàng chứa lệnh bán. Mỗi lần giá chạm vào (retest), nó "rút" bớt một lượng lệnh để khớp. Sau 2-3 lần rút, tài khoản cạn kiệt, không còn lệnh bán để đẩy giá xuống nữa, và zone sẽ bị phá vỡ.</p>
+            </div>
+            <div class="checklist-values">⭐⭐⭐⭐⭐ Fresh | ⭐⭐⭐⭐ 1 test | ❌ 3+ test = SKIP</div>
+          </div>
+        </div>
+        <div class="lesson-image full-width" style="margin: 0; padding: 0; width: 100%;">
+          <div style="background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.15); padding: 1rem 0.5rem; text-align: center; min-height: 80px;" class="">
+            <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjwnoii9-9b6ftr-img6.webp" alt="Minh họa Freshness" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0px; padding: 0px; cursor: grab;">
+          </div>
+        </div>
+
+        <!-- ITEM 6 -->
+        <div class="checklist-item">
+          <div class="checklist-number">6</div>
+          <div class="checklist-content">
+            <div class="checklist-title">Zone Integrity - Sự Toàn Vẹn</div>
+            <div class="checklist-desc">
+                <p><strong>Cái gì:</strong> Giá chưa từng đóng cửa phía trên đường Stop Line của HFZ.</p>
+                <p><strong>Tại sao:</strong> Nếu giá đã từng đóng cửa trên HFZ, điều đó chứng tỏ phe Mua đã từng chiến thắng tại vùng giá này. Cấu trúc giảm đã bị vi phạm. Đừng cố gắng giao dịch lại một chiến trường mà phe ta đã từng thua trận.</p>
+            </div>
+            <div class="checklist-values">✓ Giá close &lt; Stop Line | ✓ Không nến xanh lớn xuyên qua</div>
+          </div>
+        </div>
+      </div>
+      <div class="lesson-image full-width" style="margin: 0; padding: 0; width: 100%;">
+        <div style="background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.15); padding: 1rem 0.5rem; text-align: center; min-height: 80px;">
+          <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjwnoii9-9b6ftr-img7.webp" alt="Minh họa Integrity" style="cursor: grab;">
+        </div>
+      </div>
+
+      <!-- NHÓM 3 -->
+      <h3 class="category-title">🔍 Nhóm 3: Xác Nhận Entry (Thời Điểm Vàng)</h3>
+      <p>Dù zone đẹp đến đâu, nếu vào lệnh sai thời điểm, bạn vẫn có thể thua lỗ hoặc bị kẹt vốn. Đây là bước cuối cùng.</p>
+
+      <div class="checklist-grid">
+        <!-- ITEM 7 -->
+        <div class="checklist-item">
+          <div class="checklist-number">7</div>
+          <div class="checklist-content">
+            <div class="checklist-title">Kiên Nhẫn Đợi Retest (Không Chase!)</div>
+            <div class="checklist-desc">
+                <p><strong>Cái gì:</strong> Giá phải quay lại chạm vào đường Entry của HFZ.</p>
+                <p><strong>Tại sao:</strong> Nhiều bạn thấy Phase 3 giảm mạnh quá nên sợ lỡ cơ hội, vội vàng Sell đuổi (FOMO) ở giá thấp. Điều này làm R:R cực tệ. Hãy nhớ: Thị trường luôn cho bạn cơ hội thứ hai. Nếu giá không quay lại test, hãy bỏ qua. Chúng ta là những thợ săn kiên nhẫn, không phải con bạc khát nước.</p>
+            </div>
+            <div class="checklist-values">⏰ Đợi giá chạm HFZ | ❌ KHÔNG chase breakout</div>
+          </div>
+        </div>
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjwnoii9-9b6ftr-img8.webp" alt="Minh họa Retest" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0px; padding: 0px; cursor: grab;">
+
+        <!-- ITEM 8 -->
+        <div class="checklist-item">
+          <div class="checklist-number">8</div>
+          <div class="checklist-content">
+            <div class="checklist-title">Có Nến Xác Nhận (Confirmation)</div>
+            <div class="checklist-desc">
+                <p><strong>Cái gì:</strong> Xuất hiện mô hình nến đảo chiều giảm (Bearish Reversal) tại HFZ.</p>
+                <p><strong>Tại sao:</strong> Đây là "cái gật đầu" cuối cùng của thị trường. Nó xác nhận rằng phe Bán ĐÃ thực sự quay lại bảo vệ vùng giá này. Không có xác nhận, việc đặt lệnh Limit (Set & Forget) giống như lao xe qua ngã tư đèn đỏ mà không nhìn đường - bạn có thể qua được, nhưng rủi ro tai nạn là cực cao.</p>
+            </div>
+            <div class="checklist-values">✓ Shooting Star | ✓ Bearish Engulfing | ✓ Pin Bar</div>
+          </div>
+        </div>
+      </div>
+      <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjwnoii9-9b6ftr-img9.webp" alt="Minh họa Confirmation" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0px; padding: 0px; cursor: grab;">
+
+      <div class="highlight-box warning">
+        <p>⚠️ <strong>Lưu Ý Sống Còn:</strong> Điểm 7 và 8 thường là nơi trader thất bại nhiều nhất. Sự thiếu kiên nhẫn khi đợi retest hoặc lười biếng không đợi confirmation chính là nguyên nhân đốt cháy tài khoản nhanh nhất.</p>
+      </div>
+    </section>
+    
+    <!-- ========== SECTION 4: VÍ DỤ THỰC TẾ ========== -->
+    <section class="content-section">
+      <h2 class="section-title">
+        <span class="section-icon">📈</span>
+        Phân Tích Case Study Thực Chiến
+      </h2>
+      
+      <p>Lý thuyết là màu xám, chỉ có cây đời mãi xanh tươi. Hãy cùng tôi áp dụng bộ lọc 8 điểm này vào 2 ví dụ thực tế để thấy sự khác biệt giữa "Vàng" và "Thau".</p>
+
+      <!-- VÍ DỤ 1 -->
+      <div class="info-card">
+        <div class="info-card-header">
+          <div class="info-card-icon check">✅</div>
+          <div>
+            <div class="info-card-title">CASE 1: BTC/USDT - Setup Grade A (8/8 điểm)</div>
+            <div class="info-card-subtitle">Đây là mẫu hình DPD hoàn hảo mà bạn nên tìm kiếm mỗi ngày.</div>
+          </div>
+        </div>
+        <div class="info-card-content">
+            <p><strong>Bối cảnh:</strong> BTC đang trong xu hướng giảm mạnh trên khung H4. Chúng ta phát hiện một vùng Pause nhỏ gọn sau cú sập.</p>
+        </div>
+      </div>
+      
+      <div class="lesson-image">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjwnoii9-9b6ftr-img10.webp" alt="Chart BTC Pass Checklist" style="cursor: grab;" class="">
+      </div>
+      
+      <div class="table-container">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Điểm Kiểm Tra</th>
+              <th>Tiêu Chuẩn GEM</th>
+              <th>Thực Tế Trên Chart</th>
+              <th>Đánh Giá</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1. Phase 1</td><td>Giảm dứt khoát</td><td>Nến đỏ thân dài, giảm 3.5%</td><td class="status-pass">✓ PASS</td></tr>
+            <tr><td>2. Phase 2</td><td>Tích lũy chặt</td><td>Chỉ 3 nến nhỏ, range 0.8%</td><td class="status-pass">✓ PASS</td></tr>
+            <tr><td>3. Phase 3</td><td>Phá vỡ mạnh</td><td>Sập mạnh khỏi vùng Pause</td><td class="status-pass">✓ PASS</td></tr>
+            <tr><td>4. HFZ</td><td>Vẽ đúng</td><td>Entry/SL rõ ràng</td><td class="status-pass">✓ PASS</td></tr>
+            <tr><td>5. Freshness</td><td>Fresh Zone</td><td>Chưa test lần nào</td><td class="status-pass">✓ PASS</td></tr>
+            <tr><td>6. Integrity</td><td>Chưa bị phá</td><td>Giá luôn dưới Stop Line</td><td class="status-pass">✓ PASS</td></tr>
+            <tr><td>7. Retest</td><td>Chạm zone</td><td>Giá hồi về chạm đúng mép dưới</td><td class="status-pass">✓ PASS</td></tr>
+            <tr><td>8. Confirm</td><td>Nến đảo chiều</td><td>Xuất hiện Shooting Star đẹp</td><td class="status-pass">✓ PASS</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="highlight-box tip">
+        <p>✅ <strong>Quyết Định: FULL RISK ENTRY.</strong> Setup này hội tụ đầy đủ mọi yếu tố ủng hộ. Đây là lúc bạn tự tin vào lệnh với khối lượng tiêu chuẩn (1-2% tài khoản).</p>
+      </div>
+
+      <!-- VÍ DỤ 2 -->
+      <div class="info-card" style="margin-top: 2rem;">
+        <div class="info-card-header">
+          <div class="info-card-icon warning">❌</div>
+          <div>
+            <div class="info-card-title">CASE 2: ETH/USDT - Setup Grade C (5/8 điểm)</div>
+            <div class="info-card-subtitle">Cạm bẫy điển hình khiến newbie mất tiền.</div>
+          </div>
+        </div>
+        <div class="info-card-content">
+            <p><strong>Bối cảnh:</strong> ETH cũng giảm, nhưng vùng Pause trông khá lộn xộn và kéo dài. Nhiều người vẫn cố vào lệnh vì FOMO.</p>
+        </div>
+      </div>
+      
+      <div class="lesson-image">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjwnoii9-9b6ftr-img11.webp" alt="Chart ETH Fail Checklist" style="cursor: grab;">
+      </div>
+      <p class="image-caption">ETH/USDT 4H - Một cái bẫy DPD điển hình</p>
+
+      <div class="table-container">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Điểm Kiểm Tra</th>
+              <th>Tiêu Chuẩn GEM</th>
+              <th>Thực Tế Trên Chart</th>
+              <th>Đánh Giá</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1. Phase 1</td><td>Giảm dứt khoát</td><td>Khá ổn, giảm 2.8%</td><td class="status-pass">✓ PASS</td></tr>
+            <tr><td>2. Phase 2</td><td>Tích lũy chặt</td><td><strong>7 nến, lộn xộn, range rộng 2.1%</strong></td><td class="status-fail">✗ FAIL</td></tr>
+            <tr><td>3. Phase 3</td><td>Phá vỡ mạnh</td><td>Lực bán yếu, nến nhỏ</td><td class="status-fail">✗ FAIL</td></tr>
+            <tr><td>4. HFZ</td><td>Vẽ đúng</td><td>OK</td><td class="status-pass">✓ PASS</td></tr>
+            <tr><td>5. Freshness</td><td>Fresh Zone</td><td><strong>Đã test 3 lần trước đó</strong></td><td class="status-fail">✗ FAIL</td></tr>
+            <tr><td>6. Integrity</td><td>Chưa bị phá</td><td>OK</td><td class="status-pass">✓ PASS</td></tr>
+            <tr><td>7. Retest</td><td>Chạm zone</td><td>OK</td><td class="status-pass">✓ PASS</td></tr>
+            <tr><td>8. Confirm</td><td>Nến đảo chiều</td><td>Không có nến xác nhận rõ</td><td class="status-fail">✗ FAIL</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="highlight-box warning">
+        <p>❌ <strong>Quyết Định: SKIP (BỎ QUA).</strong> Setup này có quá nhiều rủi ro: Zone cũ (không fresh), tích lũy lỏng lẻo. Vào lệnh ở đây là đánh bạc, không phải trading.</p>
+      </div>
+    </section>
+    
+    <!-- ========== SECTION 5: SAI LẦM THƯỜNG GẶP ========== -->
+    <section class="content-section">
+      <h2 class="section-title">
+        <span class="section-icon">⚠️</span>
+        3 Sai Lầm Chết Người Khi Dùng Checklist
+      </h2>
+      
+      <p>Ngay cả khi có checklist, trader vẫn có thể mắc sai lầm nếu tư duy sai lệch. Hãy tránh xa 3 cái bẫy tâm lý này:</p>
+
+      <ul class="key-points">
+          <li><strong>1. Thiên kiến xác nhận (Confirmation Bias):</strong> Bạn muốn vào lệnh đến mức bạn cố tình "nhìn gà hóa cuốc", coi một Phase 2 lỏng lẻo là chặt chẽ, hoặc coi một cây nến xanh nhỏ là confirmation giảm. <em>Giải pháp: Hãy trung thực tàn nhẫn với bản thân.</em></li>
+          <li><strong>2. Bỏ qua bối cảnh lớn (Big Picture):</strong> Một DPD đẹp nhưng nằm ngay trên Hỗ trợ cứng của khung Tuần (Weekly Support) thì vẫn là một setup chết. Checklist này chỉ xác nhận pattern, đừng quên nhìn sang trái (Look Left) để xem có cản lớn nào không.</li>
+          <li><strong>3. Linh hoạt sai chỗ:</strong> "Thôi kệ, 6/8 điểm chắc cũng được rồi". Không! Kỷ luật là làm đúng 100% những gì đã đề ra. Mỗi lần bạn thỏa hiệp, bạn đang đục một lỗ thủng trên con thuyền trading của mình.</li>
+      </ul>
+    </section>
+
+    <!-- ========== SECTION 6: QUY TRÌNH ÁP DỤNG ========== -->
+    <section class="content-section">
+      <h2 class="section-title">
+        <span class="section-icon">📝</span>
+        Quy Trình Hành Động (Action Plan)
+      </h2>
+      
+      <p>Để biến kiến thức thành phản xạ, hãy in quy trình này ra hoặc dán nó lên màn hình trading của bạn:</p>
+
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-step-number">1</div>
+          <div class="flow-step-content">
+            <div class="flow-step-title">Bước 1: Quét (Scan)</div>
+            <div class="flow-step-desc">Lướt chart tìm cấu trúc DPD tiềm năng (DOWN → PAUSE → DOWN).</div>
+          </div>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">
+          <div class="flow-step-number">2</div>
+          <div class="flow-step-content">
+            <div class="flow-step-title">Bước 2: Lọc (Filter)</div>
+            <div class="flow-step-desc">Dùng Checklist 8 điểm để chấm điểm. <br>• 8/8: Chuẩn bị đạn dược. <br>• &lt; 6/8: Bỏ qua ngay lập tức.</div>
+          </div>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">
+          <div class="flow-step-number">3</div>
+          <div class="flow-step-content">
+            <div class="flow-step-title">Bước 3: Phục Kích (Wait)</div>
+            <div class="flow-step-desc">Đặt cảnh báo giá (Alert) gần HFZ. Đi làm việc khác, đừng nhìn chằm chằm vào màn hình.</div>
+          </div>
+        </div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">
+          <div class="flow-step-number">4</div>
+          <div class="flow-step-content">
+            <div class="flow-step-title">Bước 4: Bóp Cò (Execute)</div>
+            <div class="flow-step-desc">Khi chuông báo reo → Mở chart → Tìm nến Confirmation → Vào lệnh.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">8/8</div>
+          <div class="stat-label">Grade A (Full Size)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">6-7</div>
+          <div class="stat-label">Grade B (Half Size)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">&lt;6</div>
+          <div class="stat-label">TRASH (No Trade)</div>
+        </div>
+      </div>
+      
+      <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch2/lesson-mjwnoii9-9b6ftr-img12.webp" alt="Minh họa quy trình" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0px; padding: 0px; cursor: grab;">
+    </section>
+
+    <!-- ========== SECTION 7: SUMMARY ========== -->
+    <section class="content-section">
+      <div class="summary-box">
+        <h3 class="summary-title">📋 Tóm Tắt Bài Học</h3>
+        
+        <p>Chúc mừng bạn! Bạn vừa nạp vào đầu một lượng kiến thức quan trọng để bảo vệ vốn. Hãy nhớ rằng:</p>
+        <ul class="key-points">
+          <li><strong>Chất lượng hơn Số lượng:</strong> Thà trade ít nhưng chất (Grade A) còn hơn trade nhiều mà rác (Grade C).</li>
+          <li><strong>Cấu trúc là vua:</strong> Phase 1 và Phase 3 phải mạnh, Phase 2 phải chặt. Đó là dấu hiệu của Smart Money.</li>
+          <li><strong>Freshness là nữ hoàng:</strong> Zone mới (Fresh) luôn có nhiều tiền (lệnh chờ) hơn zone cũ.</li>
+          <li><strong>Confirmation là bảo vệ:</strong> Nó là chốt an toàn cuối cùng để bạn không bắt dao rơi.</li>
+        </ul>
+        <p style="text-align: center; margin-top: 1rem;"><em>"Trading không phải là dự đoán tương lai, mà là phản ứng với hiện tại dựa trên những dấu hiệu đã được kiểm chứng."</em></p>
+      </div>
+    </section>
+    
+    <!-- ========== QUIZ SECTION ========== -->
+    <section class="content-section">
+      <div class="quiz-container">
+        <div class="quiz-header">
+          <span class="quiz-icon">📝</span>
+          <span class="quiz-title">Kiểm Tra Kiến Thức</span>
+        </div>
+        
+        <!-- Câu hỏi 1 -->
+        <div class="quiz-question" id="question1">
+          <div class="question-number">Câu 1/3</div>
+          <div class="question-text">Tại sao Phase 2 (PAUSE) của DPD pattern cần phải có biên độ hẹp (tight range) và ít nến (1-5 nến)?</div>
+          <div class="quiz-options">
+            <div class="quiz-option" onclick="checkAnswer(1, 'a', this)">
+              <span class="option-letter">A.</span>
+              <label>Vì đó là quy định ngẫu nhiên của thị trường.</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(1, 'b', this)">
+              <span class="option-letter">B.</span>
+              <label>Vì nếu tích lũy quá lâu, sự mất cân bằng (Imbalance) giữa cung và cầu sẽ bị triệt tiêu, lực giảm sẽ yếu đi.</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(1, 'c', this)">
+              <span class="option-letter">C.</span>
+              <label>Vì nến càng nhiều thì zone càng mạnh.</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(1, 'd', this)">
+              <span class="option-letter">D.</span>
+              <label>Để biểu đồ trông đẹp hơn.</label>
+            </div>
+          </div>
+          <div class="quiz-feedback" id="feedback1">
+            <span class="quiz-feedback-text"></span>
+          </div>
+        </div>
+        
+        <!-- Câu hỏi 2 -->
+        <div class="quiz-question" id="question2">
+          <div class="question-number">Câu 2/3</div>
+          <div class="question-text">Nếu bạn gặp một HFZ đã được test 3 lần trước đó, hành động đúng đắn nhất theo phương pháp GEM là gì?</div>
+          <div class="quiz-options">
+            <div class="quiz-option" onclick="checkAnswer(2, 'a', this)">
+              <span class="option-letter">A.</span>
+              <label>Vào lệnh ngay vì zone này đã chứng minh được sức mạnh qua 3 lần giữ giá.</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(2, 'b', this)">
+              <span class="option-letter">B.</span>
+              <label>Vào lệnh nhưng giảm volume xuống một nửa.</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(2, 'c', this)">
+              <span class="option-letter">C.</span>
+              <label>SKIP (Bỏ qua) - Vì các lệnh bán chờ (sell orders) đã bị hấp thụ gần hết, zone rất dễ bị phá vỡ.</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(2, 'd', this)">
+              <span class="option-letter">D.</span>
+              <label>Chờ test thêm lần thứ 4 cho chắc chắn.</label>
+            </div>
+          </div>
+          <div class="quiz-feedback" id="feedback2">
+            <span class="quiz-feedback-text"></span>
+          </div>
+        </div>
+        
+        <!-- Câu hỏi 3 -->
+        <div class="quiz-question" id="question3">
+          <div class="question-number">Câu 3/3</div>
+          <div class="question-text">Tình huống nào sau đây là KHÔNG nên vào lệnh dù Checklist đã đạt 7/8 điểm?</div>
+          <div class="quiz-options">
+            <div class="quiz-option" onclick="checkAnswer(3, 'a', this)">
+              <span class="option-letter">A.</span>
+              <label>Khi có tin tức quan trọng (như FOMC) sắp công bố trong 15 phút nữa.</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(3, 'b', this)">
+              <span class="option-letter">B.</span>
+              <label>Khi Phase 1 giảm rất mạnh.</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(3, 'c', this)">
+              <span class="option-letter">C.</span>
+              <label>Khi zone là Fresh zone.</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(3, 'd', this)">
+              <span class="option-letter">D.</span>
+              <label>Khi có nến Shooting Star xác nhận.</label>
+            </div>
+          </div>
+          <div class="quiz-feedback" id="feedback3">
+            <span class="quiz-feedback-text"></span>
+          </div>
+        </div>
+        
+        <!-- Nút Làm Lại Quiz -->
+        <div class="quiz-retake-container">
+          <button class="quiz-retake-btn" onclick="resetQuiz()">
+            <span class="btn-icon">🔄</span>
+            <span>Làm Lại Quiz</span>
+          </button>
+        </div>
+        
+      </div>
+    </section>
+    
+    <!-- ========== FOOTER ========== -->
+    <footer class="lesson-footer">
+      <div class="footer-brand">GEM Trading Academy</div>
+      <a href="https://gemral.com" class="footer-link" target="_blank">gemral.com</a>
+    </footer>
+    
+  </div>
+  
+  <!-- Quiz Script - Instant Feedback -->
+  <script>
+    // Đáp án đúng
+    const correctAnswers = {
+      1: 'c',
+      2: 'b',
+      3: 'd'
+    };
+    
+    // Tổng số câu hỏi
+    const totalQuestions = 3;
+    
+    // Giải thích cho từng câu
+    const explanations = {
+      1: {
+        correct: '🎉 Chính xác! Phase 2 cần range < 1.5%, 1-5 nến với thân nến nhỏ. Đây là vùng tích lũy ngắn gọn của Smart Money.',
+        incorrect: '❌ Chưa đúng! Phase 2 cần: Range < 1.5%, 1-5 nến, thân nến nhỏ. Vùng tích lũy phải ngắn gọn, không kéo dài.'
+      },
+      2: {
+        correct: '🎉 Đúng! Zone test 3+ lần đã yếu. Mỗi lần test, zone mất đi một phần sức mạnh. Hãy tìm fresh zone để có xác suất cao hơn.',
+        incorrect: '❌ Chưa đúng! Zone càng test nhiều càng YẾU, không phải mạnh hơn. Zone 3+ test → SKIP và tìm fresh zone.'
+      },
+      3: {
+        correct: '🎉 Xuất sắc! Retest + Confirmation là 2 điểm quan trọng nhất. Không bao giờ chase breakout - phải đợi giá quay lại test zone VÀ có nến xác nhận.',
+        incorrect: '❌ Chưa đúng! 2 điểm quan trọng nhất: (7) Đợi Retest HFZ + (8) Có nến Confirmation. Đây là điểm khác biệt giữa trader thành công và thua lỗ.'
+      }
+    };
+    
+    // Theo dõi câu đã trả lời
+    const answeredQuestions = {};
+    
+    // Kiểm tra đã trả lời hết chưa
+    function checkAllAnswered() {
+      const answeredCount = Object.keys(answeredQuestions).length;
+      if (answeredCount >= totalQuestions) {
+        const retakeContainer = document.querySelector('.quiz-retake-container');
+        retakeContainer.classList.add('show');
+      }
+    }
+    
+    // Reset Quiz
+    function resetQuiz() {
+      // Reset tracking
+      for (let key in answeredQuestions) {
+        delete answeredQuestions[key];
+      }
+      
+      // Ẩn nút Retake
+      const retakeContainer = document.querySelector('.quiz-retake-container');
+      retakeContainer.classList.remove('show');
+      
+      // Reset tất cả câu hỏi
+      for (let i = 1; i <= totalQuestions; i++) {
+        const questionDiv = document.getElementById('question' + i);
+        const feedbackDiv = document.getElementById('feedback' + i);
+        const allOptions = questionDiv.querySelectorAll('.quiz-option');
+        
+        // Remove classes từ question
+        questionDiv.classList.remove('answered', 'correct-answered', 'incorrect-answered');
+        
+        // Reset feedback
+        feedbackDiv.classList.remove('correct', 'incorrect', 'show');
+        feedbackDiv.querySelector('.quiz-feedback-text').textContent = '';
+        
+        // Reset tất cả options
+        allOptions.forEach(option => {
+          option.classList.remove('correct', 'incorrect', 'disabled', 'show-correct');
+        });
+      }
+      
+      // Scroll lên đầu quiz với offset
+      const quizContainer = document.querySelector('.quiz-container');
+      const yOffset = -20;
+      const y = quizContainer.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+    
+    function checkAnswer(questionNum, selectedAnswer, clickedElement) {
+      // Nếu đã trả lời rồi thì không làm gì
+      if (answeredQuestions[questionNum]) return;
+      
+      // Đánh dấu đã trả lời
+      answeredQuestions[questionNum] = true;
+      
+      const questionDiv = document.getElementById('question' + questionNum);
+      const feedbackDiv = document.getElementById('feedback' + questionNum);
+      const allOptions = questionDiv.querySelectorAll('.quiz-option');
+      const isCorrect = selectedAnswer === correctAnswers[questionNum];
+      
+      // Disable tất cả options
+      allOptions.forEach((option, index) => {
+        const optionLetter = ['a', 'b', 'c', 'd'][index];
+        
+        if (option === clickedElement) {
+          if (isCorrect) {
+            option.classList.add('correct');
+          } else {
+            option.classList.add('incorrect');
+          }
+        } else if (optionLetter === correctAnswers[questionNum] && !isCorrect) {
+          option.classList.add('show-correct');
+        } else {
+          option.classList.add('disabled');
+        }
+      });
+      
+      // Hiển thị feedback
+      const feedbackText = feedbackDiv.querySelector('.quiz-feedback-text');
+      
+      if (isCorrect) {
+        feedbackDiv.classList.add('correct', 'show');
+        feedbackText.textContent = explanations[questionNum].correct;
+        questionDiv.classList.add('answered', 'correct-answered');
+      } else {
+        feedbackDiv.classList.add('incorrect', 'show');
+        feedbackText.textContent = explanations[questionNum].incorrect;
+        questionDiv.classList.add('answered', 'incorrect-answered');
+      }
+      
+      // Kiểm tra đã trả lời hết chưa → hiện nút Retake
+      checkAllAnswered();
+    }
+  </script>

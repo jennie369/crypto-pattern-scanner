@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 1.4: Chiến Lược Entry Tại HFZ - GEM Trading Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary-navy: #112250; --primary-gold: #FFBD59; --accent-cyan: #00F0FF; --accent-purple: #6A5BFF; --success-green: #10B981; --error-red: #EF4444; --bg-dark: #0A0E17; --bg-card: #1A1F2E; --bg-card-hover: #252B3D; --text-primary: #FFFFFF; --text-secondary: #A0A9C0; --border-color: rgba(255, 189, 89, 0.2); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-primary); line-height: 1.7; font-size: 16px; }
+        .lesson-container { max-width: 800px; margin: 0 auto; }
+        @media (min-width: 600px) { body { padding: 2rem; background: linear-gradient(135deg, #0A0E17 0%, #112250 100%); } .lesson-container { background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border-color); overflow: hidden; } }
+        .lesson-header { background: linear-gradient(135deg, var(--primary-navy) 0%, #1a3a7a 100%); padding: 2rem 1rem; text-align: center; border-bottom: 3px solid var(--error-red); }
+        .header-badge { display: inline-block; background: linear-gradient(135deg, var(--error-red) 0%, #DC2626 100%); color: white; padding: 0.5rem 1.25rem; border-radius: 25px; font-size: 0.85rem; font-weight: 700; margin-bottom: 1rem; }
+        .lesson-header h1 { font-size: clamp(1.5rem, 5vw, 2rem); font-weight: 700; margin-bottom: 0.5rem; }
+        .lesson-header p { color: var(--text-secondary); }
+        .content-section { padding: 0; }
+        @media (min-width: 600px) { .content-section { padding: 1.5rem; } }
+        .content-card { background: var(--bg-card); padding: 1.5rem 1rem; margin-bottom: 1px; border-left: 4px solid var(--error-red); }
+        @media (min-width: 600px) { .content-card { border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color); border-left: 4px solid var(--error-red); } }
+        .content-card h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--error-red); display: flex; align-items: center; gap: 0.75rem; }
+        .content-card h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 1rem 0; color: var(--accent-cyan); }
+        .content-card p { margin-bottom: 1rem; color: var(--text-secondary); line-height: 1.8; }
+        .content-card ul, .content-card ol { margin: 1rem 0; padding-left: 1.5rem; color: var(--text-secondary); }
+        .content-card li { margin-bottom: 0.75rem; }
+        .highlight-box { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 1.25rem; margin: 1.25rem 0; }
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0, 240, 255, 0.05) 100%); border-color: rgba(0, 240, 255, 0.3); }
+        .highlight-box.green { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%); border-color: rgba(16, 185, 129, 0.3); }
+        .highlight-box.gold { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, rgba(255, 189, 89, 0.05) 100%); border-color: rgba(255, 189, 89, 0.3); }
+        .highlight-box p { margin: 0; color: var(--text-primary); }
+        .image-placeholder { background: linear-gradient(145deg, #1a2235 0%, #0d1321 100%); border: 2px dashed rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 1rem; margin: 1.5rem 0; text-align: center; }
+        .image-placeholder img { max-width: 100%; border-radius: 8px; margin-bottom: 0.75rem; }
+        .image-placeholder p { font-size: 0.85rem; color: var(--error-red); margin: 0; font-style: italic; }
+        .candle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+        @media (max-width: 600px) { .candle-grid { grid-template-columns: 1fr; gap: 1px; background: var(--border-color); } }
+        .candle-card { background: var(--bg-card-hover); padding: 1.25rem; text-align: center; }
+        @media (min-width: 600px) { .candle-card { border-radius: 12px; border: 1px solid var(--border-color); } }
+        .candle-card .emoji { font-size: 2rem; margin-bottom: 0.5rem; }
+        .candle-card h4 { color: var(--error-red); margin-bottom: 0.25rem; }
+        .candle-card p { font-size: 0.85rem; color: var(--text-secondary); margin: 0; }
+        .step-flow { background: var(--bg-card-hover); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+        .step-item { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border-color); }
+        .step-item:last-child { border-bottom: none; }
+        .step-num { width: 2rem; height: 2rem; background: var(--error-red); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .step-content h4 { color: var(--text-primary); margin-bottom: 0.25rem; }
+        .step-content p { color: var(--text-secondary); font-size: 0.9rem; margin: 0; }
+        .summary-box { background: linear-gradient(135deg, var(--primary-navy) 0%, #1a3a7a 100%); border: 2px solid var(--error-red); padding: 1.5rem 1rem; margin: 0; }
+        @media (min-width: 600px) { .summary-box { border-radius: 16px; padding: 2rem; margin: 1.5rem; } }
+        .summary-box h3 { color: var(--error-red); font-size: 1.25rem; margin-bottom: 1rem; }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li { padding: 0.5rem 0; padding-left: 1.75rem; position: relative; color: var(--text-primary); }
+        .summary-box li::before { content: '✓'; position: absolute; left: 0; color: var(--error-red); font-weight: 700; }
+        .quiz-section { padding: 0; }
+        @media (min-width: 600px) { .quiz-section { padding: 1.5rem; } }
+        .quiz-container { background: var(--bg-card); padding: 1.5rem 1rem; border-left: 4px solid var(--accent-purple); }
+        @media (min-width: 600px) { .quiz-container { border-radius: 16px; padding: 2rem; border: 1px solid var(--border-color); border-left: 4px solid var(--accent-purple); } }
+        .quiz-container h2 { color: var(--accent-purple); font-size: 1.35rem; margin-bottom: 1.5rem; }
+        .quiz-question { background: var(--bg-card-hover); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem; border: 1px solid var(--border-color); }
+        .quiz-question p { font-weight: 600; margin-bottom: 1rem; color: var(--text-primary); }
+        .quiz-option { display: block; width: 100%; padding: 0.875rem 1rem; margin-bottom: 0.5rem; background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 8px; color: var(--text-primary); cursor: pointer; text-align: left; transition: all 0.3s; }
+        .quiz-option:hover { border-color: var(--accent-purple); }
+        .quiz-option.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--success-green); color: var(--success-green); }
+        .quiz-option.incorrect { background: rgba(239, 68, 68, 0.2); border-color: var(--error-red); color: var(--error-red); }
+        .quiz-result { padding: 0.75rem; border-radius: 8px; margin-top: 0.75rem; font-weight: 600; display: none; }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct { background: rgba(16, 185, 129, 0.2); color: var(--success-green); }
+        .quiz-result.incorrect { background: rgba(239, 68, 68, 0.2); color: var(--error-red); }
+        .quiz-score { text-align: center; padding: 1.5rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.05) 100%); border-radius: 12px; margin-top: 1.5rem; display: none; }
+        .quiz-score.show { display: block; }
+        .quiz-score h3 { color: var(--error-red); margin-bottom: 0.5rem; }
+        .retake-btn { margin-top: 1rem; padding: 0.75rem 2rem; background: linear-gradient(135deg, var(--accent-purple) 0%, #5346E0 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .lesson-footer { text-align: center; padding: 2rem 1rem; background: var(--bg-card); border-top: 1px solid var(--border-color); }
+        .lesson-footer p { color: var(--text-secondary); font-size: 0.9rem; }
+        .lesson-footer .brand { color: var(--primary-gold); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="header-badge">🥈 TIER 2 - Chapter 1</div>
+            <h1>Chiến Lược Entry Tại HFZ</h1>
+            <p>Cách vào lệnh SHORT khi giá test vùng HFZ</p>
+        </header>
+
+        <section class="content-section">
+            <!-- 📌 1. OPENING HOOK -->
+            <div class="content-card">
+                <h2><span class="icon">🎯</span> Đừng Để "Bẫy Phấn Khích" Đánh Lừa Bạn</h2>
+                <p>Bạn đã bao giờ rơi vào tình huống này chưa: Bạn xác định được một vùng HFZ (High Frequency Zone) cực đẹp, giá đang tăng mạnh và tiến thẳng vào vùng đó. Vì sợ bỏ lỡ cơ hội, bạn đặt lệnh SHORT ngay khi giá vừa chạm mép zone. Nhưng thay vì quay đầu, giá tiếp tục xuyên qua zone thêm một đoạn dài, quét sạch Stop Loss của bạn, rồi mới... thực sự đảo chiều? Đây chính là cái bẫy tâm lý phổ biến nhất mà tôi muốn giúp bạn tránh khỏi trong bài học này.</p>
+                <p>Chiến lược entry tại HFZ không chỉ là "chạm và đánh". Nó là một nghệ thuật của sự kiên nhẫn và xác nhận. Để chiến thắng trong hệ thống GEM Frequency, bạn không cần phải là người nhanh nhất, bạn cần là người có xác nhận chắc chắn nhất. Đến cuối bài học này, bạn sẽ nắm giữ quy trình 5 bước thực thi lệnh "sát thủ", giúp bạn lọc bỏ đến 80% những tín hiệu nhiễu và bảo vệ tài khoản một cách tối ưu.</p>
+                <div class="highlight-box important">
+                    <div class="highlight-title">💡 Insight Nâng Cao</div>
+                    <p>Trong trading, "tốc độ" thường là kẻ thù của "xác suất". Smart Money luôn để lại dấu vết trước khi thực sự đảo chiều. Những dấu vết đó chính là các mẫu hình nến Rejection mà chúng ta sẽ học. Việc chờ đợi nến đóng cửa không phải là sự chậm trễ, đó là sự xác nhận rằng phe Bán đã thực sự quay trở lại nắm quyền kiểm soát tại vùng tần số cao.</p>
+                </div>
+            </div>
+
+            <!-- 📌 2. CONCEPT - QUY TRÌNH 5 BƯỚC (ORIGINAL + EXPANDED) -->
+            <div class="content-card">
+                <h2><span class="icon">🎯</span> Quy Trình Entry 5 Bước</h2>
+                <p>Hãy coi quy trình này như một bản checklist bắt buộc trước khi cất cánh. Nếu thiếu bất kỳ bước nào, bạn không được phép nhấn nút "Sell". Để tôi giải thích cho bạn rõ hơn về logic đằng sau từng bước này:</p>
+                <div class="step-flow">
+                    <div class="step-item">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <h4>Xác định HFZ zone</h4>
+                            <p>Tìm zone từ pattern DPD/UPD, đánh dấu Entry và Stop Loss. Đây là bước nền tảng. Bạn phải nhìn thấy sự mất cân bằng lực cung cầu rõ ràng (Departure mạnh) thì vùng này mới được coi là HFZ có giá trị.</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <h4>Đợi giá chạm zone</h4>
+                            <p>Kiên nhẫn chờ giá di chuyển lên và chạm vào vùng HFZ. Lưu ý quan trọng: Giá phải chạm vào "Giá Entry" (mép dưới của HFZ) thì kế hoạch giao dịch của chúng ta mới bắt đầu được kích hoạt.</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">3</div>
+                        <div class="step-content">
+                            <h4>Tìm nến xác nhận rejection</h4>
+                            <p>Chờ Pin bar, Engulfing, hoặc Star pattern xuất hiện. Đây là giai đoạn quan trọng nhất. Chúng ta cần thấy phe Mua bị "chặn đứng" và phe Bán bắt đầu đẩy giá xuống ngay tại vùng tần số này.</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">4</div>
+                        <div class="step-content">
+                            <h4>Entry SHORT</h4>
+                            <p>Vào lệnh SHORT sau khi nến xác nhận close. Tuyệt đối không được "vào lệnh sớm" khi nến vẫn đang chạy. Giá đóng cửa là sự khẳng định cuối cùng về hành vi thị trường.</p>
+                        </div>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-num">5</div>
+                        <div class="step-content">
+                            <h4>Đặt Stop Loss và Take Profit</h4>
+                            <p>SL trên đỉnh zone (+0.5% buffer), TP tại R:R 1:2 trở lên. Quản lý rủi ro chính là ranh giới giữa một trader chuyên nghiệp và một con bạc. Nếu R:R không đạt tối thiểu 1:2, chúng ta sẽ bỏ qua trade này.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="highlight-box gold">
+                    <div class="highlight-title">🎯 Tại sao phải đợi Rejection?</div>
+                    <p>Rất nhiều trader hỏi tôi: "Nếu đợi nến đóng cửa, điểm entry của tôi sẽ xấu hơn và SL sẽ xa hơn?". Đúng, nhưng bù lại xác suất thắng (Win Rate) của bạn sẽ tăng vọt. Một vùng HFZ mạnh là vùng mà tại đó lực bán cực lớn. Nếu phe Mua quá mạnh và xuyên qua zone mà không có bất kỳ sự phản kháng nào, thì vùng đó không còn là HFZ valid nữa. Nến Rejection chính là bằng chứng cho thấy "Smart Money orders" đang thực sự được khớp.</p>
+                </div>
+            </div>
+
+            <!-- 📌 3. DEEP DIVE - CÁC LOẠI NẾN XÁC NHẬN (ORIGINAL + EXPANDED) -->
+            <div class="content-card">
+                <h2><span class="icon">🕯️</span> Các Loại Nến Xác Nhận</h2>
+                <p>Để trở thành một "sát thủ" tại HFZ, bạn cần nhận diện thành thục 3 loại vũ khí sau. Đây là những ngôn ngữ mà Smart Money dùng để nói với chúng ta rằng: "Vùng này vẫn đang được bảo vệ!".</p>
+                <div class="candle-grid">
+                    <div class="candle-card">
+                        <div class="emoji">📍</div>
+                        <h4>Pin Bar (Bearish)</h4>
+                        <p>Bấc dài phía trên, thân nhỏ phía dưới. Tín hiệu rejection mạnh. Nó cho thấy phe Mua đã cố đẩy giá lên rất cao nhưng bị phe Bán "đạp" xuống không thương tiếc.</p>
+                    </div>
+                    <div class="candle-card">
+                        <div class="emoji">🔻</div>
+                        <h4>Bearish Engulfing</h4>
+                        <p>Nến đỏ lớn bao trùm nến xanh trước đó. Tín hiệu đảo chiều. Đây là một cuộc "thảm sát" của phe Bán, cho thấy momentum tăng đã hoàn toàn bị triệt tiêu.</p>
+                    </div>
+                    <div class="candle-card">
+                        <div class="emoji">⭐</div>
+                        <h4>Evening Star</h4>
+                        <p>3 nến: xanh + doji + đỏ. Pattern đảo chiều cổ điển. Nó mô tả quá trình: Tăng trưởng -> Do dự -> Đảo chiều mạnh mẽ. Độ tin cậy cực cao tại vùng HFZ.</p>
+                    </div>
+                </div>
+
+                <h3>Tại sao nến Pin Bar lại "nguy hiểm" tại HFZ?</h3>
+                <p>Hãy phân tích sâu vào tâm lý: Cái bấc nến dài phía trên chính là những cái bẫy thanh khoản. Khi giá xuyên qua mép HFZ, rất nhiều retail trader sẽ nghĩ rằng "phá vỡ rồi" và nhảy vào mua đuổi. Smart Money chỉ chờ có thế để khớp hết đống lệnh SHORT khổng lồ của họ. Kết quả là giá bị đẩy xuống mạnh, để lại cái bấc nến dài – đó là "xác" của những trader mua đuổi. Khi thấy Pin Bar, bạn biết rằng Smart Money đã hoàn thành việc khớp lệnh và giá chuẩn bị lao dốc.</p>
+
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x350/112250/EF4444?text=Rejection+Candles" alt="Rejection Candles">
+                    <p>📸 3 loại nến xác nhận rejection tại HFZ - Hãy ghi nhớ hình dáng này!</p>
+                </div>
+            </div>
+
+            <!-- 📌 4. APPLICATION - NGUYÊN TẮC VÀNG (ORIGINAL + EXPANDED) -->
+            <div class="content-card">
+                <h2><span class="icon">⚠️</span> Nguyên Tắc Vàng</h2>
+                <div class="highlight-box">
+                    <p><strong>❌ KHÔNG BAO GIỜ:</strong> Entry SHORT ngay khi giá chạm zone mà không có nến xác nhận! Nếu bạn làm điều này, bạn đang đánh bạc với may rủi, không phải giao dịch theo xác suất.</p>
+                </div>
+                <div class="highlight-box green">
+                    <p><strong>✅ LUÔN LUÔN:</strong> Chờ nến xác nhận close hoàn toàn trước khi entry. Kiên nhẫn là chìa khóa! Thà lỡ một cơ hội còn hơn mất tiền vì sự nóng vội.</p>
+                </div>
+                <h3>Quản lý rủi ro (Risk Management):</h3>
+                <p>Nếu bạn không quản lý rủi ro, sớm muộn gì thị trường cũng sẽ đào thải bạn. Hãy tuân thủ tuyệt đối các con số sau:</p>
+                <ul>
+                    <li><strong>Stop Loss:</strong> Đặt trên đỉnh HFZ + 0.5% buffer. Đây là quy tắc bất di bất dịch để bảo vệ bạn khỏi Stop Hunt.</li>
+                    <li><strong>Position Size:</strong> Rủi ro tối đa 1-2% tài khoản cho mỗi lệnh. Ví dụ tài khoản $10,000, bạn chỉ được phép lỗ tối đa $100 - $200 cho lệnh này. Đừng bao giờ All-in!</li>
+                    <li><strong>Take Profit:</strong> Tối thiểu R:R 1:2. Nếu khoảng cách đến vùng hỗ trợ tiếp theo không đủ 1:2, hãy bỏ qua setup đó. Một trader thông minh biết khi nào <strong>KHÔNG</strong> nên giao dịch.</li>
+                </ul>
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x400/0A0E17/10B981?text=SL+TP+Placement" alt="SL TP Placement">
+                    <p>📸 Vị trí đặt Stop Loss và Take Profit chuẩn GEM Academy</p>
+                </div>
+            </div>
+
+            <!-- 📌 5. REAL-WORLD EXAMPLES - VÍ DỤ THỰC TẾ (ORIGINAL + EXPANDED) -->
+            <div class="content-card">
+                <h2><span class="icon">📊</span> Ví Dụ Entry Thực Tế</h2>
+                <p>Để tôi đưa ra một ví dụ thực tế trên ETH/USDT để bạn hình dung rõ nét hơn về cách "vận hành" của chiến lược này trong điều kiện thị trường thực tế.</p>
+                <p><strong>Setup:</strong> ETH/USDT 4H - HFZ từ pattern UPD. Đây là một setup đảo chiều từ đỉnh xu hướng tăng ngắn hạn.</p>
+                <ol>
+                    <li><strong>HFZ zone:</strong> $2,450 - $2,500. Trong đó: Giá Entry là $2,450 (mép dưới), Giá Stop là $2,500 (mép trên). Chúng ta cộng thêm buffer 0.5% (~$12) nên SL cuối cùng là $2,512.</li>
+                    <li><strong>Diễn biến:</strong> Giá pump lên mạnh mẽ, hưng phấn cực độ và chạm mức $2,460. Nhiều trader nghiệp dư đã vội vàng Short ở đây.</li>
+                    <li><strong>Xác nhận:</strong> Nến 4H kết thúc bằng một mô hình <strong>Bearish Engulfing</strong> cực lớn, đóng cửa tại mức $2,445. Điều này xác nhận phe Mua đã kiệt sức ngay tại ngưỡng tần số $2,450.</li>
+                    <li><strong>Thực thi:</strong> Chúng ta Entry SHORT ngay tại $2,445 sau khi nến close.</li>
+                    <li><strong>Quản lý:</strong> SL đặt tại $2,512. Khoảng cách SL là 67 giá.</li>
+                    <li><strong>Mục tiêu:</strong> TP tại $2,311. Đây là mức R:R 1:2. Tại sao lại là $2,311? Vì đây là vùng LFZ (Vùng Mua) tươi mới gần nhất ở phía dưới – nơi giá có xu hướng bị hút về.</li>
+                </ol>
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x450/112250/FFBD59?text=Real+Trade+Example" alt="Real Trade Example">
+                    <p>📸 Ví dụ trade thực tế với đầy đủ Entry, SL, TP trên biểu đồ ETH/USDT</p>
+                </div>
+                <div class="highlight-box cyan">
+                    <div class="highlight-title">🔍 Phân tích "Why"</div>
+                    <p>Tại sao chúng ta không đặt SL ngay tại $2,500? Bởi vì thị trường thường có những cú "quét" (wick hunt) qua các vùng số tròn hoặc vùng đỉnh zone để lấy thanh khoản. Khoảng buffer 0.5% là "vùng đệm an toàn" giúp bạn không bị văng khỏi cuộc chơi bởi những biến động nhiễu của thị trường trước khi nó thực sự sập.</p>
+                </div>
+            </div>
+
+            <!-- 📌 6. COMMON MISTAKES - SAI LẦM CHẾT NGƯỜI (NEW) -->
+            <div class="content-card">
+                <h2><span class="icon">🚨</span> Những "Hố Tử Thần" Cần Tránh</h2>
+                <p>Trong quá trình cố vấn cho hàng ngàn trader, tôi nhận thấy 3 sai lầm này lặp đi lặp lại khiến họ mất tiền, ngay cả khi họ biết về HFZ:</p>
+                <ul>
+                    <li><strong>Lỗi "Cầm đèn chạy trước ô tô":</strong> Thấy giá chạm zone là vào lệnh ngay (Limit order). Bạn đang đánh cược rằng zone sẽ hold. Smart Money không đánh cược, họ chờ đợi sự xác nhận. Nếu giá xuyên qua zone như dao nóng cắt bơ, bạn sẽ mất tiền vô ích.</li>
+                    <li><strong>Lỗi "Nến chưa đóng đã vội":</strong> Thấy nến đang rút râu, chưa đóng cửa 4H đã vội vào lệnh. Kết quả: 5 phút cuối nến lật kèo, rút ngược lên xanh mạnh. Luôn luôn, tôi nhắc lại, LUÔN LUÔN chờ nến đóng cửa.</li>
+                    <li><strong>Lỗi "Phớt lờ Volume":</strong> Nến Rejection nhưng Volume cực thấp. Điều này cho thấy phe Bán thực tế không mạnh, chỉ là phe Mua đang nghỉ ngơi tạm thời. Một nến xác nhận uy tín phải đi kèm với Volume tăng vọt.</li>
+                </ul>
+                <div class="highlight-box warning">
+                    <div class="highlight-title">🚨 Sai lầm chết người</div>
+                    <p>Đừng bao giờ cố gắng "dự đoán" nến sẽ đóng cửa như thế nào. Thị trường không quan tâm bạn nghĩ gì. Nó chỉ quan tâm đến những gì thực sự xảy ra. Việc vào lệnh sớm 15 phút có thể khiến bạn trả giá bằng toàn bộ Stop Loss của mình.</p>
+                </div>
+            </div>
+
+            <!-- 📌 7. SUMMARY - TÓM TẮT (ORIGINAL + EXPANDED) -->
+            <div class="summary-box">
+                <h3>📝 Tóm Tắt Bài Học</h3>
+                <p>Chúng ta hãy cùng nhìn lại những điểm cốt lõi để bạn có thể áp dụng ngay vào ngày mai:</p>
+                <ul>
+                    <li>✓ <strong>Quy trình 5 bước:</strong> Xác định zone -> Chờ chạm -> Tìm xác nhận -> Entry -> Đặt SL/TP. Đây là lộ trình an toàn nhất cho mọi lệnh Short tại HFZ.</li>
+                    <li>✓ <strong>3 "vũ khí" xác nhận:</strong> Pin Bar, Bearish Engulfing, Evening Star. Hãy học thuộc lòng hình dáng của chúng trên biểu đồ.</li>
+                    <li>✓ <strong>Nguyên tắc vàng:</strong> KHÔNG bao giờ entry khi chưa có nến xác nhận đóng cửa. Kiên nhẫn chính là lợi thế cạnh tranh của bạn.</li>
+                    <li>✓ <strong>Quản lý vốn:</strong> SL đặt trên đỉnh zone + 0.5% buffer. Rủi ro 1-2% tài khoản. R:R tối thiểu 1:2.</li>
+                </ul>
+                <p><strong>Lời khuyên từ Mentor:</strong> "Thị trường là nơi chuyển tiền từ người thiếu kiên nhẫn sang người kiên nhẫn". Hãy để giá tự nói cho bạn biết khi nào nó muốn đảo chiều. Đừng cố gắng ép buộc thị trường làm theo ý bạn.</p>
+                <p>Bây giờ bạn đã nắm vững cách đánh Short tại vùng Supply (HFZ), chúng ta sẽ chuyển sang một phần hấp dẫn không kém ở bài tiếp theo: <strong>Chiến lược săn tìm cơ hội LONG tại LFZ</strong>. Nguyên lý sẽ có sự tương đồng nhưng có những sắc thái tâm lý khác biệt mà bạn cần nắm vững.</p>
+            </div>
+        </section>
+
+        <section class="quiz-section">
+            <div class="quiz-container">
+                <h2>❓ Kiểm Tra Kiến Thức</h2>
+                <div class="quiz-question" data-correct="1">
+                    <p>1. Khi nào nên entry SHORT tại HFZ?</p>
+                    <button class="quiz-option" data-index="0">A. Ngay khi giá chạm zone</button>
+                    <button class="quiz-option" data-index="1">B. Sau khi có nến xác nhận rejection close</button>
+                    <button class="quiz-option" data-index="2">C. Trước khi giá chạm zone</button>
+                    <button class="quiz-option" data-index="3">D. Bất cứ lúc nào</button>
+                    <div class="quiz-result"></div>
+                </div>
+                <div class="quiz-question" data-correct="2">
+                    <p>2. Stop Loss nên đặt ở đâu với HFZ?</p>
+                    <button class="quiz-option" data-index="0">A. Dưới zone</button>
+                    <button class="quiz-option" data-index="1">B. Giữa zone</button>
+                    <button class="quiz-option" data-index="2">C. Trên đỉnh zone + buffer</button>
+                    <button class="quiz-option" data-index="3">D. Không cần đặt SL</button>
+                    <div class="quiz-result"></div>
+                </div>
+                <div class="quiz-question" data-correct="0">
+                    <p>3. Nến nào là tín hiệu rejection mạnh tại HFZ?</p>
+                    <button class="quiz-option" data-index="0">A. Bearish Pin Bar với bấc dài phía trên</button>
+                    <button class="quiz-option" data-index="1">B. Nến xanh lớn</button>
+                    <button class="quiz-option" data-index="2">C. Doji ở giữa trend</button>
+                    <button class="quiz-option" data-index="3">D. Morning Star</button>
+                    <div class="quiz-result"></div>
+                </div>
+                <div class="quiz-score">
+                    <h3>🎉 Hoàn thành!</h3>
+                    <p>Bạn trả lời đúng <span id="correct-count">0</span>/3 câu hỏi</p>
+                    <button class="retake-btn" onclick="location.reload()">Làm lại Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <p>Bài học thuộc <span class="brand">GEM Trading Academy - TIER 2</span></p>
+            <p>© 2024 - Nền tảng đào tạo trading chuyên nghiệp</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0, correctCount = 0;
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

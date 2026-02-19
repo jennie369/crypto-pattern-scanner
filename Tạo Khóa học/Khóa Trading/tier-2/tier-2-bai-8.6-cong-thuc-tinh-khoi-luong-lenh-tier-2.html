@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 8.6: Công Thức Tính Khối Lượng Lệnh | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section, .content-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section, .content-card {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title, .content-card h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p, .content-card p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul, .content-card ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li, .content-card li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4 { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .info-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--error);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box h4 { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .success-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .success-box h4, .info-box.success .info-box-title { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+        .success-box p { color: var(--text-secondary); margin: 0; }
+
+        .formula-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05));
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-md);
+            padding: var(--space-xl);
+            text-align: center;
+            margin: var(--space-lg) 0;
+        }
+        .formula-title {
+            color: var(--gold);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: var(--space-md);
+        }
+        .formula-text {
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        @media (max-width: 600px) {
+            .formula-text { font-size: 1.2rem; word-break: break-word; }
+        }
+
+        .calc-example {
+            background: rgba(0,0,0,0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-md) 0;
+        }
+        .calc-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-xs) 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .calc-row:last-child { border-bottom: none; }
+        .calc-label { color: var(--text-secondary); }
+        .calc-value { color: var(--text-primary); font-family: 'JetBrains Mono', monospace; }
+        .calc-result { color: var(--success); font-weight: 700; font-size: 1.1rem; }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-box li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-lg) 16px;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        .quiz-question p { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); }
+        .quiz-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-sm);
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+            color: var(--error);
+        }
+        .quiz-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .quiz-result.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent);
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .score-number { font-size: 2rem; font-weight: 800; color: var(--gold); }
+        .score-label { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .btn-retake {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-xl);
+        }
+        .lesson-footer p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+
+        .highlight-red { color: var(--error); font-weight: 600; }
+        .highlight-gold { color: var(--gold); font-weight: 600; }
+        .highlight { color: var(--cyan); font-weight: 600; }
+        
+        .styled-list { list-style: none; padding: 0; }
+        .styled-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .styled-list li::before {
+            content: "•";
+            color: var(--gold);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <span class="lesson-badge">🛡️ Tier 2 - Bài 8.6</span>
+            <h1 class="lesson-title">Công Thức Tính Khối Lượng Lệnh</h1>
+            <p class="lesson-subtitle">Lá Chắn Bảo Vệ Tài Khoản Của Bạn</p>
+        </header>
+
+        <!-- 1. OPENING HOOK -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>1. Lời Mở Đầu: Bí Mật Của Sự Sống Còn</h2>
+            </div>
+            <div class="card-content">
+                <p>Bạn đã bao giờ tự hỏi: Tại sao có hai trader cùng sử dụng một hệ thống giao dịch, cùng vào lệnh tại một điểm (Entry), cùng đặt cắt lỗ (Stop Loss) và chốt lời (Take Profit) giống hệt nhau, nhưng sau một tháng, người này thì tài khoản tăng trưởng đều đặn, còn người kia lại "cháy túi"?</p>
+                <p>Câu trả lời không nằm ở khả năng phân tích kỹ thuật hay dự đoán thị trường. Nó nằm ở một khái niệm nghe có vẻ khô khan nhưng lại là "trái tim" của mọi hệ thống giao dịch thành công: <strong>Position Sizing (Tính Khối Lượng Lệnh)</strong>.</p>
+                <p>Rất nhiều bạn khi mới bước vào Tier 2 thường chỉ tập trung vào việc tìm kiếm các Zone "thần thánh" hay các mô hình nến đảo chiều. Nhưng tôi muốn nói với bạn một sự thật: <strong>Strategy (Chiến lược) giúp bạn kiếm tiền, nhưng Risk Management (Quản lý rủi ro) mới giúp bạn giữ được tiền.</strong> Và Position Sizing chính là công cụ mạnh mẽ nhất trong bộ công cụ quản lý rủi ro của bạn.</p>
+                <p>Trong bài học này, tôi sẽ không chỉ đưa cho bạn một công thức toán học vô hồn. Tôi sẽ hướng dẫn bạn cách sử dụng nó như một "tấm khiên" để bảo vệ tài khoản của bạn trước mọi cơn bão của thị trường, và quan trọng hơn, giúp bạn ngủ ngon mỗi đêm dù đang giữ lệnh qua đêm.</p>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x350/112250/EF4444?text=Position+Sizing+Impact" alt="Position Sizing Impact">
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. CONCEPT INTRODUCTION -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>2. Khái Niệm: Position Sizing Là Gì?</h2>
+            </div>
+            <div class="card-content">
+                <p>Trước khi đi vào tính toán, hãy làm rõ một số quan niệm sai lầm phổ biến.</p>
+
+                <div class="highlight-box">
+                    <h4>💡 Định Nghĩa Đúng</h4>
+                    <p><strong>Position Sizing</strong> không phải là việc bạn quyết định "tôi sẽ đánh bao nhiêu tiền" (ví dụ: tôi đánh 1,000$ cho lệnh này). Đó là cách hiểu sai lầm chết người.</p>
+                    <p>Position Sizing là quy trình xác định khối lượng giao dịch (số lot, số coin, số hợp đồng) dựa trên <strong>số tiền bạn chấp nhận MẤT</strong> nếu lệnh đó chạm Stop Loss.</p>
+                </div>
+
+                <p>Tại sao lại có sự khác biệt này? Hãy tưởng tượng:</p>
+                <ul class="styled-list">
+                    <li>Nếu bạn "đánh 1,000$" vào BTC và nó giảm 10%, bạn mất 100$.</li>
+                    <li>Nếu bạn "đánh 1,000$" vào một Altcoin biến động mạnh và nó giảm 50%, bạn mất 500$.</li>
+                </ul>
+                <p>Cùng là "đánh 1,000$" nhưng rủi ro lại hoàn toàn khác nhau. Position Sizing giúp bạn chuẩn hóa rủi ro này. Mục tiêu của chúng ta là: <strong>Dù trade BTC hay Altcoin, dù Stop Loss xa hay gần, nếu thua, tôi chỉ mất đúng một số tiền cố định (ví dụ 100$).</strong></p>
+
+                <h3>Quy Tắc Vàng 1-2%</h3>
+                <p>Trong GEM Frequency Method, chúng tôi tuân thủ nghiêm ngặt quy tắc: <strong>Không bao giờ rủi ro quá 1-2% tài khoản cho một lệnh giao dịch.</strong></p>
+                <ul class="styled-list">
+                    <li><strong>1% (Conservative):</strong> Dành cho người mới, tài khoản lớn, hoặc khi thị trường biến động khó lường.</li>
+                    <li><strong>2% (Aggressive):</strong> Dành cho trader có kinh nghiệm, tài khoản nhỏ/trung bình, và setup đẹp (A+).</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 3. DEEP DIVE -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>3. Phân Tích Sâu: Tại Sao Phải Là 1-2%?</h2>
+            </div>
+            <div class="card-content">
+                <p>Nhiều bạn sẽ thốt lên: "Chỉ 1% thôi sao? Bao giờ mới giàu được?". Để tôi cho bạn xem một bảng toán học tàn khốc về <strong>Drawdown (Mức sụt giảm tài khoản)</strong>.</p>
+
+                <div class="warning-box">
+                    <h4>⚠️ Bẫy Của Sự Phục Hồi</h4>
+                    <p>Khi bạn mất tiền, bạn cần một tỷ lệ lợi nhuận <strong>lớn hơn</strong> để quay về mức hòa vốn.</p>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 0.75rem; text-align: center; border-bottom: 2px solid var(--error); color: var(--error);">Mức Lỗ (Drawdown)</th>
+                            <th style="padding: 0.75rem; text-align: center; border-bottom: 2px solid var(--success); color: var(--success);">Cần Thắng Để Hòa Vốn</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">10%</td>
+                            <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">11.1%</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">20%</td>
+                            <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">25%</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">50%</td>
+                            <td style="padding: 0.75rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold; color: var(--gold);">100% (X2 tài khoản!)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; text-align: center;">90%</td>
+                            <td style="padding: 0.75rem; text-align: center; font-weight: bold; color: var(--error);">900% (X10 tài khoản - Gần như không thể)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>Nếu bạn rủi ro 10% mỗi lệnh, chỉ cần một chuỗi thua 5 lệnh (điều rất bình thường trong trading), bạn đã mất 40-50% tài khoản. Lúc đó tâm lý bạn sẽ hoảng loạn, muốn "gỡ gạc", và đó là lúc thị trường nuốt chửng bạn.</p>
+                <p>Ngược lại, nếu rủi ro 1-2%, bạn có thể thua 20 lệnh liên tiếp mà vẫn còn 60-80% vốn để làm lại. Position Sizing chính là "mạng sống" của bạn trong trò chơi này.</p>
+
+                <div class="formula-box">
+                    <div class="formula-title">🔥 CÔNG THỨC POSITION SIZING CHUẨN GEM</div>
+                    <div class="formula-text">
+                        Khối Lượng = (Vốn × Rủi Ro%) / (Giá Entry - Giá SL)
+                    </div>
+                </div>
+                
+                <p><strong>Quy trình 3 bước để áp dụng công thức:</strong></p>
+                <ol class="styled-list">
+                    <li><strong>Bước 1: Xác định $ Risk.</strong> Ví dụ vốn $10,000, risk 1% = $100. Đây là số tiền tối đa bạn sẽ mất.</li>
+                    <li><strong>Bước 2: Xác định khoảng cách Stop Loss.</strong> Dựa vào biểu đồ (Zone, Market Structure), <strong>tuyệt đối không</strong> dựa vào cảm tính. Ví dụ: Entry $2000, SL $1980 => Khoảng cách là $20.</li>
+                    <li><strong>Bước 3: Tính khối lượng.</strong> Lấy $100 chia cho $20 = 5. Vậy bạn sẽ mua/bán 5 đơn vị (coin/lot).</li>
+                </ol>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x350/112250/00F0FF?text=Position+Sizing+Formula" alt="Position Sizing Formula">
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. EXAMPLES -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>4. Ví Dụ Thực Tế</h2>
+            </div>
+            <div class="card-content">
+                <p>Hãy cùng tính toán cho hai trường hợp cụ thể để bạn thấy sự linh hoạt của công thức này.</p>
+
+                <div class="path-card gold">
+                    <h4>📝 Trường Hợp 1: Stop Loss Ngắn (Zone Đẹp)</h4>
+                    <p>Bạn tìm thấy một setup Long BTC tại LFZ khung H1 cực đẹp, zone rất hẹp (tight).</p>
+                    <div class="calc-example">
+                        <div class="calc-row">
+                            <span class="calc-label">Vốn (Equity):</span>
+                            <span class="calc-value">$10,000</span>
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">Rủi Ro (2%):</span>
+                            <span class="calc-value">$200 (Đây là số tiền cược)</span>
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">Entry Price:</span>
+                            <span class="calc-value">$42,000</span>
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">Stop Loss:</span>
+                            <span class="calc-value">$41,800 (Dưới Zone H1)</span>
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">Khoảng cách SL:</span>
+                            <span class="calc-value">$200 giá</span>
+                        </div>
+                        <div class="calc-row" style="border-top: 2px solid var(--success); margin-top: 0.5rem; padding-top: 0.75rem;">
+                            <span class="calc-label"><strong>Khối Lượng Trade:</strong></span>
+                            <span class="calc-result">$200 / $200 = 1 BTC</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="path-card">
+                    <h4>📝 Trường Hợp 2: Stop Loss Xa (Zone Khung Lớn)</h4>
+                    <p>Bạn trade khung D1 (Daily), biên độ nến lớn hơn, stop loss phải đặt xa hơn để tránh bị quét (noise).</p>
+                    <div class="calc-example">
+                        <div class="calc-row">
+                            <span class="calc-label">Vốn (Equity):</span>
+                            <span class="calc-value">$10,000</span>
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">Rủi Ro (2%):</span>
+                            <span class="calc-value">$200 (Vẫn là số tiền cược cũ)</span>
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">Entry Price:</span>
+                            <span class="calc-value">$42,000</span>
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">Stop Loss:</span>
+                            <span class="calc-value">$40,000 (Dưới Zone D1)</span>
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">Khoảng cách SL:</span>
+                            <span class="calc-value">$2,000 giá</span>
+                        </div>
+                        <div class="calc-row" style="border-top: 2px solid var(--success); margin-top: 0.5rem; padding-top: 0.75rem;">
+                            <span class="calc-label"><strong>Khối Lượng Trade:</strong></span>
+                            <span class="calc-result">$200 / $2,000 = 0.1 BTC</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="success-box">
+                    <h4>✅ Bài Học Rút Ra</h4>
+                    <p>Bạn thấy đấy, dù SL là $200 giá hay $2,000 giá, <strong>rủi ro mất tiền của bạn vẫn cố định là $200</strong>. Công thức đã tự động điều chỉnh khối lượng (từ 1 BTC xuống 0.1 BTC) để bảo vệ bạn. Đây chính là sự kỳ diệu của Position Sizing.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. MISTAKES -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>5. Sai Lầm Chết Người (Cần Tránh Tuyệt Đối)</h2>
+            </div>
+            <div class="card-content">
+                <p>Ngay cả khi biết công thức, nhiều trader vẫn mắc sai lầm vì tâm lý tham lam hoặc lười biếng.</p>
+
+                <div class="warning-box">
+                    <h4>🚨 Sai Lầm 1: Fixed Lot Size (Đánh Khối Lượng Cố Định)</h4>
+                    <p>Nhiều bạn có thói quen "lệnh nào cũng đi 0.5 lot" hoặc "lệnh nào cũng đánh $1000". Điều này cực kỳ nguy hiểm. Nếu bạn gặp một setup có Stop Loss xa (ví dụ khung D1), việc đánh khối lượng như khung M15 sẽ khiến rủi ro thực tế tăng lên gấp 5-10 lần (ví dụ thành 10-20% tài khoản). Kết quả là cháy tài khoản chỉ sau 1 lệnh sai.</p>
+                </div>
+
+                <div class="warning-box">
+                    <h4>🚨 Sai Lầm 2: Bóp Stop Loss Để Tăng Volume</h4>
+                    <p>Đây là sai lầm phổ biến nhất. Bạn tính ra chỉ được đánh 0.1 BTC, nhưng bạn muốn đánh 0.5 BTC để ăn nhiều hơn. Thế là bạn cố tình kéo Stop Loss lại gần Entry (bất chấp kỹ thuật) để công thức cho ra con số lớn hơn. Kết quả: Bạn bị "Stop Hunt" (quét SL) liên tục vì đặt SL sai chỗ, trước khi giá chạy đúng hướng.</p>
+                </div>
+
+                <div class="warning-box">
+                    <h4>🚨 Sai Lầm 3: Quên Tính Phí Giao Dịch (Fees)</h4>
+                    <p>Trên các sàn Crypto (Futures), phí giao dịch và Funding Rate có thể ăn mòn lợi nhuận. Nếu Stop Loss quá gần, phí giao dịch có thể chiếm tỷ trọng lớn trong Rủi Ro. Hãy luôn tính dư ra một chút hoặc trừ phí vào $ Risk.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. APPLICATION -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>6. Ứng Dụng Thực Tế</h2>
+            </div>
+            <div class="card-content">
+                <p>Để biến kiến thức này thành thói quen, tôi muốn bạn thực hiện các bước sau ngay hôm nay:</p>
+
+                <ul class="styled-list">
+                    <li><strong>Bước 1:</strong> Tạo một file Excel hoặc Google Sheet đơn giản. Cột A: Vốn, Cột B: % Risk, Cột C: Entry, Cột D: SL, Cột E: = (A*B)/(C-D).</li>
+                    <li><strong>Bước 2:</strong> Trước MỖI lệnh trade, hãy mở file này ra (hoặc dùng app calculator trên điện thoại). Nhập số liệu vào.</li>
+                    <li><strong>Bước 3:</strong> Tuân thủ tuyệt đối con số nó đưa ra. Nếu nó bảo đánh 0.3 lot, đừng đánh 0.31 lot. Kỷ luật tạo nên tự do.</li>
+                    <li><strong>Bước 4:</strong> Review lại 5 lệnh thua gần nhất của bạn. Tính xem nếu bạn áp dụng quy tắc 1%, bạn đã tiết kiệm được bao nhiêu tiền? Con số đó sẽ khiến bạn giật mình đấy.</li>
+                </ul>
+
+                <div class="info-box success">
+                    <div class="info-box-title">✅ Công Cụ Hỗ Trợ</div>
+                    <p>Bạn có thể sử dụng các công cụ có sẵn như "Position Size Calculator" trên Myfxbook (cho Forex) hoặc các tính năng built-in trên TradingView (công cụ Long/Short Position) để tính toán nhanh chóng.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. SUMMARY -->
+        <div class="summary-box">
+            <h3>📋 Tóm Tắt Bài Học</h3>
+            <ul class="summary-list">
+                <li><strong>Position Sizing</strong> là việc điều chỉnh khối lượng lệnh để cố định số tiền rủi ro ($ Risk).</li>
+                <li>Luôn tuân thủ quy tắc <strong>1-2%</strong> để sống sót qua chuỗi thua lỗ.</li>
+                <li>Công thức: <strong>Volume = (Vốn x %Risk) / (Entry - SL)</strong>.</li>
+                <li>Stop Loss phải được đặt dựa trên <strong>Market Structure (Zone)</strong>, không phải dựa trên lòng tham.</li>
+                <li>Không bao giờ sử dụng Fixed Lot Size cho mọi lệnh trade.</li>
+            </ul>
+        </div>
+
+        <!-- 8. QUIZ -->
+        <div class="quiz-section">
+            <h3 class="quiz-title">📝 Bài Tập Kiểm Tra</h3>
+
+            <div class="quiz-question" data-correct="1">
+                <p>1. Theo quy tắc 2%, với tài khoản $10,000, bạn được phép mất tối đa bao nhiêu tiền cho một lệnh giao dịch?</p>
+                <button class="quiz-option" data-index="0">$100</button>
+                <button class="quiz-option" data-index="1">$200</button>
+                <button class="quiz-option" data-index="2">$500</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <p>2. Bạn có vốn $5,000, muốn risk 1% ($50). Bạn Buy ETH giá $2,000, Stop Loss $1,950 (Khoảng cách $50). Bạn nên mua bao nhiêu ETH?</p>
+                <button class="quiz-option" data-index="0">0.5 ETH</button>
+                <button class="quiz-option" data-index="1">0.1 ETH</button>
+                <button class="quiz-option" data-index="2">1 ETH</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <p>3. Tại sao "Fixed Lot Size" (ví dụ: luôn đánh 1 lot) là một sai lầm?</p>
+                <button class="quiz-option" data-index="0">Vì rủi ro thực tế sẽ thay đổi tùy thuộc vào khoảng cách Stop Loss của từng lệnh, có thể dẫn đến rủi ro quá lớn.</button>
+                <button class="quiz-option" data-index="1">Vì sàn giao dịch không cho phép.</button>
+                <button class="quiz-option" data-index="2">Vì nó làm giảm lợi nhuận khi thắng.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-number"><span id="correct-count">0</span>/3</div>
+                <div class="score-label">Câu trả lời đúng</div>
+                <button class="btn-retake" onclick="retakeQuiz()">Làm Lại Quiz</button>
+            </div>
+        </div>
+
+        <footer class="lesson-footer">
+            <p>GEM Trading Academy - Tier 2</p>
+            <p class="highlight">© 2026 GEM Frequency Trading Method</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác! Bạn đã hiểu đúng bản chất.';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy xem lại công thức tính toán nhé.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function retakeQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                question.querySelector('.quiz-result').className = 'quiz-result';
+            });
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+
+</body>
+</html>

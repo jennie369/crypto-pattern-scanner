@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.3: Vòng Đời Zone (Zone Lifecycle) - GEM Trading Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-navy: #112250;
+            --primary-gold: #FFBD59;
+            --accent-cyan: #00F0FF;
+            --accent-purple: #6A5BFF;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --bg-dark: #0A0E17;
+            --bg-card: #1A1F2E;
+            --bg-card-hover: #252B3D;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0A9C0;
+            --border-color: rgba(255, 189, 89, 0.2);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-primary); line-height: 1.7; font-size: 16px; }
+        .lesson-container { max-width: 800px; margin: 0 auto; }
+        @media (min-width: 600px) { body { padding: 2rem; background: linear-gradient(135deg, #0A0E17 0%, #112250 100%); } .lesson-container { background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border-color); overflow: hidden; } }
+        .lesson-header { background: linear-gradient(135deg, var(--primary-navy) 0%, #1a3a7a 100%); padding: 2rem 1rem; text-align: center; border-bottom: 3px solid var(--error-red); }
+        .header-badge { display: inline-block; background: linear-gradient(135deg, var(--error-red) 0%, #DC2626 100%); color: white; padding: 0.5rem 1.25rem; border-radius: 25px; font-size: 0.85rem; font-weight: 700; margin-bottom: 1rem; }
+        .lesson-header h1 { font-size: clamp(1.5rem, 5vw, 2rem); font-weight: 700; margin-bottom: 0.5rem; }
+        .lesson-header p { color: var(--text-secondary); }
+        .content-section { padding: 0; }
+        @media (min-width: 600px) { .content-section { padding: 1.5rem; } }
+        .content-card { background: var(--bg-card); padding: 1.5rem 1rem; margin-bottom: 1px; border-left: 4px solid var(--error-red); }
+        @media (min-width: 600px) { .content-card { border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color); border-left: 4px solid var(--error-red); } }
+        .content-card h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--error-red); display: flex; align-items: center; gap: 0.75rem; }
+        .content-card h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 1rem 0; color: var(--accent-cyan); }
+        .content-card p { margin-bottom: 1rem; color: var(--text-secondary); line-height: 1.8; }
+        .content-card ul { margin: 1rem 0; padding-left: 1.5rem; color: var(--text-secondary); }
+        .content-card li { margin-bottom: 0.75rem; }
+        .highlight-box { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 1.25rem; margin: 1.25rem 0; }
+        .highlight-box.green { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%); border-color: rgba(16, 185, 129, 0.3); }
+        .highlight-box.gold { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, rgba(255, 189, 89, 0.05) 100%); border-color: rgba(255, 189, 89, 0.3); }
+        .highlight-box p { margin: 0; color: var(--text-primary); }
+        .image-placeholder { background: linear-gradient(145deg, #1a2235 0%, #0d1321 100%); border: 2px dashed rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 1rem; margin: 1.5rem 0; text-align: center; }
+        .image-placeholder img { max-width: 100%; border-radius: 8px; margin-bottom: 0.75rem; }
+        .image-placeholder p { font-size: 0.85rem; color: var(--error-red); margin: 0; font-style: italic; }
+
+        .lifecycle-grid { display: grid; grid-template-columns: 1fr; gap: 1px; background: var(--border-color); margin: 1.5rem 0; }
+        @media (min-width: 600px) { .lifecycle-grid { grid-template-columns: 1fr 1fr; gap: 1rem; background: transparent; } }
+
+        .lifecycle-item { background: var(--bg-card-hover); padding: 1.25rem; position: relative; }
+        @media (min-width: 600px) { .lifecycle-item { border-radius: 12px; border: 1px solid var(--border-color); } }
+
+        .lifecycle-item.fresh { border-left: 4px solid var(--success-green); }
+        .lifecycle-item.tested1 { border-left: 4px solid var(--accent-cyan); }
+        .lifecycle-item.tested2 { border-left: 4px solid var(--primary-gold); }
+        .lifecycle-item.weak { border-left: 4px solid var(--error-red); opacity: 0.7; }
+        .lifecycle-item.broken { border-left: 4px solid #666; opacity: 0.5; }
+
+        .lifecycle-item .stars { font-size: 1.25rem; margin-bottom: 0.5rem; }
+        .lifecycle-item h4 { color: var(--text-primary); margin-bottom: 0.25rem; }
+        .lifecycle-item .status { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .lifecycle-item.fresh .status { color: var(--success-green); }
+        .lifecycle-item.tested1 .status { color: var(--accent-cyan); }
+        .lifecycle-item.tested2 .status { color: var(--primary-gold); }
+        .lifecycle-item.weak .status { color: var(--error-red); }
+        .lifecycle-item.broken .status { color: #666; }
+        .lifecycle-item p { font-size: 0.9rem; color: var(--text-secondary); margin: 0; }
+
+        .summary-box { background: linear-gradient(135deg, var(--primary-navy) 0%, #1a3a7a 100%); border: 2px solid var(--error-red); padding: 1.5rem 1rem; margin: 0; }
+        @media (min-width: 600px) { .summary-box { border-radius: 16px; padding: 2rem; margin: 1.5rem; } }
+        .summary-box h3 { color: var(--error-red); font-size: 1.25rem; margin-bottom: 1rem; }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li { padding: 0.5rem 0; padding-left: 1.75rem; position: relative; color: var(--text-primary); }
+        .summary-box li::before { content: '✓'; position: absolute; left: 0; color: var(--error-red); font-weight: 700; }
+
+        .quiz-section { padding: 0; }
+        @media (min-width: 600px) { .quiz-section { padding: 1.5rem; } }
+        .quiz-container { background: var(--bg-card); padding: 1.5rem 1rem; border-left: 4px solid var(--accent-purple); }
+        @media (min-width: 600px) { .quiz-container { border-radius: 16px; padding: 2rem; border: 1px solid var(--border-color); border-left: 4px solid var(--accent-purple); } }
+        .quiz-container h2 { color: var(--accent-purple); font-size: 1.35rem; margin-bottom: 1.5rem; }
+        .quiz-question { background: var(--bg-card-hover); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem; border: 1px solid var(--border-color); }
+        .quiz-question p { font-weight: 600; margin-bottom: 1rem; color: var(--text-primary); }
+        .quiz-option { display: block; width: 100%; padding: 0.875rem 1rem; margin-bottom: 0.5rem; background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 8px; color: var(--text-primary); cursor: pointer; text-align: left; transition: all 0.3s; }
+        .quiz-option:hover { border-color: var(--accent-purple); }
+        .quiz-option.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--success-green); color: var(--success-green); }
+        .quiz-option.incorrect { background: rgba(239, 68, 68, 0.2); border-color: var(--error-red); color: var(--error-red); }
+        .quiz-result { padding: 0.75rem; border-radius: 8px; margin-top: 0.75rem; font-weight: 600; display: none; }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct { background: rgba(16, 185, 129, 0.2); color: var(--success-green); }
+        .quiz-result.incorrect { background: rgba(239, 68, 68, 0.2); color: var(--error-red); }
+        .quiz-score { text-align: center; padding: 1.5rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.05) 100%); border-radius: 12px; margin-top: 1.5rem; display: none; }
+        .quiz-score.show { display: block; }
+        .quiz-score h3 { color: var(--error-red); margin-bottom: 0.5rem; }
+        .retake-btn { margin-top: 1rem; padding: 0.75rem 2rem; background: linear-gradient(135deg, var(--accent-purple) 0%, #5346E0 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .lesson-footer { text-align: center; padding: 2rem 1rem; background: var(--bg-card); border-top: 1px solid var(--border-color); }
+        .lesson-footer p { color: var(--text-secondary); font-size: 0.9rem; }
+        .lesson-footer .brand { color: var(--primary-gold); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="header-badge">🥈 TIER 2 - Chapter 1</div>
+            <h1>Vòng Đời Zone (Zone Lifecycle)</h1>
+            <p>Theo dõi trạng thái zone để tối ưu hóa xác suất thắng</p>
+        </header>
+
+        <section class="content-section">
+            <!-- 📌 SECTION 1: OPENING HOOK (NEW) -->
+            <div class="content-card">
+                <h2><span class="icon">🎯</span> Tại sao Zone lại "chết"?</h2>
+                <p>Bạn đã bao giờ tự hỏi tại sao một vùng Supply/Demand (HFZ/LFZ) đôi khi hoạt động cực kỳ mạnh mẽ, khiến giá bật ngược lại ngay lập tức, nhưng đôi khi giá lại xuyên qua nó như thể vùng đó chưa từng tồn tại? Đây là điều mà rất nhiều trader hiểu sai: họ coi mọi vùng zone đều có sức mạnh như nhau mãi mãi. Thực tế, một vùng zone giống như một cái pin điện thoại hay một tài khoản ngân hàng – nó sẽ cạn kiệt dần theo thời gian sử dụng.</p>
+                <p>Trong bài học này, chúng ta sẽ đào sâu vào khái niệm <strong>Vòng Đời Zone (Zone Lifecycle)</strong>. Đến cuối bài, bạn sẽ hiểu không chỉ trạng thái của một zone là gì, mà còn biết chính xác khi nào nên "tất tay" vào một cơ hội và khi nào nên tránh xa để bảo vệ tài khoản của mình. Nếu bạn không nắm vững kiến thức này, bạn sẽ liên tục thua lỗ ở những vùng zone đã "quá hạn sử dụng" mà lẽ ra bạn phải xóa bỏ khỏi biểu đồ từ lâu.</p>
+                <div class="highlight-box important">
+                    <div class="highlight-title">💡 Insight Nâng Cao</div>
+                    <p>Trong hệ thống GEM Frequency, chúng ta không chỉ tìm kiếm các vùng giá có sự mất cân bằng lực cung cầu. Chúng ta tìm kiếm <strong>TẦN SỐ</strong> của dòng tiền thông minh (Smart Money). Vòng đời zone chính là thước đo độ đậm đặc của tần số đó. Zone càng tươi mới, tần số càng mạnh, xác suất thắng càng cao.</p>
+                </div>
+            </div>
+
+            <!-- 📌 SECTION 2: CONCEPT - ZONE CÓ VÒNG ĐỜI (ORIGINAL + EXPANDED) -->
+            <div class="content-card">
+                <h2><span class="icon">🔄</span> Zone Có Vòng Đời</h2>
+                <p>Không phải tất cả các zone đều như nhau. Mỗi zone có <strong>vòng đời</strong> (lifecycle) riêng, và chất lượng zone thay đổi theo thời gian và số lần được test. Hãy coi mỗi vùng zone là một vùng tích lũy các lệnh chưa khớp (unfilled orders) của Smart Money. Khi giá rời khỏi vùng Pause, nó để lại một lượng lớn các lệnh chờ. Mỗi lần giá quay lại chạm vào vùng đó, một phần lệnh chờ sẽ được khớp. Quá trình này được gọi là <strong>Hấp Thụ Lệnh (Order Absorption)</strong>.</p>
+                
+                <div class="highlight-box">
+                    <p><strong>💡 Nguyên tắc:</strong> Zone chưa bao giờ được test (FRESH) có xác suất thành công cao nhất. Mỗi lần test, zone yếu đi do các lệnh chờ bị hấp thụ dần. Đây chính là lý do chúng ta tôn thờ quy tắc <em>"Freshness is Gold"</em> (Sự tươi mới là vàng).</p>
+                </div>
+
+                <h3>Tại sao điều này lại quan trọng với bạn?</h3>
+                <p>Hãy tưởng tượng bạn đang rút tiền từ một cây ATM. Nếu cây ATM đó vừa được nạp đầy tiền (Fresh Zone), xác suất bạn rút được tiền là 100%. Nhưng nếu đã có 5-10 người rút trước bạn (Tested Zone), xác suất cây ATM đó hết tiền là rất cao. Trong trading cũng vậy:</p>
+                <ul>
+                    <li><strong>Lý do 1:</strong> Giúp bạn phân loại ưu tiên các setup giao dịch. Setup tại Fresh Zone luôn xứng đáng được ưu tiên cao hơn.</li>
+                    <li><strong>Lý do 2:</strong> Tránh các "bẫy" thanh khoản. Khi một zone bị test quá nhiều lần, Smart Money không còn hứng thú bảo vệ vùng đó nữa, họ sẽ để giá xuyên qua để tìm đến vùng thanh khoản tiếp theo.</li>
+                    <li><strong>Lý do 3:</strong> Tối ưu hóa tỷ lệ R:R. Fresh Zone thường tạo ra các phản ứng cực kỳ mạnh và nhanh (explosive reaction), cho phép bạn đạt target nhanh hơn.</li>
+                </ul>
+            </div>
+
+            <!-- 📌 SECTION 3: DEEP DIVE - 5 TRẠNG THÁI ZONE (ORIGINAL GRID + EXPANDED WHY) -->
+            <div class="content-card">
+                <h2><span class="icon">⭐</span> 5 Trạng Thái Zone</h2>
+                <p>Để giao dịch chuyên nghiệp, bạn phải biết cách "chấm điểm" trạng thái của zone. Chúng ta phân chia vòng đời của một HFZ/LFZ thành 5 giai đoạn cụ thể dựa trên mức độ hấp thụ lệnh:</p>
+                
+                <div class="lifecycle-grid">
+                    <div class="lifecycle-item fresh">
+                        <div class="stars">⭐⭐⭐⭐⭐</div>
+                        <h4>FRESH</h4>
+                        <div class="status">0 lần test - TỐT NHẤT</div>
+                        <p>Zone chưa bao giờ được test. Institutional orders vẫn còn nguyên. Xác suất thành công ~75-80%.</p>
+                    </div>
+                    <div class="lifecycle-item tested1">
+                        <div class="stars">⭐⭐⭐⭐</div>
+                        <h4>TESTED_1X</h4>
+                        <div class="status">1 lần test - TỐT</div>
+                        <p>Đã test 1 lần và rejected. Vẫn còn orders chưa khớp. Xác suất ~65-70%.</p>
+                    </div>
+                    <div class="lifecycle-item tested2">
+                        <div class="stars">⭐⭐⭐</div>
+                        <h4>TESTED_2X</h4>
+                        <div class="status">2 lần test - ĐƯỢC</div>
+                        <p>Đã test 2 lần. Zone đang yếu dần. Cần confluence khác để trade. Xác suất ~55-60%.</p>
+                    </div>
+                    <div class="lifecycle-item weak">
+                        <div class="stars">❌</div>
+                        <h4>TESTED_3X+</h4>
+                        <div class="status">3+ lần test - BỎ QUA</div>
+                        <p>Zone đã bị test quá nhiều lần. Institutional orders gần hết. Không nên trade.</p>
+                    </div>
+                    <div class="lifecycle-item broken">
+                        <div class="stars">❌❌</div>
+                        <h4>BROKEN</h4>
+                        <div class="status">Bị phá vỡ - KHÔNG CÒN HIỆU LỰC</div>
+                        <p>Giá đã close qua zone. Zone mất hoàn toàn hiệu lực.</p>
+                    </div>
+                </div>
+
+                <h3>Tại sao Zone lại yếu đi sau mỗi lần test? (Cơ chế tâm lý)</h3>
+                <p>Mỗi khi giá quay lại zone, các lệnh chờ của Smart Money được thực thi. Hãy nhớ rằng các tổ chức lớn vào lệnh theo các khối lượng khổng lồ. Họ không thể vào hết một lúc mà phải "rải" lệnh. Khi giá chạm zone lần 1, các lệnh đầu tiên được khớp tạo ra sự mất cân bằng lực mua/bán đột ngột, khiến giá bật mạnh. Khi lần 2, lần 3 quay lại, các lệnh đối trọng (thanh khoản) đã khớp gần hết, lực đẩy không còn đủ mạnh để duy trì xu hướng nữa. Thị trường sẽ tìm kiếm vùng zone tươi mới tiếp theo để khớp lệnh.</p>
+
+                <div class="highlight-box gold">
+                    <div class="highlight-title">🎯 Quy Tắc Vàng: Order Flow</div>
+                    <p>Hãy nhớ rằng: "Every touch is a burn" (Mỗi lần chạm là một lần đốt cháy). Bạn không bao giờ muốn mua ở một vùng hỗ trợ mà mọi người đã mua quá nhiều lần trước đó. Bạn muốn mua khi các ông lớn vừa mới đặt lệnh xong và đang chờ đợi sự quay lại lần đầu tiên của thị trường.</p>
+                </div>
+            </div>
+
+            <!-- 📌 SECTION 4: DEEP DIVE - CÁCH THEO DÕI TRẠNG THÁI (ORIGINAL + EXPANDED HOW) -->
+            <div class="content-card">
+                <h2><span class="icon">📊</span> Cách Theo Dõi Trạng Thái</h2>
+                <h3>Bước 1: Đánh dấu zone khi được tạo</h3>
+                <p>Khi phát hiện zone mới từ pattern DPD/UPD, đánh dấu là "FRESH" với đầy đủ 5 sao. Lưu ý: Zone được tạo trên Timeframe lớn (Daily, 4H) sẽ có vòng đời kéo dài hơn và tin cậy hơn so với các zone trên timeframe thấp.</p>
+
+                <h3>Bước 2: Update mỗi khi giá test</h3>
+                <p>Mỗi lần giá chạm vào zone và bị reject, giảm 1 sao và update trạng thái. Thiết lập Alert (Cảnh báo) tại Giá Entry của zone để bạn không bỏ lỡ khoảnh khắc "chạm" đầu tiên quan trọng này.</p>
+
+                <h3>Bước 3: Xóa zone khi BROKEN</h3>
+                <p>Khi giá close candle TRÊN zone (với HFZ), zone bị phá vỡ. Xóa và không trade nữa. Đừng cố gắng "giữ kỷ niệm" với những vùng giá cũ, điều đó chỉ khiến biểu đồ của bạn rối rắm và phân tích bị sai lệch.</p>
+
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x400/112250/EF4444?text=Zone+Status+Tracking" alt="Zone Status Tracking">
+                    <p>📸 Cách đánh dấu và theo dõi trạng thái zone</p>
+                </div>
+
+                <div class="highlight-box warning">
+                    <div class="highlight-title">⚠️ Sai Lầm Chết Người: Wick vs Body</div>
+                    <p>Rất nhiều trader nhầm lẫn rằng chỉ cần giá chạm nhẹ qua zone là zone đã hỏng. Trong GEM Frequency, một zone chỉ được coi là <strong>BROKEN</strong> khi có nến ĐÓNG CỬA (body close) bên kia vạch Giá Stop. Nếu chỉ là một cái râu nến (wick) quét qua rồi rút chân lại, đó có thể là một cú Liquidity Grab (quét thanh khoản) và zone vẫn còn hiệu lực, thậm chí còn mạnh hơn!</p>
+                </div>
+            </div>
+
+            <!-- 📌 SECTION 5: APPLICATION - QUY TẮC TRADE THEO LIFECYCLE (ORIGINAL + EXPANDED RULES) -->
+            <div class="content-card">
+                <h2><span class="icon">🎯</span> Quy Tắc Trade Theo Lifecycle</h2>
+                <div class="highlight-box green">
+                    <p><strong>✅ NÊN TRADE:</strong></p>
+                    <ul style="margin-top: 0.5rem; padding-left: 1.25rem;">
+                        <li>FRESH zones (5 sao) - Ưu tiên số 1</li>
+                        <li>TESTED_1X (4 sao) - Vẫn tốt</li>
+                        <li>TESTED_2X (3 sao) - Chỉ với confluence mạnh</li>
+                    </ul>
+                </div>
+                <div class="highlight-box">
+                    <p><strong>❌ KHÔNG NÊN TRADE:</strong></p>
+                    <ul style="margin-top: 0.5rem; padding-left: 1.25rem;">
+                        <li>TESTED_3X+ - Zone đã yếu</li>
+                        <li>BROKEN - Zone không còn hiệu lực</li>
+                    </ul>
+                </div>
+
+                <h3>Tại sao không nên trade lần thứ 3?</h3>
+                <p>Nhiều học viên hỏi tôi: "Nhưng tôi thấy đôi khi lần thứ 4 giá vẫn bật lại?". Đúng, thị trường là xác suất. Tuy nhiên, nhiệm vụ của bạn không phải là thắng mọi lệnh, mà là chỉ tham gia những lệnh có <strong>LỢI THẾ (EDGE)</strong> cao nhất. Khi zone đã test 3 lần, Edge của bạn đã mất. Bạn đang đánh bạc với 50/50 thay vì giao dịch với lợi thế 80% ban đầu.</p>
+
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x350/0A0E17/10B981?text=Trade+Decision+Flow" alt="Trade Decision Flow">
+                    <p>📸 Quy trình quyết định trade theo lifecycle</p>
+                </div>
+            </div>
+
+            <!-- 📌 SECTION 6: EXAMPLES - VÍ DỤ THỰC TẾ (ORIGINAL + EXPANDED CASE STUDIES) -->
+            <div class="content-card">
+                <h2><span class="icon">💡</span> Ví Dụ Thực Tế</h2>
+                <p><strong>Tình huống:</strong> Zone HFZ được tạo từ pattern UPD trên BTC/USDT 4H.</p>
+                <ul>
+                    <li><strong>Ngày 1:</strong> Zone được tạo sau cú sập mạnh từ $90k. Trạng thái ban đầu → FRESH ⭐⭐⭐⭐⭐. Đây là lúc chúng ta đặt lệnh chờ (Limit Order) hoặc Alert.</li>
+                    <li><strong>Ngày 3:</strong> Giá hồi lên, vừa chạm mép HFZ liền rút chân tạo pin bar rejection cực mạnh → TESTED_1X ⭐⭐⭐⭐. Những ai vào lệnh ở đây đã có lợi nhuận lớn.</li>
+                    <li><strong>Ngày 5:</strong> Giá quay lại lần nữa, hình thành nến engulfing bearish ngay tại zone → TESTED_2X ⭐⭐⭐. Lần này giá vẫn giảm nhưng chậm hơn lần 1.</li>
+                    <li><strong>Ngày 8:</strong> Giá test lần 3, rejection rất yếu ớt, giá đi ngang ngay trong zone → TESTED_3X ❌ (Chúng ta tuyệt đối không trade ở đây).</li>
+                    <li><strong>Ngày 10:</strong> Một nến xanh mạnh mẽ break và close TRÊN Giá Stop → BROKEN ❌❌ (Xóa zone, kết thúc vòng đời).</li>
+                </ul>
+
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x400/112250/FFBD59?text=Zone+Lifecycle+Example" alt="Zone Lifecycle Example">
+                    <p>📸 Ví dụ vòng đời zone trên BTC/USDT</p>
+                </div>
+
+                <div class="highlight-box info">
+                    <div class="highlight-title">🔍 Insight Nâng Cao: "Look to the Left"</div>
+                    <p>Khi bạn thấy một zone, hãy nhìn sang trái để xem nó có nằm chồng lên (stacked) một zone cũ nào không. Một Fresh Zone nằm trong một vùng zone lớn của Daily chính là "Hố Đen" hút tiền của thị trường – xác suất thắng ở đây có thể lên tới 90%.</p>
+                </div>
+            </div>
+
+            <!-- 📌 SECTION 7: MISTAKES & PRACTICAL TIPS (NEW) -->
+            <div class="content-card">
+                <h2><span class="icon">🚨</span> Sai Lầm Thường Gặp & Mẹo Thực Hành</h2>
+                <p>Dưới đây là những lỗi phổ biến nhất khiến học viên mất tiền dù đã biết về Zone Lifecycle:</p>
+                <ul>
+                    <li><strong>Nhầm lẫn giữa chạm (touch) và test:</strong> Nếu giá vừa mới rời zone rồi quay lại ngay lập tức trong 1-2 nến, đó có thể vẫn nằm trong quá trình hình thành zone (base), chưa được tính là một lần test thực thụ. Một lần test cần có một đợt "Departure" (rời đi) rõ ràng.</li>
+                    <li><strong>Không xóa zone đã hỏng:</strong> Giữ lại các zone đã hỏng khiến bạn có xu hướng muốn trade "hồi mã thương". Hãy dũng cảm xóa chúng đi để giữ cái đầu tỉnh táo.</li>
+                </ul>
+                
+                <div class="highlight-box green">
+                    <div class="highlight-title">🎯 HÀNH ĐỘNG NGAY BÂY GIỜ:</div>
+                    <p>Mở chart TradingView của bạn lên, tìm 5 vùng zone gần nhất. Chấm điểm cho chúng dựa trên 5 trạng thái. Nếu thấy vùng nào đã bị test trên 3 lần hoặc đã bị close qua, hãy <strong>XÓA NGAY LẬP TỨC</strong>.</p>
+                </div>
+            </div>
+
+            <!-- 📌 SECTION 8: SUMMARY (ORIGINAL + EXPANDED) -->
+            <div class="summary-box">
+                <h3>📝 Tóm Tắt Bài Học</h3>
+                <ul>
+                    <li>✓ Zone có 5 trạng thái: FRESH, TESTED_1X, TESTED_2X, TESTED_3X+, BROKEN.</li>
+                    <li>✓ Zone bị yếu dần do hiện tượng <strong>Hấp Thụ Lệnh (Order Absorption)</strong>.</li>
+                    <li>✓ <strong>Freshness is Gold:</strong> FRESH zone (chưa bao giờ test) có xác suất thành công cao nhất (75-80%).</li>
+                    <li>✓ Mỗi lần test thành công, hãy giảm 1 sao sức mạnh của zone.</li>
+                    <li>✓ Chỉ trade zone từ 3 sao trở lên (TESTED_2X hoặc tốt hơn). Tuyệt đối bỏ qua sau lần test thứ 2.</li>
+                    <li>✓ Zone bị BROKEN khi giá close candle qua Giá Stop - không còn hiệu lực và phải xóa bỏ.</li>
+                </ul>
+                <p><strong>Bài học lớn nhất:</strong> Đừng bao giờ tin tưởng vào một vùng giá đã quá cũ kỹ. Hãy luôn đi tìm những "dòng tiền tươi mới" từ Smart Money.</p>
+                <p>Bây giờ bạn đã biết cách chọn lọc những vùng zone chất lượng nhất dựa trên vòng đời của chúng, chúng ta đã sẵn sàng để bước sang phần quan trọng nhất: <strong>Chiến lược Entry chính xác tại Zone</strong>. Ở bài tiếp theo, tôi sẽ chỉ cho bạn cách kết hợp trạng thái zone với các tín hiệu xác nhận để vào lệnh "bách phát bách trúng".</p>
+            </div>
+        </section>
+
+        <section class="quiz-section">
+            <div class="quiz-container">
+                <h2>❓ Kiểm Tra Kiến Thức</h2>
+                <div class="quiz-question" data-correct="0">
+                    <p>1. Tại sao Fresh Zone (0 lần test) lại có xác suất thắng cao nhất?</p>
+                    <button class="quiz-option" data-index="0">A. Vì các lệnh chờ của Smart Money chưa bị hấp thụ, tần số dòng tiền vẫn còn nguyên vẹn.</button>
+                    <button class="quiz-option" data-index="1">B. Vì giá thường di chuyển nhanh hơn khi gặp vùng giá mới.</button>
+                    <button class="quiz-option" data-index="2">C. Vì hầu hết các trader khác chưa nhìn thấy vùng này trên biểu đồ.</button>
+                    <button class="quiz-option" data-index="3">D. Vì đây là vùng có nhiều tin tức hỗ trợ nhất.</button>
+                    <div class="quiz-result"></div>
+                </div>
+                <div class="quiz-question" data-correct="2">
+                    <p>2. Khi nào zone bị coi là BROKEN?</p>
+                    <button class="quiz-option" data-index="0">A. Khi giá chạm zone lần đầu</button>
+                    <button class="quiz-option" data-index="1">B. Khi giá test zone 3 lần</button>
+                    <button class="quiz-option" data-index="2">C. Khi giá close candle qua Giá Stop</button>
+                    <button class="quiz-option" data-index="3">D. Khi zone được tạo quá 7 ngày</button>
+                    <div class="quiz-result"></div>
+                </div>
+                <div class="quiz-question" data-correct="2">
+                    <p>3. Theo nguyên tắc của GEM Academy, bạn nên làm gì với một zone đã bị test 3 lần?</p>
+                    <button class="quiz-option" data-index="0">A. Tiếp tục trade vì vùng đó đã chứng minh được sức mạnh hỗ trợ/kháng cự.</button>
+                    <button class="quiz-option" data-index="1">B. Tăng gấp đôi khối lượng giao dịch vì xác suất bật lại cao hơn.</button>
+                    <button class="quiz-option" data-index="2">C. Tuyệt đối không trade vì các lệnh chờ đã bị hấp thụ hết, rủi ro bị phá vỡ là rất cao.</button>
+                    <button class="quiz-option" data-index="3">D. Đợi giá đóng cửa qua zone rồi mới vào lệnh ngược lại.</button>
+                    <div class="quiz-result"></div>
+                </div>
+                <div class="quiz-score">
+                    <h3>🎉 Hoàn thành!</h3>
+                    <p>Bạn trả lời đúng <span id="correct-count">0</span>/3 câu hỏi</p>
+                    <button class="retake-btn" onclick="location.reload()">Làm lại Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <p>Bài học thuộc <span class="brand">GEM Trading Academy - TIER 2</span></p>
+            <p>© 2024 - Nền tảng đào tạo trading chuyên nghiệp</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

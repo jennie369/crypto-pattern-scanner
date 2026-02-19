@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 10.7: Các Bước Tiếp Theo - Module B</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4 { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--error);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box h4 { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box h4 { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .success-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .success-box h4 { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+        .success-box p { color: var(--text-secondary); margin: 0; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card { border: none; border-radius: 0; padding: var(--space-md); }
+        }
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--cyan);
+        }
+        .stat-card .value.red { color: var(--error); }
+        .stat-card .value.gold { color: var(--gold); }
+        .stat-card .value.green { color: var(--success); }
+        .stat-card .label { font-size: 0.85rem; color: var(--text-muted); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-box li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-lg) 16px;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .quiz-question h4, .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+            color: var(--error);
+        }
+
+        .quiz-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .quiz-result.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent);
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .quiz-score h3, .quiz-score-text { color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-score p { color: var(--text-secondary); }
+
+        .retake-btn {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border: none;
+                border-radius: 0;
+                margin-top: 0;
+                padding: var(--space-lg) 16px;
+            }
+        }
+        .lesson-footer p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .lesson-footer .highlight { color: var(--gold); font-weight: 600; }
+
+        strong { color: var(--gold); }
+
+        /* Additional classes for compatibility */
+        .path-card, .whale-card, .pattern-card, .example-card, .trade-result, .phase-card, .checklist {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .path-card h4, .whale-card h4, .pattern-card h4, .example-card h4 { color: var(--cyan); margin-bottom: var(--space-sm); }
+        .path-card.gold h4 { color: var(--gold); }
+        .path-card.green h4 { color: var(--success); }
+
+        .stat-row { display: flex; justify-content: space-around; flex-wrap: wrap; gap: var(--space-md); margin: var(--space-lg) 0; }
+        .stat-item { text-align: center; padding: var(--space-md); background: var(--bg-card); border-radius: var(--radius-md); flex: 1; min-width: 120px; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--cyan); }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: var(--space-xs); }
+
+        .whale-type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md); margin: var(--space-lg) 0; }
+        .whale-type { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); border-top: 3px solid var(--cyan); }
+        .whale-type h4 { color: var(--text-primary); margin-bottom: var(--space-sm); }
+        .whale-type .size { color: var(--gold); font-weight: 600; }
+
+        .reason-list { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        .reason-item { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); align-items: flex-start; }
+        .reason-number { background: linear-gradient(135deg, var(--cyan), var(--purple)); color: var(--navy-dark); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .reason-content h4 { color: var(--text-primary); margin-bottom: var(--space-xs); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <div class="lesson-header">
+            <span class="lesson-badge">Kết Thúc Tier 2</span>
+            <h1 class="lesson-title">Bài 8.7: Các Bước Tiếp Theo</h1>
+            <p class="lesson-subtitle">Hành động cụ thể sau khi hoàn thành Tier 2</p>
+        </div>
+
+        <div class="congrats-box">
+            <h2>🎉 Chúc Mừng!</h2>
+            <p style="font-size: 1.1rem; margin-bottom: 1rem;">Bạn đã hoàn thành Tier 2 - GEM Advanced!</p>
+            <p style="color: #a1a1aa;">Bạn đã nắm vững những kiến thức và kỹ năng nâng cao trong trading. Bây giờ là lúc quyết định bước tiếp theo.</p>
+        </div>
+
+        <div class="content-section">
+            <span class="section-label">📊 Tổng kết</span>
+            <h2 class="section-title">Những Gì Bạn Đã Học Trong Tier 2</h2>
+
+            <div class="grid-3">
+                <div class="grid-item gold">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📈</div>
+                    <h4 style="color: #FFBD59; margin-bottom: 0.25rem;">Advanced Patterns</h4>
+                    <p style="font-size: 0.85rem; color: #a1a1aa;">12 patterns nâng cao</p>
+                </div>
+                <div class="grid-item cyan">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎯</div>
+                    <h4 style="color: #00F0FF; margin-bottom: 0.25rem;">Entry Mastery</h4>
+                    <p style="font-size: 0.85rem; color: #a1a1aa;">Kỹ thuật vào lệnh chính xác</p>
+                </div>
+                <div class="grid-item purple">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚖️</div>
+                    <h4 style="color: #8B5CF6; margin-bottom: 0.25rem;">Risk Management</h4>
+                    <p style="font-size: 0.85rem; color: #a1a1aa;">Quản lý rủi ro chuyên nghiệp</p>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://via.placeholder.com/700x350/112250/10B981?text=Tier+2+Completion+-+Certificate" alt="Tier 2 Completion">
+                <p class="image-caption">Hình 8.7.1: Hoàn thành Tier 2 - GEM Advanced</p>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <span class="section-label">🚀 Lộ trình</span>
+            <h2 class="section-title">3 Lựa Chọn Cho Bước Tiếp Theo</h2>
+
+            <div class="step-card">
+                <div class="step-number">A</div>
+                <div class="step-content">
+                    <h4>Tiếp Tục Tự Thực Hành</h4>
+                    <p>Áp dụng kiến thức Tier 2 vào Paper Trading. Tự đánh giá và cải thiện. Phù hợp nếu bạn có thời gian và kiên nhẫn để tự học.</p>
+                </div>
+            </div>
+
+            <div class="step-card" style="border-left-color: #00F0FF;">
+                <div class="step-number" style="background: linear-gradient(135deg, #00F0FF, #0ea5e9);">B</div>
+                <div class="step-content">
+                    <h4>Nâng Cấp Lên Tier 3 - Elite</h4>
+                    <p>Học tiếp kiến thức Elite: Multi-Timeframe Analysis, Advanced Confluence, Institutional Trading Concepts. Nhận hỗ trợ từ cộng đồng GEM.</p>
+                </div>
+            </div>
+
+            <div class="step-card" style="border-left-color: #8B5CF6;">
+                <div class="step-number" style="background: linear-gradient(135deg, #8B5CF6, #7c3aed);">C</div>
+                <div class="step-content">
+                    <h4>Tham Gia Partner Program</h4>
+                    <p>Mentorship 1-1, Signal Group riêng, Thu nhập thụ động 10-30% theo tier CTV. Đường nhanh nhất đến kết quả, phù hợp cho ai muốn nghiêm túc theo đuổi.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <span class="section-label">📋 Hành động</span>
+            <h2 class="section-title">Các Bước Tiếp Theo Cụ Thể</h2>
+
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Xem Lại Kết Quả Paper Trading</h4>
+                    <p>Đánh giá win rate, R:R trung bình, số trade mỗi tuần. Xác định điểm mạnh và điểm cần cải thiện.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Áp Dụng Framework Quyết Định</h4>
+                    <p>Sử dụng 5-Step Framework từ Bài 8.6. Xác định mục tiêu, đánh giá tình huống, phân tích các lựa chọn.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Liên Hệ Nếu Cần Tư Vấn</h4>
+                    <p>Đội ngũ GEM sẵn sàng hỗ trợ bạn chọn hướng đi phù hợp nhất. Không có áp lực, chỉ có giải đáp thắc mắc.</p>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://via.placeholder.com/700x350/112250/FFBD59?text=Next+Steps+-+Action+Plan" alt="Action Plan">
+                <p class="image-caption">Hình 8.7.2: Lộ trình hành động sau Tier 2</p>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <span class="section-label">📞 Liên hệ</span>
+            <h2 class="section-title">Kênh Hỗ Trợ</h2>
+
+            <div class="contact-card">
+                <div class="contact-icon">💬</div>
+                <div>
+                    <strong>GEM Master Chatbot</strong>
+                    <p style="font-size: 0.9rem; color: #a1a1aa;">Hỏi đáp 24/7 trong App GEM</p>
+                </div>
+            </div>
+
+            <div class="contact-card">
+                <div class="contact-icon">👥</div>
+                <div>
+                    <strong>Cộng Đồng GEM Forum</strong>
+                    <p style="font-size: 0.9rem; color: #a1a1aa;">Kết nối với các trader khác trong App</p>
+                </div>
+            </div>
+
+            <div class="contact-card">
+                <div class="contact-icon">📧</div>
+                <div>
+                    <strong>Email Support</strong>
+                    <p style="font-size: 0.9rem; color: #a1a1aa;">support@gemtrading.academy</p>
+                </div>
+            </div>
+
+            <div class="contact-card">
+                <div class="contact-icon">🎓</div>
+                <div>
+                    <strong>Tư Vấn Nâng Cấp</strong>
+                    <p style="font-size: 0.9rem; color: #a1a1aa;">Liên hệ trong App để được tư vấn 1-1</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="cta-box">
+            <h3>🎯 Sẵn Sàng Cho Bước Tiếp Theo?</h3>
+            <p>Dù bạn chọn con đường nào, GEM luôn đồng hành cùng bạn.</p>
+            <p style="margin-top: 0.75rem; color: #a1a1aa; font-size: 0.9rem;">Tier 3 Elite hoặc Partner Program - Cơ hội để đạt level tiếp theo trong hành trình trading.</p>
+            <div class="image-placeholder" style="margin-top: 1rem; padding: 2rem;">
+                <img src="https://via.placeholder.com/600x300/112250/FFBD59?text=GEM+Academy+-+Your+Journey+Continues" alt="Your Journey Continues">
+                <p class="image-caption">Hình 8.7.3: Hành trình của bạn tiếp tục...</p>
+            </div>
+        </div>
+
+        <div class="summary-box">
+            <h3>📋 Tóm Tắt Tier 2</h3>
+            <ul class="summary-list">
+                <li>Hoàn thành 43 bài học nâng cao về GEM Method</li>
+                <li>Nắm vững 12 Advanced Patterns và Entry Techniques</li>
+                <li>Hiểu sâu Risk Management và Position Sizing chuyên nghiệp</li>
+                <li>3 lựa chọn tiếp theo: Tự thực hành, Tier 3, hoặc Partner Program</li>
+                <li>Sử dụng Framework Quyết Định để chọn hướng phù hợp nhất</li>
+            </ul>
+        </div>
+
+        <div class="quiz-section">
+            <span class="section-label">📝 Final Quiz</span>
+            <h2 class="section-title">Quiz Cuối Tier 2</h2>
+
+            <div class="quiz-question" data-correct="2">
+                <p class="question-text">1. Sau khi hoàn thành Tier 2, bước đầu tiên nên làm là gì?</p>
+                <div class="quiz-option" data-index="0">
+                    <span class="option-letter">A</span>
+                    <span>Ngay lập tức nâng cấp Tier 3</span>
+                </div>
+                <div class="quiz-option" data-index="1">
+                    <span class="option-letter">B</span>
+                    <span>Nghỉ ngơi và quên đi trading</span>
+                </div>
+                <div class="quiz-option" data-index="2">
+                    <span class="option-letter">C</span>
+                    <span>Xem lại kết quả Paper Trading và áp dụng Framework Quyết Định</span>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <p class="question-text">2. Partner Program phù hợp với ai nhất?</p>
+                <div class="quiz-option" data-index="0">
+                    <span class="option-letter">A</span>
+                    <span>Người mới hoàn toàn chưa biết gì về trading</span>
+                </div>
+                <div class="quiz-option" data-index="1">
+                    <span class="option-letter">B</span>
+                    <span>Người muốn kết quả nhanh nhất với mentorship 1-1 và thu nhập thụ động</span>
+                </div>
+                <div class="quiz-option" data-index="2">
+                    <span class="option-letter">C</span>
+                    <span>Người chỉ muốn học lý thuyết mà không thực hành</span>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <p class="score-text">Kết quả: <span id="correct-count">0</span>/2</p>
+                <p style="margin-top: 0.5rem;">🎉 Chúc mừng hoàn thành Tier 2!</p>
+                <button class="retake-btn" onclick="location.reload()">Làm Lại</button>
+            </div>
+        </div>
+
+        <div class="lesson-footer">
+            <p>© 2024 GEM Trading Academy - Tier 2 Complete!</p>
+            <p style="margin-top: 0.5rem; color: #FFBD59;">Cảm ơn bạn đã học cùng GEM. Hẹn gặp lại ở Tier 3! 🚀</p>
+        </div>
+    </div>
+
+    <script>
+        const totalQuestions = 2;
+        let answeredCount = 0;
+        let correctCount = 0;
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy xem lại nội dung bài học.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

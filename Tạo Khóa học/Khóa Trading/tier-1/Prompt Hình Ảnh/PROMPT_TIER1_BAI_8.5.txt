@@ -1,0 +1,50 @@
+  📐 HÌNH 8.5.1: ĐƯỜNG CONG CHẤP NHẬN CÔNG NGHỆ
+  Tên file: 8.5.1-early-adopter-curve.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Minh họa vị trí và lợi thế của người đi tiên phong.
+  NỘI DUNG HÌNH:
+   - Biểu đồ hình chuông (Bell Curve) chia thành 5 phần: Innovators (2.5%), Early Adopters (13.5%), Early Majority (34%), Late Majority (34%), Laggards (16%).
+   - Highlight vùng "Early Adopters" với màu vàng sáng.
+   - Mũi tên chỉ vào vùng này với text: "Vị trí của bạn hiện tại - Lợi nhuận cao nhất, Cạnh tranh thấp nhất".
+   - Mũi tên chỉ vào vùng Late Majority: "Đám đông - Cạnh tranh cao, Lợi nhuận bão hòa".
+
+  ---
+
+  📐 HÌNH 8.5.2: CHI PHÍ CƠ HỘI TÍCH LŨY
+  Tên file: 8.5.2-opportunity-cost.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: So sánh tài sản của người bắt đầu ngay vs người trì hoãn 6 tháng.
+  NỘI DUNG HÌNH:
+   - Biểu đồ đường so sánh 2 đường cong tài sản theo thời gian (trục hoành 12 tháng).
+   - Đường 1 (Xanh lá - Bắt đầu ngay): Tăng trưởng đều đặn từ tháng 1.
+   - Đường 2 (Đỏ - Trì hoãn 6 tháng): Đi ngang 6 tháng đầu, bắt đầu tăng từ tháng 7 nhưng luôn thấp hơn đường xanh một khoảng lớn.
+   - Vùng diện tích giữa 2 đường được tô màu xám với text: "CHI PHÍ CỦA VIỆC CHỜ ĐỢI (Đã mất vĩnh viễn)".
+
+  ---
+
+  📐 HÌNH 8.5.3: SO SÁNH LỢI ÍCH EARLY BIRD
+  Tên file: 8.5.3-early-bird-benefits.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Bảng so sánh trực quan quyền lợi.
+  NỘI DUNG HÌNH:
+   - Bảng so sánh 2 cột: "Early Adopter (Bây giờ)" vs "Standard User (Sau này)".
+   - Cột Early Adopter: 
+     - Giá: Thấp (Ưu đãi 30-50%).
+     - Support: 1-1 Mentoring.
+     - Updates: Lifetime Free.
+     - Community: Founding Member Badge.
+   - Cột Standard User:
+     - Giá: Full Price (Cao).
+     - Support: Group Support.
+     - Updates: Trả phí theo năm.
+     - Community: Standard Member.
+
+  ---
+
+  📐 HÌNH 8.5.4: MA TRẬN QUYẾT ĐỊNH (ACTION VS INACTION)
+  Tên file: 8.5.4-decision-matrix.png | Tỷ lệ: 1:1 (Square)
+  Bối cảnh: Giúp người dùng hình dung rõ hậu quả của quyết định.
+  NỘI DUNG HÌNH:
+   - Ma trận 2x2:
+     - Góc trái trên (Hành động + Thành công): "Tự do tài chính, Kỹ năng trọn đời".
+     - Góc phải trên (Hành động + Thất bại tạm thời): "Bài học kinh nghiệm, Cơ hội thử lại (Rủi ro thấp)".
+     - Góc trái dưới (Không hành động + Thị trường tăng): "Hối tiếc (FOMO), Mất cơ hội đổi đời".
+     - Góc phải dưới (Không hành động + Thị trường giảm): "An toàn giả tạo, Giậm chân tại chỗ".
+   - Highlight góc trái trên là mục tiêu hướng tới.

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.4: Chiến Lược Entry Cho UPD | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250; --navy-dark: #0a1628; --gold: #FFBD59; --gold-dark: #E5A73D;
+            --cyan: #00F0FF; --purple: #6A5BFF; --burgundy: #9C0612; --burgundy-light: #C41E2A;
+            --success: #00C853; --error: #FF5252; --bg-primary: #0a1628; --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF; --text-secondary: rgba(255, 255, 255, 0.85); --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4); --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px;
+            --radius-md: 12px; --radius-lg: 16px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); }
+        .lesson-badge { display: inline-block; padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.4rem, 5vw, 2.2rem); font-weight: 800; background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: var(--space-md); }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 16px; border-radius: 0; border: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.4rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); border-bottom: 1px solid var(--glass-border); padding-bottom: var(--space-sm); }
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border-left: 4px solid var(--gold); padding: var(--space-lg); margin: var(--space-lg) 0; border-radius: 4px; }
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border-left: 4px solid var(--cyan); padding: var(--space-lg); margin: var(--space-lg) 0; border-radius: 4px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--success); }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .pattern-flow { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        .flow-phase { display: flex; flex-direction: column; gap: var(--space-sm); padding: var(--space-md); background: var(--bg-card); border-left: 4px solid var(--gold); border-radius: 4px; }
+        .summary-box { background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02)); border: 2px solid var(--success); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        .quiz-section { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); }
+        .quiz-option { padding: var(--space-md); background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; margin-bottom: var(--space-sm); transition: 0.3s; display: flex; gap: 12px; align-items: center; }
+        .quiz-option:hover { border-color: var(--gold); }
+        .quiz-option.correct { background: rgba(0, 200, 83, 0.2); border-color: var(--success); }
+        .quiz-option.incorrect { background: rgba(255, 82, 82, 0.2); border-color: var(--error); }
+        .option-marker { min-width: 28px; height: 28px; background: var(--navy); border: 1px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
+        .question-feedback { margin-top: 12px; padding: 12px; border-radius: 4px; display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.1); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.1); border-left: 4px solid var(--error); }
+        .example-box { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); overflow: hidden; margin: var(--space-xl) 0; }
+        .example-header { background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); padding: var(--space-md) var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); font-weight: 700; }
+        .example-content { padding: var(--space-lg); }
+        .example-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); }
+        .example-detail-label { font-size: 0.8rem; color: var(--text-muted); }
+        .example-detail-value { font-weight: 700; }
+        .example-detail-value.entry { color: var(--burgundy-light); }
+        .example-detail-value.stop { color: var(--error); }
+        .example-detail-value.target { color: var(--success); }
+        .patterns-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        .pattern-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        .pattern-icon { font-size: 2.5rem; margin-bottom: var(--space-sm); }
+        .pattern-name { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .pattern-desc { font-size: 0.85rem; color: var(--text-muted); }
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        .warning-box { background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05)); border: 1px solid rgba(156, 6, 18, 0.4); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        .warning-box-title { font-weight: 700; color: var(--burgundy-light); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container"><div class="bg-layer-base"></div><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge"><span>📉</span><span>Reversal Pattern</span></div>
+            <div class="lesson-chapter">Chapter 5 - UPD Pattern</div>
+            <h1 class="lesson-title">Bài 5.4: Chiến Lược Entry Cho UPD</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 5.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🔥</span> Câu Chuyện Mở Đầu: Đừng Để "Bắt Đỉnh" Trở Thành "Đu Đỉnh"</h2>
+            <p>Bạn đã từng gặp tình huống này chưa? Bạn nhận ra UPD hoàn hảo, hưng phấn vào lệnh SHORT ngay khi thấy Phase 3 breakdown... và giá quay đầu tăng mạnh, quét SL của bạn trước khi giảm đúng hướng bạn dự đoán. Đây là "cái bẫy entry sớm" mà 80% trader mắc phải.</p>
+
+            <p>Tháng 12/2024, BTC tạo UPD hoàn hảo tại $108,000. Hàng nghìn trader thấy Phase 3 breakdown về $104,000 và vội vàng SHORT. Nhưng giá bounce lên $106,500 trước khi giảm thực sự về $91,500. Những ai SHORT tại $104,000 với SL $106,000 đều bị quét. Những ai KIÊN NHẪN đợi retest HFZ và entry tại $105,500 với SL $109,000 thì lời +13%. Bài học này sẽ dạy bạn cách entry như nhóm thứ hai.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Bí Quyết Entry Thành Công</div>
+                <p>Entry UPD không phải về việc "bắt đỉnh" - mà là về việc KIÊN NHẪN đợi giá quay lại HFZ và có nến xác nhận bearish. Trader nghiệp dư entry khi thấy breakdown, trader chuyên nghiệp entry khi thấy retest + rejection. Sự khác biệt này quyết định win rate 35% vs 65%!</p>
+            </div>
+        </section>
+
+        <!-- MỤC TIÊU BÀI HỌC -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Mục Tiêu Bài Học</h2>
+            <p>Sau khi hoàn thành bài học này, bạn sẽ nắm vững chiến lược entry hoàn chỉnh cho pattern UPD - từ quy trình 5 bước đến cách nhận diện nến xác nhận và thiết lập SL/TP chính xác.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📋</span> Bạn Sẽ Học Được Gì?</div>
+                <p>• <strong>Quy trình 5 bước chuẩn mực:</strong> Từng bước chi tiết từ lúc nhận diện pattern đến khi đặt lệnh, không bỏ sót bất kỳ yếu tố nào.<br>
+                • <strong>Nghệ thuật đọc nến xác nhận:</strong> Cách nhận diện 4 mẫu nến bearish uy tín nhất để tránh các tín hiệu giả.<br>
+                • <strong>Công thức quản lý lệnh:</strong> Cách tính Entry, Stop Loss, Take Profit chính xác đến từng xu để tối ưu hóa tỷ lệ R:R.<br>
+                • <strong>Phân tích thực chiến:</strong> Mổ xẻ ví dụ thực tế trên BTC để thấy lý thuyết áp dụng vào thực tế như thế nào.<br>
+                • <strong>Tránh bẫy:</strong> Nhận diện các lỗi phổ biến khi entry và cách khắc phục để bảo vệ tài khoản.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Nguyên Tắc Vàng</div>
+                <p><strong>KHÔNG entry khi giá phá vỡ (breakdown).</strong> Luôn đợi giá quay lại kiểm tra vùng HFZ rồi có nến xác nhận bearish. Entry sớm = win rate 35%. Entry sau retest + confirmation = win rate 65%. Sự khác biệt 30% này quyết định bạn có lợi nhuận hay không!</p>
+            </div>
+        </section>
+
+        <!-- 3. DEEP DIVE: QUY TRÌNH 5 BƯỚC -->
+        <section class="section">
+            <h2 class="section-title"><span>📋</span> Quy Trình Entry 5 Bước "Sát Thủ"</h2>
+            <p>Chiến lược entry cho UPD tuân theo quy trình 5 bước nghiêm ngặt:</p>
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nhận Diện UPD Pattern & Vẽ HFZ</div>
+                        <div class="flow-step-desc">Đầu tiên, bạn phải xác nhận đủ 3 phases: UP (Tăng mạnh) → PAUSE (Đi ngang nén chặt) → DOWN (Giảm mạnh). Vùng PAUSE chính là nơi chúng ta vẽ vùng <strong>HFZ (High Frequency Zone)</strong> - vùng bán tiềm năng.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đợi Giá Retest HFZ</div>
+                        <div class="flow-step-desc">Sau Phase 3, giá thường quay lại kiểm tra vùng HFZ trước khi tiếp tục giảm. Đừng nóng vội, hãy chờ đợi sự kiên nhẫn được đền đáp.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đợi Nến Xác Nhận Bearish</div>
+                        <div class="flow-step-desc">Khi giá chạm HFZ, KHÔNG được entry ngay. Hãy đợi xuất hiện nến xác nhận bearish như Pin Bar, Shooting Star, Bearish Engulfing để chắc chắn rằng phe Bán đã tham gia.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Vào Lệnh SHORT</div>
+                        <div class="flow-step-desc">Entry SHORT ngay sau khi nến xác nhận đóng cửa hoàn chỉnh. Việc chờ đóng nến giúp tránh các cú "quét râu" (fakeout).</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đặt Stop Loss & Target</div>
+                        <div class="flow-step-desc">An toàn là trên hết: SL trên HFZ + 0.5% buffer. Target tối thiểu về đáy Phase 3 hoặc đảm bảo tỷ lệ R:R từ 1:2 trở lên.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch4/4.4/4-4-1-png.webp" alt="Entry Flow">
+                <p class="image-caption">Hình 1: Sơ đồ quy trình entry 5 bước cho UPD</p>
+            </div>
+        </section>
+
+        <!-- 4. DEEP DIVE: CÁC NẾN XÁC NHẬN -->
+        <section class="section">
+            <h2 class="section-title"><span>🕯️</span> Các Nến Xác Nhận Bearish</h2>
+            <p>Khi giá chạm vùng HFZ, cần đợi một trong các mẫu nến bearish sau:</p>
+            <div class="patterns-grid">
+                <div class="pattern-card">
+                    <div class="pattern-icon">📍</div>
+                    <div class="pattern-name">Bearish Pin Bar</div>
+                    <div class="pattern-desc">Râu trên dài ≥2x thân nến, cho thấy lực từ chối giá mạnh từ phía trên.</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">⭐</div>
+                    <div class="pattern-name">Shooting Star</div>
+                    <div class="pattern-desc">Thân nhỏ ở dưới, râu trên dài, xuất hiện sau một đợt tăng giá ngắn hạn.</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🔴</div>
+                    <div class="pattern-name">Bearish Engulfing</div>
+                    <div class="pattern-desc">Nến đỏ bao trùm hoàn toàn thân của nến xanh trước đó, thể hiện sự áp đảo của phe Bán.</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🌙</div>
+                    <div class="pattern-name">Evening Star</div>
+                    <div class="pattern-desc">Bộ 3 nến đảo chiều: Nến tăng → Doji lưỡng lự → Nến giảm mạnh. Tín hiệu rất uy tín.</div>
+                </div>
+            </div>
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch4/4.4/4-4-2-png.webp" alt="Bearish Candles">
+                <p class="image-caption">Hình 2: Các mẫu nến xác nhận bearish phổ biến</p>
+            </div>
+        </section>
+
+        <!-- 5. REAL-WORLD EXAMPLE: PHÂN TÍCH KỸ THUẬT -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Phân Tích Kỹ Thuật: Entry, SL & TP</h2>
+            <p>Thiết lập vị thế chính xác là chìa khóa quản lý rủi ro hiệu quả:</p>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">1:2</div>
+                    <div class="stat-label">Tối Thiểu R:R</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0.5%</div>
+                    <div class="stat-label">Buffer SL</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">65%</div>
+                    <div class="stat-label">Win Rate</div>
+                </div>
+            </div>
+            <div class="example-box">
+                <div class="example-header"><span>📉</span><span>Ví Dụ: BTC/USDT H4</span></div>
+                <div class="example-content">
+                    <div class="example-grid">
+                        <div class="example-detail">
+                            <div class="example-detail-label">Entry SHORT</div>
+                            <div class="example-detail-value entry">$67,200</div>
+                        </div>
+                        <div class="example-detail">
+                            <div class="example-detail-label">Stop Loss</div>
+                            <div class="example-detail-value stop">$68,036</div>
+                        </div>
+                        <div class="example-detail">
+                            <div class="example-detail-label">Target 1 (1:1)</div>
+                            <div class="example-detail-value target">$66,364</div>
+                        </div>
+                        <div class="example-detail">
+                            <div class="example-detail-label">Target 2 (1:2)</div>
+                            <div class="example-detail-value target">$65,528</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch4/4.4/4-4-3-png.webp" alt="BTC Entry Example">
+                <p class="image-caption">Hình 3: Ví dụ thực tế entry UPD trên BTC/USDT H4</p>
+            </div>
+        </section>
+
+        <!-- 6. COMMON MISTAKES & FAQs -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Giải Đáp Thắc Mắc & Lỗi Thường Gặp</h2>
+            <p>Trong quá trình giao dịch, bạn sẽ gặp phải nhiều tình huống khó xử. Dưới đây là cách xử lý cho những trường hợp phổ biến nhất:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>❓</span> Nếu giá không retest HFZ thì sao?</div>
+                <p>Khoảng 30% trường hợp, áp lực bán quá mạnh khiến giá giảm thẳng mà không quay lại đón bạn. Trong trường hợp này: <strong>TUYỆT ĐỐI KHÔNG CHASE (Đuổi theo) trade!</strong> Tốt hơn là bỏ lỡ một cơ hội còn hơn là vào lệnh ở vị thế xấu với rủi ro cao. Hãy kiên nhẫn chờ đợi cơ hội tiếp theo.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>❓</span> Có nên đặt lệnh Limit (Entry ngay khi chạm) không?</div>
+                <p>Câu trả lời là <strong>KHÔNG</strong> cho người mới. Entry kiểu "Blind Limit" chỉ dành cho những trader cực kỳ kinh nghiệm và chấp nhận rủi ro cao. Với phương pháp GEM Frequency, chúng ta ưu tiên sự an toàn: LUÔN đợi confirmation. Chờ thêm 1-2 nến để xác nhận sẽ giúp bạn tránh được những lần giá xuyên thủng HFZ và tiếp tục tăng (Fakeout).</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>❓</span> Nến xác nhận thế nào là "Yếu"?</div>
+                <p>Nếu bạn thấy một nến Shooting Star nhưng râu nến rất ngắn, hoặc một nến Engulfing nhưng thân nến chỉ bao trùm được một phần nhỏ của nến trước, đó là tín hiệu yếu. Gặp trường hợp này, bạn có 2 lựa chọn: (1) Bỏ qua trade, hoặc (2) Giảm volume vào lệnh xuống một nửa. Đừng bao giờ "all-in" với một tín hiệu không rõ ràng!</p>
+            </div>
+        </section>
+
+        <!-- 7. SUMMARY & ACTION -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Tổng Kết & Hành Động</h2>
+            <div class="summary-box">
+                <div class="summary-title"><span>🎯</span> Bài Học Lớn Nhất</div>
+                <p>Chiến lược entry UPD là về <strong>KỶ LUẬT</strong>, không phải về TỐC ĐỘ. Trader nghiệp dư hấp tấp entry khi thấy breakdown và bị quét SL. Trader chuyên nghiệp kiên nhẫn đợi retest + confirmation và có win rate 65%+. Hãy nhớ: Thị trường sẽ luôn có cơ hội mới. Không có gì quý giá bằng việc bảo toàn vốn và chỉ trade khi mọi điều kiện đều hoàn hảo!</p>
+                <ul class="summary-list" style="margin-top: 1rem;">
+                    <li>✓ <strong>Quy trình chuẩn:</strong> Nhận diện UPD → Đợi Retest HFZ → Đợi Nến Xác Nhận → Entry SHORT → Đặt SL/TP.</li>
+                    <li>✓ <strong>Kiên nhẫn là vua:</strong> Entry SHORT chỉ sau khi nến xác nhận ĐÓNG CỬA hoàn chỉnh.</li>
+                    <li>✓ <strong>Quản lý rủi ro:</strong> Stop Loss = Đỉnh HFZ + 0.5% buffer.</li>
+                    <li>✓ <strong>Kỷ luật thép:</strong> "No retest, no trade".</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Bài Tập Thực Hành</div>
+                <p>1. Mở biểu đồ BTC/USDT hoặc ETH/USDT khung H4.<br>
+                2. Tìm lại 5 pattern UPD đã xuất hiện trong quá khứ.<br>
+                3. Đánh dấu điểm Entry, SL, TP theo quy tắc bài học này.<br>
+                4. Tự đánh giá: Nếu bạn trade lệnh đó, kết quả sẽ là Win hay Loss?</p>
+            </div>
+        </section>
+
+        <footer class="section" style="text-align: center; padding: var(--space-xl);">
+            <p style="color: var(--gold); font-weight: 600;">Hoàn thành Bài 5.4 - Chiến Lược Entry Cho UPD</p>
+            <p style="color: var(--text-muted);">Tiếp theo: <strong style="color: var(--text-primary);">Bài 5.5 - Phân Biệt UPD vs DPD</strong></p>
+        </footer>
+
+        <!-- 8. QUIZ SECTION -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Chọn đáp án đúng để nhận phản hồi ngay lập tức</p>
+            </div>
+            
+            <div class="quiz-question" data-question="1" data-correct="B">
+                <div class="question-number">1</div>
+                <div class="question-text">Thời điểm "vàng" để vào lệnh SHORT với mô hình UPD là khi nào?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Ngay khi giá vừa chạm vào vùng HFZ (đặt lệnh Limit).</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Sau khi giá retest HFZ và nến xác nhận bearish đã đóng cửa hoàn toàn.</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Ngay khi giá phá vỡ đáy của Phase 3 (Breakdown).</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Bất cứ lúc nào khi giá nằm trong vùng HFZ.</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="C">
+                <div class="question-number">2</div>
+                <div class="question-text">Tại sao chúng ta cần cộng thêm 0.5% buffer khi đặt Stop Loss trên đỉnh HFZ?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Để tăng tỷ lệ lợi nhuận (R:R).</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Để làm tròn số cho dễ nhớ.</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Để tránh bị quét SL bởi những biến động nhiễu (Stop Hunt) hoặc râu nến quét qua zone.</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Quy định của sàn giao dịch bắt buộc như vậy.</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+
+            <div class="quiz-question" data-question="3" data-correct="D">
+                <div class="question-number">3</div>
+                <div class="question-text">Mẫu nến nào sau đây KHÔNG phải là tín hiệu để vào lệnh SHORT tại HFZ?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Shooting Star (Búa ngược).</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Bearish Engulfing (Nhấn chìm giảm).</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Evening Star (Sao hôm).</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Hammer (Nến Búa) với râu dưới dài.</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+
+            <div class="quiz-result"><div class="result-score">0/3</div><div class="result-text">Hoàn thành!</div><div class="result-message"></div></div>
+            <div class="quiz-buttons"><button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button></div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+            let answeredCount = 0, correctCount = 0;
+            const totalQuestions = 3;
+            
+            const explanations = {
+                1: { correct: '✓ Chính xác! Sự kiên nhẫn đợi nến đóng cửa giúp bạn xác nhận rằng phe Bán đã thực sự kiểm soát tình hình, tránh được các cú "Fakeout" tăng giá.', incorrect: '✗ Sai rồi! Vào lệnh sớm (A, C) hoặc không có xác nhận (D) đều mang lại rủi ro rất cao. Hãy nhớ quy tắc "Retest + Confirmation".' },
+                2: { correct: '✓ Chính xác! Thị trường Crypto rất hay có những cú "giật" giá (spike). Buffer 0.5% là khoảng không gian an toàn để lệnh của bạn "thở" trước khi giá đi đúng hướng.', incorrect: '✗ Sai rồi! Buffer là để bảo vệ lệnh khỏi nhiễu thị trường, không phải để tăng lợi nhuận hay làm tròn số.' },
+                3: { correct: '✓ Chính xác! Hammer là mẫu nến đảo chiều TĂNG (Bullish), thường xuất hiện ở đáy xu hướng. Nếu thấy Hammer tại HFZ, đó là tín hiệu nguy hiểm cho lệnh Short, không phải tín hiệu vào lệnh.', incorrect: '✗ Sai rồi! Các mẫu nến A, B, C đều là tín hiệu giảm giá mạnh (Bearish) và rất tốt để entry Short. Chỉ có Hammer là tín hiệu tăng giá.' }
+            };
+
+            questions.forEach(q => {
+                const opts = q.querySelectorAll('.quiz-option');
+                opts.forEach(o => {
+                    o.addEventListener('click', function() {
+                        if (q.classList.contains('answered')) return;
+                        q.classList.add('answered'); answeredCount++;
+                        const sel = this.dataset.option, corr = q.dataset.correct, isCor = sel === corr;
+                        opts.forEach(op => op.classList.add('disabled'));
+                        if (isCor) { this.classList.add('correct'); correctCount++; q.querySelector('.question-feedback').classList.add('correct'); }
+                        else { this.classList.add('incorrect'); q.querySelector('.question-feedback').classList.add('incorrect'); opts.forEach(op => { if(op.dataset.option === corr) op.classList.add('correct'); }); }
+                        q.querySelector('.feedback-title').textContent = isCor ? '✓ Chính xác!' : '✗ Sai rồi!';
+                        q.querySelector('.feedback-text').textContent = explanations[q.dataset.question][isCor ? 'correct' : 'incorrect'];
+                        q.querySelector('.question-feedback').classList.add('show');
+                        if (answeredCount === totalQuestions) {
+                            resultDiv.querySelector('.result-score').textContent = `${correctCount}/${totalQuestions}`;
+                            resultDiv.querySelector('.result-message').textContent = correctCount === totalQuestions ? '🎉 Tuyệt vời! Bạn đã nắm vững bài học.' : '📚 Hãy ôn lại bài để hiểu rõ hơn nhé.';
+                            resultDiv.classList.add('show'); retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+            retakeBtn.addEventListener('click', function() { location.reload(); });
+        });
+    </script>
+</body>
+</html>

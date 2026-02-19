@@ -122,6 +122,7 @@ User clicks "Paper Trade" on pattern
 | 11 | — | RLS vulnerability fix: 24 misconfigured policies + 20 tables without RLS (43 tables, 2 migrations) | `supabase/migrations/20260217_rls_fix_service_role_policies.sql` |
 | 12 | — | 62 fixes: COALESCE type mismatch, 5 RPC name mismatches, AbortController on 38 fetch calls, `follows` table cleanup in 4 services, edge function auth+SDK updates (8 functions), 2 missing SQL functions created | `docs/Troubleshooting_Tips.md` Rules 42-46 |
 | 13 | — | Trading engine regression: null SL/TP instant-close, duplicate notifications, concurrent pending fills, atomic close guard, grace period, missing notification tables | `docs/Troubleshooting_Tips.md` Rules 47-50 |
+| 14 | — | Payment system: credit card orders lost (webhook filter), QR code cross-order bug (dangerous fallback), duplicate pending_course_access cleanup | `docs/Troubleshooting_Tips.md` Rules 53-54 |
 
 ## Documentation
 
@@ -132,7 +133,7 @@ User clicks "Paper Trade" on pattern
 | `docs/feature-phase7.8-resume-deadlock-fix.md` | Phase 7.8 resume deadlock fix (27 files, 3 root causes) |
 | `docs/feature-phase9-startup-freeze-fix.md` | Phase 9 startup freeze fix (6 files, 4 root causes) |
 | `docs/feature-phase10-biometric-push-fix.md` | Phase 10 biometric identity + push dedup (5 files, 5 root causes) |
-| `docs/Troubleshooting_Tips.md` | 50 generalized engineering rules from Phase 1-13 bugs |
+| `docs/Troubleshooting_Tips.md` | 54 generalized engineering rules from Phase 1-14 bugs |
 | `docs/SCANNER_TRADING_FEATURE_SPEC.md` | Complete Scanner/Trading feature specification (v4.1) |
 
 ## Database Migrations
@@ -157,6 +158,22 @@ SELECT tablename FROM pg_tables
 WHERE schemaname='public' AND rowsecurity=false;
 ```
 
+### Payment System Fix (2026-02-19)
+
+One migration deployed to support all payment types in `pending_payments`:
+
+1. **`20260219_add_payment_method_to_pending_payments`** — Added `payment_method` column (VARCHAR(50), default `'bank_transfer'`) to distinguish bank transfer vs credit card vs other payment types.
+
+**Edge functions redeployed:**
+- `shopify-order-webhook` (v31 → v32): Now processes ALL payment types (previously skipped credit card). Credit card orders get `payment_status = 'paid'` immediately.
+- `get-order-number` (v23 → v24): Removed dangerous fallback strategies that returned wrong order numbers. Only exact match by `shopify_order_id` remains.
+
+**Database fixes applied:**
+- 4 missing credit card orders inserted into `pending_payments`
+- 5 `pending_course_access` records linked to correct `shopify_order_id`
+- 4 duplicate `pending_course_access` records deleted
+- DH4745 stuck order marked as `expired`
+
 ## Important Conventions
 
 - **Table name**: Always `profiles` (NOT `users`) — all app code reads `profiles`
@@ -169,3 +186,5 @@ WHERE schemaname='public' AND rowsecurity=false;
 - **AbortController**: EVERY `fetch()` to external API must have AbortController timeout — not just Binance
 - **Edge functions**: Use `SERVICE_ROLE_KEY` (not `ANON_KEY`) and `@supabase/supabase-js@2` (not pinned versions)
 - **`follows` table**: Does NOT exist. Use `user_follows` or degrade gracefully with empty arrays
+- **Webhooks**: Must process ALL variants of an entity (all payment types, all order statuses) — never silently skip subtypes with `success: true`
+- **Fallback queries**: Must never return unrelated data. Prefer 404 over "most recent" fallback that returns wrong results

@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 4.2: Hanging Man (Người Treo Cổ)</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================
+       🎨 GEM DESIGN SYSTEM - V5.3 FACEBOOK-STYLE
+       ========================================== */
+    :root {
+      --color-navy: #112250;
+      --color-navy-dark: #0A0F1A;
+      --color-gold: #FFBD59;
+      --color-gold-dark: #E5A84D;
+      --color-burgundy: #9C0612;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-warning: #F59E0B;
+      --color-white: #FFFFFF;
+      --color-text: #E8E8E8;
+      --color-text-secondary: rgba(255, 255, 255, 0.7);
+      --color-text-muted: rgba(255, 255, 255, 0.5);
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.08);
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(255, 189, 89, 0.3);
+      --text-padding: 16px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 20px;
+      --radius-sm: 0;
+      --radius-md: 0;
+      --radius-lg: 0;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --glass-blur: blur(40px);
+    }
+
+    @media (min-width: 600px) {
+      :root {
+        --text-padding: 24px;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      font-size: 15px;
+      color: var(--color-text);
+      background: linear-gradient(180deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-dark) 100%);
+      min-height: 100vh;
+    }
+
+    @media (min-width: 600px) { body { font-size: 16px; line-height: 1.7; } }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(106, 91, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .lesson-container { max-width: 900px; margin: 0 auto; padding: 0; }
+    @media (min-width: 600px) { .lesson-container { padding: 16px; } }
+
+    .lesson-header {
+      text-align: center;
+      padding: var(--space-lg) var(--text-padding);
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: var(--space-md);
+    }
+
+    @media (min-width: 600px) {
+      .lesson-header {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        margin-bottom: var(--space-xl);
+      }
+    }
+
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-gold), var(--color-cyan), var(--color-gold));
+    }
+
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, var(--color-burgundy), #c41e2a);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+    }
+
+    @media (min-width: 600px) { .lesson-badge { font-size: 13px; padding: 6px 16px; } }
+
+    .lesson-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.5rem, 6vw, 2.5rem);
+      font-weight: 800;
+      color: var(--color-gold);
+      margin-bottom: var(--space-sm);
+      line-height: 1.2;
+      text-shadow: 0 0 30px rgba(255, 189, 89, 0.3);
+    }
+
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    .lesson-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--color-text-muted);
+      font-size: 12px;
+    }
+
+    @media (min-width: 600px) { .lesson-meta-item { font-size: 14px; } }
+    .lesson-meta-icon { color: var(--color-cyan); }
+
+    .lesson-content { background: transparent; border-radius: 0; padding: 0; backdrop-filter: none; border: none; }
+
+    @media (min-width: 600px) {
+      .lesson-content {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        padding: var(--text-padding);
+        backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--border-subtle);
+      }
+    }
+
+    .section { margin-bottom: var(--space-xl); }
+
+    h2, h3, p, ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      h2, h3, p, ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+
+    h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.25rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid rgba(255, 189, 89, 0.3);
+    }
+
+    @media (min-width: 600px) { h2 { font-size: 1.75rem; } }
+
+    h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-cyan);
+      margin-top: var(--space-lg);
+      margin-bottom: var(--space-sm);
+    }
+
+    @media (min-width: 600px) { h3 { font-size: 1.25rem; } }
+
+    p { margin-bottom: var(--space-md); }
+    strong { color: var(--color-gold); font-weight: 600; }
+
+    ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+      margin-bottom: var(--space-md);
+      padding-left: calc(var(--text-padding) + 20px);
+    }
+
+    @media (min-width: 600px) {
+      ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) { padding-left: 24px; }
+    }
+
+    ul li { margin-bottom: var(--space-xs); }
+
+    .opening-hook {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(17, 34, 80, 0.4));
+      border-left: 4px solid var(--color-burgundy);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin-bottom: var(--space-lg);
+      font-size: 15px;
+      font-style: italic;
+    }
+
+    @media (min-width: 600px) { .opening-hook { border-radius: var(--radius-md); font-size: 17px; } }
+    .opening-hook p { padding-left: 0; padding-right: 0; }
+    .opening-hook p:last-child { margin-bottom: 0; }
+
+    .highlight-box {
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-md) 0;
+      border-left: 4px solid;
+    }
+
+    @media (min-width: 600px) { .highlight-box { border-radius: var(--radius-md); } }
+    .highlight-box p, .highlight-box ul { padding-left: 0 !important; padding-right: 0 !important; }
+
+    .highlight-box.important { background: rgba(255, 189, 89, 0.1); border-color: var(--color-gold); }
+    .highlight-box.tip { background: rgba(0, 240, 255, 0.1); border-color: var(--color-cyan); }
+    .highlight-box.warning { background: rgba(245, 158, 11, 0.1); border-color: var(--color-warning); }
+    .highlight-box.success { background: rgba(16, 185, 129, 0.1); border-color: var(--color-green); }
+    .highlight-box.definition { background: rgba(106, 91, 255, 0.1); border-color: var(--color-purple); }
+
+    .highlight-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (min-width: 600px) { .highlight-title { font-size: 17px; } }
+
+    .highlight-box.important .highlight-title { color: var(--color-gold); }
+    .highlight-box.tip .highlight-title { color: var(--color-cyan); }
+    .highlight-box.warning .highlight-title { color: var(--color-warning); }
+    .highlight-box.success .highlight-title { color: var(--color-green); }
+    .highlight-box.definition .highlight-title { color: var(--color-purple); }
+
+    .lesson-image {
+      margin: var(--space-md) 0;
+      text-align: center;
+      overflow: hidden;
+      border-radius: 0;
+    }
+
+    @media (min-width: 600px) { .lesson-image { border-radius: var(--radius-md); margin: var(--space-lg) 0; } }
+
+    .lesson-image img { width: 100%; height: auto; display: block; border-radius: 0; }
+
+    @media (min-width: 600px) {
+      .lesson-image img {
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-subtle);
+      }
+    }
+
+    .image-caption {
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 12px;
+      margin-top: var(--space-sm);
+      font-style: italic;
+      padding: 0 var(--text-padding);
+    }
+
+    @media (min-width: 600px) { .image-caption { font-size: 14px; padding: 0; } }
+
+    .key-concept-box {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.15), rgba(17, 34, 80, 0.3));
+      border: none;
+      border-left: 4px solid var(--color-burgundy);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .key-concept-box {
+        border: 2px solid var(--color-burgundy);
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl);
+      }
+    }
+
+    .key-concept-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (min-width: 600px) { .key-concept-title { font-size: 1.25rem; } }
+
+    .key-concept-list { list-style: none; padding: 0; margin: 0; }
+
+    .key-concept-list li {
+      padding: 6px 0;
+      padding-left: 24px;
+      position: relative;
+      color: var(--color-text);
+      font-size: 14px;
+    }
+
+    @media (min-width: 600px) { .key-concept-list li { font-size: 16px; padding: 8px 0; padding-left: 28px; } }
+    .key-concept-list li::before { content: "✓"; position: absolute; left: 0; color: var(--color-green); font-weight: bold; }
+
+    .quiz-section {
+      background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05));
+      border: none;
+      border-left: 4px solid var(--color-purple);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .quiz-section {
+        border: 2px solid var(--color-purple);
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl);
+      }
+    }
+
+    .quiz-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.2rem;
+      color: var(--color-purple);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (min-width: 600px) { .quiz-title { font-size: 1.5rem; } }
+
+    .quiz-question {
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-lg);
+      border-bottom: 1px solid rgba(106, 91, 255, 0.2);
+    }
+
+    .quiz-question:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+    .quiz-question-text {
+      font-weight: 600;
+      color: var(--color-white);
+      margin-bottom: var(--space-sm);
+      font-size: 15px;
+    }
+
+    @media (min-width: 600px) { .quiz-question-text { font-size: 17px; } }
+
+    .quiz-options { list-style: none; padding: 0; }
+
+    .quiz-option {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      margin-bottom: 6px;
+      background: rgba(17, 34, 80, 0.4);
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    @media (min-width: 600px) { .quiz-option { font-size: 15px; padding: var(--space-md); } }
+    .quiz-option:hover { background: rgba(17, 34, 80, 0.6); border-color: var(--color-purple); }
+
+    .quiz-option-letter {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      background: rgba(106, 91, 255, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--color-purple);
+    }
+
+    @media (min-width: 600px) { .quiz-option-letter { width: 30px; height: 30px; font-size: 14px; } }
+
+    .quiz-answer {
+      margin-top: var(--space-sm);
+      padding: var(--space-md);
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 3px solid var(--color-green);
+      border-radius: 8px;
+      display: none;
+      font-size: 14px;
+    }
+
+    @media (min-width: 600px) { .quiz-answer { font-size: 15px; } }
+    .quiz-answer.show { display: block; }
+    .quiz-answer-label { font-weight: 600; color: var(--color-green); margin-bottom: 4px; }
+
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-xl) var(--text-padding);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: var(--space-lg);
+      background: var(--bg-card);
+    }
+
+    @media (min-width: 600px) { .lesson-footer { background: transparent; padding: var(--space-xl) 0; } }
+
+    .footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--color-gold);
+      margin-bottom: 4px;
+    }
+
+    .footer-link { color: var(--color-text-muted); font-size: 13px; }
+    .footer-link a { color: var(--color-cyan); text-decoration: none; }
+    .footer-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+
+<body>
+  <div class="lesson-container">
+
+    <!-- HEADER -->
+    <header class="lesson-header">
+      <span class="lesson-badge">📚 TIER 1 • Chương 4 • Bài 4.2</span>
+      <h1 class="lesson-title">Hanging Man (Người Treo Cổ)</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">⏱️</span>
+          14 phút đọc
+        </span>
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">📚</span>
+          ~1400 từ
+        </span>
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">✅</span>
+          3 câu quiz
+        </span>
+      </div>
+    </header>
+
+    <!-- LESSON CONTENT -->
+    <div class="lesson-content">
+
+      <div class="opening-hook">
+        <p>Cái tên "Hanging Man" nghe có vẻ đáng sợ, và đúng như vậy. Pattern này báo hiệu rằng xu hướng tăng đang gặp nguy hiểm nghiêm trọng. Giống như một người đứng chênh vênh trên mép vực, thị trường có thể sụp đổ bất cứ lúc nào. Hãy cùng tìm hiểu cách nhận diện và giao dịch với pattern cổ điển này.</p>
+        <p>Điều thú vị là Hanging Man có hình dạng giống hệt Hammer, nhưng ý nghĩa hoàn toàn ngược lại do vị trí xuất hiện khác nhau.</p>
+      </div>
+
+      <section class="section">
+        <h2>Hanging Man Là Gì?</h2>
+
+        <p><strong>Hanging Man</strong> là một mẫu nến đảo chiều giảm xuất hiện sau một xu hướng tăng. Nến này có thân nhỏ nằm ở phần trên và bóng dưới rất dài. Bóng dưới thường dài gấp ít nhất 2-3 lần thân nến. Bóng trên rất ngắn hoặc không có.</p>
+
+        <div class="highlight-box definition">
+          <div class="highlight-title">📖 Định Nghĩa Hanging Man</div>
+          <p><strong>Hanging Man</strong> là nến có thân nhỏ ở trên, bóng dưới dài ít nhất gấp 2 lần thân nến, và bóng trên rất ngắn hoặc không có. Nến này xuất hiện sau xu hướng tăng và cảnh báo khả năng đảo chiều giảm. Màu của thân nến có thể là xanh hoặc đỏ, nhưng thân đỏ cho tín hiệu mạnh hơn.</p>
+        </div>
+
+        <h3>So Sánh Với Shooting Star</h3>
+
+        <p>Nếu bạn đã học bài trước về Shooting Star, bạn sẽ thấy Hanging Man có hình dạng ngược lại. Shooting Star có bóng trên dài, còn Hanging Man có bóng dưới dài. Tuy nhiên, cả hai đều là pattern đảo chiều giảm và đều xuất hiện sau xu hướng tăng.</p>
+
+        <p>Sự khác biệt nằm ở câu chuyện thị trường đằng sau mỗi pattern. Với Shooting Star, giá bị đẩy xuống từ đỉnh. Còn với Hanging Man, giá hồi phục từ đáy nhưng điều này lại là dấu hiệu cảnh báo nguy hiểm.</p>
+
+        <div class="highlight-box important">
+          <div class="highlight-title">⭐ Điều Kiện Hình Thành Hanging Man Chuẩn</div>
+          <p>Để Hanging Man được coi là hợp lệ, bạn cần đảm bảo các điều kiện sau. Thứ nhất, phải có xu hướng tăng rõ ràng trước đó với ít nhất 3-5 nến tăng liên tiếp. Thứ hai, bóng dưới phải dài ít nhất gấp 2 lần thân nến. Thứ ba, bóng trên rất ngắn hoặc không có. Thứ tư, thân nến nằm ở phần trên của phạm vi nến.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Tại Sao Hanging Man Báo Hiệu Nguy Hiểm?</h2>
+
+        <p>Để hiểu được ý nghĩa của Hanging Man, bạn cần nhìn vào diễn biến trong phiên giao dịch. Trong phiên đó, giá đã giảm mạnh xuống mức thấp, tạo ra bóng dưới dài. Điều này cho thấy phe bán đã tấn công mạnh mẽ.</p>
+
+        <p>Sau đó, giá hồi phục và đóng cửa gần mức mở cửa. Nhiều trader nghĩ rằng đây là tín hiệu tích cực vì giá đã hồi. Nhưng thực tế, việc giá giảm sâu trong phiên cho thấy phe bán đang tích lũy lực và sẵn sàng tấn công.</p>
+
+        <div class="highlight-box warning">
+          <div class="highlight-title">⚠️ Bẫy Của Hanging Man</div>
+          <p>Nhiều trader mới thường nhầm Hanging Man là tín hiệu tích cực vì giá hồi phục cuối phiên. Đây là một sai lầm nguy hiểm. Bóng dưới dài cho thấy phe bán đã bắt đầu tấn công. Việc giá hồi chỉ là tạm thời. Trong các phiên tiếp theo, phe bán có thể tiếp tục đẩy giá xuống sâu hơn.</p>
+        </div>
+
+        <h3>Câu Chuyện Thị Trường</h3>
+
+        <p>Hãy tưởng tượng câu chuyện như sau. Thị trường đang trong xu hướng tăng mạnh. Trong một phiên giao dịch, Smart Money bắt đầu chốt lời và bán ra mạnh. Giá giảm sâu xuống mức thấp của phiên.</p>
+
+        <p>Tuy nhiên, retail traders vẫn còn hưng phấn và "bắt đáy", đẩy giá hồi phục. Khi phiên kết thúc, giá đóng cửa gần mức mở. Nhưng điều quan trọng là Smart Money đã bán xong. Trong các phiên tiếp theo, không còn lực mua để nâng giá lên nữa.</p>
+      </section>
+
+      <section class="section">
+        <h2>Cách Nhận Diện Hanging Man</h2>
+
+        <p>Khi quan sát biểu đồ, bạn cần tập trung vào hình dạng và vị trí của nến. Hanging Man thường xuất hiện tại đỉnh của xu hướng tăng hoặc tại các vùng HFZ quan trọng. Đây là nơi Smart Money bắt đầu phân phối.</p>
+
+        <h3>Đặc Điểm Hình Dạng</h3>
+
+        <p>Thân nến của Hanging Man rất nhỏ và nằm ở phần trên. Bóng dưới chiếm phần lớn chiều cao nến, thường từ 60-70% tổng chiều cao. Bóng trên gần như không có hoặc rất ngắn.</p>
+
+        <p>Một điểm quan trọng cần nhớ là màu sắc của thân nến. Nếu thân nến màu đỏ, điều này có nghĩa giá đóng cửa thấp hơn giá mở cửa. Tín hiệu này mạnh hơn so với thân nến màu xanh.</p>
+
+        <div class="highlight-box tip">
+          <div class="highlight-title">💡 Phân Biệt Hanging Man Và Hammer</div>
+          <p>Hanging Man và Hammer có hình dạng giống hệt nhau. Điểm khác biệt duy nhất là vị trí xuất hiện. Hanging Man xuất hiện sau xu hướng tăng và báo hiệu đảo chiều giảm. Hammer xuất hiện sau xu hướng giảm và báo hiệu đảo chiều tăng. Nhớ rằng context quan trọng hơn hình dạng.</p>
+        </div>
+
+        <h3>Vị Trí Xuất Hiện</h3>
+
+        <p>Hanging Man có ý nghĩa nhất khi xuất hiện tại các vùng kháng cự quan trọng. Nếu bạn thấy Hanging Man tại đỉnh cũ, đường MA quan trọng, hoặc vùng HFZ, đây là tín hiệu đáng tin cậy hơn. Vị trí quyết định ý nghĩa của pattern.</p>
+
+        <div class="highlight-box important">
+          <div class="highlight-title">⭐ Kết Hợp Với HFZ</div>
+          <p>Khi Hanging Man xuất hiện tại vùng HFZ mà bạn đã xác định, đây là tín hiệu rất mạnh. Vùng HFZ vốn đã có áp lực bán lớn từ Smart Money. Khi Hanging Man hình thành tại đây, nó xác nhận rằng phe bán đang chiếm ưu thế và giá có khả năng giảm.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Xác Nhận Tín Hiệu Hanging Man</h2>
+
+        <p>Giống như Shooting Star, một Hanging Man đơn lẻ chưa đủ để bạn vào lệnh ngay. Bạn cần đợi nến xác nhận ở phiên tiếp theo. Nến xác nhận lý tưởng là một nến giảm mạnh, đóng cửa thấp hơn đáy của Hanging Man.</p>
+
+        <h3>Các Yếu Tố Tăng Độ Tin Cậy</h3>
+
+        <p>Độ tin cậy của Hanging Man tăng lên khi kết hợp với các yếu tố khác. Volume giao dịch cao trong phiên Hanging Man cho thấy có nhiều giao dịch xảy ra. Điều này có nghĩa Smart Money đang hoạt động mạnh.</p>
+
+        <p>Ngoài ra, nếu Hanging Man xuất hiện sau một chuỗi tăng giá dài với nhiều nến tăng liên tiếp, tín hiệu càng mạnh. Thị trường đã quá căng và cần điều chỉnh. Hanging Man là dấu hiệu cho thấy điều chỉnh đang đến.</p>
+
+        <div class="highlight-box tip">
+          <div class="highlight-title">💡 Quy Tắc Entry Cơ Bản</div>
+          <p>Sau khi Hanging Man hình thành hoàn chỉnh, hãy đợi phiên tiếp theo. Nếu nến tiếp theo là nến giảm và gap down hoặc đóng cửa dưới đáy của Hanging Man, đây là lúc cân nhắc entry SHORT. Stop Loss đặt trên đỉnh của Hanging Man để bảo vệ vốn.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Tóm Tắt Bài Học</h2>
+
+        <div class="key-concept-box">
+          <div class="key-concept-title">🔑 Khái Niệm Cốt Lõi Cần Nhớ</div>
+          <ul class="key-concept-list">
+            <li><strong>Hanging Man</strong> là nến đảo chiều giảm với thân nhỏ ở trên và bóng dưới dài</li>
+            <li>Bóng dưới phải dài ít nhất gấp 2 lần thân nến, bóng trên rất ngắn hoặc không có</li>
+            <li>Hanging Man và Hammer có hình dạng giống nhau nhưng vị trí và ý nghĩa ngược nhau</li>
+            <li>Bóng dưới dài là dấu hiệu cảnh báo phe bán đang tấn công, không phải tín hiệu tích cực</li>
+            <li>Cần đợi nến xác nhận giảm ở phiên sau trước khi vào lệnh SHORT</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- QUIZ SECTION -->
+      <div class="quiz-section">
+        <div class="quiz-title">📝 Kiểm Tra Kiến Thức</div>
+
+        <div class="quiz-question">
+          <div class="quiz-question-text">Câu 1: Hanging Man khác với Hammer ở điểm nào?</div>
+          <ul class="quiz-options">
+            <li class="quiz-option">
+              <span class="quiz-option-letter">A</span>
+              <span>Hình dạng khác nhau hoàn toàn</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">B</span>
+              <span>Màu sắc thân nến khác nhau</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">C</span>
+              <span>Vị trí xuất hiện và ý nghĩa ngược nhau</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">D</span>
+              <span>Chiều dài bóng khác nhau</span>
+            </li>
+          </ul>
+          <div class="quiz-answer">
+            <div class="quiz-answer-label">✓ Đáp án đúng: C</div>
+            <p>Hanging Man và Hammer có hình dạng giống hệt nhau. Điểm khác biệt duy nhất là vị trí: Hanging Man xuất hiện sau xu hướng tăng (báo hiệu giảm), Hammer xuất hiện sau xu hướng giảm (báo hiệu tăng).</p>
+          </div>
+        </div>
+
+        <div class="quiz-question">
+          <div class="quiz-question-text">Câu 2: Tại sao bóng dưới dài của Hanging Man là dấu hiệu nguy hiểm?</div>
+          <ul class="quiz-options">
+            <li class="quiz-option">
+              <span class="quiz-option-letter">A</span>
+              <span>Vì phe mua đang rất mạnh</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">B</span>
+              <span>Vì phe bán đã bắt đầu tấn công mạnh trong phiên</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">C</span>
+              <span>Vì giá đã hồi phục cuối phiên</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">D</span>
+              <span>Vì volume giao dịch thấp</span>
+            </li>
+          </ul>
+          <div class="quiz-answer">
+            <div class="quiz-answer-label">✓ Đáp án đúng: B</div>
+            <p>Bóng dưới dài cho thấy trong phiên giao dịch, phe bán đã đẩy giá xuống rất sâu. Mặc dù giá hồi phục cuối phiên, nhưng điều này cho thấy phe bán đã bắt đầu tấn công và có thể tiếp tục trong các phiên sau.</p>
+          </div>
+        </div>
+
+        <div class="quiz-question">
+          <div class="quiz-question-text">Câu 3: Nến xác nhận lý tưởng sau Hanging Man là gì?</div>
+          <ul class="quiz-options">
+            <li class="quiz-option">
+              <span class="quiz-option-letter">A</span>
+              <span>Nến tăng mạnh gap up</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">B</span>
+              <span>Nến Doji</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">C</span>
+              <span>Nến giảm đóng cửa dưới đáy của Hanging Man</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">D</span>
+              <span>Nến đi ngang với volume thấp</span>
+            </li>
+          </ul>
+          <div class="quiz-answer">
+            <div class="quiz-answer-label">✓ Đáp án đúng: C</div>
+            <p>Nến xác nhận lý tưởng là nến giảm mạnh đóng cửa thấp hơn đáy của Hanging Man. Điều này xác nhận rằng phe bán đã thực sự chiếm quyền kiểm soát và xu hướng giảm đang bắt đầu.</p>
+          </div>
+        </div>
+
+        <p style="text-align: center; color: var(--color-text-muted); margin-top: var(--space-lg);">
+          <em>💡 Click vào đáp án để kiểm tra</em>
+        </p>
+      </div>
+
+      <!-- NEXT LESSON -->
+      <div class="highlight-box tip">
+        <div class="highlight-title">📚 Bài Tiếp Theo</div>
+        <p>Trong <strong>Bài 4.3: Hammer & Inverted Hammer</strong>, bạn sẽ học về hai pattern đảo chiều tăng quan trọng. Đây là cặp pattern ngược lại với Shooting Star và Hanging Man. Đừng bỏ lỡ nhé!</p>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="lesson-footer">
+      <div class="footer-logo">GEM Trading Academy</div>
+      <div class="footer-link">
+        <a href="https://gemral.com" target="_blank">gemral.com</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    document.querySelectorAll('.quiz-option').forEach(option => {
+      option.addEventListener('click', function() {
+        const question = this.closest('.quiz-question');
+        const answer = question.querySelector('.quiz-answer');
+        answer.classList.toggle('show');
+        question.querySelectorAll('.quiz-option').forEach(opt => { opt.style.opacity = '0.5'; });
+        this.style.opacity = '1';
+        this.style.borderColor = 'var(--color-purple)';
+      });
+    });
+  </script>
+</body>
+</html>

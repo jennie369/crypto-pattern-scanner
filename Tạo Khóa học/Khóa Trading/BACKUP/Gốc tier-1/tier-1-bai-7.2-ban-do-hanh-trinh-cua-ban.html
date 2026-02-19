@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 7.2: Bản Đồ Hành Trình Của Bạn</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================
+       GEM DESIGN SYSTEM - V5.3 FACEBOOK-STYLE
+       ========================================== */
+    :root {
+      --color-navy: #112250;
+      --color-navy-dark: #0A0F1A;
+      --color-gold: #FFBD59;
+      --color-gold-dark: #E5A84D;
+      --color-burgundy: #9C0612;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-warning: #F59E0B;
+      --color-white: #FFFFFF;
+      --color-text: #E8E8E8;
+      --color-text-secondary: rgba(255, 255, 255, 0.7);
+      --color-text-muted: rgba(255, 255, 255, 0.5);
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.08);
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(255, 189, 89, 0.3);
+      --text-padding: 16px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 20px;
+      --radius-sm: 0;
+      --radius-md: 0;
+      --radius-lg: 0;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --glass-blur: blur(40px);
+    }
+
+    @media (min-width: 600px) {
+      :root {
+        --text-padding: 24px;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      font-size: 15px;
+      color: var(--color-text);
+      background: linear-gradient(180deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-dark) 100%);
+      min-height: 100vh;
+    }
+
+    @media (min-width: 600px) { body { font-size: 16px; line-height: 1.7; } }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(106, 91, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .lesson-container { max-width: 900px; margin: 0 auto; padding: 0; }
+    @media (min-width: 600px) { .lesson-container { padding: 16px; } }
+
+    .lesson-header {
+      text-align: center;
+      padding: var(--space-lg) var(--text-padding);
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: var(--space-md);
+    }
+
+    @media (min-width: 600px) {
+      .lesson-header {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        margin-bottom: var(--space-xl);
+      }
+    }
+
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-gold), var(--color-cyan), var(--color-gold));
+    }
+
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, var(--color-burgundy), #c41e2a);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+    }
+
+    @media (min-width: 600px) { .lesson-badge { font-size: 13px; padding: 6px 16px; } }
+
+    .lesson-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.5rem, 6vw, 2.5rem);
+      font-weight: 800;
+      color: var(--color-gold);
+      margin-bottom: var(--space-sm);
+      line-height: 1.2;
+      text-shadow: 0 0 30px rgba(255, 189, 89, 0.3);
+    }
+
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    .lesson-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--color-text-muted);
+      font-size: 12px;
+    }
+
+    @media (min-width: 600px) { .lesson-meta-item { font-size: 14px; } }
+    .lesson-meta-icon { color: var(--color-cyan); }
+
+    .lesson-content { background: transparent; border-radius: 0; padding: 0; backdrop-filter: none; border: none; }
+
+    @media (min-width: 600px) {
+      .lesson-content {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        padding: var(--text-padding);
+        backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--border-subtle);
+      }
+    }
+
+    .section { margin-bottom: var(--space-xl); }
+
+    h2, h3, p, ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      h2, h3, p, ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+
+    h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.25rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid rgba(255, 189, 89, 0.3);
+    }
+
+    @media (min-width: 600px) { h2 { font-size: 1.75rem; } }
+
+    h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-cyan);
+      margin-top: var(--space-lg);
+      margin-bottom: var(--space-sm);
+    }
+
+    @media (min-width: 600px) { h3 { font-size: 1.25rem; } }
+
+    p { margin-bottom: var(--space-md); }
+    strong { color: var(--color-gold); font-weight: 600; }
+
+    ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+      margin-bottom: var(--space-md);
+      padding-left: calc(var(--text-padding) + 20px);
+    }
+
+    @media (min-width: 600px) {
+      ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) { padding-left: 24px; }
+    }
+
+    ul li { margin-bottom: var(--space-xs); }
+
+    .opening-hook {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(17, 34, 80, 0.4));
+      border-left: 4px solid var(--color-burgundy);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin-bottom: var(--space-lg);
+      font-size: 15px;
+      font-style: italic;
+    }
+
+    @media (min-width: 600px) { .opening-hook { border-radius: var(--radius-md); font-size: 17px; } }
+    .opening-hook p { padding-left: 0; padding-right: 0; }
+    .opening-hook p:last-child { margin-bottom: 0; }
+
+    .highlight-box {
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-md) 0;
+      border-left: 4px solid;
+    }
+
+    @media (min-width: 600px) { .highlight-box { border-radius: var(--radius-md); } }
+    .highlight-box p, .highlight-box ul { padding-left: 0 !important; padding-right: 0 !important; }
+
+    .highlight-box.important { background: rgba(255, 189, 89, 0.1); border-color: var(--color-gold); }
+    .highlight-box.tip { background: rgba(0, 240, 255, 0.1); border-color: var(--color-cyan); }
+    .highlight-box.warning { background: rgba(245, 158, 11, 0.1); border-color: var(--color-warning); }
+    .highlight-box.success { background: rgba(16, 185, 129, 0.1); border-color: var(--color-green); }
+    .highlight-box.definition { background: rgba(106, 91, 255, 0.1); border-color: var(--color-purple); }
+
+    .highlight-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (min-width: 600px) { .highlight-title { font-size: 17px; } }
+
+    .highlight-box.important .highlight-title { color: var(--color-gold); }
+    .highlight-box.tip .highlight-title { color: var(--color-cyan); }
+    .highlight-box.warning .highlight-title { color: var(--color-warning); }
+    .highlight-box.success .highlight-title { color: var(--color-green); }
+    .highlight-box.definition .highlight-title { color: var(--color-purple); }
+
+    .key-concept-box {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.15), rgba(17, 34, 80, 0.3));
+      border: none;
+      border-left: 4px solid var(--color-burgundy);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .key-concept-box {
+        border: 2px solid var(--color-burgundy);
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl);
+      }
+    }
+
+    .key-concept-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (min-width: 600px) { .key-concept-title { font-size: 1.25rem; } }
+
+    .key-concept-list { list-style: none; padding: 0; margin: 0; }
+
+    .key-concept-list li {
+      padding: 6px 0;
+      padding-left: 24px;
+      position: relative;
+      color: var(--color-text);
+      font-size: 14px;
+    }
+
+    @media (min-width: 600px) { .key-concept-list li { font-size: 16px; padding: 8px 0; padding-left: 28px; } }
+    .key-concept-list li::before { content: "✓"; position: absolute; left: 0; color: var(--color-green); font-weight: bold; }
+
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-xl) var(--text-padding);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: var(--space-lg);
+      background: var(--bg-card);
+    }
+
+    @media (min-width: 600px) { .lesson-footer { background: transparent; padding: var(--space-xl) 0; } }
+
+    .footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--color-gold);
+      margin-bottom: 4px;
+    }
+
+    .footer-link { color: var(--color-text-muted); font-size: 13px; }
+    .footer-link a { color: var(--color-cyan); text-decoration: none; }
+    .footer-link a:hover { text-decoration: underline; }
+
+    .roadmap-stage {
+      background: var(--bg-card);
+      border-left: 4px solid var(--color-purple);
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-md) 0;
+      position: relative;
+    }
+
+    @media (min-width: 600px) { .roadmap-stage { border-radius: var(--radius-md); } }
+
+    .roadmap-stage-number {
+      position: absolute;
+      left: -14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      background: var(--color-purple);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: white;
+    }
+
+    .roadmap-stage-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--color-cyan);
+      margin-bottom: var(--space-xs);
+      margin-left: 20px;
+    }
+
+    .roadmap-stage-desc {
+      color: var(--color-text);
+      font-size: 14px;
+      margin-left: 20px;
+      margin-bottom: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="lesson-container">
+
+    <!-- HEADER -->
+    <header class="lesson-header">
+      <span class="lesson-badge">📚 TIER 1 • Chương 7 • Bài 7.2</span>
+      <h1 class="lesson-title">Bản Đồ Hành Trình Của Bạn</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">⏱️</span>
+          12 phút đọc
+        </span>
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">📚</span>
+          Module A - Hành Trình Chuyển Hóa
+        </span>
+      </div>
+    </header>
+
+    <!-- LESSON CONTENT -->
+    <div class="lesson-content">
+
+      <div class="opening-hook">
+        <p>Một người đi du lịch không có bản đồ sẽ dễ bị lạc đường và mất thời gian. Tương tự, một trader không có lộ trình rõ ràng sẽ chạy lòng vòng mà không đạt được mục tiêu. Bài học này sẽ giúp bạn vẽ ra bản đồ hành trình của riêng mình.</p>
+      </div>
+
+      <section class="section">
+        <h2>Bạn Đang Ở Đâu Trên Bản Đồ?</h2>
+
+        <p>Trước khi biết phải đi đâu, bạn cần xác định vị trí hiện tại của mình. Sau khi hoàn thành TIER 1, bạn đã vượt qua giai đoạn người mới bắt đầu. Bạn đã có nền tảng kiến thức về phương pháp GEM Frequency. Bạn hiểu được các khái niệm cơ bản về HFZ, LFZ và các patterns.</p>
+
+        <p>Tuy nhiên, bạn vẫn chưa thể giao dịch thực tế một cách hiệu quả. Bạn mới chỉ biết nhận diện vùng bằng mắt chứ chưa có chiến lược entry cụ thể. Bạn chưa được học cách quản lý vốn và rủi ro một cách chuyên nghiệp. Đây là điều hoàn toàn bình thường ở giai đoạn này.</p>
+
+        <div class="highlight-box definition">
+          <div class="highlight-title">Vị Trí Hiện Tại</div>
+          <p>Bạn đang ở giai đoạn "Aware but not Capable" - tức là đã có nhận thức về phương pháp nhưng chưa đủ kỹ năng để thực hành. Đây là bước đệm quan trọng trước khi tiến vào giai đoạn thực chiến ở TIER 2.</p>
+        </div>
+
+        <h3>Đánh Giá Năng Lực Hiện Tại</h3>
+
+        <p>Hãy tự đánh giá bản thân trên các tiêu chí sau đây. Bạn có thể nhận diện HFZ và LFZ trên biểu đồ không? Bạn có hiểu tại sao giá phản ứng tại những vùng này không? Bạn có biết sự khác biệt giữa các patterns DPU, UPU, DPD, UPD không?</p>
+
+        <p>Nếu câu trả lời là "có" cho hầu hết các câu hỏi trên, bạn đã sẵn sàng tiến lên. Nếu còn mơ hồ về một số khái niệm, hãy quay lại ôn tập trước khi tiếp tục.</p>
+      </section>
+
+      <section class="section">
+        <h2>Lộ Trình Phát Triển Của Một Trader</h2>
+
+        <p>Hành trình trở thành một trader profitable trải qua nhiều giai đoạn khác nhau. Mỗi giai đoạn có những thách thức và bài học riêng. Hiểu được lộ trình này sẽ giúp bạn không nản lòng khi gặp khó khăn.</p>
+
+        <div class="roadmap-stage">
+          <span class="roadmap-stage-number">1</span>
+          <div class="roadmap-stage-title">Giai Đoạn Học Viên (TIER 1)</div>
+          <p class="roadmap-stage-desc">Xây dựng nền tảng kiến thức cơ bản. Hiểu được logic của thị trường và phương pháp giao dịch. Chưa giao dịch thực tế.</p>
+        </div>
+
+        <div class="roadmap-stage">
+          <span class="roadmap-stage-number">2</span>
+          <div class="roadmap-stage-title">Giai Đoạn Thực Hành (TIER 2)</div>
+          <p class="roadmap-stage-desc">Học các chiến lược entry cụ thể cho từng pattern. Bắt đầu paper trading để thực hành. Xây dựng trading journal.</p>
+        </div>
+
+        <div class="roadmap-stage">
+          <span class="roadmap-stage-number">3</span>
+          <div class="roadmap-stage-title">Giai Đoạn Nâng Cao (TIER 3)</div>
+          <p class="roadmap-stage-desc">Master các kỹ thuật advanced. Học Multi-timeframe analysis. Tối ưu hóa hệ thống giao dịch cá nhân.</p>
+        </div>
+
+        <div class="roadmap-stage">
+          <span class="roadmap-stage-number">4</span>
+          <div class="roadmap-stage-title">Giai Đoạn Profitable Trader</div>
+          <p class="roadmap-stage-desc">Giao dịch live với vốn thực. Tạo consistent profit hàng tháng. Tiếp tục học hỏi và phát triển.</p>
+        </div>
+
+        <div class="highlight-box warning">
+          <div class="highlight-title">Lưu Ý Quan Trọng</div>
+          <p>Không có con đường tắt trong trading. Nhiều người cố nhảy cóc qua các giai đoạn và kết quả là mất tiền. Hãy kiên nhẫn đi qua từng bước một cách chắc chắn. Mỗi giai đoạn đều có giá trị riêng của nó.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Mục Tiêu Ngắn Hạn và Dài Hạn</h2>
+
+        <p>Để tiến bộ một cách có hệ thống, bạn cần đặt ra mục tiêu rõ ràng cho bản thân. Mục tiêu nên được chia thành ngắn hạn và dài hạn để dễ theo dõi và đo lường.</p>
+
+        <h3>Mục Tiêu Ngắn Hạn (1-3 tháng)</h3>
+
+        <p>Trong giai đoạn tới, mục tiêu của bạn nên là hoàn thành TIER 2 một cách nghiêm túc. Bạn cần thực hành nhận diện pattern trên biểu đồ thực mỗi ngày. Bạn nên bắt đầu ghi chép trading journal cho mỗi setup bạn thấy.</p>
+
+        <div class="highlight-box success">
+          <div class="highlight-title">Mục Tiêu TIER 2</div>
+          <p>Sau khi hoàn thành TIER 2, bạn nên có khả năng: Nhận diện và vẽ được các patterns trên biểu đồ thực. Xác định được điểm entry, stop loss và take profit chính xác. Thực hiện được ít nhất 50 paper trades với kỷ luật.</p>
+        </div>
+
+        <h3>Mục Tiêu Dài Hạn (6-12 tháng)</h3>
+
+        <p>Trong 6 tháng tới, mục tiêu là hoàn thành cả 3 TIER và bắt đầu giao dịch thực. Bạn nên có win rate ổn định trên 50% trong paper trading. Bạn cần xây dựng được hệ thống quản lý vốn phù hợp với bản thân.</p>
+
+        <p>Sau 12 tháng, bạn nên có khả năng tạo ra consistent profit hàng tháng. Mục tiêu không phải là x10 tài khoản mà là không thua lỗ. Một trader biết bảo toàn vốn là trader sẽ tồn tại lâu dài trong thị trường.</p>
+      </section>
+
+      <section class="section">
+        <h2>Hành Động Cụ Thể Từ Hôm Nay</h2>
+
+        <p>Bản đồ sẽ vô nghĩa nếu bạn không bắt đầu hành trình. Dưới đây là những việc bạn nên làm ngay từ hôm nay để tiến về phía trước.</p>
+
+        <div class="highlight-box important">
+          <div class="highlight-title">Checklist Hàng Ngày</div>
+          <p>Dành 30 phút mỗi ngày để xem lại biểu đồ và tìm các patterns. Ghi chép lại những gì bạn thấy vào một cuốn sổ hoặc file. Đọc lại các bài học trước nếu cảm thấy cần củng cố kiến thức.</p>
+        </div>
+
+        <p>Bạn cũng nên tham gia cộng đồng GEM để học hỏi từ những traders khác. Đặt câu hỏi khi không hiểu thay vì tự suy đoán sai. Chia sẻ những gì bạn học được để củng cố kiến thức.</p>
+
+        <h3>Tránh Những Sai Lầm Phổ Biến</h3>
+
+        <p>Đừng vội vàng nhảy vào giao dịch thực khi chưa sẵn sàng. Đừng bỏ qua các bài học vì nghĩ mình đã hiểu hết. Đừng so sánh tốc độ tiến bộ của mình với người khác. Mỗi người có lộ trình riêng và điều đó hoàn toàn bình thường.</p>
+      </section>
+
+      <section class="section">
+        <h2>Tóm Tắt Bài Học</h2>
+
+        <div class="key-concept-box">
+          <div class="key-concept-title">Những Điểm Cốt Lõi</div>
+          <ul class="key-concept-list">
+            <li>Sau TIER 1, bạn đang ở giai đoạn "Aware but not Capable" - có nhận thức nhưng chưa đủ kỹ năng</li>
+            <li>Lộ trình trader gồm 4 giai đoạn: Học Viên, Thực Hành, Nâng Cao, Profitable</li>
+            <li>Đặt mục tiêu ngắn hạn và dài hạn rõ ràng để theo dõi tiến bộ</li>
+            <li>Hành động ngay từ hôm nay: xem biểu đồ, ghi chép, tham gia cộng đồng</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- NEXT LESSON -->
+      <div class="highlight-box tip">
+        <div class="highlight-title">Bài Tiếp Theo</div>
+        <p>Trong <strong>Bài 7.3: Sự Thay Đổi Thực Sự</strong>, bạn sẽ khám phá những gì thực sự cần thay đổi để trở thành một trader thành công. Đây không chỉ là kỹ thuật mà còn là tư duy và phong cách sống.</p>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="lesson-footer">
+      <div class="footer-logo">GEM Trading Academy</div>
+      <div class="footer-link">
+        <a href="https://gemral.com" target="_blank">gemral.com</a>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 8.4: Entry Chính Xác Trên LTF (Tier 2) | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section, .content-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section, .content-card {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title, .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p, .card-content p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul, .card-content ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box, .info-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box, .info-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4, .info-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p, .info-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box, .info-box.danger, .info-box.warning {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box, .info-box.danger, .info-box.warning {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--error);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box h4, .info-box.danger .info-box-title, .info-box.warning .info-box-title { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        
+        .success-box, .info-box.success {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .success-box, .info-box.success {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .success-box h4, .info-box.success .info-box-title { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+
+        .trigger-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-md);
+            margin-top: var(--space-md);
+        }
+        .trigger-card {
+            background: rgba(0, 0, 0, 0.2);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--glass-border);
+        }
+        .trigger-card.sell { border-color: rgba(255, 82, 82, 0.3); }
+        .trigger-title {
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+            color: var(--cyan);
+        }
+        .trigger-card.sell .trigger-title { color: var(--error); }
+        .trigger-list { list-style: none; padding: 0; margin: 0; }
+        .trigger-list li { margin-bottom: 4px; font-size: 0.9rem; }
+
+        .step-card {
+            display: flex;
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
+            padding: var(--space-md);
+            background: rgba(0,0,0,0.2);
+            border-radius: var(--radius-md);
+        }
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: var(--gold);
+            color: var(--navy-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        .step-content { flex: 1; }
+        .step-title { display: block; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+        .step-desc { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        .summary-box h3 { font-size: 1.25rem; font-weight: 700; color: var(--success); margin-bottom: var(--space-lg); }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); }
+        .summary-list li::before { content: "✓"; color: var(--success); font-weight: 700; }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); }
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option { padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; color: var(--text-secondary); transition: all 0.3s ease; text-align: left; }
+        .quiz-option:hover { border-color: var(--gold); background: var(--bg-card); }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; color: var(--success); }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; color: var(--error); }
+        .quiz-result { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--radius-md); display: none; }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); color: var(--success); }
+        .quiz-result.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); color: var(--error); }
+        .quiz-score { text-align: center; padding: var(--space-xl); background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent); border: 1px solid var(--purple); border-radius: var(--radius-lg); margin-top: var(--space-lg); display: none; }
+        .quiz-score.show { display: block; }
+        .score-number { font-size: 2rem; font-weight: 800; color: var(--gold); }
+        .btn-retake { margin-top: var(--space-md); padding: var(--space-md) var(--space-xl); background: linear-gradient(135deg, var(--purple), var(--cyan)); color: var(--navy-dark); border: none; border-radius: var(--radius-md); font-weight: 700; cursor: pointer; }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); margin-top: var(--space-xl); }
+        .highlight-green { color: var(--success); font-weight: 600; }
+        .highlight-red { color: var(--error); font-weight: 600; }
+        .highlight { color: var(--gold); font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <span class="lesson-badge">📊 Tier 2 - Bài 8.4</span>
+            <h1 class="lesson-title">Entry Chính Xác Trên LTF</h1>
+            <p class="lesson-subtitle">Precision Entry Techniques: From Macro to Micro</p>
+        </header>
+
+        <!-- 1. OPENING HOOK -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>1. Tại Sao Bạn Vẫn Thua Dù Phân Tích Đúng?</h2>
+            </div>
+            <div class="card-content">
+                <p>Bạn đã bao giờ gặp tình huống này chưa: Bạn xác định một Zone rất đẹp trên khung Daily. Bạn kiên nhẫn chờ giá quay về. Bạn vào lệnh ngay khi giá chạm Zone. Và rồi... giá tiếp tục đi thêm một đoạn, quét Stoploss của bạn, sau đó mới đảo chiều và chạy đúng như dự đoán?</p>
+                <p>Cảm giác đó thật sự ức chế. Bạn đúng về hướng đi (Direction), đúng về vùng giá (Zone), nhưng vẫn mất tiền. Tại sao? Câu trả lời nằm ở hai chữ: <strong>Sự Chính Xác (Precision)</strong>.</p>
+                <p>Trong thị trường tài chính, "Gần đúng" cũng có nghĩa là "Sai hoàn toàn". Một Zone trên khung Daily có thể rộng tới 100 pips. Nếu bạn vào lệnh mù quáng (blind entry) tại đó, bạn phải chấp nhận rủi ro cực lớn hoặc bị Stop Hunt dễ dàng.</p>
+                <p>Hôm nay, chúng ta sẽ học cách sử dụng "Kính hiển vi" trong trading. Chúng ta sẽ không bắn súng máy vào bóng đêm nữa. Chúng ta sẽ trở thành những tay lính bắn tỉa (Sniper), chờ đợi con mồi đi vào tâm ngắm trên khung thời gian nhỏ (LTF) để tung ra phát đạn quyết định với rủi ro thấp nhất và lợi nhuận cao nhất.</p>
+            </div>
+        </div>
+
+        <!-- 2. CONCEPT: LTF ENTRY LÀ GÌ? -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>2. Khái Niệm: Zoom In Để Tìm Entry</h2>
+            </div>
+            <div class="card-content">
+                <p><strong>LTF Entry (Lower Timeframe Entry)</strong> là kỹ thuật chuyển xuống khung thời gian nhỏ hơn để tìm điểm vào lệnh sau khi giá đã tiếp cận Zone quan trọng trên khung thời gian lớn (HTF/ITF).</p>
+                <p>Hãy tưởng tượng bạn đang dùng Google Maps.
+                    <br>• <strong>HTF (Daily/Weekly):</strong> Là chế độ xem "Thành phố". Bạn biết bạn muốn đến quận nào (Zone).
+                    <br>• <strong>LTF (15m/1H):</strong> Là chế độ xem "Đường phố". Bạn cần biết chính xác số nhà để dừng xe.
+                </p>
+
+                <div class="info-box success">
+                    <div class="info-box-title">✅ Phép Màu Của R:R (Risk:Reward)</div>
+                    <p>Tại sao chúng ta phải làm phức tạp vấn đề? Tại sao không trade luôn trên Daily? Hãy xem phép toán này:</p>
+                    <ul class="styled-list">
+                        <li><strong>Trade trên Daily Zone:</strong> Zone rộng 100 pips → Stoploss 110 pips. Để đạt R:R 1:3, giá phải chạy 330 pips. (Rất khó).</li>
+                        <li><strong>Trade trên LTF (trong Daily Zone):</strong> Tìm setup đảo chiều trên 15m → Stoploss chỉ còn 20 pips. Để đạt R:R 1:3, giá chỉ cần chạy 60 pips. (Rất dễ).</li>
+                    </ul>
+                    <p>Cùng một vùng giá, cùng một hướng đi, nhưng LTF Entry biến một cơ hội trung bình thành một cơ hội <strong>Siêu Lợi Nhuận</strong>.</p>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x400/112250/10B981?text=ITF+Entry+vs+LTF+Entry+Comparison" alt="ITF vs LTF Entry">
+                </div>
+                <p class="caption">Hình minh họa: Sự khác biệt về Stoploss và R:R giữa Entry mù (Blind Entry) và Entry xác nhận trên LTF.</p>
+
+                <div class="info-box warning">
+                    <div class="info-box-title">⚠️ Rủi Ro Cần Tránh</div>
+                    <p>Đừng hiểu lầm! LTF Entry không có nghĩa là bạn ngồi cả ngày nhìn chart 1 phút và trade mọi tín hiệu. Bạn <strong>CHỈ</strong> xuống LTF khi và chỉ khi giá đã chạm vào Zone quan trọng của khung lớn (HTF). Nếu không có HTF Zone, LTF chỉ là nhiễu (noise).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. DEEP DIVE: CƠ CHẾ HOẠT ĐỘNG -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>3. Phân Tích Sâu: Điều Gì Xảy Ra Trên LTF?</h2>
+            </div>
+            <div class="card-content">
+                <p>Tại sao giá lại đảo chiều tại Zone? Đó không phải là phép thuật. Đó là sự thay đổi của <strong>Order Flow</strong> (Dòng lệnh).</p>
+                
+                <h3>A. Sự Chuyển Giao Quyền Lực (Shift in Momentum)</h3>
+                <p>Khi giá lao vào một HFZ (Vùng Bán) trên khung Daily, nó thường đi kèm với đà tăng mạnh (Momentum). Bạn không thể chặn đầu một chiếc xe tải đang lao dốc. Trên khung Daily, bạn chỉ thấy một cây nến xanh lớn.</p>
+                <p>Nhưng nếu bạn Zoom vào khung 15m, bạn sẽ thấy câu chuyện khác:
+                    <br>1. Giá bắt đầu chậm lại (Compression).
+                    <br>2. Những cây nến xanh nhỏ dần, nến đỏ bắt đầu xuất hiện (Absorption).
+                    <br>3. Cấu trúc tăng trên 15m bị phá vỡ (Break of Structure - BOS).
+                    <br>4. Phe bán chiếm quyền kiểm soát.
+                </p>
+                <p>LTF cho phép bạn nhìn thấy sự "hụt hơi" của phe đối lập trước khi nó hiển thị rõ ràng trên khung lớn.</p>
+
+                <h3>B. Trigger Là Gì?</h3>
+                <p>Trigger (Cò súng) là tín hiệu cụ thể để bạn click chuột. Chúng ta không đoán, chúng ta đợi Trigger. Trigger xác nhận rằng Zone đang hoạt động.</p>
+            </div>
+        </div>
+
+        <!-- 4. ENTRY TRIGGERS -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>4. Các Mẫu Entry Trigger (Cầm Tay Chỉ Việc)</h2>
+            </div>
+            <div class="card-content">
+                <p>Dưới đây là các "Cò súng" mà bạn sẽ tìm kiếm trên khung thời gian nhỏ (15m hoặc 1H) khi giá đã nằm trong Zone lớn.</p>
+
+                <h3>A. Cho Lệnh LONG (Tại LFZ - Vùng Mua)</h3>
+                <p>Khi giá chạm LFZ, đừng mua ngay khi thấy nến đỏ dài. Hãy đợi:</p>
+
+                <div class="trigger-grid">
+                    <div class="trigger-card">
+                        <div class="trigger-title">🕯️ Nến Đảo Chiều (Candle Patterns)</div>
+                        <ul class="trigger-list">
+                            <li>✓ <strong>Bullish Engulfing:</strong> Nến xanh nuốt chửng nến đỏ trước đó. Tín hiệu mạnh nhất.</li>
+                            <li>✓ <strong>Hammer / Pin Bar:</strong> Rút chân dài, từ chối giá thấp.</li>
+                            <li>✓ <strong>Morning Star:</strong> Bộ 3 nến đảo chiều kinh điển.</li>
+                        </ul>
+                    </div>
+                    <div class="trigger-card">
+                        <div class="trigger-title">📊 Cấu Trúc Thị Trường (Structure)</div>
+                        <ul class="trigger-list">
+                            <li>✓ <strong>Higher High (HH):</strong> Giá phá vỡ đỉnh gần nhất trên LTF.</li>
+                            <li>✓ <strong>Double Bottom:</strong> Mô hình hai đáy nhỏ trong Zone.</li>
+                            <li>✓ <strong>Trendline Break:</strong> Giá phá vỡ đường xu hướng giảm ngắn hạn.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x450/112250/10B981?text=Long+Entry+Triggers+on+LTF" alt="Long Entry Triggers">
+                </div>
+
+                <div class="info-box success">
+                    <div class="info-box-title">🏆 Combo Bất Bại Cho Long</div>
+                    <p>Setup hoàn hảo nhất là: <strong>Giá chạm Daily LFZ → Chuyển sang 15m → Thấy giá phá vỡ cấu trúc giảm (BOS) → Hồi lại tạo Bullish Engulfing.</strong> Đây là lúc bạn bóp cò.</p>
+                </div>
+
+                <h3>B. Cho Lệnh SHORT (Tại HFZ - Vùng Bán)</h3>
+                <p>Ngược lại, khi giá chạm HFZ, hãy tìm kiếm sự suy yếu của phe mua:</p>
+
+                <div class="trigger-grid">
+                    <div class="trigger-card sell">
+                        <div class="trigger-title">🕯️ Nến Đảo Chiều (Candle Patterns)</div>
+                        <ul class="trigger-list">
+                            <li>✓ <strong>Bearish Engulfing:</strong> Nến đỏ nuốt trọn nến xanh.</li>
+                            <li>✓ <strong>Shooting Star:</strong> Râu nến trên dài, từ chối giá cao.</li>
+                            <li>✓ <strong>Evening Star:</strong> Bộ 3 nến đảo chiều giảm.</li>
+                        </ul>
+                    </div>
+                    <div class="trigger-card sell">
+                        <div class="trigger-title">📊 Cấu Trúc Thị Trường (Structure)</div>
+                        <ul class="trigger-list">
+                            <li>✓ <strong>Lower Low (LL):</strong> Giá phá vỡ đáy gần nhất trên LTF.</li>
+                            <li>✓ <strong>Double Top:</strong> Mô hình hai đỉnh nhỏ (M pattern).</li>
+                            <li>✓ <strong>Structure Shift:</strong> Đang Higher Lows chuyển sang Lower Lows.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x450/112250/EF4444?text=Short+Entry+Triggers+on+LTF" alt="Short Entry Triggers">
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. QUY TRÌNH THỰC HIỆN -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>5. Quy Trình 5 Bước "Săn Mồi"</h2>
+            </div>
+            <div class="card-content">
+                <p>Đừng để cảm xúc chi phối. Hãy biến việc vào lệnh thành một quy trình cơ học, lạnh lùng như robot:</p>
+
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <span class="step-title">Bước 1: Xác Định & Đặt Cảnh Báo (Alert)</span>
+                        <div class="step-desc">Xác định Zone trên khung lớn (H4/Daily). Đặt Alert cách Zone khoảng 10-20 pips. Tắt máy đi chơi, đừng nhìn chart.</div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <span class="step-title">Bước 2: Quan Sát Phản Ứng (Reaction)</span>
+                        <div class="step-desc">Khi Alert kêu, mở chart, chuyển xuống khung LTF (15m/1H). Quan sát xem giá có phản ứng (rút râu, giảm tốc) hay đâm thủng Zone?</div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <span class="step-title">Bước 3: Chờ Trigger (Confirmation)</span>
+                        <div class="step-desc">Kiên nhẫn đợi một mẫu hình nến đảo chiều hoặc phá vỡ cấu trúc trên LTF. Chưa có Trigger = Chưa vào lệnh.</div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <span class="step-title">Bước 4: Tính Toán Risk (Position Size)</span>
+                        <div class="step-desc">Đặt Stoploss dựa trên cấu trúc LTF (trên đỉnh/dưới đáy trigger). Tính khối lượng lệnh sao cho Risk không quá 1-2% tài khoản.</div>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <span class="step-title">Bước 5: Kích Hoạt & Quên (Fire & Forget)</span>
+                        <div class="step-desc">Vào lệnh. Đặt TP/SL cứng. Đóng máy. Mọi việc còn lại là xác suất.</div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x450/112250/FFBD59?text=5-Step+Entry+Process" alt="Entry Process">
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. SAI LẦM PHỔ BIẾN -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>6. Tại Sao Bạn Vẫn Thất Bại? (Các Sai Lầm)</h2>
+            </div>
+            <div class="card-content">
+                <div class="info-box danger">
+                    <div class="info-box-title">❌ Xuống LTF Quá Sớm (Micro-Managing)</div>
+                    <p><strong>Lỗi:</strong> Giá chưa chạm Daily Zone mà bạn đã xuống khung 1 phút (1m) để tìm điểm vào.<br><strong>Hậu quả:</strong> Bạn bị nhiễu loạn bởi các tín hiệu giả (Noise). Hãy nhớ: LTF chỉ có giá trị TRONG lòng HTF Zone.</p>
+                </div>
+
+                <div class="info-box danger">
+                    <div class="info-box-title">❌ Stoploss Quá Chặt (Greed)</div>
+                    <p><strong>Lỗi:</strong> Vì muốn R:R 1:10, bạn đặt Stoploss sát sạt ngay sau cây nến 5m.<br><strong>Hậu quả:</strong> Bạn đúng hướng nhưng bị Spread hoặc một nhịp quét nhẹ đá văng khỏi thị trường. Hãy cho giá một chút không gian để thở (Buffer).</p>
+                </div>
+
+                <div class="info-box danger">
+                    <div class="info-box-title">❌ Hesitation (Do Dự)</div>
+                    <p><strong>Lỗi:</strong> Trigger đã xuất hiện nhưng bạn sợ hãi không dám bấm nút, đợi thêm confirmation thứ 2, thứ 3...<br><strong>Hậu quả:</strong> Giá chạy mất, R:R không còn tốt nữa, và bạn rơi vào trạng thái FOMO đuổi theo giá.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. APPLICATION -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>7. Bài Tập Thực Hành</h2>
+            </div>
+            <div class="card-content">
+                <p>Lý thuyết là vô nghĩa nếu không thực hành. Tuần này, tôi muốn bạn:</p>
+                <ol class="styled-list">
+                    <li>Tìm 3 Zone chất lượng trên khung <strong>H4 hoặc Daily</strong>.</li>
+                    <li>Đặt Alert và chờ đợi.</li>
+                    <li>Khi giá đến, chuyển xuống khung <strong>15 phút (M15)</strong>.</li>
+                    <li>Chụp ảnh lại màn hình KHI Trigger xuất hiện (Engulfing, Pinbar...).</li>
+                    <li>Ghi chú lại: Bạn vào lệnh ở đâu? Stoploss ở đâu trên LTF? R:R dự kiến là bao nhiêu?</li>
+                </ol>
+                <p>Đừng quan trọng kết quả thắng thua vội. Hãy quan trọng việc bạn có tuân thủ quy trình "Zoom In" này hay không.</p>
+            </div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="summary-box">
+            <h3>📋 Tổng Kết Bài Học</h3>
+            <ul class="summary-list">
+                <li>Entry trên <strong>LTF (Lower Timeframe)</strong> là chìa khóa để có R:R cao và Risk thấp.</li>
+                <li>Chỉ xuống LTF khi giá đã tiếp cận <strong>HTF Zone</strong>.</li>
+                <li><strong>Long Trigger:</strong> Bullish Engulfing, Hammer, Phá vỡ cấu trúc giảm.</li>
+                <li><strong>Short Trigger:</strong> Bearish Engulfing, Shooting Star, Phá vỡ cấu trúc tăng.</li>
+                <li>Tuân thủ tuyệt đối quy trình: <strong>HTF Zone → Alert → LTF Trigger → Entry</strong>.</li>
+            </ul>
+        </div>
+
+        <!-- QUIZ -->
+        <div class="quiz-section">
+            <h3 class="quiz-title">📝 Kiểm Tra Kiến Thức</h3>
+
+            <div class="quiz-question" data-correct="1">
+                <h4>1. Lợi ích lớn nhất của việc Entry trên LTF là gì?</h4>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Tăng tỷ lệ thắng (Winrate) lên 100%.</div>
+                    <div class="quiz-option" data-index="1">Giảm độ rộng Stoploss, từ đó tăng tỷ lệ Lợi nhuận/Rủi ro (R:R).</div>
+                    <div class="quiz-option" data-index="2">Giúp bạn giao dịch được nhiều lệnh hơn trong ngày.</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <h4>2. Khi nào bạn được phép chuyển xuống khung thời gian nhỏ (LTF) để tìm điểm vào lệnh?</h4>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">CHỈ KHI giá đã tiếp cận hoặc nằm trong Zone của khung thời gian lớn (HTF/ITF).</div>
+                    <div class="quiz-option" data-index="1">Bất cứ lúc nào thấy mô hình nến đẹp trên khung 5 phút.</div>
+                    <div class="quiz-option" data-index="2">Khi thị trường đang biến động mạnh và chạy nhanh.</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <h4>3. Đâu là một setup Entry HOÀN HẢO cho lệnh Short?</h4>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Giá chạm LFZ + Xuất hiện nến Hammer trên M15.</div>
+                    <div class="quiz-option" data-index="1">Giá phá vỡ HFZ đi lên mạnh mẽ với nến xanh lớn.</div>
+                    <div class="quiz-option" data-index="2">Giá chạm HFZ + Xuất hiện Bearish Engulfing hoặc phá vỡ cấu trúc tăng trên M15.</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <h3 class="score-number">Kết quả: <span id="correct-count">0</span>/3</h3>
+                <p class="quiz-score-text">Bạn đã hiểu rõ về kỹ thuật Entry LTF chưa?</p>
+                <button class="btn-retake" onclick="retakeQuiz()">Làm Lại Quiz</button>
+            </div>
+        </div>
+
+        <footer class="lesson-footer">
+            <p>GEM Trading Academy - Tier 2</p>
+            <p class="highlight">Bài tiếp theo: Ví Dụ Thực Tế Multi-TF</p>
+            <p>© 2025 GEM Frequency Trading Method</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.innerHTML = '<strong>✓ Chính xác!</strong> ' + (selectedIndex === 1 && question.querySelector('h4').textContent.includes('Lợi ích') ? 'LTF entry giúp tối ưu hóa điểm vào, làm cho khoảng cách đến Stoploss ngắn lại, qua đó Risk giảm và Reward tiềm năng tăng lên.' : '');
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.innerHTML = '<strong>✗ Chưa đúng.</strong> Đáp án đúng đã được hiển thị.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function retakeQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                question.querySelector('.quiz-result').className = 'quiz-result';
+            });
+
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+
+</body>
+</html>

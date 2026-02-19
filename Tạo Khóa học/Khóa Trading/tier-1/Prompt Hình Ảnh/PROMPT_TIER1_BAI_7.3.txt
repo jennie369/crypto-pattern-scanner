@@ -1,0 +1,44 @@
+  📐 HÌNH 7.3.1: FIXED MINDSET VS GROWTH MINDSET
+  Tên file: 7.3.1-mindset-shift.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: So sánh trực quan giữa hai loại tư duy.
+  NỘI DUNG HÌNH:
+   - Bên trái (Fixed Mindset): Hình ảnh bộ não bị khóa lại hoặc một cái cây khô héo trong chậu chật hẹp.
+     - Keywords: "Tránh thử thách", "Bỏ cuộc sớm", "Lờ đi phản hồi".
+   - Bên phải (Growth Mindset): Hình ảnh bộ não đang phát sáng mở rộng hoặc cái cây vươn cao mạnh mẽ.
+     - Keywords: "Đón nhận thử thách", "Kiên trì", "Học từ thất bại".
+   - Mũi tên chuyển đổi từ trái sang phải với chữ "TRANSFORMATION".
+
+  ---
+
+  📐 HÌNH 7.3.2: SỨC MẠNH CỦA THÓI QUEN NHỎ
+  Tên file: 7.3.2-habit-compound.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Minh họa hiệu ứng lãi kép của việc cải thiện 1% mỗi ngày.
+  NỘI DUNG HÌNH:
+   - Biểu đồ đường (Line Chart):
+     - Đường 1 (Màu đỏ): Đi ngang hoặc đi xuống (Không thay đổi/Thói quen xấu).
+     - Đường 2 (Màu xanh lá): Tăng trưởng theo hàm mũ (Exponential) - (Thói quen tốt tích lũy).
+   - Ghi chú: "1.01^365 = 37.78" (Cải thiện 1% mỗi ngày) vs "0.99^365 = 0.03" (Tệ đi 1% mỗi ngày).
+   - Text nổi bật: "CONSISTENCY > INTENSITY" (Sự đều đặn quan trọng hơn cường độ).
+
+  ---
+
+  📐 HÌNH 7.3.3: BIỂU ĐỒ CẢM XÚC TRADING
+  Tên file: 7.3.3-emotional-management.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Sự khác biệt về tâm lý giữa Amateur và Pro Trader.
+  NỘI DUNG HÌNH:
+   - Phần trên (Amateur): Đường biểu đồ giá biến động mạnh kèm theo các emoji cảm xúc: 🤑 (Greed/FOMO ở đỉnh), 😱 (Fear/Panic ở đáy), 😡 (Anger khi cắt lỗ).
+   - Phần dưới (Pro): Đường tâm lý phẳng lặng, ổn định (Flat line) dù giá thị trường biến động.
+   - Ghi chú: "Amateur: Bị thị trường điều khiển" vs "Pro: Kiểm soát phản ứng bản thân".
+
+  ---
+
+  📐 HÌNH 7.3.4: THÁP CÂN BẰNG CUỘC SỐNG
+  Tên file: 7.3.4-balanced-lifestyle.png | Tỷ lệ: 3:4 (Vertical)
+  Bối cảnh: Trading chỉ là đỉnh của tảng băng chìm, nền tảng là lối sống.
+  NỘI DUNG HÌNH:
+   - Mô hình kim tự tháp 4 tầng (từ dưới lên):
+     1. Đáy (Lớn nhất): SỨC KHỎE (Ngủ, Ăn uống, Tập luyện).
+     2. Tầng 2: MỐI QUAN HỆ (Gia đình, Bạn bè, Cộng đồng tích cực).
+     3. Tầng 3: TÂM LÝ (Thiền, Kỷ luật, Cân bằng cảm xúc).
+     4. Đỉnh (Nhỏ nhất): KỸ NĂNG TRADING (Phân tích, Vào lệnh).
+   - Thông điệp: "Nền móng vững chắc tạo nên Trader thành công."

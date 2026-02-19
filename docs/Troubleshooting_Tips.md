@@ -2986,3 +2986,243 @@ test_count=$(grep -rl "SUPABASE_ANON_KEY" supabase/functions/ --include="*.ts" |
 pinned_count=$(grep -rn "@supabase/supabase-js@2\." supabase/functions/ --include="*.ts" | wc -l)
 # Expected: 0 (all use @2 for latest stable)
 ```
+
+---
+
+# RULE 51: Display Value Must Use Same Source as Copy/Share Action
+**Source:** Phase 14 — Referral code displayed differently in Tab Tài Sản vs Affiliate Detail page
+
+## What Failed
+Tab "Tài Sản" (AffiliateSection) showed referral code **GEMBBEFE8** while "Chương Trình Affiliate" (AffiliateDetailScreen) showed **GEM64F7F0** for the same user. Clicking "Copy mã" on either screen produced a third value from `affiliateService.getReferralCode()`.
+
+## Why It Failed
+Three different data sources were used for the same concept:
+
+1. **AffiliateSection (display)**: `partnershipStatus.affiliate_code` → reads from `affiliate_profiles.affiliate_code || profiles.affiliate_code`
+2. **AffiliateDetailScreen (display)**: `profile?.referral_code || profile?.affiliate_code` → reads from `affiliate_profiles` only
+3. **Both screens (copy/share)**: `affiliateService.getReferralCode()` → reads from `affiliate_codes.code || profiles.affiliate_code || generate from user.id`
+
+When `affiliate_profiles.affiliate_code` was NULL:
+- AffiliateSection fell through to `profiles.affiliate_code` (had a value)
+- AffiliateDetailScreen fell through to `user.id.slice(0,6)` fallback (different value)
+
+This is a combination of Rule 9 (Field Name Fragmentation: `referral_code` vs `affiliate_code` vs `code`) and Rule 20 (Multiple Systems for Same Purpose: 5 referral code sources).
+
+## What Guard Was Added
+1. Both screens now call `affiliateService.getReferralCode()` during data load (not just for copy/share)
+2. The centralized code is stored in state and used for display with fallback chain
+3. Display value and copy value are now guaranteed to match
+
+```javascript
+// BAD: each screen computes display code from different source
+const affiliateCode = partnershipStatus.affiliate_code || `GEM${user?.id?.slice(0, 6)}`;  // Screen A
+const referralCode = profile?.referral_code || profile?.affiliate_code || `GEM${user?.id?.slice(0, 6)}`;  // Screen B
+
+// GOOD: all screens use centralized getReferralCode() for display
+const [centralCode, setCentralCode] = useState(null);
+// Load during data fetch:
+const code = await affiliateService.getReferralCode(user.id);
+setCentralCode(code);
+// Display:
+const displayCode = centralCode || fallback;
+```
+
+## How to Detect Similar Issues
+1. **Grep for inline referral code computation**: Any screen that constructs `GEM${user.id.slice(...)}` instead of calling `affiliateService.getReferralCode()` is using a different source
+2. **Compare display vs copy values**: If a screen shows one code but copies a different one, the display source is wrong
+3. **Multiple field names for same concept**: `referral_code`, `affiliate_code`, `code` across tables — Rule 9 indicator
+
+### Code smell indicators
+- Screen computing a display value inline but using a different function for the copy action
+- `profile?.referral_code || profile?.affiliate_code || fallback` — multi-field OR chain across ambiguous names
+- Different screens reading from different tables for the "same" data
+
+### Future bugs this prevents
+- User sees one referral code, shares a different one
+- Referral tracking fails because the displayed code doesn't match what's in affiliate_codes table
+- Admin confusion when user reports their referral code but it doesn't match DB records
+
+---
+
+# RULE 53: Webhook Must Process ALL Variants of an Entity (Not Just One Subtype)
+**Source:** Phase 14 — `shopify-order-webhook` skipped credit card orders, causing 4 paid orders to vanish from database
+
+## What Failed
+4 credit card orders (#4749, #4751, #4755, #4759) totaling 1,984,000 VND were completely lost from the database. No record in `pending_payments`, `payment_logs`, or `shopify_orders`. Customers paid via credit card on Shopify but the GEM platform had zero knowledge of these orders.
+
+## Why It Failed
+`shopify-order-webhook/index.ts` had a payment gateway filter that only processed bank transfers:
+
+```typescript
+// DANGEROUS: silently skips non-bank-transfer orders
+const isBankTransfer =
+  paymentGateway.toLowerCase().includes('bank') ||
+  paymentGateway.toLowerCase().includes('manual') ||
+  paymentGateway === '' ||
+  order.financial_status === 'pending';
+
+if (!isBankTransfer) {
+  return new Response(JSON.stringify({
+    success: true,  // ← Rule 10 violation: returns success for skipped orders
+    message: 'Not bank transfer order',
+  }));
+}
+```
+
+Three compounding failures:
+1. **Selective processing**: Webhook only handled one payment type, silently ignoring others
+2. **Silent success**: Returned `{ success: true }` for skipped orders — Shopify thought the webhook processed correctly and didn't retry
+3. **No backup path**: `shopify-webhook` and `shopify-paid-webhook` should have caught credit card orders via `orders/paid` topic but had no trace of these 4 orders — indicating the webhook topic may not be registered or the functions weren't receiving events
+
+This also triggered a **cascade bug**: because credit card orders weren't in `pending_payments`, the `get-order-number` API couldn't find them by `shopify_order_id`, fell through to a dangerous "most recent pending" fallback, and returned a DIFFERENT order's number — causing QR code DH4754 to be shown to customer DH4757 (see Rule 54).
+
+## What Guard Was Added
+1. **`shopify-order-webhook`**: Removed the `isBankTransfer` filter entirely. Now creates `pending_payment` records for ALL payment types:
+   - Bank transfer → `payment_status = 'pending'`, `payment_method = 'bank_transfer'`
+   - Credit card → `payment_status = 'paid'`, `payment_method = 'credit_card'`, `verified_at = NOW()`, `verification_method = 'shopify_verified'`
+   - Any other → detected from `payment_gateway_names[0]`, status from `financial_status`
+
+2. **Database**: Added `payment_method` column (VARCHAR(50)) to `pending_payments` table to distinguish payment types
+
+3. **Logging**: `event_type` is `payment_verified` for pre-paid orders (not `order_created`), with `payment_method` and `financial_status` in event_data
+
+## How to Detect Similar Issues
+1. **Grep for early-return filters in webhook handlers**:
+   ```bash
+   grep -A5 "if (!is" supabase/functions/shopify-*/index.ts
+   ```
+   Any `if (!isSomeType) return success` is a potential data loss point.
+
+2. **Count orders in Shopify vs database**:
+   ```sql
+   SELECT COUNT(*) FROM pending_payments; -- compare with Shopify Admin order count
+   ```
+   If counts don't match, some payment types are being skipped.
+
+3. **Check for `success: true` on skip paths**:
+   ```bash
+   grep -B5 "success: true" supabase/functions/*/index.ts | grep -i "skip\|not\|ignore"
+   ```
+   Returning success while skipping work violates Rule 10.
+
+4. **Monitor payment_method distribution**:
+   ```sql
+   SELECT payment_method, COUNT(*) FROM pending_payments GROUP BY payment_method;
+   ```
+   If only `bank_transfer` appears, credit card orders are still being lost.
+
+### Code smell indicators
+- Webhook handler with `if (!isSpecificType) return success` — silently discards other types
+- `return { success: true, message: 'Not X type, skipping' }` — makes external system think processing succeeded
+- Multiple webhook handlers for same Shopify topic with no clear ownership matrix
+- Order count mismatch between Shopify Admin and database
+
+### Future bugs this prevents
+- Orders paid via new payment methods (Apple Pay, Google Pay, crypto) being silently discarded
+- Revenue tracking missing entire payment channels
+- Customer support unable to find orders that Shopify confirms as paid
+- Automatic course/tier unlock failing for non-bank-transfer customers
+
+---
+
+# RULE 54: Fallback Queries Must Never Return Unrelated Data
+**Source:** Phase 14 — `get-order-number` returned DH4754 (crystal order) when queried for DH4757 (course order), causing wrong QR code display
+
+## What Failed
+Customer for order DH4757 (300,000 VND course) was shown a QR code with transfer content "DH4754" (1,990,000 VND crystal order). The customer transferred 300,000 VND with memo "DH4754", which was rejected as `unknown_transaction` because DH4754 was already expired. Customer waited 7 days for manual admin intervention.
+
+## Why It Failed
+`get-order-number/index.ts` had three fallback strategies:
+
+```typescript
+// Strategy 1: by shopify_order_id → GOOD: exact match
+// Strategy 2: by total_amount (most recent) → BAD: returns wrong order if amounts differ
+// Strategy 3: most recent pending order → CRITICAL: returns ANY random pending order!
+```
+
+When DH4757's credit card order wasn't in `pending_payments` (due to Rule 53 bug):
+1. Strategy 1 failed (shopify_order_id not found)
+2. Strategy 2 failed (no order with 300,000 amount)
+3. Strategy 3 returned DH4754 (the most recent pending order — a crystal order for a completely different customer!)
+
+The Thank You page then displayed QR code with "DH4754" content, and the customer unknowingly transferred money with the wrong reference.
+
+**This is a textbook Rule 10 violation**: the fallback "helped" by returning *something* instead of returning an error, but that *something* was catastrophically wrong.
+
+## What Guard Was Added
+Removed Strategy 2 (match by total_amount) and Strategy 3 (most recent pending) entirely. Only Strategy 1 (exact match by `shopify_order_id`) remains. If not found → returns 404 with clear error message.
+
+```typescript
+// BEFORE: 3 fallback strategies (dangerous)
+if (!orderNumber && totalAmount) { /* Strategy 2: match by amount */ }
+if (!orderNumber) { /* Strategy 3: most recent pending — CAUSED THE BUG */ }
+
+// AFTER: exact match only (safe)
+if (numericId) {
+  const { data } = await supabase.from('pending_payments')
+    .select('order_number').eq('shopify_order_id', numericId).single();
+  if (data) orderNumber = data.order_number;
+}
+if (!orderNumber) return 404; // explicit failure, no guessing
+```
+
+Combined with Rule 53 fix (all payment types now stored in `pending_payments`), Strategy 1 will always find the order.
+
+## How to Detect Similar Issues
+1. **Grep for fallback queries that broaden scope**:
+   ```bash
+   grep -A10 "if (!.*)" supabase/functions/*/index.ts | grep -i "most recent\|latest\|limit(1)\|order.*desc"
+   ```
+   Any "get the most recent X" as a fallback for "get the specific X" is dangerous.
+
+2. **Test with missing data**: Delete a `pending_payment` record and call `get-order-number`. Does it return 404 or a wrong order?
+
+3. **Check for `ORDER BY created_at DESC LIMIT 1` fallbacks**:
+   ```bash
+   grep -n "order.*desc.*limit.*1\|LIMIT 1" supabase/functions/*/index.ts
+   ```
+   These are often "last resort" fallbacks that return unrelated data.
+
+### Code smell indicators
+- Query with `ORDER BY created_at DESC LIMIT 1` used as a fallback for an exact-match query
+- Multiple fallback strategies where each one widens the search scope
+- "Strategy 1 / Strategy 2 / Strategy 3" pattern where Strategy 3 is "just return anything"
+- API returning 200 with wrong data instead of 404 with no data
+- Fallback that ignores the original search criteria (e.g., ignoring order ID, just matching by amount)
+
+### Future bugs this prevents
+- QR codes displaying payment info for wrong orders
+- Customers paying with wrong reference numbers
+- Payments classified as `unknown_transaction` despite being legitimate
+- Admin manual intervention required for what should be automatic matching
+- Cross-customer data leakage (showing one customer's order details to another)
+
+---
+
+# RULE 52: Tab Screen Must Use AuthContext Profile as Immediate Fallback
+**Source:** Phase 14 — Tab Tài Sản shows blank avatar/info until API call completes
+
+## What Failed
+Tapping the "Tài Sản" tab showed a blank avatar and default text for ~1-2 seconds until `loadData()` API call completed. User expected instant display of their profile info.
+
+## Why It Failed
+AccountScreen used `profile` (local state) for display, initialized from `accountCache.profile` which is null on first visit. But `authProfile` from `useAuth()` was **already loaded** from AuthContext (populated during login/session restore). The screen ignored this readily available data.
+
+```javascript
+// BAD: only uses local state, null until API call completes
+const displayName = profile?.full_name || user?.email?.split('@')[0] || 'User';
+const avatarUrl = profile?.avatar_url;
+
+// GOOD: uses AuthContext profile as immediate fallback
+const displayProfile = profile || authProfile;
+const displayName = displayProfile?.full_name || user?.email?.split('@')[0] || 'User';
+const avatarUrl = displayProfile?.avatar_url;
+```
+
+## What Guard Was Added
+`AccountScreen.js` now uses `const displayProfile = profile || authProfile` for all display values (name, username, bio, avatar, badges, edit modal). AuthContext profile provides instant data while the background API call loads fresh data.
+
+## How to Detect Similar Issues
+1. **Tab screens with `useAuth()` that don't use the profile**: If a tab screen destructures `{ profile: authProfile }` from `useAuth()` but only uses it for fallback in `loadData`, not for display
+2. **Screens with `const [profile, setProfile] = useState(null)`**: If the initial state is null and the display code reads from this state without AuthContext fallback
+3. **"Flash of empty state"**: User sees defaults (letter avatar, email username) before real data appears

@@ -671,10 +671,12 @@ export default function AccountScreen() {
   // REMOVED: Blocking loading state - UI should always render immediately
   // Data loads in background, content shows from cache or with defaults
 
-  const displayName = profile?.full_name || user?.email?.split('@')[0] || 'User';
-  const username = profile?.username || user?.email?.split('@')[0] || '';
-  const bio = profile?.bio || t('account.noBio', 'Chưa có tiểu sử');
-  const avatarUrl = profile?.avatar_url;
+  // Use authProfile as immediate fallback when local profile hasn't loaded yet (Rule 23)
+  const displayProfile = profile || authProfile;
+  const displayName = displayProfile?.full_name || user?.email?.split('@')[0] || 'User';
+  const username = displayProfile?.username || user?.email?.split('@')[0] || '';
+  const bio = displayProfile?.bio || t('account.noBio', 'Chưa có tiểu sử');
+  const avatarUrl = displayProfile?.avatar_url;
 
   return (
     <LinearGradient
@@ -724,7 +726,7 @@ export default function AccountScreen() {
             <View style={styles.userInfo}>
               <View style={styles.nameRow}>
                 <Text style={styles.displayName}>{displayName}</Text>
-                <UserBadges user={profile} size="small" maxBadges={3} />
+                <UserBadges user={displayProfile} size="small" maxBadges={3} />
               </View>
               {username && <Text style={styles.username}>@{username}</Text>}
               <Text style={styles.bio} numberOfLines={2}>{bio}</Text>
@@ -1323,7 +1325,7 @@ export default function AccountScreen() {
         <EditProfileModal
           isOpen={editModalVisible}
           onClose={() => setEditModalVisible(false)}
-          profile={profile}
+          profile={displayProfile}
           onSave={handleProfileSave}
         />
 

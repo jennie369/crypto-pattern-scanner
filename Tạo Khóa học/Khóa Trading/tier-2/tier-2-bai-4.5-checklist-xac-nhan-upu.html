@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 4.5: Checklist Xác Nhận UPU | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.8; /* Tăng line-height cho dễ đọc text dài */
+            font-size: 16px;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--success), #00A844); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); font-size: 1.05rem; }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box { background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05)); border: 1px solid rgba(156, 6, 18, 0.4); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .warning-box { border: none; border-radius: 0; border-left: 4px solid var(--burgundy); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .warning-box-title { font-weight: 700; color: var(--burgundy-light); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        /* Checklist Styles Enhanced */
+        .checklist { list-style: none; margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .checklist { margin: var(--space-md) 0; background: var(--glass-border); } }
+        .checklist-item { display: flex; flex-direction: column; gap: var(--space-xs); padding: var(--space-lg); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); margin-bottom: var(--space-md); transition: transform 0.2s ease; }
+        .checklist-item:hover { transform: translateY(-2px); border-color: var(--gold); }
+        @media (max-width: 600px) { .checklist-item { padding: var(--space-md) 16px; border: none; border-radius: 0; margin-bottom: 0; border-left: 4px solid var(--gold); } }
+        
+        .checklist-header { display: flex; align-items: center; gap: var(--space-md); width: 100%; }
+        .checklist-icon { width: 32px; height: 32px; min-width: 32px; background: var(--glass-bg); border: 2px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 1rem; font-weight: 700; }
+        .checklist-title { font-weight: 700; color: var(--gold); font-size: 1.1rem; }
+        
+        .checklist-desc { color: var(--text-secondary); margin-left: calc(32px + var(--space-md)); font-size: 0.95rem; margin-top: var(--space-xs); }
+        @media (max-width: 600px) { .checklist-desc { margin-left: 0; margin-top: var(--space-sm); } }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+
+        .quiz-section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; padding: 0; margin-top: 0; border-top: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: var(--space-lg) 16px var(--space-md); margin-bottom: 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-question { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin-bottom: 0; border-bottom: 1px solid var(--glass-border); } }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; font-weight: 700; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); line-height: 1.6; }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        @media (max-width: 600px) { .quiz-options { gap: 1px; background: var(--glass-border); margin-left: -16px; margin-right: -16px; margin-left: calc(-16px - 4px); } }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .quiz-option { border: none; border-radius: 0; border-left: 4px solid transparent; padding: var(--space-md) 16px; } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); background: var(--bg-card); }
+        @media (max-width: 600px) { .quiz-option:hover:not(.disabled) { border-left-color: var(--gold); } }
+        .quiz-option.selected { border-color: var(--gold); background: rgba(255, 189, 89, 0.1); }
+        @media (max-width: 600px) { .quiz-option.selected { border-left-color: var(--gold); } }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.correct { border-left-color: var(--success) !important; } }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.incorrect { border-left-color: var(--error) !important; } }
+        .quiz-option.disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-marker { width: 28px; height: 28px; min-width: 28px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.selected .option-marker { background: var(--gold); border-color: var(--gold); color: var(--navy-dark); }
+        .quiz-option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; }
+        .quiz-option.incorrect .option-marker { background: var(--error); border-color: var(--error); color: white; }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--space-sm); display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .result-text { font-size: 1.25rem; font-weight: 700; margin-bottom: var(--space-sm); }
+        .result-message { color: var(--text-muted); }
+
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-buttons { padding: var(--space-lg) 16px; } }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>📈</span>
+                <span>Bullish Pattern</span>
+            </div>
+            <div class="lesson-chapter">Chapter 4 - UPU Pattern Mastery</div>
+            <h1 class="lesson-title">Bài 4.5: Checklist Xác Nhận UPU</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 4.5</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>2 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- PHẦN 1: OPENING -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Mở Đầu: Tấm Khiên Bảo Vệ Bạn</h2>
+            <p>Hãy tưởng tượng bạn là một phi công chuẩn bị cất cánh một chiếc Boeing 747. Trước khi đẩy cần ga, bạn có dám bỏ qua bảng danh sách kiểm tra (checklist) an toàn bay không? Chắc chắn là không. Một sai sót nhỏ có thể đánh đổi bằng cả mạng sống.</p>
+            <p>Trading cũng giống hệt như vậy. Mỗi lệnh giao dịch bạn đặt xuống là một lần bạn "cất cánh" với số vốn quý giá của mình. Vậy tại sao rất nhiều trader lại vào lệnh dựa trên cảm tính: "Tôi thấy nó đẹp thì tôi mua"? Đó là lý do tại sao 90% trader thất bại.</p>
+            <p>Trong bài học hôm nay, tôi sẽ trao cho bạn "tấm khiên" vững chắc nhất của hệ thống GEM Frequency: <strong>Checklist 8 Điểm Xác Nhận UPU</strong>. Đây không phải là những gạch đầu dòng vô hồn. Mỗi điểm trong checklist này đều được đúc kết từ hàng nghìn giờ quan sát thị trường, nhằm loại bỏ những tín hiệu nhiễu và chỉ giữ lại những cơ hội chiến thắng cao nhất. Nếu bạn cam kết tuân thủ nó, bạn đã thắng 50% cuộc chơi rồi.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Tư Duy Mentor</div>
+                <p>Đừng xem checklist là sự ràng buộc hay phiền toái. Hãy xem nó như người vệ sĩ đang bảo vệ túi tiền của bạn khỏi những quyết định bốc đồng. <strong>Kỷ luật không làm bạn mất tự do, kỷ luật mang lại lợi nhuận tự do.</strong></p>
+            </div>
+        </section>
+
+        <!-- PHẦN 2: CONCEPT - CHECKLIST 8 ĐIỂM -->
+        <section class="section">
+            <h2 class="section-title"><span>✅</span> Checklist 8 Điểm Vàng</h2>
+            <p>Để một setup UPU được coi là hợp lệ (Valid), nó phải vượt qua tất cả 8 bài kiểm tra sau đây. Hãy đi sâu vào từng điểm để hiểu <strong>TẠI SAO</strong> nó lại quan trọng đến thế.</p>
+
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <div class="checklist-header">
+                        <span class="checklist-icon">1</span>
+                        <span class="checklist-title">Phase 1 Tăng ≥ 2%</span>
+                    </div>
+                    <p class="checklist-desc">
+                        <strong>Tại sao?</strong> Chúng ta cần sự tham gia của Smart Money (Dòng tiền thông minh). Nhỏ lẻ không thể đẩy giá tăng mạnh 2% trong thời gian ngắn. Một cú tăng yếu ớt (ví dụ 0.5% - 1%) chỉ là nhiễu động thị trường. Mức 2% (trên Crypto) là bằng chứng cho thấy "Cá mập" đã thực sự nhập cuộc.
+                    </p>
+                </li>
+                <li class="checklist-item">
+                    <div class="checklist-header">
+                        <span class="checklist-icon">2</span>
+                        <span class="checklist-title">Phase 2 Range < 1.5% (Vùng Pause Hẹp)</span>
+                    </div>
+                    <p class="checklist-desc">
+                        <strong>Tại sao?</strong> Vùng Pause là nơi tích lũy năng lượng. Hãy tưởng tượng một chiếc lò xo: nén càng chặt (range hẹp) thì bật càng mạnh. Nếu vùng Pause quá rộng (> 1.5%), điều đó chứng tỏ phe Bán đang phản kháng mạnh mẽ, và cấu trúc tăng giá không còn vững chắc. Chúng ta cần một sự đồng thuận, một sự "im lặng trước cơn bão".
+                    </p>
+                </li>
+                <li class="checklist-item">
+                    <div class="checklist-header">
+                        <span class="checklist-icon">3</span>
+                        <span class="checklist-title">Phase 3 Tăng ≥ 2% (Breakout Mạnh)</span>
+                    </div>
+                    <p class="checklist-desc">
+                        <strong>Tại sao?</strong> Đây là cú đấm quyết định. Nó xác nhận rằng giai đoạn nghỉ (Pause) đã kết thúc và phe Mua đã hoàn toàn kiểm soát thế trận. Nếu Phase 3 tăng yếu ớt, rất có thể đó là một cú "Fakeout" (Phá vỡ giả).
+                    </p>
+                </li>
+                <li class="checklist-item">
+                    <div class="checklist-header">
+                        <span class="checklist-icon">4</span>
+                        <span class="checklist-title">Giá Đã Quay Lại Test LFZ (Retest)</span>
+                    </div>
+                    <p class="checklist-desc">
+                        <strong>Tại sao?</strong> Đây là điểm khác biệt của GEM. Chúng ta <strong>KHÔNG</strong> mua đuổi (Breakout). Chúng ta đợi giá hồi về "Trạm đón khách". Mua tại Retest giúp bạn có vị thế giá tốt hơn rất nhiều và Stoploss ngắn hơn. Không retest = Không có lệnh. Đơn giản vậy thôi.
+                    </p>
+                </li>
+                <li class="checklist-item">
+                    <div class="checklist-header">
+                        <span class="checklist-icon">5</span>
+                        <span class="checklist-title">Có Nến Xác Nhận Bullish</span>
+                    </div>
+                    <p class="checklist-desc">
+                        <strong>Tại sao?</strong> Chạm vào LFZ chưa đủ. Chúng ta cần thấy phe Mua "rút súng" ra bảo vệ vùng đất của họ. Một cây nến Hammer (Búa), Bullish Engulfing (Nhấn chìm tăng) hoặc Morning Star là tín hiệu xác nhận rằng: "Chúng tôi đã ở đây, sẵn sàng đẩy giá lên!".
+                    </p>
+                </li>
+                <li class="checklist-item">
+                    <div class="checklist-header">
+                        <span class="checklist-icon">6</span>
+                        <span class="checklist-title">Zone Chưa Bị Phá (Zone Intact)</span>
+                    </div>
+                    <p class="checklist-desc">
+                        <strong>Tại sao?</strong> Nếu giá đóng cửa dưới đáy của vùng LFZ, điều đó có nghĩa là phe Mua đã thất bại. "Căn cứ" đã bị quân địch chiếm đóng. Đừng cố gắng bắt dao rơi. Một zone đã thủng là một zone chết.
+                    </p>
+                </li>
+                <li class="checklist-item">
+                    <div class="checklist-header">
+                        <span class="checklist-icon">7</span>
+                        <span class="checklist-title">Zone Đã Test < 3 Lần (Freshness)</span>
+                    </div>
+                    <p class="checklist-desc">
+                        <strong>Tại sao?</strong> Zone giống như một bức tường gỗ. Lần húc đầu tiên (Fresh) là chắc chắn nhất. Lần thứ 2 vẫn ổn. Nhưng đến lần thứ 3, thứ 4, bức tường đã rạn nứt. Các lệnh chờ mua (Limit Orders) đã bị khớp hết. Xác suất thủng zone lúc này cực cao.
+                    </p>
+                </li>
+                <li class="checklist-item">
+                    <div class="checklist-header">
+                        <span class="checklist-icon">8</span>
+                        <span class="checklist-title">R:R ≥ 1:2 (Risk:Reward)</span>
+                    </div>
+                    <p class="checklist-desc">
+                        <strong>Tại sao?</strong> Đây là bài toán kinh tế. Nếu bạn ris 1 đồng để ăn 1 đồng (R:R 1:1), bạn cần thắng >50% mới có lãi. Nhưng nếu R:R là 1:2, bạn chỉ cần thắng 34% là hòa vốn. Đừng bao giờ đánh đổi rủi ro lớn để lấy lợi nhuận nhỏ.
+                    </p>
+                </li>
+            </ul>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.5/3.5-1.webp" alt="UPU Checklist">
+            </div>
+            <div class="image-caption">Hình 1: In tấm hình này ra và dán ngay cạnh màn hình trading của bạn!</div>
+        </section>
+
+        <!-- PHẦN 3: MISTAKES & DEEP DIVE -->
+        <section class="section">
+            <h2 class="section-title"><span>⚠️</span> Những "Cái Bẫy" Cần Tránh</h2>
+            <p>Biết điều cần làm là chưa đủ, bạn cần biết điều KHÔNG nên làm. Dưới đây là những sai lầm kinh điển mà tôi thấy học viên mắc phải mỗi ngày.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">❌</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Lỗi 1: Hội chứng FOMO Breakout</div>
+                        <div class="flow-step-desc">
+                            Bạn thấy giá phá đỉnh Phase 3 và nghĩ "Nó bay rồi!". Bạn nhảy vào mua ngay đỉnh. Kết quả? Giá quay đầu retest, bạn dính Stoploss ngay đáy, rồi sau đó giá mới tăng thật. 
+                            <br><em>Giải pháp:</em> Buộc tay mình lại. Chờ đợi là kỹ năng được trả lương cao nhất.
+                        </div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">❌</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Lỗi 2: "Bắt Dao Rơi" Tại LFZ</div>
+                        <div class="flow-step-desc">
+                            Giá lao ầm ầm về LFZ với một cây nến đỏ dài ngoằng. Bạn đặt lệnh Limit Buy ngay mép zone. Kết quả? Giá xuyên thủng qua như một tờ giấy.
+                            <br><em>Giải pháp:</em> Luôn đợi nến đóng cửa. Hãy để phe Bán kiệt sức và phe Mua hiện diện (Nến xác nhận) rồi mới vào.
+                        </div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">❌</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Lỗi 3: Tham Lam Với Zone Rộng</div>
+                        <div class="flow-step-desc">
+                            Vùng Pause biến động tới 3-4%. Bạn vẫn cố vẽ zone. Zone quá rộng khiến Stoploss của bạn quá xa, làm tỷ lệ R:R trở nên tồi tệ (dưới 1:1).
+                            <br><em>Giải pháp:</em> Bỏ qua. Thị trường có hàng nghìn cơ hội, đừng cố ép một mảnh ghép sai vào bức tranh.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>🚫</span> Quy Tắc Bất Di Bất Dịch</div>
+                <p>Nếu bạn chỉ tích được 7/8 điểm trong checklist? <strong>KHÔNG VÀO LỆNH.</strong> Một chiếc máy bay bị hỏng 1 động cơ vẫn có thể bay, nhưng bạn có dám ngồi lên đó không? Đừng đánh cược tiền của mình vào những cơ hội "khuyết tật".</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.5/3.5-2.webp" alt="Common Mistakes">
+            </div>
+            <div class="image-caption">Hình 2: 5 lỗi phổ biến khiến tài khoản của bạn "bốc hơi"</div>
+        </section>
+
+        <!-- PHẦN 4: EXAMPLES & COMPARISON -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> So Sánh: Setup "Hạng A" vs "Hạng Bét"</h2>
+            <p>Hãy cùng phân tích sự khác biệt giữa một cơ hội kiếm tiền thực sự và một cái bẫy.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.5/3.5-3.webp" alt="Good vs Bad Setup">
+            </div>
+            <div class="image-caption">Hình 3: Bên trái là Setup chuẩn sách giáo khoa. Bên phải là thảm họa.</div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>✅</span> Phân Tích Hình Ảnh</div>
+                <p>
+                    <strong>Setup Tốt (Trái):</strong> Phase 1 tăng dứt khoát. Pause cực ngắn (3 nến), đi ngang rất đẹp. Phase 3 bùng nổ. Khi giá hồi về, nó chạm nhẹ LFZ và bật lên ngay lập tức bằng một cây Pinbar. Đây là dấu hiệu của Smart Money.<br><br>
+                    <strong>Setup Xấu (Phải):</strong> Phase 1 tăng yếu ớt, nến nhỏ. Vùng Pause kéo dài lê thê cả chục nến, biến động lộn xộn. Phase 3 cố gắng đẩy lên nhưng bị bán ngược lại ngay. Đây không phải là UPU, đây là vùng phân phối!
+                </p>
+            </div>
+        </section>
+
+        <!-- PHẦN 5: SUMMARY -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Tổng Kết Bài Học</h2>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>🎯</span> Những Điều Cốt Tử Cần Nhớ</div>
+                <ul class="summary-list">
+                    <li>Checklist không phải là "gợi ý", nó là "luật". Tuân thủ 100% hoặc đứng ngoài.</li>
+                    <li>Sức mạnh của UPU nằm ở Phase 2 (Pause). Pause càng ngắn, càng chặt, lực nén càng mạnh.</li>
+                    <li>Đừng bao giờ bắt dao rơi. Hãy để nến xác nhận dẫn đường cho bạn.</li>
+                    <li>Hãy in checklist này ra, dán nó lên tường, lên màn hình, hoặc để làm hình nền điện thoại. Đừng vào lệnh cho đến khi bạn đã tick đủ 8 ô.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- PHẦN 6: QUIZ -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Hãy thử sức xem bạn đã thực sự hiểu bài chưa nhé!</p>
+            </div>
+
+            <div class="quiz-question" data-question="1" data-correct="D">
+                <div class="question-number">1</div>
+                <div class="question-text">Trong checklist 8 điểm, điều kiện nào sau đây là SAI (không có trong checklist)?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Phase 1 tăng ≥2%</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Zone đã test < 3 lần (Còn Fresh)</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Tỷ lệ R:R ≥ 1:2</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Volume của Phase 3 phải gấp 3 lần Phase 1</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="B">
+                <div class="question-number">2</div>
+                <div class="question-text">Tại sao chúng ta phải tránh những Zone đã bị test quá nhiều lần (từ 3 lần trở lên)?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Vì zone đó nhìn không đẹp trên biểu đồ.</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Vì các lệnh chờ (Limit Orders) của Smart Money đã bị khớp hết, bức tường bảo vệ đã mỏng đi.</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Vì sàn giao dịch sẽ thu phí cao hơn ở những zone cũ.</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Không có lý do gì cả, thích thì trade thôi.</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score">0/2</div>
+                <div class="result-text">Hoàn thành!</div>
+                <div class="result-message"></div>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+
+            let answeredCount = 0;
+            let correctCount = 0;
+            const totalQuestions = 2;
+
+            const explanations = {
+                1: {
+                    correct: '✓ Chính xác! Checklist chỉ yêu cầu Volume cao xác nhận Breakout, không hề có quy định cứng nhắc phải gấp 3 lần. Đừng tự làm khó mình!',
+                    incorrect: '✗ Sai rồi! Điều kiện "Phase 1 tăng ≥2%", "Zone Fresh" và "R:R ≥ 1:2" đều là những điểm cốt lõi trong checklist.'
+                },
+                2: {
+                    correct: '✓ Chính xác! Mỗi lần giá chạm zone là một lần nó "ăn" bớt thanh khoản. Đến lần thứ 3, kho đạn của phe Mua đã cạn kiệt, zone rất dễ thủng.',
+                    incorrect: '✗ Sai! Hãy nhớ về hình ảnh bức tường gỗ. Húc mãi thì tường cũng phải đổ. Trade ở zone cũ là rủi ro cực lớn.'
+                }
+            };
+
+            questions.forEach(question => {
+                const options = question.querySelectorAll('.quiz-option');
+                const correctAnswer = question.dataset.correct;
+                const questionNum = question.dataset.question;
+                const feedbackDiv = question.querySelector('.question-feedback');
+                const feedbackTitle = feedbackDiv.querySelector('.feedback-title');
+                const feedbackText = feedbackDiv.querySelector('.feedback-text');
+
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        if (question.classList.contains('answered')) return;
+
+                        question.classList.add('answered');
+                        answeredCount++;
+
+                        const selectedOption = this.dataset.option;
+                        const isCorrect = selectedOption === correctAnswer;
+
+                        options.forEach(opt => opt.classList.add('disabled'));
+                        this.classList.add('selected');
+
+                        if (isCorrect) {
+                            this.classList.add('correct');
+                            correctCount++;
+                            feedbackDiv.classList.add('correct');
+                            feedbackTitle.textContent = '✓ Chính xác!';
+                            feedbackText.textContent = explanations[questionNum].correct;
+                        } else {
+                            this.classList.add('incorrect');
+                            feedbackDiv.classList.add('incorrect');
+                            feedbackTitle.textContent = '✗ Sai rồi!';
+                            feedbackText.textContent = explanations[questionNum].incorrect;
+                            options.forEach(opt => {
+                                if (opt.dataset.option === correctAnswer) {
+                                    opt.classList.add('correct');
+                                }
+                            });
+                        }
+
+                        feedbackDiv.classList.add('show');
+
+                        if (answeredCount === totalQuestions) {
+                            const scoreDiv = resultDiv.querySelector('.result-score');
+                            const messageDiv = resultDiv.querySelector('.result-message');
+                            scoreDiv.textContent = `${correctCount}/${totalQuestions}`;
+
+                            if (correctCount === totalQuestions) {
+                                messageDiv.textContent = '🎉 Xuất sắc! Bạn đã sẵn sàng để săn tìm UPU!';
+                            } else if (correctCount >= 1) {
+                                messageDiv.textContent = '👍 Khá lắm! Hãy ôn lại checklist một chút nữa nhé!';
+                            } else {
+                                messageDiv.textContent = '📚 Đừng lo! Hãy đọc lại bài kỹ hơn, thành công cần sự kiên nhẫn.';
+                            }
+
+                            resultDiv.classList.add('show');
+                            retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0;
+                correctCount = 0;
+
+                questions.forEach(question => {
+                    question.classList.remove('answered');
+                    const options = question.querySelectorAll('.quiz-option');
+                    const feedbackDiv = question.querySelector('.question-feedback');
+
+                    options.forEach(opt => {
+                        opt.classList.remove('selected', 'correct', 'incorrect', 'disabled');
+                    });
+                    feedbackDiv.classList.remove('show', 'correct', 'incorrect');
+                });
+
+                resultDiv.classList.remove('show');
+                retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

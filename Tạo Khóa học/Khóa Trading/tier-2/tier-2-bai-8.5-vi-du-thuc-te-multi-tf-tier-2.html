@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 8.5: Ví Dụ Thực Tế Multi-TF - Tier 2 | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title, .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, .card-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, .styled-list, ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box, .info-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box, .info-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4, .info-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p, .info-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box, .info-box.danger {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box, .info-box.danger {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--error);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box h4, .info-box.danger .info-box-title { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        .warning-box p, .info-box.danger p { color: var(--text-secondary); margin: 0; }
+
+        .success-box, .info-box.success {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .success-box, .info-box.success {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .success-box h4, .info-box.success .info-box-title { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+        .success-box p, .info-box.success p { color: var(--text-secondary); margin: 0; }
+
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+
+        /* Case Study Specific Styles */
+        .case-study {
+            background: rgba(17, 34, 80, 0.8);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-xl);
+            position: relative;
+            overflow: hidden;
+        }
+        .case-study::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+        }
+        .case-study.win::before { background: var(--success); }
+        .case-study.loss::before { background: var(--error); }
+
+        .case-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+        }
+        .case-title { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
+        .case-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        .case-badge.win { background: rgba(0, 200, 83, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .case-badge.loss { background: rgba(255, 82, 82, 0.2); color: var(--error); border: 1px solid var(--error); }
+
+        .trade-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            background: rgba(0,0,0,0.2);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+        }
+        .trade-detail-item { text-align: center; }
+        .trade-detail-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+        .trade-detail-value { font-weight: 700; color: var(--text-primary); font-size: 1.1rem; }
+        .trade-detail-value.positive { color: var(--success); }
+        .trade-detail-value.negative { color: var(--error); }
+
+        .timeline {
+            position: relative;
+            margin: var(--space-lg) 0;
+            padding-left: 20px;
+            border-left: 2px solid var(--glass-border);
+        }
+        .timeline-step {
+            position: relative;
+            margin-bottom: var(--space-lg);
+            padding-left: var(--space-md);
+        }
+        .timeline-step::before {
+            content: '';
+            position: absolute;
+            left: -27px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--bg-primary);
+            border: 2px solid var(--glass-border);
+            z-index: 1;
+        }
+        .timeline-step.htf::before { border-color: var(--purple); background: var(--purple); }
+        .timeline-step.itf::before { border-color: var(--gold); background: var(--gold); }
+        .timeline-step.ltf::before { border-color: var(--cyan); background: var(--cyan); }
+        .timeline-step.result::before { border-color: var(--success); background: var(--success); }
+        
+        .timeline-label {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+        .timeline-step.htf .timeline-label { color: var(--purple); }
+        .timeline-step.itf .timeline-label { color: var(--gold); }
+        .timeline-step.ltf .timeline-label { color: var(--cyan); }
+        .timeline-step.result .timeline-label { color: var(--success); }
+        
+        .timeline-text { color: var(--text-secondary); font-size: 0.95rem; }
+
+        .highlight-green { color: var(--success); font-weight: 600; }
+        .highlight-red { color: var(--error); font-weight: 600; }
+        .highlight-gold { color: var(--gold); font-weight: 600; }
+        .highlight-purple { color: var(--purple); font-weight: 600; }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-list li { margin-bottom: var(--space-sm); }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            width: 100%;
+            text-align: left;
+            margin-bottom: var(--space-sm);
+        }
+        .quiz-option:hover { border-color: var(--gold); background: var(--bg-card); }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; color: var(--success); }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; color: var(--error); }
+        .quiz-result { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--radius-md); display: none; }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); color: var(--success); }
+        .quiz-result.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); color: var(--error); }
+        .quiz-score { text-align: center; padding: var(--space-xl); background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent); border: 1px solid var(--purple); border-radius: var(--radius-lg); margin-top: var(--space-lg); display: none; }
+        .quiz-score.show { display: block; }
+        .btn-retake { margin-top: var(--space-md); padding: var(--space-md) var(--space-xl); background: linear-gradient(135deg, var(--purple), var(--cyan)); color: var(--navy-dark); border: none; border-radius: var(--radius-md); font-weight: 700; cursor: pointer; }
+        .lesson-footer { text-align: center; padding: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); margin-top: var(--space-xl); }
+        .lesson-footer p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <span class="lesson-badge">📊 Tier 2 - Bài 8.5</span>
+            <h1 class="lesson-title">Ví Dụ Thực Tế Multi-TF</h1>
+            <p class="lesson-subtitle">Phân Tích Đa Khung Thời Gian Trong Thực Chiến</p>
+        </header>
+
+        <!-- 1. Opening Hook -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>1. Mở Đầu: Đừng Bị "Mù" Giữa Rừng Biểu Đồ</h2>
+            </div>
+            <div class="card-content">
+                <p>Bạn đã bao giờ rơi vào tình huống này chưa: Biểu đồ Daily nói TĂNG, biểu đồ 4H nói GIẢM, còn biểu đồ 1H thì đi ngang? Bạn bối rối, không biết nên nghe theo khung thời gian nào, và cuối cùng bạn quyết định "đánh đại" hoặc đứng ngoài nhìn giá chạy mất?</p>
+                <p>Đó là nỗi đau của hầu hết trader khi mới tiếp cận <strong>Multi-Timeframe Analysis (MTF)</strong>. Bạn có quá nhiều tín hiệu mâu thuẫn.</p>
+                <p>Nhưng hãy tưởng tượng MTF giống như việc xem bản đồ. Khung Daily là bản đồ toàn quốc cho bạn biết hướng đi Bắc-Nam. Khung 4H là bản đồ thành phố cho bạn biết con đường chính. Và khung 1H là bản đồ khu phố cho bạn biết chính xác ngã rẽ vào nhà.</p>
+                <p>Trong bài học này, tôi sẽ không chỉ nói lý thuyết suông. Chúng ta sẽ cùng nhau mổ xẻ <strong>4 Case Study thực tế</strong> - cả thắng lẫn thua - để bạn thấy chính xác cách một GEM Trader chuyên nghiệp kết hợp các mảnh ghép thời gian lại với nhau như thế nào.</p>
+            </div>
+        </div>
+
+        <!-- 2. Concept Recap -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>2. Ôn Tập Nhanh: Quy Trình 3 Bước</h2>
+            </div>
+            <div class="card-content">
+                <p>Trước khi đi vào ví dụ, hãy chắc chắn rằng chúng ta đang nói cùng một ngôn ngữ. Quy trình MTF của GEM luôn tuân thủ nghiêm ngặt 3 bước:</p>
+                
+                <ul class="styled-list">
+                    <li><strong>Bước 1: HTF (Higher Timeframe) - Daily/Weekly:</strong> Xác định xu hướng chính (Trend) và các Key Zone lớn. Đây là "La Bàn" chỉ hướng.</li>
+                    <li><strong>Bước 2: ITF (Intermediate Timeframe) - 4H:</strong> Tìm kiếm Setup và Zone cụ thể. Đây là nơi chúng ta lên kế hoạch giao dịch.</li>
+                    <li><strong>Bước 3: LTF (Lower Timeframe) - 1H/15m:</strong> Tìm điểm Entry chính xác (Timing) với các mô hình nến đảo chiều. Đây là lúc chúng ta bóp cò.</li>
+                </ul>
+
+                <div class="info-box">
+                    <div class="info-box-title">💡 Quy Tắc Bất Di Bất Dịch</div>
+                    <p>Không bao giờ trade ngược HTF Trend trừ khi giá đang chạm HTF Zone cực mạnh. <em>"Trend is your friend"</em> không phải là câu sáo rỗng, nó là lá chắn bảo vệ tài khoản của bạn.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Case Study 1: BTC Long -->
+        <div class="case-study win">
+            <div class="case-header">
+                <span class="case-title">📈 Case 1: BTC/USDT Long - Sức Mạnh Của Confluence</span>
+                <span class="case-badge win">WIN +4.2%</span>
+            </div>
+
+            <div class="trade-details">
+                <div class="trade-detail-item">
+                    <div class="trade-detail-label">Coin</div>
+                    <div class="trade-detail-value">BTC</div>
+                </div>
+                <div class="trade-detail-item">
+                    <div class="trade-detail-label">Direction</div>
+                    <div class="trade-detail-value positive">LONG</div>
+                </div>
+                <div class="trade-detail-item">
+                    <div class="trade-detail-label">RR Ratio</div>
+                    <div class="trade-detail-value">3.5:1</div>
+                </div>
+                <div class="trade-detail-item">
+                    <div class="trade-detail-label">Result</div>
+                    <div class="trade-detail-value positive">+4.2%</div>
+                </div>
+            </div>
+
+            <div class="card-content">
+                <p>Trong ví dụ này, chúng ta sẽ thấy sức mạnh khi hai khung thời gian "đồng thanh" ủng hộ một vùng giá. Đây gọi là <strong>Confluence Zone</strong>.</p>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-step htf">
+                    <div class="timeline-content">
+                        <div class="timeline-label">Step 1: HTF (Daily) - Xác Định "Sân Chơi"</div>
+                        <div class="timeline-text">
+                            <p>Mở biểu đồ Daily, tôi thấy BTC đang tạo cấu trúc <strong>Higher Highs & Higher Lows</strong> rõ ràng. Xu hướng là TĂNG. Tôi xác định được một vùng Daily LFZ (Vùng Mua) quanh mức $41,900.</p>
+                            <p>👉 <strong>Quyết định:</strong> Chỉ canh BUY. Bỏ qua mọi tín hiệu Sell ngắn hạn.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-step itf">
+                    <div class="timeline-content">
+                        <div class="timeline-label">Step 2: ITF (4H) - Tinh Chỉnh Zone</div>
+                        <div class="timeline-text">
+                            <p>Zoom vào 4H, tôi thấy một mô hình UPU (Up-Pause-Up) rất đẹp tạo ra một vùng LFZ tại $41,800 - $42,200. Điều đặc biệt là vùng 4H này <strong>nằm chồng lên (overlap)</strong> ngay vùng Daily LFZ đã xác định ở trên.</p>
+                            <p>👉 <strong>Nhận định:</strong> Đây là "Confluence Zone" - nơi cả phe mua dài hạn và trung hạn đều đang canh me. Độ tin cậy cực cao.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-step ltf">
+                    <div class="timeline-content">
+                        <div class="timeline-label">Step 3: LTF (1H) - Bóp Cò</div>
+                        <div class="timeline-text">
+                            <p>Giá hồi về vùng $42,000. Tôi không vào lệnh ngay (Limit Order) mà chờ đợi. Trên 1H, giá tạo một nến <strong>Bullish Engulfing</strong> mạnh mẽ, nuốt trọn nến giảm trước đó. Đồng thời, cấu trúc giảm ngắn hạn trên 1H bị phá vỡ.</p>
+                            <p>👉 <strong>Action:</strong> Entry Long tại $42,050. Stop Loss $41,700 (dưới vùng Confluence).</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-step result">
+                    <div class="timeline-content">
+                        <div class="timeline-label">Kết Quả</div>
+                        <div class="timeline-text">Giá chạm TP tại $43,270 sau 18 giờ. Lợi nhuận +4.2%. R:R đạt 3.5:1. Trade diễn ra mượt mà vì có sự đồng thuận của cả 3 khung thời gian.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://via.placeholder.com/800x450/112250/10B981?text=BTC+Long+Multi-TF+Analysis" alt="BTC Long Case">
+            </div>
+
+            <div class="info-box success">
+                <div class="info-box-title">✅ Bài Học Từ Case 1</div>
+                <p><strong>Confluence Zone là Vua.</strong> Khi Zone của ITF (4H) nằm trong Zone của HTF (Daily), đó là setup loại A+. Bạn có thể tự tin tăng volume hoặc giữ lệnh lâu hơn.</p>
+            </div>
+        </div>
+
+        <!-- Case Study 2: ETH Short -->
+        <div class="case-study win">
+            <div class="case-header">
+                <span class="case-title">📉 Case 2: ETH/USDT Short - Bơi Xuôi Dòng</span>
+                <span class="case-badge win">WIN +3.8%</span>
+            </div>
+
+            <div class="trade-details">
+                <div class="trade-detail-item">
+                    <div class="trade-detail-label">Coin</div>
+                    <div class="trade-detail-value">ETH</div>
+                </div>
+                <div class="trade-detail-item">
+                    <div class="trade-detail-label">Direction</div>
+                    <div class="trade-detail-value negative">SHORT</div>
+                </div>
+                <div class="trade-detail-item">
+                    <div class="trade-detail-label">RR Ratio</div>
+                    <div class="trade-detail-value">2.8:1</div>
+                </div>
+                <div class="trade-detail-item">
+                    <div class="trade-detail-label">Result</div>
+                    <div class="trade-detail-value positive">+3.8%</div>
+                </div>
+            </div>
+
+            <div class="card-content">
+                <p>Case study này minh họa cho câu nói kinh điển: <em>"Trend is your friend"</em>. Tại sao đánh theo xu hướng lớn lại dễ dàng hơn nhiều so với việc cố gắng bắt đỉnh bắt đáy?</p>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-step htf">
+                    <div class="timeline-content">
+                        <div class="timeline-label">Step 1: HTF (Daily) - Nhận Diện Dòng Chảy</div>
+                        <div class="timeline-text">
+                            <p>ETH đang trong một <strong>Downtrend</strong> mạnh mẽ trên khung Daily. Các đỉnh sau thấp hơn đỉnh trước (Lower Highs). Phe bán đang kiểm soát hoàn toàn.</p>
+                            <p>👉 <strong>Quyết định:</strong> Bias là SHORT. Tuyệt đối không tìm điểm Buy bắt đáy.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-step itf">
+                    <div class="timeline-content">
+                        <div class="timeline-label">Step 2: ITF (4H) - Tìm Điểm Vào Hàng</div>
+                        <div class="timeline-text">
+                            <p>Trong xu hướng giảm đó, tôi tìm thấy một vùng HFZ (Vùng Bán) tại $2,450 - $2,490 được tạo bởi mô hình DPD (Down-Pause-Down). Quan trọng hơn, vùng này còn <strong>FRESH</strong> (chưa bị test lần nào).</p>
+                            <p>👉 <strong>Kế hoạch:</strong> Chờ giá hồi lên vùng $2,450 để Short.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-step ltf">
+                    <div class="timeline-content">
+                        <div class="timeline-label">Step 3: LTF (1H) - Xác Nhận</div>
+                        <div class="timeline-text">
+                            <p>Giá spike nhanh lên HFZ. Ngay lập tức, một nến <strong>Bearish Engulfing</strong> xuất hiện kèm theo Volume bán tăng vọt. Đây là dấu hiệu phe bán (Smart Money) đang bảo vệ vùng giá này.</p>
+                            <p>👉 <strong>Action:</strong> Entry Short $2,465. SL $2,510 (trên vùng HFZ).</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-step result">
+                    <div class="timeline-content">
+                        <div class="timeline-label">Kết Quả</div>
+                        <div class="timeline-text">Giá sập mạnh về $2,340, hit TP +3.8%. Trade này diễn ra rất nhanh và ít khi bị drawdown (âm trạng thái) vì chúng ta đang "bơi xuôi dòng" cùng cá mập.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://via.placeholder.com/800x450/112250/EF4444?text=ETH+Short+Multi-TF+Analysis" alt="ETH Short Case">
+            </div>
+
+            <div class="info-box success">
+                <div class="info-box-title">✅ Bài Học Từ Case 2</div>
+                <p><strong>Alignment (Sự đồng thuận)</strong> giữa Trend HTF và Setup ITF là yếu tố then chốt. Khi bạn trade thuận xu hướng HTF, tỷ lệ thắng tăng lên đáng kể và tâm lý giao dịch cũng thoải mái hơn.</p>
+            </div>
+        </div>
+
+        <!-- Case Study 3: BNB Loss -->
+        <div class="case-study loss">
+            <div class="case-header">
+                <span class="case-title">⚠️ Case 3: BNB/USDT Long - Bài Học Về "Khoảng Trống"</span>
+                <span class="case-badge loss">LOSS -1.5%</span>
+            </div>
+
+            <div class="trade-details">
+                <div class="trade-detail-item">
+                    <div class="trade-detail-label">Coin</div>
+                    <div class="trade-detail-value">BNB</div>
+                </div>
+                <div class="trade-detail-item">
+                    <div class="trade-detail-label">Direction</div>
+                    <div class="trade-detail-value positive">LONG</div>
+                </div>
+                <div class="trade-detail-item">
+                    <div class="trade-detail-label">RR Ratio</div>
+                    <div class="trade-detail-value">2:1</div>
+                </div>
+                <div class="trade-detail-item">
+                    <div class="trade-detail-label">Result</div>
+                    <div class="trade-detail-value negative">-1.5%</div>
+                </div>
+            </div>
+
+            <div class="card-content">
+                <p>Không phải lúc nào cũng thắng. Case này là một ví dụ điển hình về việc <strong>bỏ qua chướng ngại vật</strong> trên khung thời gian lớn.</p>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-step htf">
+                    <div class="timeline-content">
+                        <div class="timeline-label">Step 1: HTF (Daily) - Cảnh Báo Bị Bỏ Qua</div>
+                        <div class="timeline-text">
+                            <p>BNB đang đi ngang (Range). Tuy nhiên, tôi phát hiện một <strong>Daily HFZ (Vùng Bán mạnh)</strong> nằm lù lù ngay tại $320. Đây là một "bức tường" cứng.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-step itf">
+                    <div class="timeline-content">
+                        <div class="timeline-label">Step 2: ITF (4H) - Setup Đẹp Nhưng Nguy Hiểm</div>
+                        <div class="timeline-text">
+                            <p>Tôi tìm thấy một vùng LFZ (Mua) tại $305 - $308. Mọi thứ trông có vẻ ổn: UPU pattern đẹp, nến tăng mạnh.</p>
+                            <p>⚠️ <strong>Vấn đề:</strong> Khoảng cách từ điểm mua ($308) đến bức tường Daily HFZ ($320) chỉ khoảng 3.5%. Nếu trừ đi spread và buffer, R:R thực tế rất thấp.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-step ltf">
+                    <div class="timeline-content">
+                        <div class="timeline-label">Step 3: LTF (1H) - Cố Chấp Vào Lệnh</div>
+                        <div class="timeline-text">
+                            <p>Tôi vẫn quyết định vào Long tại $306.5 khi thấy Bullish Engulfing, hy vọng giá sẽ phá qua $320. Tôi đã để lòng tham làm mờ mắt trước rủi ro hiển hiện.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-step result">
+                    <div class="timeline-content">
+                        <div class="timeline-label">Kết Quả</div>
+                        <div class="timeline-text">Giá bật lên một chút đến $315, sau đó bị phe bán tại Daily HFZ $320 đập mạnh xuống (dù chưa chạm hẳn tới). Trade đảo chiều và hit Stoploss.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://via.placeholder.com/800x450/112250/FFBD59?text=BNB+Zone+Conflict+Case" alt="BNB Loss Case">
+            </div>
+
+            <div class="info-box danger">
+                <div class="info-box-title">❌ Bài Học Xương Máu Từ Case 3</div>
+                <p><strong>Luôn nhìn sang bên trái!</strong> Trước khi Buy, hãy xem có Zone Sell mạnh nào của khung lớn nằm ngay trên đầu không. Nếu có <strong>Zone Conflict</strong> (Xung đột vùng), hãy bỏ qua hoặc chốt lời cực ngắn. Đừng bao giờ đánh cược vào việc phá cản lớn.</p>
+            </div>
+        </div>
+
+        <!-- Case Study 4: SOL Win -->
+        <div class="case-study win">
+            <div class="case-header">
+                <span class="case-title">⭐ Case 4: SOL/USDT Long - A+ Setup Hoàn Hảo</span>
+                <span class="case-badge win">WIN +6.5%</span>
+            </div>
+
+            <div class="trade-details">
+                <div class="trade-detail-item">
+                    <div class="trade-detail-label">Coin</div>
+                    <div class="trade-detail-value">SOL</div>
+                </div>
+                <div class="trade-detail-item">
+                    <div class="trade-detail-label">Direction</div>
+                    <div class="trade-detail-value positive">LONG</div>
+                </div>
+                <div class="trade-detail-item">
+                    <div class="trade-detail-label">RR Ratio</div>
+                    <div class="trade-detail-value">4.3:1</div>
+                </div>
+                <div class="trade-detail-item">
+                    <div class="trade-detail-label">Result</div>
+                    <div class="trade-detail-value positive">+6.5%</div>
+                </div>
+            </div>
+
+            <div class="card-content">
+                <p>Đây là ví dụ về một setup "trong mơ" mà bạn nên kiên nhẫn chờ đợi. Khi tất cả các yếu tố hội tụ, đó là lúc bạn "All-in" (theo nghĩa bóng, vẫn quản lý rủi ro nhé!).</p>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-step htf">
+                    <div class="timeline-content">
+                        <div class="timeline-label">Step 1: HTF (Daily) - Momentum Cực Đại</div>
+                        <div class="timeline-text">
+                            <p>SOL vừa phá đỉnh ATH (All Time High) hoặc một đỉnh quan trọng. Xu hướng Tăng cực mạnh, không có kháng cự nào ở trên (Blue Sky Breakout). Daily LFZ hình thành tại $95 - $100.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-step itf">
+                    <div class="timeline-content">
+                        <div class="timeline-label">Step 2: ITF (4H) - Sự Đồng Thuận Tuyệt Đối</div>
+                        <div class="timeline-text">
+                            <p>4H LFZ cũng nằm gọn trong vùng $97 - $100. Zone này rất <strong>FRESH</strong> và có lực đẩy (Departure) cực mạnh trước đó. Đây là một setup có điểm số Odds Enhancers rất cao.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-step ltf">
+                    <div class="timeline-content">
+                        <div class="timeline-label">Step 3: LTF (1H) - Mẫu Hình Đẹp</div>
+                        <div class="timeline-text">
+                            <p>Giá hồi về zone và tạo mô hình <strong>Double Bottom</strong> (Hai Đáy) nhỏ trên 1H, kèm theo Bullish Engulfing. Đây là tín hiệu xác nhận kép.</p>
+                            <p>👉 <strong>Action:</strong> Entry $98.5. SL $95. Target thả nổi (trailing stop) vì không có cản trên.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="timeline-step result">
+                    <div class="timeline-content">
+                        <div class="timeline-label">Kết Quả</div>
+                        <div class="timeline-text">SOL tăng không ngừng nghỉ lên $113.5. Tôi chốt lời dần và trailing stop. Profit +6.5%. Đây là sức mạnh của <strong>Perfect MTF Alignment</strong>.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://via.placeholder.com/800x450/112250/6A5BFF?text=SOL+Perfect+MTF+Alignment" alt="SOL Win Case">
+            </div>
+
+            <div class="info-box success">
+                <div class="info-box-title">⭐ Bài Học Từ Case 4</div>
+                <p>Hãy học cách nói "KHÔNG" với các setup loại B, C (như Case 3) để dành vốn cho các <strong>A+ Setup</strong> như thế này. Trading không phải là trade nhiều, mà là trade chất lượng.</p>
+            </div>
+        </div>
+
+        <!-- 4. Summary -->
+        <div class="summary-box">
+            <h3>📋 Tổng Kết Bài Học</h3>
+            <ul class="summary-list">
+                <li><strong>BTC Case:</strong> Confluence Zone (Vùng hợp lưu) giữa HTF và ITF luôn có độ tin cậy cao nhất.</li>
+                <li><strong>ETH Case:</strong> Trade thuận xu hướng HTF (Trend Following) giúp tâm lý thoải mái và tỷ lệ thắng cao.</li>
+                <li><strong>BNB Case:</strong> Zone Conflict (Xung đột vùng) là sát thủ tài khoản. Đừng tham lam khi phía trước là tường đá.</li>
+                <li><strong>SOL Case:</strong> Kiên nhẫn chờ đợi sự đồng thuận hoàn hảo (Trend + Zone + Trigger) sẽ mang lại phần thưởng lớn nhất.</li>
+            </ul>
+        </div>
+
+        <!-- 5. Quiz -->
+        <div class="quiz-section">
+            <h3 class="quiz-title">📝 Kiểm Tra Kiến Thức</h3>
+
+            <div class="quiz-question" data-correct="2">
+                <h4>1. Trong Case 3 (BNB), nguyên nhân chính dẫn đến thua lỗ là gì?</h4>
+                <div class="quiz-options">
+                    <button class="quiz-option" data-index="0">Entry trigger trên LTF không rõ ràng.</button>
+                    <button class="quiz-option" data-index="1">Stoploss đặt quá chặt nên bị quét.</button>
+                    <button class="quiz-option" data-index="2">Zone Conflict - Giá đụng phải Daily HFZ (Kháng cự mạnh) ngay phía trên.</button>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <h4>2. "Perfect MTF Alignment" (Sự đồng thuận hoàn hảo) bao gồm những yếu tố nào?</h4>
+                <div class="quiz-options">
+                    <button class="quiz-option" data-index="0">HTF Trend ủng hộ + HTF/ITF Zone trùng nhau + LTF có tín hiệu xác nhận.</button>
+                    <button class="quiz-option" data-index="1">Chỉ cần LTF có nến tăng mạnh là đủ.</button>
+                    <button class="quiz-option" data-index="2">Chỉ số RSI quá bán và MACD cắt lên.</button>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <h4>3. Tại sao trade của ETH (Case 2) lại diễn ra nhanh và mượt mà?</h4>
+                <div class="quiz-options">
+                    <button class="quiz-option" data-index="0">Vì ETH là coin top nên volume lớn.</button>
+                    <button class="quiz-option" data-index="1">Vì lệnh Short thuận theo xu hướng Downtrend mạnh trên khung Daily.</button>
+                    <button class="quiz-option" data-index="2">Vì Stoploss đặt rất xa.</button>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-number">Kết quả: <span id="correct-count">0</span>/3</div>
+                <p class="quiz-score-text">Bạn đã hiểu rõ về Multi-Timeframe chưa?</p>
+                <button class="btn-retake" onclick="retakeQuiz()">Làm Lại Quiz</button>
+            </div>
+        </div>
+
+        <footer class="lesson-footer">
+            <p>GEM Trading Academy - Tier 2</p>
+            <p>© 2025 GEM Frequency Trading Method. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác! Bạn đã nắm bắt vấn đề rất tốt.';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy xem lại bài học ở phần Case Study tương ứng nhé.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function retakeQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                question.querySelector('.quiz-result').className = 'quiz-result';
+            });
+
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+
+</body>
+</html>

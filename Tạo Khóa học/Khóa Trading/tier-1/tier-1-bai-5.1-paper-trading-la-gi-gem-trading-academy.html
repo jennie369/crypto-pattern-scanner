@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.1: Paper Trading Là Gì? - GEM Trading Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>:root{--navy:#112250;--navy-dark:#0a1628;--gold:#FFBD59;--gold-dark:#E5A73D;--cyan:#00F0FF;--purple:#6A5BFF;--burgundy:#9C0612;--success:#00C853;--error:#FF5252;--bg-primary:#0a1628;--bg-card:rgba(17,34,80,0.6);--text-primary:#FFFFFF;--text-secondary:rgba(255,255,255,0.85);--text-muted:rgba(255,255,255,0.6);--glass-bg:rgba(17,34,80,0.4);--glass-border:rgba(255,189,89,0.2);--space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--radius-md:12px;--radius-lg:16px}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}body{font-family:'Montserrat',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.7}img{max-width:100%;height:auto;display:block}.background-container{position:fixed;inset:0;z-index:-1}.bg-layer-base{position:absolute;inset:0;background:linear-gradient(180deg,var(--navy-dark) 0%,var(--navy) 50%,var(--navy-dark) 100%)}.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.3}.orb-1{width:400px;height:400px;background:var(--gold);top:-100px;right:-100px}.orb-2{width:300px;height:300px;background:var(--cyan);bottom:20%;left:-100px}.orb-3{width:250px;height:250px;background:var(--success);bottom:-50px;right:20%}.lesson-container{max-width:800px;margin:0 auto;padding:1.5rem}@media(max-width:600px){.lesson-container{padding:0}}.lesson-header{text-align:center;padding:var(--space-xl);margin-bottom:var(--space-xl);background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg)}@media(max-width:600px){.lesson-header{padding:var(--space-lg) 16px;margin-bottom:0;border:none;border-radius:0;border-bottom:8px solid var(--bg-primary)}}.lesson-badge{display:inline-flex;align-items:center;gap:var(--space-sm);padding:var(--space-sm) var(--space-md);background:linear-gradient(135deg,var(--success),var(--cyan));border-radius:50px;font-size:0.75rem;font-weight:700;text-transform:uppercase;margin-bottom:var(--space-md);color:var(--navy-dark);}.lesson-chapter{color:var(--cyan);font-weight:600;font-size:0.9rem;margin-bottom:var(--space-sm);text-transform:uppercase;letter-spacing:1px}.lesson-title{font-size:clamp(1.75rem,5vw,2.5rem);font-weight:800;color:var(--text-primary);margin-bottom:var(--space-md);line-height:1.2}.lesson-meta{display:flex;justify-content:center;gap:var(--space-lg);color:var(--text-muted);font-size:0.9rem}.section{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin-bottom:var(--space-xl)}@media(max-width:600px){.section{padding:var(--space-lg) 16px;margin-bottom:0;border:none;border-radius:0;border-bottom:1px solid var(--glass-border)}}.section-title{font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-lg)}.highlight-box{background:linear-gradient(135deg,rgba(255,189,89,0.1),rgba(255,189,89,0.05));border-left:4px solid var(--gold);padding:var(--space-lg);border-radius:var(--radius-md);margin-bottom:var(--space-lg)}.highlight-box-title{font-weight:700;color:var(--gold);margin-bottom:var(--space-sm)}.definition-box{background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(0,240,255,0.05));border-left:4px solid var(--cyan);padding:var(--space-lg);border-radius:var(--radius-md);margin-bottom:var(--space-lg)}.definition-box-title{font-weight:700;color:var(--cyan);margin-bottom:var(--space-sm)}.image-container{margin:var(--space-lg) 0;text-align:center}.image-caption{font-size:0.85rem;color:var(--text-muted);margin-top:var(--space-sm)}.summary-box{background:linear-gradient(135deg,rgba(0,200,83,0.1),rgba(0,200,83,0.05));border:1px solid var(--success);border-radius:var(--radius-lg);padding:var(--space-xl);margin-bottom:var(--space-xl)}.summary-title{font-size:1.25rem;font-weight:700;color:var(--success);margin-bottom:var(--space-md)}.quiz-section{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin-top:var(--space-2xl)}.quiz-header{text-align:center;margin-bottom:var(--space-xl)}.quiz-title{font-size:1.5rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-sm)}.quiz-subtitle{color:var(--text-muted)}.quiz-question{margin-bottom:var(--space-xl);padding-bottom:var(--space-xl);border-bottom:1px solid var(--glass-border)}.quiz-question:last-child{border-bottom:none}.question-number{color:var(--purple);font-weight:700;margin-bottom:var(--space-sm);display:block}.question-text{font-size:1.1rem;font-weight:600;margin-bottom:var(--space-md)}.quiz-options{display:grid;gap:var(--space-sm)}.quiz-option{background:var(--bg-card);border:1px solid var(--glass-border);padding:var(--space-md);border-radius:var(--radius-md);cursor:pointer;transition:all 0.2s ease;display:flex;align-items:center;gap:var(--space-md)}.quiz-option:hover{background:rgba(255,255,255,0.1);border-color:var(--gold)}.quiz-option.selected{border-color:var(--cyan);background:rgba(0,240,255,0.1)}.quiz-option.correct{border-color:var(--success);background:rgba(0,200,83,0.1)}.quiz-option.incorrect{border-color:var(--error);background:rgba(255,82,82,0.1)}.option-marker{width:24px;height:24px;border-radius:50%;border:2px solid var(--glass-border);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:var(--text-muted)}.quiz-option.selected .option-marker{border-color:var(--cyan);color:var(--cyan)}.quiz-option.correct .option-marker{border-color:var(--success);background:var(--success);color:var(--navy)}.quiz-option.incorrect .option-marker{border-color:var(--error);background:var(--error);color:white}.question-feedback{margin-top:var(--space-md);padding:var(--space-md);border-radius:var(--radius-md);background:rgba(255,255,255,0.05);display:none}.question-feedback.show{display:block}.question-feedback.correct{border-left:4px solid var(--success)}.question-feedback.incorrect{border-left:4px solid var(--error)}.feedback-title{font-weight:700;margin-bottom:var(--space-xs)}.feedback-text{font-size:0.9rem;color:var(--text-secondary)}.quiz-result{text-align:center;margin-top:var(--space-xl);padding:var(--space-xl);background:var(--glass-bg);border-radius:var(--radius-lg);border:1px solid var(--gold);display:none}.quiz-result.show{display:block}.result-score{font-size:2.5rem;font-weight:800;color:var(--gold);margin-bottom:var(--space-sm)}.footer{text-align:center;margin-top:var(--space-2xl);padding:var(--space-xl);border-top:1px solid var(--glass-border);color:var(--text-muted);font-size:0.9rem}</style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge"><span>📝</span><span>Practice</span></div>
+            <div class="lesson-chapter">Chapter 5 - Paper Trading</div>
+            <h1 class="lesson-title">Bài 5.1: Paper Trading Là Gì?</h1>
+            <div class="lesson-meta">
+                <span>📚 Bài 5.1</span>
+                <span>⏱️ 12 phút đọc</span>
+                <span>📝 3 câu quiz</span>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title">🎯 Bạn Có Dám Trade $10,000 Ngay Bây Giờ?</h2>
+            <p>Hãy tưởng tượng bạn vừa học xong lý thuyết trading trong 6 tuần, hiểu rõ các pattern UPU, DPU, Flag, Triangle, Head & Shoulders, và bạn đang rất hào hứng muốn kiếm tiền ngay lập tức. Bạn nạp vào tài khoản $10,000 tiền thật và bắt đầu trade. Câu hỏi đặt ra là: Liệu bạn sẽ kiếm được tiền hay mất sạch số tiền đó trong tháng đầu tiên?</p>
+            <p>Thống kê từ Binance cho thấy một con số gây sốc: 87% trader mới mất hơn 50% vốn trong 90 ngày đầu tiên khi họ bỏ qua giai đoạn Paper Trading và lao thẳng vào thị trường với tiền thật. Ngược lại, những trader dành 2-3 tháng Paper Trading trước khi chuyển sang real đạt tỷ lệ sống sót cao hơn gấp 3 lần trong năm đầu tiên. Vậy Paper Trading thực sự là gì và tại sao nó quan trọng đến vậy? Bài học hôm nay sẽ giải đáp mọi thắc mắc của bạn.</p>
+        </section>
+
+        <!-- MỤC TIÊU BÀI HỌC -->
+        <section class="section">
+            <h2 class="section-title">📚 Mục Tiêu Bài Học</h2>
+            <div class="definition-box">
+                <div class="definition-box-title">💎 Sau bài học này, bạn sẽ:</div>
+                <p>Hiểu chính xác Paper Trading là gì và cách nó hoạt động trên thị trường crypto thực tế.</p>
+                <p>Biết được 5 lợi ích quan trọng nhất mà Paper Trading mang lại cho trader mới.</p>
+                <p>Nắm rõ sự khác biệt then chốt giữa Paper Trading và Real Trading để chuẩn bị tâm lý.</p>
+                <p>Xác định được các tiêu chí cụ thể để biết khi nào bạn sẵn sàng chuyển sang trade tiền thật.</p>
+            </div>
+        </section>
+
+        <!-- DEEP EXPLANATION: WHAT -->
+        <section class="section">
+            <h2 class="section-title">📖 Paper Trading Là Gì? (Định Nghĩa Đầy Đủ)</h2>
+            <p><strong>Paper Trading</strong> (hay còn gọi là Simulated Trading hoặc Demo Trading) là phương pháp thực hành giao dịch sử dụng tiền ảo trên thị trường thực, với dữ liệu giá real-time từ sàn giao dịch. Bạn đặt lệnh mua, bán, thiết lập Stop Loss và Take Profit giống hệt như trading thật, theo dõi kết quả theo thời gian thực, nhưng hoàn toàn không có rủi ro mất tiền vì sử dụng số dư ảo.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🚗 Ví Dụ Dễ Hiểu: Paper Trading Như Học Lái Xe Trên Simulator</div>
+                <p>Trước khi được cấp bằng lái và ra đường thật, bạn phải tập lái xe trên mô phỏng hoặc sân tập để làm quen với vô lăng, ga, phanh mà không lo gây tai nạn. Paper Trading cũng tương tự như vậy trong thế giới trading.</p>
+                <p>Bạn được làm quen với cách đặt lệnh, quản lý vị thế đang mở, theo dõi P&L biến động theo thời gian thực, và quan trọng nhất là học cách kiểm soát cảm xúc khi thấy lệnh lỗ hoặc lãi.</p>
+                <p>Khác biệt duy nhất là bạn không mất tiền thật nếu sai, điều này cho phép bạn thử nghiệm, mắc sai lầm, và học từ những sai lầm đó mà không phải trả giá bằng tiền.</p>
+            </div>
+
+            <p>Trong GEM Mobile App, tính năng Paper Trading được tích hợp sẵn với số dư ảo $10,000 USD. Giá được cập nhật trực tiếp từ Binance Futures, và hệ thống tự động theo dõi tất cả các vị thế của bạn. Khi giá chạm Stop Loss hoặc Take Profit, lệnh sẽ được đóng tự động và kết quả được ghi nhận vào lịch sử giao dịch. Điều này có nghĩa là trải nghiệm Paper Trading trên GEM App gần như giống hệt với real trading, ngoại trừ việc bạn không mất tiền thật.</p>
+
+            <!-- HÌNH 7.1.1 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch7/7.1/7-1-1.webp" alt="Paper Trading Concept - Học lái xe trên simulator">
+                <div class="image-caption">Hình 7.1.1: Paper Trading như học lái xe trên simulator - thực hành với tiền ảo trên thị trường thật</div>
+            </div>
+        </section>
+
+        <!-- DEEP EXPLANATION: WHY -->
+        <section class="section">
+            <h2 class="section-title">❓ Tại Sao Paper Trading Quan Trọng?</h2>
+            <p>Nhiều trader mới thường hỏi: "Tại sao phải mất thời gian Paper Trade khi có thể học nhanh hơn bằng tiền thật?" Câu trả lời nằm ở việc hiểu rõ 5 lợi ích then chốt mà Paper Trading mang lại cho hành trình trading của bạn.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🛡️ Lợi Ích 1: Không Rủi Ro Tài Chính (Zero Financial Risk)</div>
+                <p>Bạn có thể thử nghiệm bất kỳ chiến lược nào, trade bất kỳ pattern nào, và mắc bất kỳ sai lầm nào mà không mất một xu tiền thật. Điều này cho phép bạn tự do học hỏi mà không bị áp lực tài chính đè nặng.</p>
+                <p>Một trader mới có thể test 50-100 trades khác nhau để tìm ra phong cách phù hợp với mình, trong khi nếu làm điều này với tiền thật, chi phí "học phí" có thể lên đến hàng nghìn đô la.</p>
+                <p>Đây là cơ hội để bạn mắc sai lầm trong môi trường an toàn trước khi những sai lầm đó trở nên tốn kém trong thị trường thực.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📊 Lợi Ích 2: Kiểm Chứng Chiến Lược Trước Khi Áp Dụng</div>
+                <p>Mỗi pattern bạn học như UPU, DPU, Flag hay Head & Shoulders đều có lý thuyết rõ ràng, nhưng lý thuyết và thực tế có thể rất khác nhau. Paper Trading cho phép bạn test xem các pattern này hoạt động thực sự như thế nào trên các coin bạn muốn trade.</p>
+                <p>Ví dụ, bạn có thể phát hiện ra rằng pattern Flag hoạt động tốt hơn trên BTC với timeframe 4H, trong khi Triangle phù hợp hơn với altcoin trên timeframe 1H. Những insight này chỉ có thể thu được thông qua thực hành.</p>
+                <p>Sau 50-100 trades, bạn sẽ có data thực tế về win rate, average profit, và drawdown của chiến lược mình đang sử dụng.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🧠 Lợi Ích 3: Xây Dựng Sự Tự Tin Từng Bước</div>
+                <p>Sự tự tin trong trading không đến từ việc đọc sách hay xem video, mà đến từ việc thực hành và có track record thành công. Paper Trading giúp bạn xây dựng track record này một cách an toàn.</p>
+                <p>Khi bạn đã có 50 trades với win rate 60% và profit factor 1.8 trên paper account, bạn sẽ tự tin hơn rất nhiều khi chuyển sang trade tiền thật vì biết rằng phương pháp của mình đã được kiểm chứng.</p>
+                <p>Sự tự tin này cũng giúp bạn giữ vững kỷ luật khi gặp chuỗi thua lỗ, vì bạn biết rằng về dài hạn, chiến lược của mình vẫn có lãi.</p>
+            </div>
+
+            <!-- HÌNH 7.1.2 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch7/7.1/7-1-2.webp" alt="5 Lợi Ích Của Paper Trading">
+                <div class="image-caption">Hình 7.1.2: 5 lợi ích quan trọng của Paper Trading - Zero Risk, Test Strategy, Build Confidence</div>
+            </div>
+        </section>
+
+        <!-- CASE STUDY -->
+        <section class="section">
+            <h2 class="section-title">📈 Case Study: Hành Trình Của Trader A vs Trader B</h2>
+            <p>Để minh họa rõ hơn tầm quan trọng của Paper Trading, hãy xem xét câu chuyện thực tế của hai trader bắt đầu cùng thời điểm với cùng số vốn $5,000 nhưng có cách tiếp cận hoàn toàn khác nhau.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title">📌 Trader A: Bỏ Qua Paper Trading, Lao Thẳng Vào Thị Trường</div>
+                <p><strong>Tháng 1:</strong> Sau khi học xong khóa cơ bản, A nạp ngay $5,000 vào Binance và bắt đầu trade. Tuần đầu may mắn lãi $800 (16%). A cảm thấy mình là thiên tài trading.</p>
+                <p><strong>Tháng 2:</strong> Gặp chuỗi 5 trades thua liên tiếp. Thay vì dừng lại phân tích, A tăng size lệnh để "gỡ". Kết quả: mất thêm $2,000.</p>
+                <p><strong>Tháng 3:</strong> Vốn còn $2,200 (giảm 56%). A bắt đầu revenge trading, FOMO vào các coin pump, và bỏ qua mọi quy tắc đã học. Kết thúc tháng còn $800.</p>
+                <p><strong>Kết quả sau 3 tháng:</strong> Mất 84% vốn ($4,200), tâm lý sụp đổ, mất niềm tin vào trading. A bỏ cuộc và kết luận rằng "trading là lừa đảo".</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📌 Trader B: Paper Trade 3 Tháng Trước Khi Real</div>
+                <p><strong>Tháng 1-3:</strong> B dành 3 tháng Paper Trading, thực hiện 87 trades trên GEM App. Kết quả: Win rate 58%, Profit Factor 1.6, Max Drawdown 15%. B học được rằng mình trade tốt nhất với pattern UPU và DPU trên timeframe 4H.</p>
+                <p><strong>Tháng 4 (bắt đầu real):</strong> B nạp $5,000 và bắt đầu với size rất nhỏ (1% mỗi trade = $50 risk). Tuần đầu có 3 win, 2 loss. Tâm lý ổn định vì đã quen với việc có lệnh thua.</p>
+                <p><strong>Tháng 5-6:</strong> Dần dần tăng size khi thấy chiến lược hoạt động. Gặp chuỗi 4 trades thua nhưng không panic vì biết đây là bình thường với win rate 58%.</p>
+                <p><strong>Kết quả sau 6 tháng real:</strong> Vốn từ $5,000 lên $7,200 (+44%), tâm lý vững vàng, tiếp tục trade có kỷ luật.</p>
+            </div>
+
+            <p>Sự khác biệt giữa Trader A và Trader B không phải ở trí thông minh hay vốn liếng, mà ở việc B đã chuẩn bị kỹ lưỡng qua 3 tháng Paper Trading. B không chỉ test chiến lược mà còn xây dựng được kỷ luật, sự kiên nhẫn, và khả năng kiểm soát cảm xúc trước khi đặt tiền thật lên bàn.</p>
+
+            <!-- HÌNH 7.1.3 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch7/7.1/7-1-3.webp" alt="Case Study - Trader A vs Trader B">
+                <div class="image-caption">Hình 7.1.3: So sánh Trader A (bỏ qua Paper Trading) vs Trader B (Paper Trade 3 tháng) - Kết quả sau 6 tháng</div>
+            </div>
+        </section>
+
+        <!-- Q&A SECTION -->
+        <section class="section">
+            <h2 class="section-title">❓ Câu Hỏi Thường Gặp</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">Q1: Paper Trading khác gì với Backtesting?</div>
+                <p><strong>Backtesting</strong> là việc test chiến lược trên dữ liệu lịch sử, nghĩa là bạn đã biết trước kết quả. Ngược lại, <strong>Paper Trading</strong> là trade trên thị trường live với giá real-time, bạn không biết điều gì sẽ xảy ra tiếp theo.</p>
+                <p>Paper Trading gần với real trading hơn vì bạn phải ra quyết định trong điều kiện không chắc chắn, đối mặt với FOMO khi coin pump và FUD khi coin dump.</p>
+                <p>Cả hai đều quan trọng: Backtesting để validate ý tưởng nhanh, Paper Trading để test trong điều kiện thị trường thực.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">Q2: Nên Paper Trade bao lâu trước khi chuyển sang tiền thật?</div>
+                <p>Không có con số cố định, nhưng khuyến nghị tối thiểu là <strong>50-100 trades trong 2-3 tháng</strong>. Số trades đủ lớn để có ý nghĩa thống kê, và thời gian đủ dài để trải qua các điều kiện thị trường khác nhau.</p>
+                <p>Quan trọng hơn số lượng trades là chất lượng: Bạn phải đạt được <strong>win rate ổn định trên 55%</strong>, <strong>profit factor trên 1.5</strong>, và <strong>max drawdown dưới 20%</strong> trong ít nhất 2 tháng liên tiếp.</p>
+                <p>Nếu sau 100 trades mà kết quả vẫn không ổn định, tiếp tục Paper Trade thêm cho đến khi đạt tiêu chí.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">Q3: Tâm lý Paper Trading có giống Real Trading không?</div>
+                <p><strong>Câu trả lời ngắn gọn: Không.</strong> Khi trade tiền ảo, bạn không có áp lực thực sự. Thấy lệnh -$500 trên paper account không đau bằng mất $500 tiền thật trong ví.</p>
+                <p>Điều này có nghĩa là bạn cần chuẩn bị tâm lý cho sự khác biệt này. Khi chuyển sang real, hãy bắt đầu với size rất nhỏ để dần dần làm quen với cảm giác trade tiền thật.</p>
+                <p>Nhiều trader paper trade rất giỏi nhưng real trade lại thua, vì họ không kiểm soát được cảm xúc khi tiền thật bị ảnh hưởng.</p>
+            </div>
+        </section>
+
+        <!-- PRACTICAL ACTION -->
+        <section class="section">
+            <h2 class="section-title">🎯 Thực Hành Ngay</h2>
+
+            <div class="definition-box">
+                <div class="definition-box-title">📌 Làm Ngay Hôm Nay (15 phút):</div>
+                <p><strong>Bước 1:</strong> Mở GEM Mobile App → Vào tab Scanner → Tìm bất kỳ coin nào đang có pattern rõ ràng (Flag, Triangle, hoặc UPU/DPU).</p>
+                <p><strong>Bước 2:</strong> Nhấn "Paper Trade" → Nhập Entry price, Stop Loss, và Take Profit theo đúng quy tắc đã học. Ví dụ: Risk:Reward tối thiểu 1:2.</p>
+                <p><strong>Bước 3:</strong> Xác nhận lệnh và để lệnh chạy. Không can thiệp, không close sớm. Đây là bài tập đầu tiên về kỷ luật.</p>
+                <p><strong>Bước 4:</strong> Ghi chép lại trong notebook: Coin gì? Pattern gì? Entry/SL/TP bao nhiêu? Lý do vào lệnh?</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📋 Tuần Này - Mục Tiêu 5 Paper Trades:</div>
+                <p>Trong 7 ngày tới, thực hiện ít nhất <strong>5 paper trades</strong> theo đúng quy trình: Scan → Identify Pattern → Entry với SL/TP rõ ràng → Ghi chép.</p>
+                <p>Mục tiêu không phải win tất cả, mà là thực hành quy trình một cách nhất quán. Trader giỏi không phải người thắng nhiều nhất, mà là người tuân thủ quy trình tốt nhất.</p>
+                <p>Cuối tuần, review lại 5 trades: Có trade nào bạn vào sai quy trình không? Có trade nào bạn close sớm vì sợ hãi không? Học được gì từ mỗi trade?</p>
+            </div>
+        </section>
+
+        <!-- SUMMARY BOX -->
+        <div class="summary-box">
+            <div class="summary-title">📝 Tóm Tắt Bài Học</div>
+            <ul>
+                <li><strong>Paper Trading</strong> là phương pháp thực hành trading với tiền ảo trên thị trường thực, giúp bạn học hỏi mà không rủi ro mất tiền.</li>
+                <li><strong>5 lợi ích chính:</strong> Zero risk, test chiến lược, xây dựng tự tin, tạo track record, và rèn luyện kỷ luật.</li>
+                <li><strong>Tiêu chí sẵn sàng chuyển sang real:</strong> 50-100 trades, win rate ổn định trên 55%, profit factor trên 1.5, max drawdown dưới 20% trong 2-3 tháng.</li>
+                <li><strong>Sự khác biệt quan trọng:</strong> Tâm lý Paper Trading và Real Trading rất khác nhau, chuẩn bị tinh thần cho điều này.</li>
+                <li><strong>GEM App:</strong> Tính năng Paper Trading tích hợp sẵn với $10,000 ảo, giá real-time từ Binance, tự động track P&L và history.</li>
+            </ul>
+            <p style="margin-top: var(--space-md); color: var(--gold); font-weight: 600;">🎯 Bài học lớn: Paper Trading không phải "lãng phí thời gian" - đó là đầu tư thông minh nhất bạn có thể làm cho sự nghiệp trading của mình.</p>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <p style="color: var(--gold); font-weight: 600;">✅ Hoàn thành Bài 5.1 - Paper Trading Là Gì?</p>
+            <p>Tiếp theo: <strong style="color: var(--text-primary);">Bài 5.2 - Hướng Dẫn Paper Trade Trong GEM App</strong></p>
+        </div>
+
+        <!-- QUIZ SECTION -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">🎯 Kiểm Tra Hiểu Biết</h2>
+                <p class="quiz-subtitle">Trả lời 3 câu hỏi để củng cố kiến thức</p>
+            </div>
+
+            <div class="quiz-question" data-question="1">
+                <div class="question-number">1</div>
+                <p class="question-text">Theo khuyến nghị, bạn nên thực hiện bao nhiêu paper trades trước khi chuyển sang trade tiền thật?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">10-20 trades trong 2 tuần</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">50-100 trades trong 2-3 tháng</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">500+ trades trong 1 năm</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Không cần paper trade, có thể real ngay</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2">
+                <div class="question-number">2</div>
+                <p class="question-text">Win rate tối thiểu nên đạt được trong paper trading trước khi chuyển sang real là bao nhiêu?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">35% - 40%</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">45% - 50%</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">55% trở lên, ổn định trong 2+ tháng</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">80% trở lên</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="3">
+                <div class="question-number">3</div>
+                <p class="question-text">Điểm khác biệt LỚN NHẤT giữa Paper Trading và Real Trading là gì?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Tâm lý và áp lực khi có tiền thật liên quan</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Giá cả khác nhau hoàn toàn</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Patterns hoạt động khác nhau</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Timeframe không áp dụng được</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score"><span id="score">0</span>/3</div>
+                <p id="result-message" style="color: var(--text-secondary); margin-bottom: var(--space-lg);"></p>
+                <button onclick="resetQuiz()" style="background: var(--gold); color: var(--navy-dark); border: none; padding: 12px 24px; border-radius: var(--radius-md); font-weight: 700; cursor: pointer;">Làm Lại Quiz</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const correctAnswers = { 1: 'B', 2: 'C', 3: 'A' };
+        const explanations = {
+            1: {
+                correct: 'Chính xác! 50-100 trades trong 2-3 tháng là con số đủ để có ý nghĩa thống kê và trải qua nhiều điều kiện thị trường khác nhau. Ít hơn thì chưa đủ data, nhiều hơn thì có thể lãng phí thời gian nếu bạn đã sẵn sàng.',
+                incorrect: 'Chưa đúng. Khuyến nghị là 50-100 trades trong 2-3 tháng. Số trades này đủ lớn để có ý nghĩa thống kê về win rate và profit factor, đồng thời thời gian đủ dài để bạn trải qua cả thị trường uptrend, downtrend và sideways.'
+            },
+            2: {
+                correct: 'Tuyệt vời! Win rate 55% trở lên, ổn định trong ít nhất 2 tháng liên tiếp là tiêu chí quan trọng. Kết hợp với profit factor trên 1.5 và max drawdown dưới 20%, đây là dấu hiệu bạn đã sẵn sàng cho real trading.',
+                incorrect: 'Chưa chính xác. Win rate tối thiểu nên đạt là 55% trở lên, và phải ổn định trong ít nhất 2 tháng liên tiếp. Win rate thấp hơn có thể profitable nếu R:R cao, nhưng 55% là mức an toàn cho trader mới với R:R tiêu chuẩn 1:2.'
+            },
+            3: {
+                correct: 'Hoàn toàn đúng! Tâm lý là khác biệt lớn nhất. Khi trade tiền ảo, bạn không cảm thấy đau khi thua. Nhưng khi tiền thật bị mất, cảm xúc như sợ hãi, tham lam, FOMO sẽ xuất hiện và ảnh hưởng mạnh đến quyết định của bạn.',
+                incorrect: 'Không phải. Giá cả, patterns và timeframe đều giống nhau giữa paper và real trading. Điểm khác biệt lớn nhất là TÂM LÝ - khi có tiền thật liên quan, cảm xúc như sợ hãi và tham lam sẽ ảnh hưởng mạnh đến quyết định trading của bạn.'
+            }
+        };
+        let answered = {};
+        let score = 0;
+
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const question = this.closest('.quiz-question');
+                const questionNum = question.dataset.question;
+                if (answered[questionNum]) return;
+
+                answered[questionNum] = true;
+                const selectedAnswer = this.dataset.option;
+                const isCorrect = selectedAnswer === correctAnswers[questionNum];
+
+                question.querySelectorAll('.quiz-option').forEach(opt => opt.classList.add('disabled'));
+
+                if (isCorrect) {
+                    this.classList.add('correct');
+                    score++;
+                } else {
+                    this.classList.add('incorrect');
+                    question.querySelectorAll('.quiz-option').forEach(opt => {
+                        if (opt.dataset.option === correctAnswers[questionNum]) {
+                            opt.classList.add('correct');
+                        }
+                    });
+                }
+
+                const feedback = question.querySelector('.question-feedback');
+                feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+                feedback.querySelector('.feedback-title').textContent = isCorrect ? '✓ Chính xác!' : '✗ Chưa đúng';
+                feedback.querySelector('.feedback-text').textContent = isCorrect ? explanations[questionNum].correct : explanations[questionNum].incorrect;
+
+                if (Object.keys(answered).length === 3) {
+                    setTimeout(() => {
+                        document.getElementById('score').textContent = score;
+                        let msg = score === 3 ? 'Xuất sắc! Bạn đã nắm vững kiến thức về Paper Trading!' : score === 2 ? 'Tốt lắm! Xem lại phần bạn trả lời sai để hiểu rõ hơn.' : 'Hãy đọc lại bài học và thử lại quiz nhé!';
+                        document.getElementById('result-message').textContent = msg;
+                        document.querySelector('.quiz-result').classList.add('show');
+                    }, 1000);
+                }
+            });
+        });
+
+        function resetQuiz() {
+            answered = {};
+            score = 0;
+            document.querySelectorAll('.quiz-question').forEach(q => {
+                q.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect', 'disabled');
+                });
+                q.querySelector('.question-feedback').classList.remove('show', 'correct', 'incorrect');
+            });
+            document.querySelector('.quiz-result').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.2: Cấu Trúc 3 Phases Của UPD | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .section > ul, .section > ol { color: var(--text-secondary); padding-left: 1.5em; margin-bottom: var(--space-md); }
+        .section li { margin-bottom: var(--space-sm); }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .warning-box { background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05)); border: 1px solid rgba(156, 6, 18, 0.4); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .warning-box { border: none; border-radius: 0; border-left: 4px solid var(--burgundy); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .warning-box-title { font-weight: 700; color: var(--burgundy-light); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .stats-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        @media (max-width: 600px) { .stat-card { border: none; border-radius: 0; padding: var(--space-md); } }
+        .stat-value { font-size: 1.75rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        @media (max-width: 600px) { .stat-value { font-size: 1.25rem; } }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+
+        .quiz-section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; padding: 0; margin-top: 0; border-top: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: var(--space-lg) 16px var(--space-md); margin-bottom: 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-question { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin-bottom: 0; border-bottom: 1px solid var(--glass-border); } }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; font-weight: 700; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); line-height: 1.6; }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        @media (max-width: 600px) { .quiz-options { gap: 1px; background: var(--glass-border); margin-left: -16px; margin-right: -16px; margin-left: calc(-16px - 4px); } }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .quiz-option { border: none; border-radius: 0; border-left: 4px solid transparent; padding: var(--space-md) 16px; } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); background: var(--bg-card); }
+        @media (max-width: 600px) { .quiz-option:hover:not(.disabled) { border-left-color: var(--gold); } }
+        .quiz-option.selected { border-color: var(--gold); background: rgba(255, 189, 89, 0.1); }
+        @media (max-width: 600px) { .quiz-option.selected { border-left-color: var(--gold); } }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.correct { border-left-color: var(--success) !important; } }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.incorrect { border-left-color: var(--error) !important; } }
+        .quiz-option.disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-marker { width: 28px; height: 28px; min-width: 28px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.selected .option-marker { background: var(--gold); border-color: var(--gold); color: var(--navy-dark); }
+        .quiz-option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; }
+        .quiz-option.incorrect .option-marker { background: var(--error); border-color: var(--error); color: white; }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--space-sm); display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .result-text { font-size: 1.25rem; font-weight: 700; margin-bottom: var(--space-sm); }
+        .result-message { color: var(--text-muted); }
+
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-buttons { padding: var(--space-lg) 16px; } }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>📉</span>
+                <span>Reversal Pattern</span>
+            </div>
+            <div class="lesson-chapter">Chapter 5 - UPD Pattern Mastery</div>
+            <h1 class="lesson-title">Bài 5.2: Cấu Trúc 3 Phases Của UPD</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 5.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>15 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🔥</span> 1. Lời Mở Đầu: Giải Mã "Vụ Án" UPD</h2>
+            <p>Chào mừng bạn trở lại. Trong bài trước, chúng ta đã biết UPD là gì. Hôm nay, tôi muốn mời bạn tham gia vào một "vụ án" đặc biệt. Hãy tưởng tượng bạn là một thám tử tài chính, và nhiệm vụ của bạn là vạch trần một vụ chuyển giao tài sản khổng lồ đang diễn ra ngay trước mắt hàng triệu người.</p>
+
+            <p>Thủ phạm? Smart Money (Dòng tiền thông minh).<br>
+            Nạn nhân? Retail Traders (Nhà đầu tư nhỏ lẻ).<br>
+            Hiện trường vụ án? Chính là mẫu hình <strong>UPD (Up-Pause-Down)</strong>.</p>
+
+            <p>Nhiều trader nhìn vào biểu đồ và chỉ thấy những cây nến xanh đỏ vô tri. Nhưng sau bài học này, bạn sẽ nhìn thấy một câu chuyện hoàn toàn khác. Bạn sẽ thấy lòng tham, sự sợ hãi, sự toan tính và cả những cái bẫy tinh vi. UPD không chỉ là một hình vẽ; nó là một kịch bản tâm lý học hoàn hảo gồm 3 màn kịch: <strong>Mồi Nhử (Up)</strong>, <strong>Trao Tay (Pause)</strong> và <strong>Sập Hầm (Down)</strong>.</p>
+
+            <p>Tại sao bạn cần phải hiểu sâu đến mức này? Bởi vì nếu bạn chỉ học vẹt "thấy hình chữ nhật thì Sell", bạn sẽ sớm trở thành nạn nhân tiếp theo. Nhưng nếu bạn hiểu được <em>động cơ</em> đằng sau từng cây nến, bạn sẽ biết chính xác khi nào nên đứng ngoài quan sát và khi nào nên bóp cò.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Nguyên Tắc Cốt Lõi</div>
+                <p><strong>"Không có Phase 2 = Không có Trade."</strong> Hãy khắc cốt ghi tâm điều này. Nhiều trader vội vàng SHORT khi thấy giá giảm mạnh (Phase 3) mà bỏ qua việc kiểm tra xem Phase 2 có tồn tại hay không. Phase 2 (vùng Pause) chính là "kho đạn" của Smart Money. Nếu không có kho đạn này, đợt giảm giá chỉ là một cú hắt hơi, không phải là sự đảo chiều xu hướng.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: CONCEPT INTRODUCTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> 2. Concept: UPD - Up, Pause, Down</h2>
+            <p>Trước khi đi sâu vào chi tiết, hãy ôn lại định nghĩa một chút để đảm bảo chúng ta cùng tần số. UPD là viết tắt của <strong>Up - Pause - Down</strong>. Đây là một mẫu hình <strong>Đảo Chiều Giảm (Bearish Reversal)</strong> cực mạnh, thường xuất hiện ở cuối một xu hướng tăng dài hạn hoặc trung hạn.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📋</span> Cấu Trúc Giải Phẫu 3 Màn Kịch</div>
+                <p>
+                    <strong>• Phase 1 (UP):</strong> Giai đoạn "Thả Mồi". Giá tăng mạnh, tạo sự hưng phấn tột độ để lôi kéo đám đông vào cuộc.<br>
+                    <strong>• Phase 2 (PAUSE):</strong> Giai đoạn "Trao Tay". Giá đi ngang, Smart Money âm thầm bán ra số lượng lớn cho Retail đang say mồi.<br>
+                    <strong>• Phase 3 (DOWN):</strong> Giai đoạn "Sập Bẫy". Giá giảm mạnh, xác nhận đảo chiều, nhốt chặt những người mua đỉnh.
+                </p>
+            </div>
+
+            <p>Mục tiêu tối thượng của chúng ta không phải là cố gắng bắt đỉnh ở Phase 1 hay Phase 2. Mục tiêu là xác định được vùng <strong>HFZ (High Frequency Zone)</strong> được tạo ra trong Phase 2. Tại sao? Vì HFZ chính là "vùng tử địa" đối với phe Mua. Bất cứ khi nào giá quay lại vùng này trong tương lai, những lệnh bán chưa khớp hết của Smart Money sẽ kích hoạt, tạo ra áp lực bán đè bẹp mọi nỗ lực hồi phục.</p>
+        </section>
+
+        <!-- SECTION 3: DEEP DIVE -->
+        <section class="section">
+            <h2 class="section-title"><span>🔍</span> 3. Deep Dive: Phân Tích Chuyên Sâu 3 Phases</h2>
+            <p>Bây giờ, hãy đeo kính lúp vào và soi kỹ từng milimet của mô hình này. Đừng nhìn bề mặt. Hãy nhìn sâu vào tâm lý và dòng tiền đằng sau mỗi cây nến.</p>
+
+            <!-- Phase 1 Detail -->
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Phase 1: UP - Sự Hưng Phấn Cuối Cùng</div>
+                        <div class="flow-step-desc">
+                            <p>Đây là giai đoạn mà sự tham lam (Greed) lên ngôi. Giá tăng mạnh với các cây nến xanh thân dài (Marubozu), biên độ tăng <strong>tối thiểu 2%</strong> (thường lớn hơn nhiều ở Crypto). Volume giao dịch tăng vọt.</p>
+                            <p><strong>Tâm lý thị trường (Market Sentiment):</strong> "To the moon!", "Không mua bây giờ thì không còn cơ hội đâu". Tin tức tốt tràn ngập mặt báo. Retail Traders (đám đông nhỏ lẻ) sợ bỏ lỡ cơ hội (FOMO) nên điên cuồng nhảy vào mua bất chấp giá. Họ nhìn thấy lợi nhuận trước mắt mà quên mất rủi ro.</p>
+                            <p><strong>Hành động của Smart Money:</strong> Họ LÀ NGƯỜI BÁN. Hãy nhớ, để bạn mua được, phải có ai đó bán cho bạn. Khi cả thế giới muốn mua, ai là người bán? Chính là Cá Mập. Họ tận dụng thanh khoản dồi dào từ đám đông đang hưng phấn để bắt đầu chốt lời những vị thế họ đã mua từ đáy. Họ bán vào sức mua (Selling into strength) để không làm giá sập ngay lập tức.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔍</span> Dấu Hiệu Nhận Biết Phase 1</div>
+                <p>• Nến thân lớn, chủ yếu là nến xanh, ít râu trên.<br>
+                • Volume cao đột biến do Retail đổ xô vào mua.<br>
+                • Chỉ báo RSI thường nằm ở vùng quá mua (Overbought > 70).<br>
+                • Tin tức tích cực tràn lan, sentiment thị trường cực kỳ lạc quan.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch4/4.2/4-2-1.webp" alt="Phase 1 UP">
+            </div>
+            <div class="image-caption">Hình 1: Phase 1 - Đợt tăng giá mạnh mẽ kích hoạt lòng tham cực độ (Extreme Greed)</div>
+
+            <!-- Phase 2 Detail -->
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Phase 2: PAUSE - Sự Chuyển Giao Tài Sản (HFZ)</div>
+                        <div class="flow-step-desc">
+                            <p>Đây là giai đoạn quan trọng nhất, là "trái tim" của mô hình UPD. Giá đột ngột chững lại sau đợt tăng mạnh. Nó đi ngang trong một phạm vi hẹp (Consolidation) từ <strong>1 đến 5 cây nến</strong>. Biên độ dao động (Range) của vùng này phải <strong>nhỏ hơn 1.5%</strong>.</p>
+                            <p><strong>Tại sao giá lại dừng?</strong> Lẽ ra với lực mua mạnh ở Phase 1, giá phải tăng tiếp chứ? Câu trả lời là: <strong>Absorption (Sự hấp thụ)</strong>. Smart Money đã đặt những "bức tường bán" (Sell Walls) khổng lồ ở đây. Mọi lực mua của Retail đều bị Smart Money hấp thụ hết. Bạn mua bao nhiêu, họ bán bấy nhiêu. Giá không thể tăng nổi dù Volume vẫn cao.</p>
+                            <p><strong>Tâm lý Retail:</strong> "Chắc giá chỉ nghỉ ngơi xíu rồi tăng tiếp thôi", "Cơ hội mua thêm giá tốt (Buy the dip)". Họ không biết rằng họ đang mua lại chính số hàng mà Cá Mập muốn tống khứ.</p>
+                            <p>👉 Vùng giá đi ngang này chính là nơi hình thành <strong>HFZ (High Frequency Zone)</strong> - Vùng cung mạnh nhất.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Cảnh Báo Về Thời Gian Phase 2</div>
+                <p>Nếu vùng Pause kéo dài quá lâu (trên 6-7 nến), HFZ sẽ yếu đi. Tại sao? Vì Smart Money không bao giờ giữ trạng thái "treo" quá lâu nếu họ thực sự muốn bán. Nếu họ mất quá nhiều thời gian để phân phối, có nghĩa là lực cầu vẫn còn rất mạnh và có thể hấp thụ hết lượng hàng của họ. Thời gian tích lũy càng ngắn (nhưng đủ để trao tay), cú sập sau đó càng mạnh và bất ngờ.</p>
+            </div>
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch4/4.2/4-2-2.webp" alt="Phase 2 PAUSE">
+            </div>
+            <div class="image-caption">Hình 2: Phase 2 - Vùng Pause nơi Smart Money âm thầm thoát hàng tạo nên HFZ</div>
+
+            <!-- Phase 3 Detail -->
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Phase 3: DOWN - Cú Sập Hầm</div>
+                        <div class="flow-step-desc">
+                            <p>Khi Smart Money đã bán hết số hàng họ muốn, họ làm gì tiếp theo? Họ rút các lệnh hỗ trợ phía dưới. Kết quả là giá rơi tự do vì không còn ai đỡ nữa. Phase 3 được xác nhận bởi một hoặc chuỗi nến đỏ thân dài, giảm <strong>tối thiểu 2%</strong> và phá vỡ hoàn toàn đáy của vùng Pause.</p>
+                            <p><strong>Tâm lý thị trường:</strong> Hoảng loạn tột độ (Panic). Những người mua ở Phase 1 (đang hòa hoặc lỗ nhẹ) và Phase 2 (vừa mua xong) giờ đây nhận ra mình đã sai. Họ bắt đầu cắt lỗ (Sell to close), tạo thêm áp lực bán tháo, cộng hưởng với lực Short của Smart Money, đẩy giá xuống sâu hơn nữa.</p>
+                            <p><strong>Volume:</strong> Thường có sự đột biến (Spike) về volume bán. Đây là tiếng chuông báo tử cho xu hướng tăng trước đó.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Điểm Vào Lệnh (Entry Point)</div>
+                <p>Phase 3 xác nhận pattern UPD hoàn chỉnh. Tuy nhiên, chúng ta KHÔNG đuổi theo giá ở Phase 3 (đó là cách trade của gà mờ). Chúng ta kiên nhẫn đợi giá <strong>quay lại test HFZ (vùng PAUSE)</strong> ở tương lai. Đó mới là lúc chúng ta vào lệnh SHORT với rủi ro thấp nhất và lợi nhuận cao nhất.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch4/4.2/4-2-3.webp" alt="Phase 3 DOWN">
+            </div>
+            <div class="image-caption">Hình 3: Phase 3 - Sự sụp đổ xác nhận bẫy đã sập và phe Mua đã bị nhốt</div>
+        </section>
+
+        <!-- SECTION 4: COMPLETE STRUCTURE -->
+        <section class="section">
+            <h2 class="section-title"><span>🔄</span> Tổng Quan: Bức Tranh Toàn Cảnh</h2>
+            <p>Khi ghép 3 mảnh ghép này lại, bạn có một bản đồ hoàn chỉnh về hành vi của thị trường. Hãy nhìn hình dưới đây và khắc ghi nó vào tâm trí. Đây không chỉ là biểu đồ, đây là bản đồ cảm xúc của hàng triệu con người.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch4/4.2/4-2-4.webp" alt="UPD Complete Structure">
+            </div>
+            <div class="image-caption">Hình 4: Cấu trúc hoàn chỉnh của UPD - Cơ hội nằm ở HFZ</div>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>💎</span> Thông Số Kỹ Thuật Chuẩn (GEM Specs)</div>
+                <ul class="summary-list">
+                    <li><strong>Phase 1 (UP):</strong> Tăng mạnh, nến xanh chủ đạo, Momentum lớn, Volume cao.</li>
+                    <li><strong>Phase 2 (PAUSE):</strong> 1-5 nến, Range < 1.5%. Volume có thể cao hoặc thấp nhưng giá không tăng. Đây là HFZ.</li>
+                    <li><strong>Phase 3 (DOWN):</strong> Giảm mạnh, nến đỏ chủ đạo, phá vỡ đáy Phase 2 dứt khoát.</li>
+                    <li><strong>Entry Point:</strong> Retest vùng HFZ (đáy của Phase 2).</li>
+                    <li><strong>Stop Loss:</strong> Trên đỉnh của Phase 2 (cộng thêm buffer an toàn).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECTION 5: EXAMPLES -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> 4. Examples: Phân Tích Thực Chiến</h2>
+            <p>Lý thuyết là màu xám, còn cây đời mãi xanh tươi. Hãy xem UPD hoạt động thế nào trên biểu đồ thực tế của Bitcoin và Ethereum để thấy sức mạnh hủy diệt của nó.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📉</span> Case Study 1: BTC/USDT (Tháng 12/2024) - Bẫy ETF</div>
+                <p><strong>Bối cảnh:</strong> BTC sau chuỗi ngày tăng nóng lên $108,000. Tin tức về ETF ngập tràn, ai cũng nghĩ $120k là chuyện nhỏ.</p>
+                <p><strong>Diễn biến chi tiết:</strong>
+                <br>• <strong>Phase 1:</strong> BTC pump từ $94k lên $108k trong 3 ngày. Mạng xã hội bùng nổ dự đoán $150k.
+                <br>• <strong>Phase 2:</strong> Giá khựng lại ở $104k-$108k trong 5 ngày. Nến Doji và Spinning Top xuất hiện liên tục. Volume lớn nhưng giá không phá đỉnh $108k. Đây là tín hiệu Smart Money đang "thoát hàng" vào đầu Retail.
+                <br>• <strong>Phase 3:</strong> Một cây nến đỏ H4 dài ngoằng phá thủng $104k, volume bán tăng gấp 3 lần trung bình. Giá rơi thẳng về $91.5k trong sự ngỡ ngàng.</p>
+                <p><strong>Bài học:</strong> Những ai mua ở vùng $106k-$108k (Phase 2) đều trở thành "thanh khoản" cho cá mập. Nếu biết UPD, bạn đã có thể vẽ HFZ tại $104k-$108k và chờ Short khi giá hồi về $104k.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📉</span> Case Study 2: ETH/USDT (Khung H4) - Cú Lừa Kháng Cự</div>
+                <p><strong>Bối cảnh:</strong> ETH cố gắng phá kháng cự tâm lý $4,000.</p>
+                <p><strong>Diễn biến chi tiết:</strong>
+                <br>• <strong>Phase 1:</strong> Tăng tốc từ $3,600 lên $4,000 với 3 cây nến xanh H4 liên tiếp.
+                <br>• <strong>Phase 2:</strong> 3 cây nến H4 tiếp theo đi ngang biên độ cực hẹp ($3,980 - $4,010). Đây là HFZ "xịn" vì range rất chặt, cho thấy sự kiểm soát hoàn toàn của phe bán tại vùng giá này.
+                <br>• <strong>Phase 3:</strong> Sập mạnh về $3,800, phá vỡ cấu trúc tăng ngắn hạn.
+                <br>• <strong>Cơ hội:</strong> 2 ngày sau, giá hồi lên test lại vùng $3,980 (HFZ). Đây là điểm Entry Short hoàn hảo với R:R > 1:3.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 6: MISTAKES -->
+        <section class="section">
+            <h2 class="section-title"><span>🚫</span> 5. Mistakes: Những Sai Lầm "Cháy Tài Khoản"</h2>
+            <p>Nhận diện UPD không khó, nhưng trade nó thì không dễ. Dưới đây là 3 cái hố mà newbie hay rơi vào nhất. Hãy đọc kỹ để tránh mất tiền oan.</p>
+
+            <div class="warning-box">
+                <div class="warning-box-title">Sai Lầm #1: Nhầm lẫn với Bull Flag (Cờ Tăng)</div>
+                <p>Nhiều bạn thấy giá đi ngang sau khi tăng (Phase 2) thì nghĩ là Bull Flag để mua tiếp.
+                <br><strong>Tại sao sai?</strong> Bull Flag và UPD Phase 2 nhìn rất giống nhau.
+                <br><strong>Khắc phục:</strong> Chờ Phase 3 xác nhận. Bull Flag sẽ phá vỡ lên trên. UPD sẽ phá vỡ xuống dưới. Đừng đoán! Hãy để thị trường trả lời. Chúng ta là trader, không phải thầy bói.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title">Sai Lầm #2: Vào lệnh quá sớm ở Phase 2 (Front-running)</div>
+                <p>Bạn đoán đây là đỉnh và Short ngay trong vùng Pause để có entry đẹp nhất.
+                <br><strong>Rủi ro:</strong> Giá có thể chỉ đang nghỉ ngơi để tăng tiếp (Continuation - UPU). Nếu bạn Short sớm, bạn đang "chặn đầu xe lửa".
+                <br><strong>Khắc phục:</strong> Chỉ vẽ HFZ và lên kế hoạch Short SAU KHI Phase 3 (cú sập) đã xảy ra và phá vỡ cấu trúc.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title">Sai Lầm #3: Bỏ qua Volume ở Phase 3</div>
+                <p>Một UPD "chuẩn" phải có Volume đột biến ở Phase 3.
+                <br><strong>Tại sao quan trọng?</strong> Volume xác nhận nỗ lực của phe Bán. Nếu giá giảm nhưng Volume thấp, đó có thể chỉ là rũ bỏ (Shakeout) hoặc thiếu cầu tạm thời chứ không phải đảo chiều thực sự. Cú giảm đó sẽ không bền vững.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 7: APPLICATION -->
+        <section class="section">
+            <h2 class="section-title"><span>🛠️</span> 6. Application: Quy Trình Săn UPD</h2>
+            <p>Bây giờ đến lượt bạn. Hãy mở chart lên và thực hành theo quy trình "Săn Cá Mập" sau đây:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Bước 1: Quét Chart (Scan)</div>
+                        <div class="flow-step-desc">Tìm kiếm những đợt tăng giá mạnh gần đây (trên khung H4 hoặc D1) tạo ra các đỉnh mới. Đừng nhìn vào vùng sideway.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Bước 2: Soi Vùng Pause (Identify)</div>
+                        <div class="flow-step-desc">Có vùng đi ngang nào 1-5 nến ngay sau đỉnh đó không? Kiểm tra range giá có nhỏ hơn 1.5% không? Volume ở đây có dấu hiệu bất thường không?</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Bước 3: Xác Nhận Phase 3 (Confirm)</div>
+                        <div class="flow-step-desc">Giá có sập mạnh khỏi vùng Pause không? Nến giảm có lớn không? Có phá vỡ đáy gần nhất không? Nếu có → UPD đã hình thành.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Bước 4: Vẽ HFZ & Đặt Cảnh Báo (Set Trap)</div>
+                        <div class="flow-step-desc">Dùng công cụ Box vẽ trọn vẹn vùng Phase 2. Kéo dài sang phải. Đặt chuông cảnh báo tại mép dưới của HFZ. Giờ thì ngồi chơi xơi nước, đừng nhìn màn hình nữa, đợi giá hồi về rồi tính tiếp.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="warning-box">
+                <div class="warning-box-title"><span>❓</span> Tip Vẽ HFZ Chuẩn</div>
+                <p><strong>Bước 1:</strong> Xác định điểm cao nhất (High) và điểm thấp nhất (Low) của các nến trong Phase 2 (bao gồm cả râu nến).<br>
+                <strong>Bước 2:</strong> Vẽ một hình chữ nhật (rectangle) bao phủ từ Low đến High.<br>
+                <strong>Bước 3:</strong> Kéo rectangle sang phải. Đó là HFZ của bạn. Hãy nhớ, HFZ là một VÙNG, không phải một đường kẻ.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📋</span> Bài Tập Tuần Này</div>
+                <p>1. Phân tích 5 UPD patterns trên BTC, ETH, SOL, BNB, XRP (mỗi coin 1 pattern).<br>
+                2. Ghi chép vào trading journal: Mỗi phase dài bao nhiêu nến? Range Phase 2 là bao nhiêu %? Volume thay đổi ra sao?<br>
+                3. So sánh: UPD nào có Phase 2 "sạch" nhất (nến nhỏ, đều)? Giá retest HFZ như thế nào?<br>
+                4. KHÔNG TRADE thật - chỉ quan sát và học cách nhận diện trong tuần đầu.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 8: SUMMARY -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> 7. Tổng Kết</h2>
+            <div class="summary-box">
+                <div class="summary-title"><span>📌</span> Điểm Chính Cần Nhớ</div>
+                <ul class="summary-list">
+                    <li>UPD là mẫu hình đảo chiều giảm, tạo ra vùng cung mạnh (HFZ) nơi Smart Money để lại dấu chân.</li>
+                    <li>Cấu trúc 3 phần: UP (Mồi nhử) → PAUSE (Trao tay/Phân phối) → DOWN (Sập bẫy).</li>
+                    <li>Phase 2 (Pause) là quan trọng nhất: Phải hẹp, ngắn gọn và có volume ẩn. Đây là nơi ta vẽ HFZ.</li>
+                    <li>Tuyệt đối không đoán đỉnh. Hãy đợi Phase 3 hoàn thành rồi mới lên kế hoạch giao dịch tại HFZ. Kiên nhẫn là chìa khóa.</li>
+                </ul>
+            </div>
+            
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Bài Học Lớn Nhất</div>
+                <p>Cấu trúc 3 phases của UPD không chỉ là "hình dạng" trên chart - nó là "câu chuyện" về cách Smart Money thao túng thị trường. Phase 1 là bait (mồi nhử), Phase 2 là distribution (phân phối), Phase 3 là trap sprung (bẫy sập). Khi bạn hiểu logic này, bạn sẽ không bao giờ trade mà không biết mình đang ở phase nào của "cuộc chơi". Hãy luôn tự hỏi: "Mình có đang là thanh khoản cho kẻ khác không?"</p>
+            </div>
+
+            <p>Bài học tiếp theo chúng ta sẽ đi sâu vào <strong>"Tại Sao UPD Là Pattern Mạnh?"</strong> và cách kết hợp nó với các yếu tố khác để tăng xác suất thắng lên trên 70%.</p>
+        </section>
+
+        <!-- SECTION 9: QUIZ -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 8. Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Hãy chắc chắn bạn đã hiểu rõ trước khi bước sang bài tiếp theo</p>
+            </div>
+
+            <div class="quiz-question" data-question="1" data-correct="B">
+                <div class="question-number">1</div>
+                <div class="question-text">Trong Phase 2 của UPD, hành động chính của Smart Money là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Mua thêm để đẩy giá lên tiếp (Accumulation).</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Phân phối (bán) hàng cho Retail Traders đang FOMO (Distribution).</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Ngừng giao dịch để đi nghỉ mát.</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Đặt lệnh Stop Loss để bảo vệ vị thế mua.</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="C">
+                <div class="question-number">2</div>
+                <div class="question-text">Vùng HFZ (High Frequency Zone) được tạo ra từ giai đoạn nào của UPD?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Phase 1 (UP)</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Phase 3 (DOWN)</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Phase 2 (PAUSE)</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Cả 3 giai đoạn kết hợp lại</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="3" data-correct="A">
+                <div class="question-number">3</div>
+                <div class="question-text">Điều kiện lý tưởng cho Phase 2 (Pause) là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Range &lt; 1.5% và kéo dài từ 1-5 nến.</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Range &gt; 5% và kéo dài trên 10 nến.</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Không quan trọng, miễn là giá đi ngang.</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Volume phải cực thấp, gần như bằng 0.</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score">0/3</div>
+                <div class="result-text">Hoàn thành!</div>
+                <div class="result-message"></div>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button>
+            </div>
+        </section>
+
+    </div>

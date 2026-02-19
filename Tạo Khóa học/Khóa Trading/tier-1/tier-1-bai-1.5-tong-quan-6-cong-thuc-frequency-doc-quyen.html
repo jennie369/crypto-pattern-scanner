@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 1.5: Tổng Quan 6 Công Thức Frequency Độc Quyền | GEM Trading Academy</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;family=Noto+Sans+Display:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       🎨 GEM DESIGN SYSTEM - V5.3 FACEBOOK-STYLE
+       Full-width components, text-only padding
+       ========================================== */
+    :root {
+      /* Colors */
+      --color-navy: #112250;
+      --color-navy-dark: #0A0F1A;
+      --color-navy-light: #1a3a6e;
+      --color-gold: #FFBD59;
+      --color-gold-dark: #E5A84D;
+      --color-burgundy: #9C0612;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-white: #FFFFFF;
+      --color-text: #E8E8E8;
+      --color-text-secondary: rgba(255, 255, 255, 0.7);
+      --color-text-muted: rgba(255, 255, 255, 0.5);
+      
+      /* Backgrounds */
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.08);
+      
+      /* Borders */
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(255, 189, 89, 0.3);
+      
+      /* V5.3: Text-only padding */
+      --text-padding: 16px;
+      
+      /* Spacing */
+      --space-xs: 0.125rem;
+      --space-sm: 0.25rem;
+      --space-md: 0.5rem;
+      --space-lg: 0.75rem;
+      --space-xl: 1rem;
+      --space-2xl: 1.25rem;
+      --space-3xl: 1.5rem;
+      
+      /* V5.3: No container padding on mobile */
+      --container-padding: 0;
+      --card-padding: 0.75rem;
+      --table-padding: 0.375rem;
+      
+      /* Border Radius */
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      
+      /* Shadows */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --shadow-glow-cyan: 0 0 15px rgba(0, 240, 255, 0.3);
+      
+      /* Glassmorphism */
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: blur(40px);
+    }
+    
+    /* ========================================
+       V5.3: Desktop (600px+)
+       ======================================== */
+    @media (min-width: 600px) {
+      :root {
+        --text-padding: 24px;
+        --container-padding: 1.5rem;
+        --card-padding: 1rem;
+        --table-padding: 0.75rem;
+        --radius-lg: 16px;
+        --radius-xl: 24px;
+      }
+    }
+    
+    /* ==========================================
+       🔄 RESET & BASE
+       ========================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      font-size: 0.9rem;
+      color: var(--color-text);
+      background: linear-gradient(180deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-dark) 100%);
+      min-height: 100vh;
+    }
+    
+    @media (min-width: 600px) {
+      body {
+        font-size: 1rem;
+        line-height: 1.7;
+      }
+    }
+    
+    /* Background Bokeh Effects */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(106, 91, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--color-white);
+    }
+    
+    /* ==========================================
+       📐 V5.3 CONTAINER - No padding mobile
+       ========================================== */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .container {
+        padding: var(--container-padding);
+      }
+    }
+    
+    /* ==========================================
+       🏷️ HEADER - V5.3 Full-width mobile
+       ========================================== */
+    .lesson-header {
+      text-align: center;
+      margin-bottom: 1px;
+      padding: var(--card-padding);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-gold), var(--color-cyan), var(--color-gold));
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-header {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        margin-bottom: var(--space-xl);
+      }
+    }
+    
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      background: linear-gradient(135deg, var(--color-gold), var(--color-burgundy));
+      color: white;
+      padding: var(--space-xs) var(--space-md);
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-badge {
+        font-size: 0.85rem;
+        padding: var(--space-xs) var(--space-lg);
+      }
+    }
+    
+    .lesson-title {
+      font-size: clamp(1.3rem, 5vw, 2.2rem);
+      margin-bottom: var(--space-sm);
+      background: linear-gradient(135deg, var(--color-gold), var(--color-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+    
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      color: var(--color-text-muted);
+      font-size: 0.75rem;
+      flex-wrap: wrap;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-meta {
+        gap: var(--space-xl);
+        font-size: 0.9rem;
+      }
+    }
+    
+    .lesson-meta span {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+    
+    /* ==========================================
+       📦 SECTION - V5.3 Full-width mobile
+       ========================================== */
+    .section {
+      background: var(--glass-bg);
+      border: none;
+      border-bottom: 1px solid var(--glass-border);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin-bottom: 1px;
+      backdrop-filter: var(--glass-blur);
+    }
+    
+    @media (min-width: 600px) {
+      .section {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+        margin-bottom: var(--space-xl);
+      }
+    }
+    
+    .section-title {
+      font-size: 1.1rem;
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      border-bottom: 2px solid var(--color-gold);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .section-title {
+        font-size: 1.5rem;
+        gap: var(--space-md);
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+    
+    .section-title .icon {
+      font-size: 1.2rem;
+    }
+    
+    @media (min-width: 600px) {
+      .section-title .icon {
+        font-size: 1.8rem;
+      }
+    }
+    
+    /* V5.3: Text elements get padding */
+    .section > p {
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      margin-bottom: var(--space-md);
+    }
+    
+    @media (min-width: 600px) {
+      .section > p {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+    
+    /* ==========================================
+       🎯 OBJECTIVE LIST - V5.3 Full-width
+       ========================================== */
+    .objective-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .objective-list li {
+      padding: var(--space-sm);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      margin-bottom: 1px;
+      background: rgba(255, 189, 89, 0.1);
+      border-left: 4px solid var(--color-gold);
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 0.85rem;
+    }
+    
+    @media (min-width: 600px) {
+      .objective-list li {
+        padding: var(--space-md);
+        margin-bottom: var(--space-sm);
+        font-size: 1rem;
+        gap: var(--space-md);
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        border-left: 3px solid var(--color-gold);
+      }
+    }
+    
+    .objective-list .check {
+      color: var(--color-green);
+      font-size: 1rem;
+    }
+    
+    /* ==========================================
+       🖼️ IMAGE - V5.3 Full-width
+       ========================================== */
+    .image-container {
+      margin: var(--space-md) 0;
+      text-align: center;
+    }
+    
+    .image-container img {
+      width: 100%;
+      border-radius: 0;
+      box-shadow: var(--shadow-md);
+      display: block;
+    }
+    
+    @media (min-width: 600px) {
+      .image-container img {
+        border-radius: var(--radius-md);
+        border: 2px solid var(--glass-border);
+      }
+    }
+    
+    .image-caption {
+      margin-top: var(--space-sm);
+      color: var(--color-text-muted);
+      font-size: 0.75rem;
+      font-style: italic;
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .image-caption {
+        font-size: 0.9rem;
+        padding: 0;
+      }
+    }
+    
+    /* Placeholder - V5.3 */
+    .image-placeholder {
+      background: linear-gradient(135deg, var(--color-navy-light), var(--color-navy));
+      border: none;
+      border-left: 4px dashed var(--color-gold);
+      border-radius: 0;
+      padding: var(--space-xl);
+      padding-left: calc(var(--text-padding) - 4px);
+      padding-right: var(--text-padding);
+      text-align: center;
+      color: var(--color-text-muted);
+    }
+    
+    @media (min-width: 600px) {
+      .image-placeholder {
+        padding: var(--space-3xl);
+        border: 2px dashed var(--color-gold);
+        border-radius: var(--radius-md);
+      }
+    }
+    
+    .image-placeholder .placeholder-icon {
+      font-size: 2rem;
+      margin-bottom: var(--space-sm);
+      opacity: 0.5;
+    }
+    
+    @media (min-width: 600px) {
+      .image-placeholder .placeholder-icon {
+        font-size: 3rem;
+        margin-bottom: var(--space-md);
+      }
+    }
+    
+    .image-placeholder .placeholder-text {
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 600px) {
+      .image-placeholder .placeholder-text {
+        font-size: 0.9rem;
+      }
+    }
+    
+    /* ==========================================
+       💡 HIGHLIGHT BOX - V5.3 Full-width
+       ========================================== */
+    .highlight-box {
+      padding: var(--card-padding);
+      padding-left: calc(var(--text-padding) - 4px);
+      padding-right: var(--text-padding);
+      border-radius: 0;
+      margin: var(--space-md) 0;
+      border: none;
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box {
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+      }
+    }
+    
+    .highlight-box.default {
+      background: rgba(255, 189, 89, 0.1);
+      border-left: 4px solid var(--color-gold);
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box.default {
+        border: 1px solid rgba(255, 189, 89, 0.3);
+        border-left: 4px solid var(--color-gold);
+      }
+    }
+    
+    .highlight-box.important {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid var(--color-red);
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box.important {
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-left: 4px solid var(--color-red);
+      }
+    }
+    
+    .highlight-box.success {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 4px solid var(--color-green);
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box.success {
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-left: 4px solid var(--color-green);
+      }
+    }
+    
+    .highlight-box.info {
+      background: rgba(0, 240, 255, 0.1);
+      border-left: 4px solid var(--color-cyan);
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box.info {
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-left: 4px solid var(--color-cyan);
+      }
+    }
+    
+    .highlight-box .highlight-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 0.9rem;
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box .highlight-title {
+        font-size: 1rem;
+      }
+    }
+    
+    .highlight-box p {
+      margin-bottom: 0;
+    }
+    
+    /* ==========================================
+       📊 PATTERN CARDS - V5.3 Full-width
+       ========================================== */
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      margin: var(--space-md) 0;
+      background: var(--glass-border);
+    }
+    
+    @media (min-width: 600px) {
+      .pattern-grid {
+        gap: var(--space-lg);
+        background: transparent;
+      }
+    }
+    
+    .pattern-card {
+      background: var(--glass-bg);
+      border: none;
+      border-radius: 0;
+      padding: var(--space-sm);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    @media (min-width: 600px) {
+      .pattern-card {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: var(--space-lg);
+      }
+      
+      .pattern-card:hover {
+        border-color: var(--color-gold);
+        box-shadow: var(--shadow-glow-gold);
+        transform: translateY(-2px);
+      }
+    }
+    
+    .pattern-card.continuation {
+      border-left: 3px solid var(--color-cyan);
+    }
+    
+    .pattern-card.reversal {
+      border-left: 3px solid var(--color-purple);
+    }
+    
+    .pattern-card .pattern-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--color-gold);
+      margin-bottom: var(--space-xs);
+    }
+    
+    @media (min-width: 600px) {
+      .pattern-card .pattern-name {
+        font-size: 1.5rem;
+        margin-bottom: var(--space-sm);
+      }
+    }
+    
+    .pattern-card .pattern-full-name {
+      font-size: 0.7rem;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .pattern-card .pattern-full-name {
+        font-size: 0.9rem;
+        margin-bottom: var(--space-md);
+      }
+    }
+    
+    .pattern-card .pattern-type {
+      display: inline-block;
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: 50px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .pattern-card .pattern-type {
+        font-size: 0.8rem;
+        padding: var(--space-xs) var(--space-md);
+        margin-bottom: var(--space-md);
+      }
+    }
+    
+    .pattern-card.continuation .pattern-type {
+      background: rgba(0, 240, 255, 0.2);
+      color: var(--color-cyan);
+    }
+    
+    .pattern-card.reversal .pattern-type {
+      background: rgba(106, 91, 255, 0.2);
+      color: var(--color-purple);
+    }
+    
+    .pattern-card .pattern-zone {
+      font-weight: 600;
+      margin-bottom: var(--space-xs);
+      font-size: 0.75rem;
+    }
+    
+    @media (min-width: 600px) {
+      .pattern-card .pattern-zone {
+        font-size: 0.9rem;
+        margin-bottom: var(--space-sm);
+      }
+    }
+    
+    .pattern-card .zone-hfz {
+      color: var(--color-red);
+    }
+    
+    .pattern-card .zone-lfz {
+      color: var(--color-green);
+    }
+    
+    .pattern-card .pattern-desc {
+      font-size: 0.7rem;
+      color: var(--color-text-muted);
+    }
+    
+    @media (min-width: 600px) {
+      .pattern-card .pattern-desc {
+        font-size: 0.85rem;
+      }
+    }
+    
+    /* ==========================================
+       🔴🟢 ZONE CARDS - V5.3 Full-width
+       ========================================== */
+    .zone-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      margin: var(--space-md) 0;
+      background: var(--glass-border);
+    }
+    
+    @media (min-width: 600px) {
+      .zone-grid {
+        gap: var(--space-xl);
+        background: transparent;
+      }
+    }
+    
+    .zone-card {
+      padding: var(--space-md);
+      border-radius: 0;
+      text-align: center;
+      border: none;
+    }
+    
+    @media (min-width: 600px) {
+      .zone-card {
+        padding: var(--space-xl);
+        border-radius: var(--radius-lg);
+      }
+    }
+    
+    .zone-card.hfz {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(156, 6, 18, 0.2));
+      border-left: 4px solid var(--color-red);
+    }
+    
+    @media (min-width: 600px) {
+      .zone-card.hfz {
+        border: 2px solid var(--color-red);
+      }
+    }
+    
+    .zone-card.lfz {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(0, 240, 255, 0.2));
+      border-left: 4px solid var(--color-green);
+    }
+    
+    @media (min-width: 600px) {
+      .zone-card.lfz {
+        border: 2px solid var(--color-green);
+      }
+    }
+    
+    .zone-card .zone-icon {
+      font-size: 2rem;
+      margin-bottom: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .zone-card .zone-icon {
+        font-size: 3rem;
+        margin-bottom: var(--space-md);
+      }
+    }
+    
+    .zone-card .zone-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: var(--space-xs);
+    }
+    
+    @media (min-width: 600px) {
+      .zone-card .zone-name {
+        font-size: 1.3rem;
+        margin-bottom: var(--space-sm);
+      }
+    }
+    
+    .zone-card.hfz .zone-name {
+      color: var(--color-red);
+    }
+    
+    .zone-card.lfz .zone-name {
+      color: var(--color-green);
+    }
+    
+    .zone-card .zone-subtitle {
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-sm);
+      font-size: 0.7rem;
+    }
+    
+    @media (min-width: 600px) {
+      .zone-card .zone-subtitle {
+        font-size: 0.85rem;
+        margin-bottom: var(--space-md);
+      }
+    }
+    
+    .zone-card .zone-action {
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: var(--space-xs) var(--space-md);
+      border-radius: 50px;
+      display: inline-block;
+    }
+    
+    @media (min-width: 600px) {
+      .zone-card .zone-action {
+        font-size: 1.2rem;
+        padding: var(--space-sm) var(--space-lg);
+      }
+    }
+    
+    .zone-card.hfz .zone-action {
+      background: var(--color-red);
+      color: var(--color-white);
+    }
+    
+    .zone-card.lfz .zone-action {
+      background: var(--color-green);
+      color: var(--color-white);
+    }
+    
+    .zone-card .zone-desc {
+      margin-top: var(--space-sm);
+      font-size: 0.75rem;
+    }
+    
+    @media (min-width: 600px) {
+      .zone-card .zone-desc {
+        font-size: 0.9rem;
+        margin-top: var(--space-md);
+      }
+    }
+    
+    /* ==========================================
+       📋 COMPARISON TABLE - V5.3 Full-width
+       ========================================== */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--space-md) 0;
+      font-size: 0.7rem;
+      border-radius: 0;
+      overflow: hidden;
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-table {
+        font-size: 0.9rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--glass-border);
+      }
+    }
+    
+    .comparison-table th,
+    .comparison-table td {
+      padding: var(--table-padding);
+      text-align: center;
+      border: 1px solid var(--glass-border);
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-table th,
+      .comparison-table td {
+        padding: var(--space-md);
+      }
+    }
+    
+    .comparison-table th {
+      background: var(--color-navy-light);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 0.65rem;
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-table th {
+        font-size: 0.85rem;
+      }
+    }
+    
+    .comparison-table th.continuation {
+      background: rgba(0, 240, 255, 0.2);
+      color: var(--color-cyan);
+    }
+    
+    .comparison-table th.reversal {
+      background: rgba(106, 91, 255, 0.2);
+      color: var(--color-purple);
+    }
+    
+    .comparison-table tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    
+    .comparison-table td:first-child {
+      text-align: left;
+      font-weight: 600;
+      color: var(--color-gold);
+    }
+    
+    /* ==========================================
+       📈 ROADMAP - V5.3 Full-width
+       ========================================== */
+    .roadmap {
+      position: relative;
+      padding-left: calc(var(--text-padding) + 16px);
+      padding-right: var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .roadmap {
+        padding-left: var(--space-2xl);
+        padding-right: 0;
+      }
+    }
+    
+    .roadmap::before {
+      content: '';
+      position: absolute;
+      left: var(--text-padding);
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(to bottom, var(--color-gold), var(--color-cyan), var(--color-purple));
+      border-radius: 2px;
+    }
+    
+    @media (min-width: 600px) {
+      .roadmap::before {
+        left: 0;
+      }
+    }
+    
+    .roadmap-item {
+      position: relative;
+      padding: var(--space-sm);
+      margin-bottom: var(--space-sm);
+      background: var(--glass-bg);
+      border: none;
+      border-left: 4px solid transparent;
+      border-radius: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .roadmap-item {
+        padding: var(--space-lg);
+        margin-bottom: var(--space-lg);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+      }
+    }
+    
+    .roadmap-item::before {
+      content: '';
+      position: absolute;
+      left: calc(-1 * var(--text-padding) - 8px + var(--text-padding));
+      top: 50%;
+      transform: translateY(-50%);
+      width: 12px;
+      height: 12px;
+      background: var(--color-gold);
+      border-radius: 50%;
+      border: 2px solid var(--color-navy-dark);
+    }
+    
+    @media (min-width: 600px) {
+      .roadmap-item::before {
+        left: calc(-1 * var(--space-2xl) - 5px);
+        width: 16px;
+        height: 16px;
+        border-width: 3px;
+      }
+    }
+    
+    .roadmap-item .chapter-badge {
+      display: inline-block;
+      background: var(--color-gold);
+      color: var(--color-navy-dark);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: 50px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      margin-bottom: var(--space-xs);
+    }
+    
+    @media (min-width: 600px) {
+      .roadmap-item .chapter-badge {
+        font-size: 0.75rem;
+        padding: var(--space-xs) var(--space-md);
+        margin-bottom: var(--space-sm);
+      }
+    }
+    
+    .roadmap-item .chapter-title {
+      font-size: 0.9rem;
+      color: var(--color-white);
+      margin-bottom: var(--space-xs);
+    }
+    
+    @media (min-width: 600px) {
+      .roadmap-item .chapter-title {
+        font-size: 1.1rem;
+        margin-bottom: var(--space-sm);
+      }
+    }
+    
+    .roadmap-item .chapter-desc {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+    
+    @media (min-width: 600px) {
+      .roadmap-item .chapter-desc {
+        font-size: 0.9rem;
+      }
+    }
+    
+    /* ==========================================
+       📝 SUMMARY BOX - V5.3 Full-width
+       ========================================== */
+    .summary-box {
+      background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(0, 240, 255, 0.1));
+      border: none;
+      border-left: 4px solid var(--color-gold);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin: var(--space-lg) 0;
+    }
+    
+    @media (min-width: 600px) {
+      .summary-box {
+        border: 2px solid var(--color-gold);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+    
+    .summary-box .summary-title {
+      font-size: 1.1rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      text-align: center;
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .summary-box .summary-title {
+        font-size: 1.3rem;
+        margin-bottom: var(--space-lg);
+        padding: 0;
+      }
+    }
+    
+    .summary-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .summary-list li {
+      padding: var(--space-sm);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      margin-bottom: 1px;
+      background: var(--glass-bg);
+      border-radius: 0;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 600px) {
+      .summary-list li {
+        padding: var(--space-md);
+        margin-bottom: var(--space-sm);
+        font-size: 0.95rem;
+        gap: var(--space-md);
+        border-radius: var(--radius-sm);
+      }
+    }
+    
+    .summary-list .number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      background: var(--color-gold);
+      color: var(--color-navy-dark);
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .summary-list .number {
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
+      }
+    }
+    
+    /* ==========================================
+       ❓ QUIZ SECTION - V5.3 Full-width
+       ========================================== */
+    .quiz-section {
+      background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(0, 240, 255, 0.05));
+      border: none;
+      border-left: 4px solid var(--color-purple);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin: var(--space-lg) 0;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-section {
+        border: 2px solid var(--color-purple);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+    
+    .quiz-title {
+      font-size: 1.1rem;
+      color: var(--color-purple);
+      margin-bottom: var(--space-md);
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-title {
+        font-size: 1.5rem;
+        margin-bottom: var(--space-xl);
+        gap: var(--space-md);
+        padding: 0;
+      }
+    }
+    
+    .quiz-question {
+      background: var(--glass-bg);
+      border: none;
+      border-radius: 0;
+      border-bottom: 1px solid var(--glass-border);
+      padding: var(--card-padding);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      margin-bottom: 1px;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-question {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+        margin-bottom: var(--space-md);
+      }
+    }
+    
+    .question-number {
+      display: inline-block;
+      background: var(--color-purple);
+      color: var(--color-white);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: 50px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .question-number {
+        font-size: 0.85rem;
+        padding: var(--space-xs) var(--space-md);
+        margin-bottom: var(--space-md);
+      }
+    }
+    
+    .question-text {
+      font-size: 0.9rem;
+      margin-bottom: var(--space-md);
+      color: var(--color-white);
+    }
+    
+    @media (min-width: 600px) {
+      .question-text {
+        font-size: 1.1rem;
+        margin-bottom: var(--space-lg);
+      }
+    }
+    
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--glass-border);
+      margin: 0 calc(-1 * var(--text-padding));
+    }
+    
+    @media (min-width: 600px) {
+      .options {
+        gap: var(--space-sm);
+        background: transparent;
+        margin: 0;
+      }
+    }
+    
+    .option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      background: rgba(255, 255, 255, 0.02);
+      border: none;
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 600px) {
+      .option {
+        padding: var(--space-md);
+        gap: var(--space-md);
+        font-size: 0.95rem;
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-sm);
+      }
+      
+      .option:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--color-gold);
+      }
+    }
+    
+    .option input[type="radio"] {
+      display: none;
+    }
+    
+    .option .radio-custom {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--color-text-muted);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+    
+    @media (min-width: 600px) {
+      .option .radio-custom {
+        width: 20px;
+        height: 20px;
+      }
+    }
+    
+    .option input[type="radio"]:checked + .radio-custom {
+      border-color: var(--color-gold);
+      background: var(--color-gold);
+    }
+    
+    .option input[type="radio"]:checked + .radio-custom::after {
+      content: '✓';
+      color: var(--color-navy-dark);
+      font-weight: bold;
+      font-size: 0.65rem;
+    }
+    
+    @media (min-width: 600px) {
+      .option input[type="radio"]:checked + .radio-custom::after {
+        font-size: 0.8rem;
+      }
+    }
+    
+    .option.correct {
+      background: rgba(16, 185, 129, 0.2);
+      border-left: 4px solid var(--color-green);
+    }
+    
+    @media (min-width: 600px) {
+      .option.correct {
+        border: 1px solid var(--color-green);
+        border-left: 4px solid var(--color-green);
+      }
+    }
+    
+    .option.incorrect {
+      background: rgba(239, 68, 68, 0.2);
+      border-left: 4px solid var(--color-red);
+    }
+    
+    @media (min-width: 600px) {
+      .option.incorrect {
+        border: 1px solid var(--color-red);
+        border-left: 4px solid var(--color-red);
+      }
+    }
+    
+    .feedback {
+      margin-top: var(--space-sm);
+      padding: var(--space-sm);
+      border-radius: var(--radius-sm);
+      display: none;
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 600px) {
+      .feedback {
+        padding: var(--space-md);
+        font-size: 0.9rem;
+      }
+    }
+    
+    .feedback.correct {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--color-green);
+      color: var(--color-green);
+      display: block;
+    }
+    
+    .feedback.incorrect {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid var(--color-red);
+      color: var(--color-red);
+      display: block;
+    }
+    
+    /* ==========================================
+       📱 FOOTER - V5.3 Full-width
+       ========================================== */
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-lg);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-footer {
+        background: transparent;
+        margin-top: var(--space-lg);
+      }
+    }
+    
+    .footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .footer-link {
+      color: var(--color-text-muted);
+      font-size: 0.8rem;
+    }
+    
+    .footer-link a {
+      color: var(--color-cyan);
+      text-decoration: none;
+    }
+    
+    .footer-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+
+
+  <div class="container">
+    
+    <!-- ==========================================
+         🏷️ LESSON HEADER
+         ========================================== -->
+    <header class="lesson-header">
+      <span class="lesson-badge">📚 TIER 1 • Chương 1 • Bài 1.5</span>
+      <h1 class="lesson-title">Tổng Quan 6 Công Thức Frequency Độc Quyền</h1>
+      <div class="lesson-meta">
+        <span>⏱️ 10 phút đọc</span>
+        <span>📝 3 câu quiz</span>
+        <span>🖼️ 4 hình minh họa</span>
+      </div>
+    </header>
+    
+    <!-- ==========================================
+         🎯 MỤC TIÊU BÀI HỌC
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">🎯</span>
+        Mục Tiêu Bài Học
+      </h2>
+      <ul class="objective-list">
+        <li>
+          <span class="check">✓</span>
+          Nắm vững 4 patterns tìm zone: DPD, UPU, UPD, DPU
+        </li>
+        <li>
+          <span class="check">✓</span>
+          Hiểu rõ 2 loại zone: HFZ (Bán) và LFZ (Mua)
+        </li>
+        <li>
+          <span class="check">✓</span>
+          Phân biệt rõ ràng Continuation (Tiếp diễn) và Reversal (Đảo chiều)
+        </li>
+        <li>
+          <span class="check">✓</span>
+          Nắm được lộ trình học 6 công thức để áp dụng ngay
+        </li>
+      </ul>
+    </section>
+    
+    <!-- ==========================================
+         📊 GIỚI THIỆU HỆ THỐNG
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">🏆</span>
+        Tại Sao 95% Trader Thất Bại Với Support & Resistance Cũ?
+      </h2>
+      
+      <p>
+        Bạn có bao giờ tự hỏi tại sao mình vẽ Hỗ Trợ/Kháng Cự (Support/Resistance) rất đẹp, nhưng giá cứ thế xuyên qua như không có gì? Đó là vì bạn đang sử dụng những công cụ cũ kỹ mà ai cũng biết. Smart Money biết điều đó, và họ dùng chính những vùng đó để săn thanh khoản (stop hunt).
+      </p>
+      <p>
+        GEM Frequency Method không dựa trên những đường kẻ mơ hồ. Chúng tôi dựa trên <strong style="color: var(--color-gold);">6 công thức độc quyền</strong> được xây dựng từ hành vi giá (Price Action) và tâm lý đám đông. Đây là những patterns và zones giúp bạn nhìn thấy dấu chân của Smart Money TRƯỚC KHI họ hành động.
+      </p>
+      
+      <!-- Hình 1 -->
+      <div class="image-container">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlci3vj-yvyap3-img1.webp" alt="gemini-generated-image-7eyp8h7eyp8h-lwsr">
+      </div>
+      
+      <div class="highlight-box default">
+        <div class="highlight-title">💡 Công thức thành công</div>
+        <p>Hệ thống GEM Frequency = <strong>4 Patterns</strong> (Cấu trúc giá) + <strong>2 Loại Zone</strong> (Vùng hành động) = <strong>6 Vũ Khí Độc Quyền</strong> giúp bạn chiến thắng thị trường.</p>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         📈 4 PATTERNS TÌM ZONE
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">📈</span>
+        Giải Mã 4 Patterns Tìm Zone
+      </h2>
+      
+      <p>
+        Hãy tưởng tượng thị trường như một bản nhạc. Frequency (Tần số) chính là nhịp điệu của bản nhạc đó. 4 patterns dưới đây giúp bạn bắt trúng nhịp điệu này để không bị lỡ nhịp.
+      </p>
+      
+      <div class="pattern-grid">
+        <!-- DPD -->
+        <div class="pattern-card continuation">
+          <div class="pattern-name">DPD</div>
+          <div class="pattern-full-name">Down - Pause - Down</div>
+          <div class="pattern-type">TIẾP DIỄN GIẢM</div>
+          <div class="pattern-zone">Tạo ra: <span class="zone-hfz">HFZ (Vùng Bán)</span></div>
+          <div class="pattern-desc">Giá đang giảm mạnh, nghỉ ngơi một chút (Pause), rồi tiếp tục giảm. Vùng Pause chính là nơi ta canh BÁN tiếp.</div>
+        </div>
+        
+        <!-- UPU -->
+        <div class="pattern-card continuation">
+          <div class="pattern-name">UPU</div>
+          <div class="pattern-full-name">Up - Pause - Up</div>
+          <div class="pattern-type">TIẾP DIỄN TĂNG</div>
+          <div class="pattern-zone">Tạo ra: <span class="zone-lfz">LFZ (Vùng Mua)</span></div>
+          <div class="pattern-desc">Giá đang tăng mạnh, nghỉ ngơi (Pause), rồi tiếp tục tăng. Vùng Pause là trạm dừng chân để ta lên tàu MUA.</div>
+        </div>
+        
+        <!-- UPD -->
+        <div class="pattern-card reversal">
+          <div class="pattern-name">UPD</div>
+          <div class="pattern-full-name">Up - Pause - Down</div>
+          <div class="pattern-type">ĐẢO CHIỀU GIẢM</div>
+          <div class="pattern-zone">Tạo ra: <span class="zone-hfz">HFZ (Vùng Bán)</span></div>
+          <div class="pattern-desc">Giá đang tăng, gặp cản và nghỉ (Pause), sau đó đảo chiều giảm mạnh. Đây là tín hiệu BÁN cực mạnh.</div>
+        </div>
+        
+        <!-- DPU -->
+        <div class="pattern-card reversal">
+          <div class="pattern-name">DPU</div>
+          <div class="pattern-full-name">Down - Pause - Up</div>
+          <div class="pattern-type">ĐẢO CHIỀU TĂNG</div>
+          <div class="pattern-zone">Tạo ra: <span class="zone-lfz">LFZ (Vùng Mua)</span></div>
+          <div class="pattern-desc">Giá đang giảm, tìm được hỗ trợ và nghỉ (Pause), sau đó đảo chiều tăng vọt. Cơ hội MUA đáy là đây.</div>
+        </div>
+      </div>
+      
+      <div class="highlight-box info">
+        <div class="highlight-title">🔍 Bí mật của Pause</div>
+        <p>Vùng "Pause" (Nghỉ) chính là chìa khóa. Đó là lúc Smart Money đang âm thầm tích lũy vị thế (gom hàng hoặc xả hàng) trước khi đẩy giá đi mạnh. Chúng ta sẽ đặt bẫy ngay tại vùng Pause này.</p>
+      </div>
+
+      <!-- Hình 2 -->
+      <div class="image-container">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlci3vj-yvyap3-img2.webp" alt="gemini-generated-image-n7vctqn7vctq-4z4t">
+        <div class="image-caption">Hình minh họa 4 patterns cơ bản trong GEM Frequency Method</div>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         🔴🟢 2 LOẠI ZONE
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">🎯</span>
+        2 Loại Zone: HFZ và LFZ
+      </h2>
+      
+      <p>
+        Sau khi nhận diện được pattern, công việc tiếp theo là xác định <strong>Zone</strong>. Đừng gọi là Kháng cự hay Hỗ trợ nữa, hãy gọi đúng tên của chúng trong hệ thống GEM:
+      </p>
+      
+      <div class="zone-grid">
+        <!-- HFZ -->
+        <div class="zone-card hfz">
+          <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlci3vj-yvyap3-img3.webp" alt="template-trading-2">
+          <div class="zone-name">HFZ</div>
+          <div class="zone-subtitle">High Frequency Zone (Vùng Tần Số Cao)</div>
+          <div class="zone-action">CHỈ CANH BÁN (Short)</div>
+          <p class="zone-desc">
+            Nằm <strong>TRÊN</strong> giá hiện tại. Là nơi phe Gấu (Sellers) đang phục kích. Khi giá chạm HFZ, xác suất cao sẽ bị đạp xuống.
+          </p>
+        </div>
+        
+        <!-- LFZ -->
+        <div class="zone-card lfz">
+          <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlci3vj-yvyap3-img4.webp" alt="template-trading-1">
+          <div class="zone-name">LFZ</div>
+          <div class="zone-subtitle">Low Frequency Zone (Vùng Tần Số Thấp)</div>
+          <div class="zone-action">CHỈ CANH MUA (Long)</div>
+          <p class="zone-desc">
+            Nằm <strong>DƯỚI</strong> giá hiện tại. Là căn cứ địa của phe Bò (Buyers). Khi giá hồi về LFZ, lực mua sẽ đẩy giá bật lên.
+          </p>
+        </div>
+      </div>
+      
+      <!-- Hình 3 -->
+      <div class="image-container">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlci3vj-yvyap3-img5.webp" alt="gemini-generated-image-suqrhysuqrhy-ddva">
+        <div class="image-caption">Sự tương quan giữa HFZ (Supply) và LFZ (Demand) trên biểu đồ thực tế</div>
+      </div>
+      
+      <div class="highlight-box success">
+        <div class="highlight-title">💡 Mẹo nhớ nhanh</div>
+        <p>
+          <strong style="color: var(--color-red);">HFZ (High)</strong> = Giá Cao = Bán.<br>
+          <strong style="color: var(--color-green);">LFZ (Low)</strong> = Giá Thấp = Mua.
+        </p>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         📊 SO SÁNH CONTINUATION VS REVERSAL
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">⚖️</span>
+        Continuation vs Reversal: Chọn Phe Nào?
+      </h2>
+      
+      <p>
+        Hiểu sự khác biệt giữa hai nhóm này sẽ giúp bạn quản lý vốn và kỳ vọng tốt hơn. Không phải pattern nào cũng có sức mạnh như nhau.
+      </p>
+      
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Tiêu Chí</th>
+            <th class="continuation">CONTINUATION (Tiếp Diễn)</th>
+            <th class="reversal">REVERSAL (Đảo Chiều)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Patterns</td>
+            <td>DPD, UPU</td>
+            <td>UPD, DPU</td>
+          </tr>
+          <tr>
+            <td>Bản chất</td>
+            <td>Đi theo xu hướng cũ</td>
+            <td>Bẻ gãy xu hướng cũ, tạo xu hướng mới</td>
+          </tr>
+          <tr>
+            <td>Độ mạnh Zone</td>
+            <td>⭐⭐⭐ (Trung bình)</td>
+            <td>⭐⭐⭐⭐⭐ (Rất mạnh)</td>
+          </tr>
+          <tr>
+            <td>Tần suất xuất hiện</td>
+            <td>Nhiều hơn (Dễ tìm)</td>
+            <td>Ít hơn (Cần kiên nhẫn)</td>
+          </tr>
+          <tr>
+            <td>Chiến lược</td>
+            <td>Đánh nhanh thắng nhanh</td>
+            <td>Nuôi lệnh dài hạn (Swing)</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="highlight-box important">
+        <div class="highlight-title">⚠️ Lưu ý sống còn</div>
+        <p>
+          <strong>Reversal patterns</strong> (UPD, DPU) thường tạo ra những cú trade để đời với lợi nhuận lớn (R:R cao), vì bạn đang bắt được đỉnh hoặc đáy của một con sóng mới. Tuy nhiên, đừng cố bắt dao rơi nếu không có xác nhận.</p>
+          <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlci3vj-yvyap3-img6.webp" alt="gemini-generated-image-ux98n1ux98n1-r2s0">
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         🗺️ LỘ TRÌNH HỌC
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">🗺️</span>
+        Lộ Trình Làm Chủ 6 Công Thức
+      </h2>
+      
+      <p>
+        Chúng ta sẽ không học nhồi nhét. Bạn sẽ đi từng bước, làm chủ từng pattern một trước khi sang cái tiếp theo. Đây là bản đồ kho báu của bạn:
+      </p>
+      
+      <!-- Hình 4 -->
+      <div class="image-container">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlci3vj-yvyap3-img7.webp" alt="gemini-generated-image-oh0q7koh0q7k-i5e6">
+        <div class="image-caption">Roadmap chi tiết cho khóa học GEM Frequency</div>
+      </div>
+      
+      <div class="roadmap">
+        <div class="roadmap-item">
+          <span class="chapter-badge">CHƯƠNG 2</span>
+          <h4 class="chapter-title">DPD Pattern Mastery (Công thức 1)</h4>
+          <p class="chapter-desc">Học cách "Short" khi thị trường đang rơi tự do. Kiếm tiền ngay cả khi thị trường đỏ lửa.</p>
+        </div>
+        
+        <div class="roadmap-item">
+          <span class="chapter-badge">CHƯƠNG 3</span>
+          <h4 class="chapter-title">UPU Pattern Mastery (Công thức 2)</h4>
+          <p class="chapter-desc">Học cách "Long" theo xu hướng tăng. "Trend is your friend" - và UPU giúp bạn kết bạn với nó.</p>
+        </div>
+        
+        <div class="roadmap-item">
+          <span class="chapter-badge">CHƯƠNG 4</span>
+          <h4 class="chapter-title">UPD Pattern - Bắt Đỉnh (Công thức 3)</h4>
+          <p class="chapter-desc">Kỹ thuật săn đỉnh điêu luyện. Nhận diện khi nào phe Mua kiệt sức và phe Bán chuẩn bị tấn công.</p>
+        </div>
+        
+        <div class="roadmap-item">
+          <span class="chapter-badge">CHƯƠNG 5</span>
+          <h4 class="chapter-title">DPU Pattern - Bắt Đáy (Công thức 4)</h4>
+          <p class="chapter-desc">Kỹ thuật bắt đáy an toàn. Tìm điểm vào lệnh khi thị trường hoảng loạn bán tháo nhưng Smart Money lại âm thầm gom hàng.</p>
+        </div>
+        
+        <div class="roadmap-item">
+          <span class="chapter-badge">TIER 2</span>
+          <h4 class="chapter-title">HFZ & LFZ Advanced (Công thức 5 & 6)</h4>
+          <p class="chapter-desc">Nâng cao kỹ năng vẽ zone, chấm điểm zone (Zone Scoring), và kết hợp đa khung thời gian để tối ưu hóa lợi nhuận.</p>
+        </div>
+      </div>
+      
+      <div class="highlight-box success">
+        <div class="highlight-title">✅ Cam kết chất lượng</div>
+        <p>
+          Hệ thống này không phải lý thuyết suông. Nó đã được backtest và kiểm chứng. Nếu bạn tuân thủ kỷ luật, tỷ lệ thắng <strong>67.8%</strong> hoàn toàn nằm trong tầm tay. Hãy kiên nhẫn!
+        </p>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         📝 TÓM TẮT
+         ========================================== -->
+    <div class="summary-box">
+      <h3 class="summary-title">📝 Tóm Tắt Bài Học</h3>
+      <ul class="summary-list">
+        <li>
+          <span class="number">1</span>
+          <span><strong>Hệ thống GEM:</strong> Dựa trên 4 Patterns (Cấu trúc) và 2 Zones (Vùng giá) độc quyền.</span>
+        </li>
+        <li>
+          <span class="number">2</span>
+          <span><strong>Phân loại:</strong> DPD/UPU là Tiếp diễn (dễ trade). UPD/DPU là Đảo chiều (lợi nhuận cao).</span>
+        </li>
+        <li>
+          <span class="number">3</span>
+          <span><strong>HFZ vs LFZ:</strong> HFZ nằm trên để BÁN. LFZ nằm dưới để MUA. Tuyệt đối không làm ngược lại.</span>
+        </li>
+        <li>
+          <span class="number">4</span>
+          <span><strong>Tư duy:</strong> Đừng vẽ zone bừa bãi. Chỉ vẽ zone khi có Pattern rõ ràng xác nhận.</span>
+        </li>
+      </ul>
+    </div>
+    
+    <!-- ==========================================
+         ❓ QUIZ SECTION
+         ========================================== -->
+    <section class="quiz-section">
+      <h2 class="quiz-title">
+        <span>❓</span>
+        Kiểm Tra Kiến Thức
+      </h2>
+      
+      <!-- Câu 1 -->
+      <div class="quiz-question" id="q1">
+        <span class="question-number">Câu 1/3</span>
+        <p class="question-text">Pattern nào sau đây là tín hiệu ĐẢO CHIỀU (Reversal) mạnh mẽ nhất?</p>
+        <div class="options">
+          <label class="option" data-correct="false">
+            <input type="radio" name="q1" value="a">
+            <span class="radio-custom"></span>
+            <span>A. DPD (Giảm - Nghỉ - Giảm)</span>
+          </label>
+          <label class="option" data-correct="true">
+            <input type="radio" name="q1" value="b">
+            <span class="radio-custom"></span>
+            <span>B. DPU (Giảm - Nghỉ - Tăng)</span>
+          </label>
+          <label class="option" data-correct="false">
+            <input type="radio" name="q1" value="c">
+            <span class="radio-custom"></span>
+            <span>C. UPU (Tăng - Nghỉ - Tăng)</span>
+          </label>
+          <label class="option" data-correct="false">
+            <input type="radio" name="q1" value="d">
+            <span class="radio-custom"></span>
+            <span>D. Không có pattern nào đảo chiều</span>
+          </label>
+        </div>
+        <div class="feedback" id="fb1"></div>
+      </div>
+      
+      <!-- Câu 2 -->
+      <div class="quiz-question" id="q2">
+        <span class="question-number">Câu 2/3</span>
+        <p class="question-text">Khi gặp HFZ (High Frequency Zone), hành động duy nhất bạn nên cân nhắc là gì?</p>
+        <div class="options">
+          <label class="option" data-correct="false">
+            <input type="radio" name="q2" value="a">
+            <span class="radio-custom"></span>
+            <span>A. Tìm cơ hội MUA (Long) vì giá sẽ phá cản</span>
+          </label>
+          <label class="option" data-correct="true">
+            <input type="radio" name="q2" value="b">
+            <span class="radio-custom"></span>
+            <span>B. Tìm cơ hội BÁN (Short) vì áp lực bán mạnh</span>
+          </label>
+          <label class="option" data-correct="false">
+            <input type="radio" name="q2" value="c">
+            <span class="radio-custom"></span>
+            <span>C. Đứng ngoài quan sát, không làm gì</span>
+          </label>
+          <label class="option" data-correct="false">
+            <input type="radio" name="q2" value="d">
+            <span class="radio-custom"></span>
+            <span>D. Mua trung bình giá (DCA)</span>
+          </label>
+        </div>
+        <div class="feedback" id="fb2"></div>
+      </div>
+      
+      <!-- Câu 3 -->
+      <div class="quiz-question" id="q3">
+        <span class="question-number">Câu 3/3</span>
+        <p class="question-text">Tại sao vùng "Pause" (Nghỉ) trong các pattern lại quan trọng?</p>
+        <div class="options">
+          <label class="option" data-correct="false">
+            <input type="radio" name="q3" value="a">
+            <span class="radio-custom"></span>
+            <span>A. Vì đó là lúc thị trường đóng cửa</span>
+          </label>
+          <label class="option" data-correct="true">
+            <input type="radio" name="q3" value="b">
+            <span class="radio-custom"></span>
+            <span>B. Vì đó là nơi Smart Money tích lũy lệnh trước khi đẩy giá đi mạnh</span>
+          </label>
+          <label class="option" data-correct="false">
+            <input type="radio" name="q3" value="c">
+            <span class="radio-custom"></span>
+            <span>C. Vì đó là lúc tin tức được công bố</span>
+          </label>
+          <label class="option" data-correct="false">
+            <input type="radio" name="q3" value="d">
+            <span class="radio-custom"></span>
+            <span>D. Nó không quan trọng, chỉ cần nhìn nến tăng giảm là đủ</span>
+          </label>
+        </div>
+        <div class="feedback" id="fb3"></div>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         🦶 FOOTER - gemral.com
+         ========================================== -->
+    <footer class="lesson-footer">
+      <div class="footer-logo">GEM Trading Academy</div>
+      <div class="footer-link">
+        <a href="https://gemral.com" target="_blank">gemral.com</a>
+      </div>
+    </footer>
+    
+  </div>
+  
+  <!-- ==========================================
+       📜 QUIZ JAVASCRIPT
+       ========================================== -->
+  <script>
+    const quizData = {
+      q1: {
+        correct: 'b',
+        explanation: {
+          correct: '✅ Chính xác! DPU (Down-Pause-Up) là pattern đảo chiều từ Giảm sang Tăng, tạo cơ hội bắt đáy tuyệt vời.',
+          incorrect: '❌ Sai rồi. DPD và UPU là tiếp diễn. Hãy nhớ: DPU = Đảo chiều tăng.'
+        }
+      },
+      q2: {
+        correct: 'b',
+        explanation: {
+          correct: '✅ Chuẩn! HFZ = High = Cao = Vùng Bán. Đừng bao giờ mua tại HFZ.',
+          incorrect: '❌ Nguy hiểm! HFZ là vùng tập trung phe Bán. Mua ở đây rất dễ đu đỉnh.'
+        }
+      },
+      q3: {
+        correct: 'b',
+        explanation: {
+          correct: '✅ Chính xác! Vùng Pause là dấu chân của Cá Mập. Hiểu được Pause là hiểu được ý đồ thị trường.',
+          incorrect: '❌ Sai rồi. Pause không phải là ngẫu nhiên. Nó là sự chuẩn bị cho một cú bùng nổ.'
+        }
+      }
+    };
+    
+    document.querySelectorAll('.option').forEach(option => {
+      option.addEventListener('click', function() {
+        const questionDiv = this.closest('.quiz-question');
+        const questionId = questionDiv.id;
+        const feedbackDiv = document.getElementById('fb' + questionId.slice(1));
+        const isCorrect = this.dataset.correct === 'true';
+        
+        questionDiv.querySelectorAll('.option').forEach(opt => {
+          opt.classList.remove('correct', 'incorrect');
+        });
+        
+        if (isCorrect) {
+          this.classList.add('correct');
+          feedbackDiv.className = 'feedback correct';
+          feedbackDiv.textContent = quizData[questionId].explanation.correct;
+        } else {
+          this.classList.add('incorrect');
+          questionDiv.querySelector('.option[data-correct="true"]').classList.add('correct');
+          feedbackDiv.className = 'feedback incorrect';
+          feedbackDiv.textContent = quizData[questionId].explanation.incorrect;
+        }
+        
+        this.querySelector('input').checked = true;
+      });
+    });
+  </script>
+
+</body>
+</html>

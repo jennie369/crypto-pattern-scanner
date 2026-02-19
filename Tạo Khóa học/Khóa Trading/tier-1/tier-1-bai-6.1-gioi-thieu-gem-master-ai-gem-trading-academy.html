@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 6.1: Giới Thiệu GEM Master AI - GEM Trading Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>:root{--navy:#112250;--navy-dark:#0a1628;--gold:#FFBD59;--gold-dark:#E5A73D;--cyan:#00F0FF;--purple:#6A5BFF;--burgundy:#9C0612;--success:#00C853;--error:#FF5252;--bg-primary:#0a1628;--bg-card:rgba(17,34,80,0.6);--text-primary:#FFFFFF;--text-secondary:rgba(255,255,255,0.85);--text-muted:rgba(255,255,255,0.6);--glass-bg:rgba(17,34,80,0.4);--glass-border:rgba(255,189,89,0.2);--space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--radius-md:12px;--radius-lg:16px}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}body{font-family:'Montserrat',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.7}img{max-width:100%;height:auto;display:block}.background-container{position:fixed;inset:0;z-index:-1}.bg-layer-base{position:absolute;inset:0;background:linear-gradient(180deg,var(--navy-dark) 0%,var(--navy) 50%,var(--navy-dark) 100%)}.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.3}.orb-1{width:400px;height:400px;background:var(--gold);top:-100px;right:-100px}.orb-2{width:300px;height:300px;background:var(--cyan);bottom:20%;left:-100px}.orb-3{width:250px;height:250px;background:var(--success);bottom:-50px;right:20%}.lesson-container{max-width:800px;margin:0 auto;padding:1.5rem}@media(max-width:600px){.lesson-container{padding:0}}.lesson-header{text-align:center;padding:var(--space-xl);margin-bottom:var(--space-xl);background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:0 4px 24px rgba(0,0,0,0.2)}@media(max-width:600px){.lesson-header{padding:var(--space-lg) 16px;margin-bottom:0;border:none;border-radius:0;box-shadow:none;border-bottom:8px solid var(--bg-primary)}}.lesson-badge{display:inline-flex;align-items:center;gap:var(--space-sm);padding:var(--space-sm) var(--space-md);background:linear-gradient(135deg,var(--purple),var(--cyan));border-radius:50px;font-size:0.75rem;font-weight:700;text-transform:uppercase;margin-bottom:var(--space-md);color:var(--navy-dark);}.lesson-chapter{color:var(--cyan);font-weight:600;font-size:0.9rem;margin-bottom:var(--space-sm);text-transform:uppercase;letter-spacing:1px}.lesson-title{font-size:clamp(1.75rem,5vw,2.5rem);font-weight:800;color:var(--text-primary);margin-bottom:var(--space-md);line-height:1.2}.lesson-meta{display:flex;justify-content:center;gap:var(--space-lg);color:var(--text-muted);font-size:0.9rem}.section{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin-bottom:var(--space-xl)}@media(max-width:600px){.section{padding:var(--space-lg) 16px;margin-bottom:0;border:none;border-radius:0;border-bottom:1px solid var(--glass-border)}}.section-title{font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-lg)}.highlight-box{background:linear-gradient(135deg,rgba(255,189,89,0.1),rgba(255,189,89,0.05));border-left:4px solid var(--gold);padding:var(--space-lg);border-radius:var(--radius-md);margin-bottom:var(--space-lg)}.highlight-box-title{font-weight:700;color:var(--gold);margin-bottom:var(--space-sm)}.definition-box{background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(0,240,255,0.05));border-left:4px solid var(--cyan);padding:var(--space-lg);border-radius:var(--radius-md);margin-bottom:var(--space-lg)}.definition-box-title{font-weight:700;color:var(--cyan);margin-bottom:var(--space-sm)}.image-container{margin:var(--space-lg) 0;text-align:center}.image-caption{font-size:0.85rem;color:var(--text-muted);margin-top:var(--space-sm)}.summary-box{background:linear-gradient(135deg,rgba(0,200,83,0.1),rgba(0,200,83,0.05));border:1px solid var(--success);border-radius:var(--radius-lg);padding:var(--space-xl);margin-bottom:var(--space-xl)}.summary-title{font-size:1.25rem;font-weight:700;color:var(--success);margin-bottom:var(--space-md)}.quiz-section{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin-top:var(--space-2xl)}.quiz-header{text-align:center;margin-bottom:var(--space-xl)}.quiz-title{font-size:1.5rem;font-weight:700;color:var(--text-primary);margin-bottom:var(--space-sm)}.quiz-subtitle{color:var(--text-muted)}.quiz-question{margin-bottom:var(--space-xl);padding-bottom:var(--space-xl);border-bottom:1px solid var(--glass-border)}.quiz-question:last-child{border-bottom:none}.question-number{color:var(--purple);font-weight:700;margin-bottom:var(--space-sm);display:block}.question-text{font-size:1.1rem;font-weight:600;margin-bottom:var(--space-md)}.quiz-options{display:grid;gap:var(--space-sm)}.quiz-option{background:var(--bg-card);border:1px solid var(--glass-border);padding:var(--space-md);border-radius:var(--radius-md);cursor:pointer;transition:all 0.2s ease;display:flex;align-items:center;gap:var(--space-md)}.quiz-option:hover{background:rgba(255,255,255,0.1);border-color:var(--gold)}.quiz-option.selected{border-color:var(--cyan);background:rgba(0,240,255,0.1)}.quiz-option.correct{border-color:var(--success);background:rgba(0,200,83,0.1)}.quiz-option.incorrect{border-color:var(--error);background:rgba(255,82,82,0.1)}.option-marker{width:24px;height:24px;border-radius:50%;border:2px solid var(--glass-border);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:var(--text-muted)}.quiz-option.selected .option-marker{border-color:var(--cyan);color:var(--cyan)}.quiz-option.correct .option-marker{border-color:var(--success);background:var(--success);color:var(--navy)}.quiz-option.incorrect .option-marker{border-color:var(--error);background:var(--error);color:white}.question-feedback{margin-top:var(--space-md);padding:var(--space-md);border-radius:var(--radius-md);background:rgba(255,255,255,0.05);display:none}.question-feedback.show{display:block}.question-feedback.correct{border-left:4px solid var(--success)}.question-feedback.incorrect{border-left:4px solid var(--error)}.feedback-title{font-weight:700;margin-bottom:var(--space-xs)}.feedback-text{font-size:0.9rem;color:var(--text-secondary)}.quiz-result{text-align:center;margin-top:var(--space-xl);padding:var(--space-xl);background:var(--glass-bg);border-radius:var(--radius-lg);border:1px solid var(--gold);display:none}.quiz-result.show{display:block}.result-score{font-size:2.5rem;font-weight:800;color:var(--gold);margin-bottom:var(--space-sm)}.footer{text-align:center;margin-top:var(--space-2xl);padding:var(--space-xl);border-top:1px solid var(--glass-border);color:var(--text-muted);font-size:0.9rem}</style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🤖</span>
+                <span>AI Tools</span>
+            </div>
+            <div class="lesson-chapter">Chapter 6 - GEM Master AI</div>
+            <h1 class="lesson-title">Bài 6.1: Giới Thiệu GEM Master AI</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 6.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title">🎯 Trợ Lý AI Riêng Cho Trading Của Bạn</h2>
+
+            <p>Hãy tưởng tượng bạn có một trợ lý làm việc 24/7, không bao giờ mệt mỏi, sẵn sàng quét hàng trăm biểu đồ trong vài giây, trả lời mọi câu hỏi về trading bất kỳ lúc nào, và thông báo cho bạn ngay khi có cơ hội giao dịch xuất hiện. Đó chính là GEM Master AI, hệ thống trí tuệ nhân tạo được thiết kế riêng cho cộng đồng GEM Trading.</p>
+
+            <p>Trước đây, để tìm được một pattern UPU hoặc DPU tiềm năng, bạn phải ngồi xem từng chart một, có thể mất hàng giờ đồng hồ mỗi ngày. Bây giờ, GEM Master AI có thể quét toàn bộ 150 đồng coin trong chưa đầy 30 giây và báo cáo cho bạn những setup đẹp nhất. Đây không phải là tương lai xa vời mà là công cụ bạn có thể sử dụng ngay hôm nay.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">💡 Tại Sao GEM Master AI Ra Đời?</div>
+                <p>Trong khảo sát với 500 members GEM, 78% cho biết họ bỏ lỡ cơ hội giao dịch tốt vì không có thời gian theo dõi thị trường liên tục. 65% nói rằng họ cần có ai đó giải đáp thắc mắc về trading ngay lập tức thay vì chờ đợi trong forum. GEM Master AI được phát triển để giải quyết chính xác những vấn đề này, giúp bạn trading hiệu quả hơn với ít thời gian hơn.</p>
+            </div>
+
+            <!-- HÌNH 8.1.1 -->
+            <div class="image-container">
+                <img src="images/bai-8.1-hinh-1-gem-master-ai-overview.jpg" alt="Tổng quan GEM Master AI">
+                <div class="image-caption">Hình 6.1.1: Tổng quan hệ thống GEM Master AI với 4 tính năng chính hỗ trợ trading</div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: Mục Tiêu Bài Học -->
+        <section class="section">
+            <h2 class="section-title">📚 Mục Tiêu Bài Học</h2>
+
+            <p>Sau khi hoàn thành bài học này, bạn sẽ hiểu rõ GEM Master AI là gì và có những tính năng cốt lõi nào. Bạn sẽ biết cách truy cập và bắt đầu sử dụng ngay trong ứng dụng GEM App. Quan trọng nhất, bạn sẽ nắm được các giới hạn sử dụng theo từng TIER để tận dụng tối đa công cụ này mà không bị giới hạn đột ngột giữa chừng.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title">📖 GEM Master AI Là Gì?</div>
+                <p>GEM Master AI là hệ thống trí tuệ nhân tạo được thiết kế riêng cho cộng đồng GEM, kết hợp giữa ba công cụ mạnh mẽ. Thứ nhất là Chatbot Hỏi Đáp Thông Minh, sẵn sàng trả lời mọi câu hỏi về trading, patterns và chiến lược. Thứ hai là Scanner Quét Pattern Tự Động, giúp tìm kiếm các pattern đang hình thành trên hàng trăm coin. Và thứ ba là Hệ Thống Cảnh Báo Thông Minh, gửi thông báo đến điện thoại khi có cơ hội giao dịch xuất hiện.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Deep Explanation - 4 Tính Năng Chính -->
+        <section class="section">
+            <h2 class="section-title">⚡ 4 Tính Năng Chính Của GEM Master AI</h2>
+
+            <h3>1. Chatbot Hỏi Đáp Thông Minh</h3>
+            <p>Chatbot được huấn luyện trên toàn bộ kiến thức GEM Method, bao gồm tất cả patterns, chiến lược entry, quản lý vốn và tâm lý trading. Bạn có thể hỏi bất kỳ câu hỏi nào như "UPU khác gì UPD?", "Khi nào nên di chuyển stop loss?", hay "Làm sao để tính position size với $500 vốn?" và nhận được câu trả lời chi tiết, chính xác trong vài giây. Chatbot hoạt động 24/7, không có thời gian chờ, và có thể giải thích các khái niệm phức tạp bằng ngôn ngữ đơn giản, dễ hiểu.</p>
+
+            <h3>2. Scanner Quét Pattern Tự Động</h3>
+            <p>Scanner là công cụ mạnh mẽ nhất trong GEM Master AI. Nó liên tục phân tích biểu đồ của hàng trăm coin trên nhiều timeframe khác nhau để tìm kiếm các pattern UPU, UPD, DPU, DPD, Flag, Pennant và Triangle đang trong giai đoạn hình thành. Khi tìm thấy pattern tiềm năng, Scanner sẽ hiển thị điểm Confidence từ 1-100, vị trí entry đề xuất, mức stop loss và take profit, cùng với tỷ lệ Risk:Reward. Điều này giúp bạn tiết kiệm hàng giờ mỗi ngày so với việc phải tự quét chart thủ công.</p>
+
+            <!-- HÌNH 8.1.2 -->
+            <div class="image-container">
+                <img src="images/bai-8.1-hinh-2-scanner-demo.jpg" alt="Demo Scanner quét pattern">
+                <div class="image-caption">Hình 6.1.2: Giao diện Scanner hiển thị kết quả quét với điểm Confidence và thông tin entry</div>
+            </div>
+
+            <h3>3. Hệ Thống Cảnh Báo Thông Minh</h3>
+            <p>Bạn không thể ngồi trước màn hình 24/7, nhưng GEM Master AI có thể. Hệ thống cảnh báo cho phép bạn thiết lập các điều kiện cụ thể, ví dụ như "Thông báo khi có pattern UPU với Confidence trên 75 trên BTC/USDT" hoặc "Cảnh báo khi giá SOL chạm vùng HFZ". Khi điều kiện được đáp ứng, bạn sẽ nhận được thông báo push đến điện thoại ngay lập tức, kèm theo tất cả thông tin cần thiết để đưa ra quyết định giao dịch.</p>
+
+            <h3>4. Phân Tích Nhanh Setup</h3>
+            <p>Khi bạn đã tìm được một setup tiềm năng, tính năng Phân Tích Nhanh sẽ giúp bạn đánh giá setup đó trong vài giây. Chỉ cần chọn coin và timeframe, AI sẽ phân tích và đưa ra đánh giá tổng thể bao gồm loại pattern đang hình thành, độ mạnh của setup từ 1-10, các vùng hỗ trợ và kháng cự quan trọng, và đề xuất entry, SL, TP với R:R cụ thể. Đây là công cụ tuyệt vời để xác nhận lại phân tích của bạn trước khi vào lệnh.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">⚠️ Lưu Ý Quan Trọng</div>
+                <p>GEM Master AI là công cụ HỖ TRỢ, không phải công cụ THAY THẾ cho kỹ năng và phán đoán của bạn. Luôn tự kiểm tra lại các setup do AI đề xuất trước khi vào lệnh. AI có thể sai, và trách nhiệm cuối cùng vẫn thuộc về bạn với tư cách là trader. Sử dụng AI như một "second opinion" chứ không phải nguồn duy nhất để ra quyết định.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Cách Truy Cập và Giới Hạn Tier -->
+        <section class="section">
+            <h2 class="section-title">📱 Cách Truy Cập và Giới Hạn Theo TIER</h2>
+
+            <p>Truy cập GEM Master AI rất đơn giản từ ứng dụng GEM App. Sau khi đăng nhập, bạn nhấn vào tab "GEM Master" có biểu tượng robot ở thanh menu phía dưới. Từ đây, bạn có thể chọn các tính năng như Chat để hỏi đáp, Scanner để quét pattern, hoặc Alerts để thiết lập cảnh báo.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title">📊 Giới Hạn Sử Dụng Theo TIER</div>
+                <p><strong>TIER 1 (Bạn đang ở đây):</strong> 20 câu hỏi chatbot mỗi ngày, 50 lần quét Scanner mỗi ngày, quét được 50 coins phổ biến nhất, 1 timeframe (4H), và tối đa 10 cảnh báo đồng thời. Đây là mức đủ cho người mới bắt đầu học và thực hành.</p>
+                <p><strong>TIER 2:</strong> 100 câu hỏi chatbot mỗi ngày, 200 lần quét mỗi ngày, quét được 150 coins, 3 timeframes (1H, 4H, 1D), và tối đa 50 cảnh báo. Phù hợp cho traders active muốn theo dõi nhiều cơ hội hơn.</p>
+                <p><strong>TIER 3:</strong> Không giới hạn chatbot và Scanner, quét toàn bộ coins trên Binance, tất cả timeframes từ 5m đến 1W, và không giới hạn số lượng cảnh báo. Dành cho traders chuyên nghiệp và full-time.</p>
+            </div>
+
+            <!-- HÌNH 8.1.3 -->
+            <div class="image-container">
+                <img src="images/bai-8.1-hinh-3-tier-comparison.jpg" alt="So sánh giới hạn theo TIER">
+                <div class="image-caption">Hình 6.1.3: Bảng so sánh giới hạn sử dụng GEM Master AI theo từng TIER</div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">💡 TIER 1 Đủ Để Bắt Đầu!</div>
+                <p>Đừng lo lắng về giới hạn của TIER 1. Với 50 lần quét và 20 câu hỏi mỗi ngày, bạn hoàn toàn có thể học tập và thực hành hiệu quả. Hầu hết các traders mới không sử dụng hết quota này trong ngày. Chỉ nâng cấp lên TIER cao hơn khi bạn thực sự cảm thấy bị giới hạn và đã master được các kỹ năng cơ bản.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: Câu Hỏi Thường Gặp -->
+        <section class="section">
+            <h2 class="section-title">❓ Câu Hỏi Thường Gặp Về GEM Master AI</h2>
+
+            <h3>1. AI có thể thay thế việc học trading không?</h3>
+            <p>Không, AI là công cụ hỗ trợ chứ không phải thay thế cho kiến thức và kỹ năng của bạn. Bạn vẫn cần hiểu rõ các pattern, biết cách đọc chart, và có khả năng đưa ra quyết định độc lập. AI giúp bạn tiết kiệm thời gian và không bỏ lỡ cơ hội, nhưng quyết định cuối cùng và trách nhiệm vẫn thuộc về bạn. Traders dựa hoàn toàn vào AI mà không có kiến thức nền tảng thường gặp khó khăn khi AI đưa ra tín hiệu sai.</p>
+
+            <h3>2. Scanner có chính xác 100% không?</h3>
+            <p>Không có công cụ nào chính xác 100%, kể cả AI tiên tiến nhất. Scanner của GEM Master AI có độ chính xác khoảng 70-75% cho các pattern có Confidence trên 70 điểm. Điều này có nghĩa là 1 trong 4 setup do AI đề xuất có thể không thành công. Đó là lý do bạn luôn phải áp dụng quản lý vốn nghiêm ngặt và không bao giờ "all-in" dựa trên tín hiệu AI.</p>
+
+            <h3>3. Quota reset khi nào?</h3>
+            <p>Quota sử dụng được reset về 0 mỗi ngày lúc 00:00 UTC tức 7:00 sáng giờ Việt Nam. Nếu bạn sử dụng hết quota trước thời gian này, bạn sẽ không thể sử dụng tính năng đó cho đến khi quota được reset. Để tránh tình huống này, hãy sử dụng quota một cách có kế hoạch và ưu tiên các coin và timeframe quan trọng nhất.</p>
+        </section>
+
+        <!-- SECTION 6: Thực Hành -->
+        <section class="section">
+            <h2 class="section-title">🎯 Bài Tập Thực Hành</h2>
+
+            <h3>📌 Hành Động Ngay Hôm Nay:</h3>
+            <p>Mở GEM App và truy cập tab GEM Master. Nhấn vào tính năng Chat và hỏi một câu hỏi đơn giản như "UPU pattern là gì?". Xem cách AI trả lời và so sánh với kiến thức bạn đã học trong khóa học. Sau đó, nhấn vào tính năng Scanner và quét BTC/USDT 4H để xem có pattern nào đang hình thành không. Làm quen với giao diện và các thông tin được hiển thị.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📋 Bài Tập Tuần Này: Khám Phá 4 Tính Năng</div>
+                <p><strong>Ngày 1-2:</strong> Sử dụng Chatbot để hỏi 5 câu hỏi về các kiến thức đã học, ví dụ như sự khác biệt giữa các patterns, cách tính position size, hay khi nào nên entry.</p>
+                <p><strong>Ngày 3-4:</strong> Sử dụng Scanner để quét 10 coins khác nhau và ghi chép lại các pattern mà AI tìm được. So sánh với phân tích của bạn.</p>
+                <p><strong>Ngày 5-7:</strong> Thiết lập 3-5 cảnh báo cho các coins bạn quan tâm và theo dõi xem cảnh báo có chính xác không khi được kích hoạt.</p>
+            </div>
+
+            <!-- HÌNH 8.1.4 -->
+            <div class="image-container">
+                <img src="images/bai-8.1-hinh-4-gem-app-navigation.jpg" alt="Hướng dẫn truy cập GEM Master AI">
+                <div class="image-caption">Hình 6.1.4: Hướng dẫn truy cập GEM Master AI từ tab menu trong ứng dụng GEM App</div>
+            </div>
+        </section>
+
+        <!-- SECTION 7: Tóm Tắt -->
+        <div class="summary-box">
+            <h3 class="summary-title">📝 Tóm Tắt Bài 6.1</h3>
+            <ul class="summary-list">
+                <li>GEM Master AI là hệ thống trí tuệ nhân tạo được thiết kế riêng cho cộng đồng GEM, kết hợp chatbot hỏi đáp, scanner quét pattern và hệ thống cảnh báo thông minh.</li>
+                <li>Bốn tính năng chính bao gồm Chatbot Hỏi Đáp 24/7, Scanner Quét Pattern Tự Động, Hệ Thống Cảnh Báo Push, và Phân Tích Nhanh Setup.</li>
+                <li>Truy cập qua tab "GEM Master" trong GEM App, có biểu tượng robot ở thanh menu phía dưới của ứng dụng.</li>
+                <li>TIER 1 có giới hạn 20 câu hỏi chatbot mỗi ngày, 50 lần quét Scanner, quét 50 coins phổ biến, 1 timeframe 4H, và tối đa 10 cảnh báo.</li>
+                <li>AI là công cụ HỖ TRỢ, không phải THAY THẾ cho kiến thức và kỹ năng trading của bạn, luôn tự xác nhận lại các tín hiệu từ AI trước khi vào lệnh.</li>
+            </ul>
+            <p style="margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--glass-border); color: var(--gold); font-weight: 600;">🎯 Bài Học Lớn: GEM Master AI giúp bạn trading hiệu quả hơn với ít thời gian hơn, nhưng nền tảng kiến thức vững chắc vẫn là yếu tố quan trọng nhất!</p>
+        </div>
+
+        <!-- SECTION 8: Quiz -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">❓ Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Trả lời 3 câu hỏi để củng cố kiến thức về GEM Master AI</p>
+            </div>
+
+            <div class="quiz-question" id="question-1">
+                <div class="question-number">1</div>
+                <p class="question-text">GEM Master AI có bao nhiêu tính năng chính?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-question="1" data-answer="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">2 tính năng: Chat và Scanner</span>
+                    </div>
+                    <div class="quiz-option" data-question="1" data-answer="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">4 tính năng: Chat, Scanner, Alerts, Phân tích nhanh</span>
+                    </div>
+                    <div class="quiz-option" data-question="1" data-answer="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">6 tính năng khác nhau</span>
+                    </div>
+                </div>
+                <div class="question-feedback" id="feedback-1">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" id="question-2">
+                <div class="question-number">2</div>
+                <p class="question-text">TIER 1 được phép quét Scanner bao nhiêu lần mỗi ngày?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-question="2" data-answer="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">50 lần/ngày</span>
+                    </div>
+                    <div class="quiz-option" data-question="2" data-answer="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">100 lần/ngày</span>
+                    </div>
+                    <div class="quiz-option" data-question="2" data-answer="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Không giới hạn</span>
+                    </div>
+                </div>
+                <div class="question-feedback" id="feedback-2">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" id="question-3">
+                <div class="question-number">3</div>
+                <p class="question-text">GEM Master AI có thể thay thế hoàn toàn việc học trading không?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-question="3" data-answer="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Có, AI thông minh hơn con người nên không cần học</span>
+                    </div>
+                    <div class="quiz-option" data-question="3" data-answer="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Không, AI là công cụ hỗ trợ, kiến thức nền tảng vẫn quan trọng nhất</span>
+                    </div>
+                    <div class="quiz-option" data-question="3" data-answer="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">AI chính xác 100% nên chỉ cần làm theo</span>
+                    </div>
+                </div>
+                <div class="question-feedback" id="feedback-3">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result" id="quiz-result">
+                <div class="result-score"><span id="score">0</span>/3</div>
+                <p class="result-message" id="result-message"></p>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn btn-secondary" onclick="resetQuiz()">Làm Lại</button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="lesson-footer">
+            <p class="footer-completion">🎉 Hoàn thành Bài 6.1!</p>
+            <p class="footer-next">Tiếp theo: <strong>Bài 6.2 - Sử Dụng Chatbot Hỏi Đáp</strong></p>
+        </footer>
+    </div>
+
+    <script>
+        const correctAnswers = {
+            1: 'B',
+            2: 'A',
+            3: 'B'
+        };
+
+        const explanations = {
+            1: {
+                correct: 'Chính xác! GEM Master AI có 4 tính năng chính: Chatbot Hỏi Đáp 24/7 để trả lời mọi câu hỏi về trading, Scanner Quét Pattern Tự Động để tìm kiếm cơ hội, Hệ Thống Cảnh Báo Push để thông báo khi có pattern xuất hiện, và Phân Tích Nhanh Setup để đánh giá các setup tiềm năng.',
+                incorrect: 'Chưa đúng. GEM Master AI có 4 tính năng chính: Chatbot Hỏi Đáp, Scanner Quét Pattern, Hệ Thống Cảnh Báo, và Phân Tích Nhanh Setup. Mỗi tính năng đóng vai trò quan trọng trong việc hỗ trợ trading của bạn.'
+            },
+            2: {
+                correct: 'Chính xác! TIER 1 cho phép 50 lần quét Scanner mỗi ngày. Con số này đủ cho người mới bắt đầu học và thực hành, cho phép bạn quét các coin quan trọng nhất mỗi ngày mà không bị giới hạn quá nhiều.',
+                incorrect: 'Chưa đúng. TIER 1 chỉ cho phép 50 lần quét Scanner mỗi ngày, không phải 100 hay unlimited. 100 lần là giới hạn của TIER 2, còn unlimited là TIER 3. Hãy sử dụng quota một cách có kế hoạch để không bị hết giữa chừng.'
+            },
+            3: {
+                correct: 'Chính xác! AI là công cụ HỖ TRỢ, không phải THAY THẾ cho kiến thức và kỹ năng của bạn. Scanner có độ chính xác khoảng 70-75%, nghĩa là 1 trong 4 setup có thể sai. Bạn vẫn cần hiểu rõ các pattern, biết đọc chart, và tự đưa ra quyết định có trách nhiệm.',
+                incorrect: 'Chưa đúng. Không có AI nào chính xác 100% và có thể thay thế hoàn toàn việc học. GEM Master AI có độ chính xác khoảng 70-75%, nghĩa là vẫn có thể sai. Kiến thức nền tảng vững chắc vẫn là yếu tố quan trọng nhất để trading thành công lâu dài.'
+            }
+        };
+
+        let answered = {1: false, 2: false, 3: false};
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const questionNum = parseInt(this.dataset.question);
+                const selectedAnswer = this.dataset.answer;
+
+                if (answered[questionNum]) return;
+                answered[questionNum] = true;
+
+                const questionEl = document.getElementById(`question-${questionNum}`);
+                const feedbackEl = document.getElementById(`feedback-${questionNum}`);
+                const options = questionEl.querySelectorAll('.quiz-option');
+
+                options.forEach(opt => opt.classList.add('disabled'));
+
+                const isCorrect = selectedAnswer === correctAnswers[questionNum];
+
+                if (isCorrect) {
+                    this.classList.add('correct');
+                    correctCount++;
+                    feedbackEl.classList.add('correct');
+                    feedbackEl.querySelector('.feedback-title').textContent = '✓ Chính xác!';
+                    feedbackEl.querySelector('.feedback-text').textContent = explanations[questionNum].correct;
+                } else {
+                    this.classList.add('incorrect');
+                    options.forEach(opt => {
+                        if (opt.dataset.answer === correctAnswers[questionNum]) {
+                            opt.classList.add('correct');
+                        }
+                    });
+                    feedbackEl.classList.add('incorrect');
+                    feedbackEl.querySelector('.feedback-title').textContent = '✗ Chưa đúng';
+                    feedbackEl.querySelector('.feedback-text').textContent = explanations[questionNum].incorrect;
+                }
+
+                feedbackEl.classList.add('show');
+
+                if (answered[1] && answered[2] && answered[3]) {
+                    showResult();
+                }
+            });
+        });
+
+        function showResult() {
+            const resultEl = document.getElementById('quiz-result');
+            const scoreEl = document.getElementById('score');
+            const messageEl = document.getElementById('result-message');
+
+            scoreEl.textContent = correctCount;
+
+            if (correctCount === 3) {
+                messageEl.textContent = 'Xuất sắc! Bạn đã hiểu rõ về GEM Master AI. Hãy bắt đầu khám phá ngay!';
+            } else if (correctCount === 2) {
+                messageEl.textContent = 'Tốt lắm! Hãy xem lại phần giải thích để nắm vững kiến thức về AI.';
+            } else {
+                messageEl.textContent = 'Bạn cần đọc lại bài học để hiểu rõ hơn về các tính năng và giới hạn của AI.';
+            }
+
+            resultEl.classList.add('show');
+        }
+
+        function resetQuiz() {
+            answered = {1: false, 2: false, 3: false};
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('correct', 'incorrect', 'disabled');
+            });
+
+            document.querySelectorAll('.question-feedback').forEach(fb => {
+                fb.classList.remove('show', 'correct', 'incorrect');
+            });
+
+            document.getElementById('quiz-result').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

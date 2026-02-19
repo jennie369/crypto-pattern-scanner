@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.1: Tổng Quan Classic Patterns | GEM Trading Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --navy: #112250; --navy-dark: #0a1628; --gold: #FFBD59; --gold-dark: #E5A73D; --cyan: #00F0FF; --purple: #6A5BFF; --burgundy: #9C0612; --burgundy-light: #C41E2A; --success: #00C853; --error: #FF5252; --bg-primary: #0a1628; --bg-card: rgba(17, 34, 80, 0.6); --text-primary: #FFFFFF; --text-secondary: rgba(255, 255, 255, 0.85); --text-muted: rgba(255, 255, 255, 0.6); --glass-bg: rgba(17, 34, 80, 0.4); --glass-border: rgba(255, 189, 89, 0.2); --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px; --radius-md: 12px; --radius-lg: 16px; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--purple), var(--cyan)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); color: var(--navy-dark); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .warning-box { background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05)); border: 1px solid rgba(156, 6, 18, 0.4); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .warning-box { border: none; border-radius: 0; border-left: 4px solid var(--burgundy); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .warning-box-title { font-weight: 700; color: var(--burgundy-light); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+        .summary-box { background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02)); border: 2px solid var(--success); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--success); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--success); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--success); font-weight: 700; }
+        .quiz-section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; padding: 0; margin-top: 0; border-top: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: var(--space-lg) 16px var(--space-md); margin-bottom: 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-question { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin-bottom: 0; border-bottom: 1px solid var(--glass-border); } }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; font-weight: 700; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); line-height: 1.6; }
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        @media (max-width: 600px) { .quiz-options { gap: 1px; background: var(--glass-border); margin-left: calc(-16px - 4px); margin-right: -16px; } }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; }
+        @media (max-width: 600px) { .quiz-option { border: none; border-radius: 0; border-left: 4px solid transparent; padding: var(--space-md) 16px; } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.correct { border-left-color: var(--success) !important; } }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.incorrect { border-left-color: var(--error) !important; } }
+        .quiz-option.disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-marker { width: 28px; height: 28px; min-width: 28px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; }
+        .quiz-option.incorrect .option-marker { background: var(--error); border-color: var(--error); color: white; }
+        .option-text { flex: 1; color: var(--text-secondary); }
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--space-sm); display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-buttons { padding: var(--space-lg) 16px; } }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container"><div class="bg-layer-base"></div><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge"><span>📊</span><span>Pattern Recognition</span></div>
+            <div class="lesson-chapter">Chapter 3 - Classic Patterns</div>
+            <h1 class="lesson-title">Bài 3.1: Tổng Quan Classic Patterns</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 3.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>15 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🔥</span> Ngôn Ngữ Của Thị Trường</h2>
+            <p>Hãy tưởng tượng bạn đang đi vào một khu rừng rậm rạp. Nếu bạn biết cách đọc dấu chân thú, tiếng gãy của cành cây, hướng gió thổi, bạn sẽ biết con thú nào đang ở gần, nguy hiểm hay an toàn. Trong trading, <strong>Classic Patterns (Mẫu hình cổ điển)</strong> chính là những dấu chân đó.</p>
+
+            <p>Từ những năm 1900, các trader huyền thoại như Charles Dow đã nhận ra rằng giá cả không di chuyển ngẫu nhiên. Chúng lặp đi lặp lại những hình thù nhất định. Tại sao? Vì tâm lý con người - lòng tham và nỗi sợ hãi - không bao giờ thay đổi. Một mô hình "Vai Đầu Vai" trên biểu đồ giá lúa mì năm 1920 có ý nghĩa y hệt như trên biểu đồ Bitcoin năm 2024.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Sức Mạnh Của Sự Đồng Thuận</div>
+                <p>Classic Patterns hoạt động mạnh mẽ vì hiệu ứng "Self-Fulfilling Prophecy" (Lời tiên tri tự ứng nghiệm). Khi hàng triệu trader trên thế giới cùng nhìn thấy một mẫu hình tam giác (Triangle) và cùng chờ đợi điểm phá vỡ (Breakout), hành động tập thể đó sẽ đẩy giá đi đúng như dự đoán. Đây là "Ngôn Ngữ Chung" mà bạn bắt buộc phải thành thạo.</p>
+            </div>
+        </section>
+
+        <!-- MỤC TIÊU BÀI HỌC -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Mục Tiêu Bài Học</h2>
+            <p>Bài học này sẽ cung cấp cho bạn tấm bản đồ tổng thể về thế giới Classic Patterns, trước khi chúng ta đi sâu vào chi tiết từng loại ở các bài sau.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📋</span> Bạn Sẽ Nắm Vững</div>
+                <p>• <strong>Bản chất:</strong> Classic Patterns thực sự là gì và tại sao chúng xuất hiện?<br>
+                • <strong>Phân loại:</strong> Sự khác biệt sống còn giữa Continuation (Tiếp diễn) và Reversal (Đảo chiều).<br>
+                • <strong>Chi tiết:</strong> Nắm bắt các pattern phổ biến như Flag, Triangle, Head & Shoulders.<br>
+                • <strong>Tư duy:</strong> Cách kết hợp Classic Patterns với GEM Frequency Patterns.<br>
+                • <strong>Cạm bẫy:</strong> Những sai lầm chết người khi giao dịch mô hình.</p>
+            </div>
+        </section>
+
+        <!-- CLASSIC PATTERNS LÀ GÌ & LỊCH SỬ -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Classic Patterns Là Gì?</h2>
+            <p>Classic Patterns (hay Chart Patterns) là các hình dạng đặc trưng xuất hiện trên biểu đồ giá. Chúng được hình thành bởi chuỗi các đỉnh và đáy theo một quy luật nhất định, phản ánh cuộc chiến giữa phe mua và phe bán. Khi pattern hoàn thành, nó cho tín hiệu về hướng đi tiếp theo của giá.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📈</span> Đặc Điểm Quan Trọng</div>
+                <p>Classic Patterns xuất hiện trên MỌI thị trường (tiền điện tử, chứng khoán, ngoại hối, hàng hóa) và MỌI khung thời gian (từ M1 đến Monthly). Điều này khiến chúng trở thành công cụ phân tích kỹ thuật phổ quát mà bất kỳ trader nào cũng cần biết. Tuy nhiên, cần lưu ý rằng không phải mọi pattern đều hoàn thành đúng - xác suất thành công dao động từ 50-75% tùy loại pattern và điều kiện thị trường.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🎓</span> Lịch Sử Ngắn Gọn</div>
+                <p>Phân tích mẫu hình bắt đầu từ lý thuyết Dow vào cuối thế kỷ 19. Richard Schabacker phát triển thêm trong những năm 1930. Sau đó, Robert Edwards và John Magee hệ thống hóa tất cả trong cuốn sách "Technical Analysis of Stock Trends" (1948) - được coi là kinh thánh của phân tích kỹ thuật. Các pattern trong sách này vẫn được sử dụng nguyên bản cho đến ngày nay.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.1/6-1-1.webp" alt="Classic Patterns Overview">
+            </div>
+            <div class="image-caption">Hình 1: Các mẫu hình cổ điển phổ biến phản ánh tâm lý thị trường</div>
+        </section>
+
+        <!-- 2 LOẠI PATTERN CHÍNH: CONTINUATION & REVERSAL -->
+        <section class="section">
+            <h2 class="section-title"><span>🔄</span> Hai Loại Pattern Chính</h2>
+            <p>Tất cả Classic Patterns đều thuộc một trong hai nhóm dựa trên ý nghĩa của chúng đối với xu hướng hiện tại. Việc xác định đúng nhóm là chìa khóa để không đánh ngược xu hướng.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.1/6-1-2.webp" alt="Continuation vs Reversal">
+            </div>
+            <div class="image-caption">Hình 2: Sự khác biệt cấu trúc giữa Tiếp Diễn (trái) và Đảo Chiều (phải)</div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📈</span> 1. Continuation Patterns (Mẫu Hình Tiếp Diễn)</div>
+                <p>Đây là những pattern cho tín hiệu rằng xu hướng hiện tại sẽ tiếp tục sau khi hoàn thành. Pattern tiếp diễn thường hình thành khi thị trường "nghỉ ngơi" sau một đợt di chuyển mạnh, tích lũy năng lượng trước khi tiếp tục theo hướng cũ.
+                <br><br><strong>Ví dụ phổ biến:</strong>
+                <br>• <strong>Flag & Pennant (Cờ & Cờ Đuôi Nheo):</strong> Hình thành sau cột cờ, win rate cao (~65-70%).
+                <br>• <strong>Triangle (Tam Giác):</strong> Ascending, Descending, Symmetrical.
+                <br>• <strong>Rectangle (Hình Chữ Nhật):</strong> Sideway box.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔄</span> 2. Reversal Patterns (Mẫu Hình Đảo Chiều)</div>
+                <p>Đây là những pattern báo hiệu xu hướng hiện tại sắp kết thúc và giá sẽ đảo ngược hướng. Reversal patterns chỉ có giá trị khi xuất hiện sau một xu hướng rõ ràng - không có trend trước thì không phải reversal.
+                <br><br><strong>Ví dụ phổ biến:</strong>
+                <br>• <strong>Head & Shoulders (Vai Đầu Vai):</strong> Reversal kinh điển nhất, win rate ~65%.
+                <br>• <strong>Double Top & Bottom (Hai Đỉnh & Đáy):</strong> Hình chữ M hoặc W.
+                <br>• <strong>Triple Top & Bottom (Ba Đỉnh & Đáy):</strong> Tương tự nhưng test 3 lần.</p>
+            </div>
+        </section>
+
+        <!-- CONTINUATION PATTERNS CHI TIẾT -->
+        <section class="section">
+            <h2 class="section-title"><span>📈</span> Continuation Patterns Phổ Biến</h2>
+            <p>Hãy cùng đi sâu vào những người bạn đồng hành đáng tin cậy này trong xu hướng:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🚩</span> Flag & Pennant (Cờ & Cờ Đuôi Nheo)</div>
+                <p>Flag là hình chữ nhật nghiêng ngược với trend, còn Pennant là tam giác nhỏ. Cả hai đều hình thành sau một đợt tăng/giảm mạnh (cột cờ) và thường kéo dài 1-3 tuần. Khi giá phá ra khỏi pattern theo hướng trend, target bằng chiều cao cột cờ. Flag và Pennant có win rate khoảng 65-70% và là những pattern đáng tin cậy nhất trong nhóm continuation.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📐</span> Triangle (Tam Giác)</div>
+                <p>Có 3 loại: Ascending (đỉnh bằng, đáy cao dần - bullish), Descending (đáy bằng, đỉnh thấp dần - bearish), và Symmetrical (đỉnh thấp dần, đáy cao dần - trung tính). Tam giác hình thành khi biên độ giá thu hẹp dần, như lò xo bị nén. Khi phá ra, giá thường di chuyển mạnh. Target bằng đáy tam giác (điểm rộng nhất) tính từ điểm breakout.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📦</span> Rectangle (Hình Chữ Nhật)</div>
+                <p>Đây là vùng sideway với support và resistance song song, rõ ràng. Rectangle có thể là continuation hoặc reversal tùy thuộc vào hướng breakout. Khi giá break lên trên resistance với volume mạnh, đó là tín hiệu LONG. Khi break dưới support, đó là tín hiệu SHORT. Target bằng chiều cao của rectangle.</p>
+            </div>
+        </section>
+
+        <!-- REVERSAL PATTERNS CHI TIẾT -->
+        <section class="section">
+            <h2 class="section-title"><span>🔄</span> Reversal Patterns Phổ Biến</h2>
+            <p>Những kẻ hủy diệt xu hướng mà bạn cần cảnh giác:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👤</span> Head & Shoulders (Đầu Vai)</div>
+                <p>Đây là reversal pattern đáng tin cậy nhất. Pattern bao gồm 3 đỉnh: vai trái, đầu (cao nhất), và vai phải. Đường nối hai đáy giữa các đỉnh gọi là neckline. Khi giá phá xuống dưới neckline với volume mạnh, pattern hoàn thành và tín hiệu SHORT được xác nhận. Target bằng khoảng cách từ đầu đến neckline, tính từ điểm breakout. Win rate khoảng 65%.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📉</span> Double Top & Double Bottom (Hai Đỉnh & Hai Đáy)</div>
+                <p>Double Top hình thành khi giá test đỉnh 2 lần nhưng không thể vượt qua, tạo hình chữ M. Khi phá support (đáy giữa 2 đỉnh), đó là tín hiệu SHORT. Ngược lại, Double Bottom là hình chữ W với 2 lần test đáy, và khi phá resistance là tín hiệu LONG. Đây là pattern dễ nhận biết nhất nhưng cũng dễ bị false breakout nhất - cần volume confirmation.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Lưu Ý Quan Trọng</div>
+                <p>Reversal patterns CHỈ có giá trị khi xuất hiện sau một xu hướng rõ ràng. Một Head & Shoulders trong thị trường sideway không có ý nghĩa gì. Ngoài ra, volume là yếu tố xác nhận quan trọng - breakout không có volume thường là false breakout. Luôn đợi nến đóng cửa xác nhận trước khi vào lệnh.</p>
+            </div>
+        </section>
+
+        <!-- MỐI LIÊN HỆ VỚI GEM PATTERNS -->
+        <section class="section">
+            <h2 class="section-title"><span>🔗</span> Sự Kết Hợp Hoàn Hảo: GEM + Classic</h2>
+            <p>Bạn đã học về 4 patterns độc quyền của GEM. Tin vui là chúng có mối liên hệ mật thiết với Classic Patterns. Khi bạn nhìn thấy sự xuất hiện đồng thời của cả hai, đó là tín hiệu <strong>Confluence (Hợp lưu)</strong> cực mạnh.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💎</span> Công Thức Confluence</div>
+                <p>• <strong>UPD (Up-Pause-Down)</strong> thường chính là mô hình <strong>Double Top</strong> hoặc <strong>Head & Shoulders</strong> trên khung thời gian nhỏ hơn.
+                <br>• <strong>DPU (Down-Pause-Up)</strong> thường là <strong>Double Bottom</strong> hoặc <strong>Inverse Head & Shoulders</strong>.
+                <br>• <strong>DPD/UPU</strong> chính là các mô hình <strong>Flag</strong> hoặc <strong>Pennant</strong>.</p>
+            </div>
+
+            <p><strong>Chiến lược:</strong> Khi hệ thống GEM báo hiệu một vùng HFZ (Vùng Bán) từ pattern UPD, hãy zoom vào khung thời gian nhỏ hơn. Nếu bạn thấy một mô hình Double Top cổ điển hình thành ngay tại đó, hãy tự tin vào lệnh. Đó là lúc cả hai trường phái phân tích kỹ thuật đều đồng thuận cho một cú sập.</p>
+        </section>
+
+        <!-- CÂU HỎI THƯỜNG GẶP -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+            <p>Những thắc mắc phổ biến khi mới bắt đầu học Classic Patterns:</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>❓</span> Có quá nhiều patterns, nên học pattern nào trước?</div>
+                <p>Bắt đầu với 4 patterns cơ bản nhất: Flag, Triangle, Double Top/Bottom, và Head & Shoulders. Đây là những pattern xuất hiện thường xuyên nhất và có xác suất thành công cao nhất. Khi đã thành thạo 4 patterns này (sau khoảng 50 lần nhận diện thành công), mới chuyển sang học các patterns phức tạp hơn như Cup & Handle hoặc Wedge.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>❓</span> Làm sao biết pattern đã hoàn thành hay chưa?</div>
+                <p>Pattern chỉ hoàn thành khi có breakout xác nhận. Breakout là khi giá phá qua một mức quan trọng (neckline, support, resistance) với volume cao hơn trung bình. Nến breakout phải đóng cửa ngoài mức đó - không chỉ wick chạm. Trước khi breakout, pattern chỉ đang "đang hình thành" và có thể thất bại bất cứ lúc nào.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>❓</span> Pattern nào có win rate cao nhất?</div>
+                <p>Theo nghiên cứu của Thomas Bulkowski trên hàng ngàn patterns: (1) Bull Flag trong uptrend: 67% win rate, (2) Head & Shoulders: 65%, (3) Ascending Triangle trong uptrend: 64%, (4) Double Bottom: 61%. Tuy nhiên, win rate phụ thuộc nhiều vào điều kiện thị trường. Trong bull market, continuation patterns hoạt động tốt hơn. Trong bear market, reversal patterns tại đáy thường fail.</p>
+            </div>
+        </section>
+
+        <!-- HÀNH ĐỘNG THỰC HÀNH -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Hành Động Thực Hành</h2>
+            <p>Để nắm vững kiến thức tổng quan về Classic Patterns, hãy thực hành ngay:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Làm Ngay Hôm Nay</div>
+                <p>1. Mở TradingView và chọn BTC/USDT khung D1.<br>
+                2. Cuộn về lịch sử 6 tháng gần nhất (Q3-Q4 2024).<br>
+                3. Tìm và đánh dấu tất cả patterns bạn nhận ra.<br>
+                4. Phân loại: Đây là Continuation hay Reversal?<br>
+                5. Kiểm tra: Pattern đó có breakout thành công không?</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📋</span> Bài Tập Tuần Này</div>
+                <p>1. Tạo một "Pattern Spotting Journal" - ghi chép mỗi pattern bạn tìm thấy.<br>
+                2. Với mỗi pattern, ghi lại: Loại pattern, Coin, Timeframe, Ngày hình thành, Breakout hay Fail.<br>
+                3. Sau 1 tuần, đếm: Bạn tìm được bao nhiêu Continuation? Bao nhiêu Reversal?<br>
+                4. Phân tích: Pattern nào bạn nhận diện nhanh nhất? Pattern nào hay nhầm?<br>
+                5. Mục tiêu: Nhận diện ít nhất 10 patterns trong tuần đầu tiên.</p>
+            </div>
+        </section>
+
+        <!-- TỔNG KẾT -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Tổng Kết Bài Học</h2>
+            <div class="summary-box">
+                <div class="summary-title"><span>🎯</span> Chìa Khóa Thành Công</div>
+                <ul class="summary-list">
+                    <li>Classic Patterns là ngôn ngữ chung của thị trường, phản ánh tâm lý đám đông.</li>
+                    <li>Phân biệt rõ ràng Tiếp Diễn (Flag, Triangle...) và Đảo Chiều (H&S, Double Top...).</li>
+                    <li>Sức mạnh thực sự nằm ở sự kết hợp: GEM Patterns xác định Vùng (Zone), Classic Patterns xác định Thời Điểm (Trigger).</li>
+                    <li>Luôn đợi xác nhận Breakout + Volume trước khi vào lệnh.</li>
+                    <li>Không bao giờ trade pattern mà không xét đến bối cảnh xu hướng trước đó.</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎓</span> Bước Tiếp Theo</div>
+                <p>Trong bài 3.2, chúng ta sẽ đi sâu vào mổ xẻ hai mô hình tiếp diễn mạnh mẽ nhất: <strong>Flag (Cờ) và Pennant (Cờ Đuôi Nheo)</strong>. Bạn sẽ học cách đo target lợi nhuận chính xác từng giá một!</p>
+            </div>
+        </section>
+
+        <footer class="section" style="text-align: center; padding: var(--space-xl);">
+            <p style="color: var(--gold); font-weight: 600;">Hoàn thành Bài 3.1 - Tổng Quan Classic Patterns</p>
+            <p style="color: var(--text-muted);">Tiếp theo: <strong style="color: var(--text-primary);">Bài 3.2 - Flag & Pennant Patterns</strong></p>
+        </footer>
+
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Chọn đáp án để nhận phản hồi ngay lập tức</p>
+            </div>
+            <div class="quiz-question" data-question="1" data-correct="A">
+                <div class="question-number">1</div>
+                <div class="question-text">Bull Flag (Cờ Tăng) thuộc nhóm pattern nào và ý nghĩa là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Continuation (Tiếp diễn) - Báo hiệu xu hướng tăng sẽ tiếp tục sau nhịp nghỉ.</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Reversal (Đảo chiều) - Báo hiệu xu hướng tăng sắp kết thúc.</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Neutral (Trung tính) - Thị trường sẽ đi ngang mãi mãi.</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Không có ý nghĩa gì đặc biệt.</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+            <div class="quiz-question" data-question="2" data-correct="B">
+                <div class="question-number">2</div>
+                <div class="question-text">Điều kiện bắt buộc để một Reversal Pattern (như Vai Đầu Vai) có hiệu lực là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Phải xuất hiện trong phiên giao dịch buổi sáng.</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Phải có một xu hướng (Trend) rõ ràng trước đó để đảo chiều.</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Phải có hình dạng đẹp như trong sách giáo khoa.</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Phải xuất hiện trên khung thời gian 1 phút.</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+            <div class="quiz-question" data-question="3" data-correct="C">
+                <div class="question-number">3</div>
+                <div class="question-text">GEM Pattern nào tương đồng với mô hình Double Bottom (Hai Đáy) trong Classic Patterns?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">DPD (Down-Pause-Down)</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">UPU (Up-Pause-Up)</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">DPU (Down-Pause-Up) - Đảo chiều từ giảm sang tăng.</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">UPD (Up-Pause-Down)</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+            <div class="quiz-result"><div class="result-score">0/3</div><div class="result-text">Hoàn thành!</div><div class="result-message"></div></div>
+            <div class="quiz-buttons"><button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button></div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+            let answeredCount = 0, correctCount = 0;
+            const totalQuestions = 3;
+            const explanations = {
+                1: { correct: '✓ Chính xác! Bull Flag là mô hình tiếp diễn kinh điển, cho thấy phe mua đang tạm nghỉ lấy sức trước khi đẩy giá lên tiếp.', incorrect: '✗ Sai rồi! Bull Flag là mẫu hình Tiếp Diễn (Continuation), không phải Đảo Chiều.' },
+                2: { correct: '✓ Chính xác! Không có xu hướng thì không có gì để đảo chiều cả. Reversal pattern vô nghĩa trong thị trường sideway.', incorrect: '✗ Sai rồi! Điều kiện tiên quyết là phải có Trend trước đó. Nếu không có trend, pattern đó không có giá trị.' },
+                3: { correct: '✓ Chính xác! DPU (Down-Pause-Up) là mô hình đảo chiều tăng, tương tự như Double Bottom tạo đáy W.', incorrect: '✗ Sai rồi! DPU (Down-Pause-Up) mới là mô hình đảo chiều tăng tương tự Double Bottom. Hãy xem lại phần so sánh!' }
+            };
+            questions.forEach(q => {
+                const opts = q.querySelectorAll('.quiz-option');
+                opts.forEach(o => {
+                    o.addEventListener('click', function() {
+                        if (q.classList.contains('answered')) return;
+                        q.classList.add('answered'); answeredCount++;
+                        const sel = this.dataset.option, corr = q.dataset.correct, isCor = sel === corr;
+                        opts.forEach(op => op.classList.add('disabled'));
+                        if (isCor) { this.classList.add('correct'); correctCount++; q.querySelector('.question-feedback').classList.add('correct'); }
+                        else { this.classList.add('incorrect'); q.querySelector('.question-feedback').classList.add('incorrect'); opts.forEach(op => { if(op.dataset.option === corr) op.classList.add('correct'); }); }
+                        q.querySelector('.feedback-title').textContent = isCor ? '✓ Chính xác!' : '✗ Sai rồi!';
+                        q.querySelector('.feedback-text').textContent = explanations[q.dataset.question][isCor ? 'correct' : 'incorrect'];
+                        q.querySelector('.question-feedback').classList.add('show');
+                        if (answeredCount === totalQuestions) {
+                            resultDiv.querySelector('.result-score').textContent = `${correctCount}/${totalQuestions}`;
+                            resultDiv.querySelector('.result-message').textContent = correctCount === totalQuestions ? '🎉 Xuất sắc!' : '📚 Ôn lại bài nhé!';
+                            resultDiv.classList.add('show'); retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0; correctCount = 0;
+                questions.forEach(q => { q.classList.remove('answered'); q.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('correct', 'incorrect', 'disabled')); q.querySelector('.question-feedback').classList.remove('show', 'correct', 'incorrect'); });
+                resultDiv.classList.remove('show'); retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

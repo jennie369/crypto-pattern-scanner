@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.6: Classic Patterns Tổng Kết - GEM Trading Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>:root{--navy:#112250;--navy-dark:#0a1628;--gold:#FFBD59;--gold-dark:#E5A73D;--cyan:#00F0FF;--purple:#6A5BFF;--burgundy:#9C0612;--burgundy-light:#C41E2A;--success:#00C853;--error:#FF5252;--bg-primary:#0a1628;--bg-card:rgba(17,34,80,0.6);--text-primary:#FFFFFF;--text-secondary:rgba(255,255,255,0.85);--text-muted:rgba(255,255,255,0.6);--glass-bg:rgba(17,34,80,0.4);--glass-border:rgba(255,189,89,0.2);--space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--radius-md:12px;--radius-lg:16px}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}body{font-family:'Montserrat',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.7}img{max-width:100%;height:auto;display:block}.background-container{position:fixed;inset:0;z-index:-1}.bg-layer-base{position:absolute;inset:0;background:linear-gradient(180deg,var(--navy-dark) 0%,var(--navy) 50%,var(--navy-dark) 100%)}.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.3}.orb-1{width:400px;height:400px;background:var(--gold);top:-100px;right:-100px}.orb-2{width:300px;height:300px;background:var(--cyan);bottom:20%;left:-100px}.orb-3{width:250px;height:250px;background:var(--success);bottom:-50px;right:20%}.lesson-container{max-width:800px;margin:0 auto;padding:1.5rem}@media(max-width:600px){.lesson-container{padding:0}}.lesson-header{text-align:center;padding:var(--space-xl);margin-bottom:var(--space-xl);background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:0 4px 24px rgba(0,0,0,0.2)}@media(max-width:600px){.lesson-header{padding:var(--space-lg) 16px;margin-bottom:0;border:none;border-radius:0;box-shadow:none;border-bottom:8px solid var(--bg-primary)}}.lesson-badge{display:inline-flex;align-items:center;gap:var(--space-sm);padding:var(--space-sm) var(--space-md);background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50px;font-size:0.75rem;font-weight:700;text-transform:uppercase;margin-bottom:var(--space-md);color:var(--navy-dark);box-shadow:0 0 15px rgba(255,189,89,0.3)}.lesson-chapter{color:var(--cyan);font-size:0.9rem;font-weight:600;margin-bottom:var(--space-xs);text-transform:uppercase;letter-spacing:1px}.lesson-title{font-size:clamp(1.5rem,5vw,2.5rem);font-weight:800;margin-bottom:var(--space-md);background:linear-gradient(135deg,var(--text-primary),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-shadow:0 4px 20px rgba(0,0,0,0.3)}.lesson-meta{display:flex;justify-content:center;gap:var(--space-md);font-size:0.85rem;color:var(--text-muted);flex-wrap:wrap}.meta-item{display:flex;align-items:center;gap:var(--space-xs)}.section{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:0 4px 24px rgba(0,0,0,0.2);padding:var(--space-xl);margin-bottom:var(--space-lg)}.section-title{font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-lg);display:flex;align-items:center;gap:var(--space-sm);border-bottom:1px solid rgba(255,189,89,0.2);padding-bottom:var(--space-md)}p{color:var(--text-secondary);margin-bottom:var(--space-md);font-size:1rem}strong{color:var(--gold);font-weight:600}.highlight-box{background:linear-gradient(135deg,rgba(255,189,89,0.15),rgba(255,189,89,0.05));border:1px solid rgba(255,189,89,0.3);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}.highlight-box-title{font-weight:700;color:var(--gold);margin-bottom:var(--space-sm);display:flex;align-items:center;gap:8px;font-size:1.1rem}.definition-box{background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(0,240,255,0.02));border:1px solid rgba(0,240,255,0.2);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}.definition-box-title{font-weight:700;color:var(--cyan);margin-bottom:var(--space-sm);font-size:1.1rem}.image-container{margin:var(--space-lg) 0;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--glass-border)}.image-caption{text-align:center;color:var(--text-muted);font-size:0.85rem;margin-top:var(--space-sm);font-style:italic}.summary-box{background:linear-gradient(135deg,rgba(0,200,83,0.1),rgba(0,200,83,0.02));border:2px solid var(--success);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0}.summary-title{font-size:1.25rem;font-weight:700;color:var(--success);margin-bottom:var(--space-lg);display:flex;align-items:center;gap:var(--space-sm)}.summary-list{list-style:none}.summary-list li{position:relative;padding-left:24px;margin-bottom:var(--space-md);color:var(--text-secondary)}.summary-list li::before{content:"✓";position:absolute;left:0;color:var(--success);font-weight:700}.quiz-section{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin-top:var(--space-xl)}.quiz-header{text-align:center;margin-bottom:var(--space-xl)}.quiz-title{font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-sm)}.quiz-subtitle{color:var(--text-muted)}.quiz-question{margin-bottom:var(--space-xl);padding-bottom:var(--space-lg);border-bottom:1px solid rgba(255,255,255,0.1)}.quiz-question:last-child{border-bottom:none}.question-number{font-size:0.9rem;color:var(--cyan);font-weight:700;margin-bottom:var(--space-xs);text-transform:uppercase}.question-text{font-size:1.1rem;font-weight:600;color:var(--text-primary);margin-bottom:var(--space-md)}.quiz-options{display:grid;gap:var(--space-sm)}.quiz-option{display:flex;align-items:center;padding:var(--space-md);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-md);cursor:pointer;transition:all 0.2s}.quiz-option:hover{background:rgba(255,255,255,0.1);border-color:var(--gold)}.quiz-option.correct{background:rgba(0,200,83,0.2);border-color:var(--success)}.quiz-option.incorrect{background:rgba(255,82,82,0.2);border-color:var(--error)}.quiz-option.disabled{pointer-events:none;opacity:0.7}.option-marker{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.1);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;margin-right:var(--space-md)}.quiz-option.correct .option-marker{background:var(--success);color:var(--navy-dark)}.quiz-option.incorrect .option-marker{background:var(--error);color:var(--text-primary)}.question-feedback{margin-top:var(--space-md);padding:var(--space-md);border-radius:var(--radius-md);display:none}.question-feedback.show{display:block}.question-feedback.correct{background:rgba(0,200,83,0.1);border:1px solid var(--success);color:var(--success)}.question-feedback.incorrect{background:rgba(255,82,82,0.1);border:1px solid var(--error);color:var(--error)}.feedback-title{font-weight:700;margin-bottom:var(--space-xs)}.quiz-result{text-align:center;margin-top:var(--space-xl);display:none}.quiz-result.show{display:block}.result-score{font-size:2rem;font-weight:800;color:var(--gold);margin-bottom:var(--space-sm)}.quiz-btn{background:linear-gradient(135deg,var(--purple),var(--cyan));color:var(--text-primary);border:none;padding:var(--space-md) var(--space-xl);border-radius:50px;font-weight:700;cursor:pointer;font-size:1rem;box-shadow:0 4px 15px rgba(106,91,255,0.3);transition:transform 0.2s}.quiz-btn:hover{transform:translateY(-2px)}</style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>📋</span>
+                <span>Chapter Summary</span>
+            </div>
+            <div class="lesson-chapter">Chapter 3 - Classic Patterns</div>
+            <h1 class="lesson-title">Classic Patterns Tổng Kết</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 3.6</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- 1. OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title">🎯 Nhìn Lại Hành Trình</h2>
+            <p>Chúc mừng bạn đã hoàn thành <strong>Chapter 3 - Classic Patterns</strong>! Đây là một cột mốc quan trọng. Trong suốt chương này, bạn đã được trang bị kiến thức về các chart patterns kinh điển nhất trong phân tích kỹ thuật, từ những mô hình tiếp diễn như Flag và Triangle đến những mô hình đảo chiều mạnh mẽ như Head & Shoulders và Double Top/Bottom. Đây là những công cụ đã được sử dụng bởi các trader chuyên nghiệp trên toàn thế giới trong hơn một thế kỷ qua.</p>
+            <p>Tuy nhiên, học thuộc hình dáng pattern mới chỉ là bước đầu. Bài học tổng kết này sẽ giúp bạn hệ thống hóa toàn bộ kiến thức, hiểu rõ mối liên hệ giữa các patterns, và quan trọng nhất: <strong>biết cách kết hợp Classic Patterns với GEM Method</strong> để tạo ra những setup giao dịch "bất bại". Hãy coi bài này như một tấm bản đồ kho báu mà bạn có thể quay lại tham khảo bất cứ lúc nào.</p>
+        </section>
+
+        <!-- 2. CONCEPT: TỔNG HỢP PATTERNS -->
+        <section class="section">
+            <h2 class="section-title">📊 Bảng Tổng Hợp Tất Cả Patterns</h2>
+            <p>Để giúp bạn dễ dàng ghi nhớ và tra cứu, tôi đã tổng hợp tất cả các patterns quan trọng nhất vào hai nhóm chính. Hãy chú ý kỹ đến tín hiệu giao dịch và cách tính target của từng loại.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📈 Continuation Patterns (Tiếp Diễn Xu Hướng)</div>
+                <p>Nhóm này cho biết xu hướng hiện tại đang tạm nghỉ để lấy đà đi tiếp. Đừng vội vàng đánh đảo chiều khi thấy chúng!</p>
+                <ul>
+                    <li><strong>Bull Flag:</strong> Xuất hiện trong uptrend, hình lá cờ nghiêng xuống. Tín hiệu LONG khi giá break cạnh trên. Target = Chiều dài cán cờ (Pole).</li>
+                    <li><strong>Bear Flag:</strong> Xuất hiện trong downtrend, hình lá cờ nghiêng lên. Tín hiệu SHORT khi giá break cạnh dưới. Target = Chiều dài cán cờ (Pole).</li>
+                    <li><strong>Pennant:</strong> Giống Flag nhưng vùng tích lũy hình tam giác nhỏ. Tín hiệu bùng nổ theo hướng cũ.</li>
+                    <li><strong>Ascending Triangle:</strong> Đỉnh ngang kháng cự + đáy tăng dần. Phe mua đang dồn ép phe bán. Break lên là tín hiệu LONG mạnh.</li>
+                    <li><strong>Descending Triangle:</strong> Đáy ngang hỗ trợ + đỉnh giảm dần. Phe bán đang đè bẹp phe mua. Break xuống là tín hiệu SHORT mạnh.</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📉 Reversal Patterns (Đảo Chiều Xu Hướng)</div>
+                <p>Nhóm này báo hiệu xu hướng cũ đã kiệt sức và một xu hướng mới sắp bắt đầu. Đây là cơ hội để bắt trọn con sóng mới từ đầu.</p>
+                <ul>
+                    <li><strong>Head & Shoulders (Vai Đầu Vai):</strong> Xuất hiện sau uptrend. Gồm Vai Trái - Đầu - Vai Phải. Tín hiệu SHORT khi break Neckline. Target = Khoảng cách từ Đầu đến Neckline.</li>
+                    <li><strong>Inverse Head & Shoulders (Vai Đầu Vai Ngược):</strong> Xuất hiện sau downtrend. Tín hiệu LONG khi break Neckline.</li>
+                    <li><strong>Double Top (Hai Đỉnh):</strong> Hình chữ "M" sau uptrend. Giá không thể phá đỉnh cũ. Tín hiệu SHORT khi break Neckline.</li>
+                    <li><strong>Double Bottom (Hai Đáy):</strong> Hình chữ "W" sau downtrend. Giá từ chối giảm sâu hơn. Tín hiệu LONG khi break Neckline.</li>
+                </ul>
+            </div>
+
+            <!-- HÌNH 3.6.1 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.6/6-6-1.webp" alt="Bảng tổng hợp các Classic Patterns">
+                <div class="image-caption">Hình 3.6.1: Bảng tổng hợp tất cả Classic Patterns với Entry, SL, TP chuẩn</div>
+            </div>
+        </section>
+
+        <!-- 3. DEEP DIVE: MAPPING VỚI GEM PATTERNS -->
+        <section class="section">
+            <h2 class="section-title">🔗 Kết Hợp Classic Patterns Với GEM Method</h2>
+            <p>Đây là phần quan trọng nhất của bài học này. Bạn có thể tự hỏi: "Tại sao tôi cần học cả hai hệ thống?". Câu trả lời là: <strong>Sự Hợp Lưu (Confluence)</strong>. Khi hai hệ thống phân tích độc lập cùng chỉ về một hướng, độ tin cậy của tín hiệu sẽ tăng lên gấp bội.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title">🔄 Từ Classic sang GEM Frequency</div>
+                <p>Hãy nhìn nhận các Classic Patterns dưới lăng kính của GEM Method (Up-Pause-Down):</p>
+                
+                <p><strong>1. Bull Flag / Ascending Triangle = UPU (Up-Pause-Up)</strong></p>
+                <p>Cán cờ (Pole) chính là nhịp <strong>Up</strong> đầu tiên. Lá cờ (Flag) chính là giai đoạn <strong>Pause</strong> (Tích lũy). Cú breakout chính là nhịp <strong>Up</strong> tiếp theo. Khi bạn thấy Bull Flag, hãy tìm kiếm <strong>LFZ (Low Frequency Zone)</strong> ở vùng Pause. Đó là nơi Smart Money đang tích lũy lệnh mua!</p>
+
+                <p><strong>2. Bear Flag / Descending Triangle = DPD (Down-Pause-Down)</strong></p>
+                <p>Tương tự, Pole là nhịp <strong>Down</strong> đầu tiên. Flag là vùng <strong>Pause</strong>. Breakout là nhịp <strong>Down</strong> tiếp theo. Hãy tìm kiếm <strong>HFZ (High Frequency Zone)</strong> ở vùng Pause. Đó là nơi Smart Money đang phân phối thêm lệnh bán.</p>
+
+                <p><strong>3. Head & Shoulders / Double Top = UPD (Up-Pause-Down)</strong></p>
+                <p>Đây là mô hình đảo chiều. Giá đi lên (<strong>Up</strong>), tạo đỉnh và vai (<strong>Pause</strong> - Phân phối), rồi sập xuống (<strong>Down</strong>). Neckline chính là ranh giới dưới của vùng Pause. Khi giá phá Neckline, mô hình UPD hoàn tất và <strong>HFZ</strong> được xác nhận.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">💡 Insight Nâng Cao</div>
+                <p>Khi một Classic Pattern xuất hiện trùng khớp với một GEM Zone (HFZ/LFZ), đó là <strong>A+ Grade Setup</strong>. Ví dụ: Bạn thấy một Bull Flag hình thành ngay tại một LFZ của khung thời gian lớn hơn (D1). Đây là tín hiệu cực mạnh để LONG.</p>
+            </div>
+
+            <!-- HÌNH 3.6.2 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.6/6-6-2.webp" alt="Sơ đồ mapping Classic Patterns với GEM Method">
+                <div class="image-caption">Hình 3.6.2: Sơ đồ mapping - Classic Pattern là lớp vỏ, GEM Method là cốt lõi</div>
+            </div>
+        </section>
+
+        <!-- 4. APPLICATION: QUY TRÌNH GIAO DỊCH -->
+        <section class="section">
+            <h2 class="section-title">📋 Quy Trình Giao Dịch 5 Bước</h2>
+            <p>Đừng bao giờ vào lệnh theo cảm tính. Hãy tuân thủ quy trình 5 bước sau để đảm bảo bạn luôn giao dịch có kỷ luật:</p>
+
+            <div class="definition-box">
+                <p><strong>Bước 1: Xác Định Xu Hướng (Big Picture)</strong><br>
+                Mở khung thời gian lớn (D1/H4). Xu hướng đang là gì? Nếu D1 tăng, chỉ ưu tiên tìm Bull Flag hoặc Double Bottom.</p>
+
+                <p><strong>Bước 2: Tìm Kiếm GEM Zone</strong><br>
+                Xác định các vùng HFZ/LFZ quan trọng. Giá đang phản ứng tại đâu? Nếu giá đang ở LFZ, hãy tìm tín hiệu mua.</p>
+
+                <p><strong>Bước 3: Nhận Diện Classic Pattern</strong><br>
+                Zoom vào khung nhỏ hơn (H1/M15). Có pattern nào đang hình thành tại Zone đó không? Một Bull Flag tại LFZ D1 là cơ hội vàng.</p>
+
+                <p><strong>Bước 4: Kiểm Tra Volume (Xác Nhận)</strong><br>
+                Volume có ủng hộ pattern không? Volume cần giảm trong giai đoạn hình thành pattern và BÙNG NỔ khi breakout. Không có volume = Fakeout.</p>
+
+                <p><strong>Bước 5: Lên Kế Hoạch Entry & Exit</strong><br>
+                Xác định điểm vào lệnh (Breakout hay Retest), điểm cắt lỗ (Dưới pattern) và chốt lời (Theo target của pattern). Nếu R:R < 2, bỏ qua lệnh này.</p>
+            </div>
+
+            <!-- HÌNH 3.6.3 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.6/6-6-3.webp" alt="Flowchart quy trình giao dịch 5 bước">
+                <div class="image-caption">Hình 3.6.3: Flowchart 5 bước từ phân tích đến vào lệnh</div>
+            </div>
+        </section>
+
+        <!-- 5. MISTAKES & BEST PRACTICES -->
+        <section class="section">
+            <h2 class="section-title">✅ Do's and Don'ts (Nên và Không Nên)</h2>
+            <p>Kinh nghiệm xương máu của các trader đi trước được đúc kết lại dưới đây. Hãy đọc kỹ để không phải trả học phí cho thị trường.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">✅ NÊN LÀM (DO)</div>
+                <ul>
+                    <li><strong>Chờ đóng nến:</strong> Luôn đợi nến đóng cửa bên ngoài pattern để xác nhận breakout. Nến chưa đóng = chưa có gì xảy ra.</li>
+                    <li><strong>Trade thuận xu hướng:</strong> Continuation patterns (như Flag) trong xu hướng mạnh có tỷ lệ thắng cao nhất.</li>
+                    <li><strong>Dùng lệnh Limit cho Retest:</strong> Nếu lỡ nhịp breakout, hãy kiên nhẫn đặt lệnh limit ở vùng neckline/trendline chờ giá hồi về.</li>
+                    <li><strong>Chốt lời từng phần:</strong> Chốt 50% tại Target 1 (theo lý thuyết) và để 50% còn lại chạy với trailing stop. Điều này giúp bạn bảo toàn profit trong khi vẫn có cơ hội capture bigger moves.</li>
+                </ul>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">❌ KHÔNG NÊN LÀM (DON'T)</div>
+                <ul>
+                    <li><strong>Cầm đèn chạy trước ô tô:</strong> Vào lệnh khi pattern "trông có vẻ" sắp hình thành nhưng chưa hoàn thiện.</li>
+                    <li><strong>Bỏ qua Volume:</strong> Breakout mà volume lẹt đẹt thì 80% là bẫy Bull Trap/Bear Trap.</li>
+                    <li><strong>Đánh đảo chiều khi trend quá mạnh:</strong> Thấy Double Top khi giá đang dựng cột xanh? Đừng Short vội, đó có thể chỉ là một nhịp nghỉ (Bull Flag) thôi!</li>
+                    <li><strong>Cố ép chart ra pattern:</strong> Nếu bạn phải nheo mắt, nghiêng đầu mới thấy pattern, thì nó không tồn tại đâu. Pattern xịn phải đập ngay vào mắt.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 6. FAQ -->
+        <section class="section">
+            <h2 class="section-title">❓ Câu Hỏi Thường Gặp</h2>
+
+            <p><strong>1. Timeframe nào tốt nhất để trade patterns?</strong><br>
+            Patterns hoạt động trên mọi khung thời gian, nhưng khung càng lớn (H4, D1) thì độ chính xác càng cao và ít nhiễu hơn. Người mới nên bắt đầu với H4.</p>
+
+            <p><strong>2. Nếu pattern thất bại (Failed Pattern) thì sao?</strong><br>
+            Pattern thất bại là một tín hiệu cực mạnh theo hướng NGƯỢC LẠI. Ví dụ: Bull Flag bị phá xuống dưới thường dẫn đến đợt giảm mạnh. Hãy linh hoạt đảo chiều tư duy.</p>
+
+            <p><strong>3. Nên dùng râu nến hay thân nến để vẽ pattern?</strong><br>
+            Hãy vẽ sao cho đường trendline chạm được nhiều điểm nhất có thể. Thường thì râu nến quan trọng trong việc xác định False Break, còn thân nến quan trọng để xác nhận Breakout.</p>
+        </section>
+
+        <!-- 7. ACTION PLAN -->
+        <section class="section">
+            <h2 class="section-title">🎯 Hành Động Thực Hành</h2>
+
+            <div class="success-box">
+                <div class="success-box-title">⚡ Bài Tập Về Nhà</div>
+                <p>1. Mở biểu đồ BTC hoặc ETH khung H4.</p>
+                <p>2. Tìm lại quá khứ 3 tháng gần nhất.</p>
+                <p>3. Khoanh vùng ít nhất 5 Classic Patterns bạn nhận diện được.</p>
+                <p>4. Ghi chú xem pattern đó tương ứng với GEM Pattern nào (UPU, DPD...).</p>
+                <p>5. Kiểm tra xem nếu trade theo pattern đó, bạn đã Win hay Loss?</p>
+            </div>
+
+            <!-- HÌNH 3.6.4 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.6/6-6-4.webp" alt="Ví dụ thực hành trên chart">
+                <div class="image-caption">Hình 3.6.4: Ví dụ thực hành - Nhận diện Bull Flag trên chart BTC</div>
+            </div>
+        </section>
+
+        <!-- TỔNG KẾT -->
+        <div class="summary-box">
+            <div class="summary-title">📝 Tổng Kết Chương 3</div>
+            <ul class="summary-list">
+                <li>Classic Patterns chia làm 2 loại chính: Continuation (Flag, Pennant, Triangle) và Reversal (Head & Shoulders, Double Top/Bottom).</li>
+                <li>Mỗi pattern có công thức tính target riêng - với Flag và Pennant là Pole Projection, với Triangle và H&S là Height Projection.</li>
+                <li>Volume confirmation là yếu tố bắt buộc - pattern không có volume là weak pattern với tỷ lệ thành công thấp.</li>
+                <li>Classic Patterns có thể map với GEM Patterns: Bull Flag ≈ UPU, Bear Flag ≈ DPD, H&S ≈ UPD, Double Bottom ≈ DPU.</li>
+                <li>Khi cả Classic và GEM patterns đều confirm, đó là A+ Grade Setup đáng trade với size lớn hơn.</li>
+            </ul>
+
+            <div style="margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--glass-border);">
+                <p style="color: var(--gold); font-weight: 700;">🎯 BÀI HỌC LỚN CỦA CHƯƠNG</p>
+                <p style="color: var(--text-secondary);">Patterns không phải là những hình vẽ ngẫu nhiên trên chart - chúng là biểu hiện của tâm lý tập thể của market participants. Khi bạn nhìn thấy một pattern, bạn đang đọc được "ngôn ngữ" của thị trường về cung-cầu, sức mạnh của bulls vs bears, và khả năng xu hướng tiếp tục hay đảo chiều. Hãy luôn nhớ rằng pattern là công cụ hỗ trợ quyết định, không phải công cụ dự đoán chắc chắn - quản lý risk vẫn luôn là ưu tiên số một.</p>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="section" style="text-align: center; padding: var(--space-xl);">
+            <p style="color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm);">🎉 Chúc mừng! Bạn đã hoàn thành Chapter 3: Classic Patterns</p>
+            <p style="color: var(--text-muted);">Bài tiếp theo: <strong style="color: var(--text-primary);">Chương 4 - Nến Nhật & Price Action</strong></p>
+        </footer>
+
+        <!-- QUIZ -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">🎯 Quiz Tổng Hợp Chapter 3</h2>
+                <p class="quiz-subtitle">Kiểm tra kiến thức để sẵn sàng sang chương mới</p>
+            </div>
+
+            <div class="quiz-question" data-question="1">
+                <div class="question-number">1</div>
+                <p class="question-text">Bull Flag trong Classic Patterns tương đương với cấu trúc nào trong GEM Method?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="a">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">UPD (Up-Pause-Down) - Đảo chiều giảm</span>
+                    </div>
+                    <div class="quiz-option" data-option="b">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">DPU (Down-Pause-Up) - Đảo chiều tăng</span>
+                    </div>
+                    <div class="quiz-option" data-option="c">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">UPU (Up-Pause-Up) - Tiếp diễn tăng</span>
+                    </div>
+                    <div class="quiz-option" data-option="d">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">DPD (Down-Pause-Down) - Tiếp diễn giảm</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2">
+                <div class="question-number">2</div>
+                <p class="question-text">Điều kiện nào biến một setup thành "A+ Grade Setup" (Xác suất cao nhất)?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="a">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Có sự hợp lưu giữa Classic Pattern và GEM Zone + Volume ủng hộ.</span>
+                    </div>
+                    <div class="quiz-option" data-option="b">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Pattern xuất hiện ngược với xu hướng khung D1.</span>
+                    </div>
+                    <div class="quiz-option" data-option="c">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Không cần Volume, chỉ cần hình dáng đẹp là đủ.</span>
+                    </div>
+                    <div class="quiz-option" data-option="d">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Pattern chưa hoàn thành nhưng bạn linh cảm nó sẽ break.</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="3">
+                <div class="question-number">3</div>
+                <p class="question-text">Khi nào một pattern bị coi là thất bại (Failed Pattern)?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="a">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Khi giá đi ngang trong pattern quá lâu.</span>
+                    </div>
+                    <div class="quiz-option" data-option="b">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Khi giá breakout giả (False Break) rồi quay đầu phá vỡ cạnh đối diện của pattern.</span>
+                    </div>
+                    <div class="quiz-option" data-option="c">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Khi RSI chạm mức quá mua.</span>
+                    </div>
+                    <div class="quiz-option" data-option="d">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Khi có tin tức tốt được tung ra.</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score"><span id="score">0</span>/3</div>
+                <p style="color: var(--text-secondary); margin-bottom: var(--space-lg);">Bạn đã hoàn thành Quiz Tổng Hợp Chapter 3!</p>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" onclick="resetQuiz()">Làm Lại Quiz</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const correctAnswers = { 1: 'c', 2: 'a', 3: 'b' };
+        const explanations = {
+            1: {
+                correct: "Chính xác! Bull Flag là mô hình giá tăng, nghỉ ngơi, rồi tăng tiếp. Cấu trúc này hoàn toàn trùng khớp với UPU (Up-Pause-Up) trong hệ thống GEM.",
+                incorrect: "Chưa đúng. Bull Flag là mô hình tiếp diễn tăng (Bullish Continuation). Nó tương đương với UPU."
+            },
+            2: {
+                correct: "Tuyệt vời! Sự hợp lưu (Confluence) giữa Pattern cổ điển, Vùng cung cầu (GEM Zone) và Khối lượng (Volume) chính là chìa khóa của những lệnh thắng lớn.",
+                incorrect: "Sai rồi. A+ Setup cần sự hội tụ của nhiều yếu tố ủng hộ, đặc biệt là Volume và GEM Zone."
+            },
+            3: {
+                correct: "Đúng rồi! Failed Pattern thường xảy ra khi giá lừa breakout một đầu rồi quay xe phá vỡ đầu kia. Đây thường là tín hiệu đảo chiều rất mạnh.",
+                incorrect: "Chưa chính xác. Failed Pattern là khi cấu trúc giá bị phá vỡ theo hướng ngược lại với kỳ vọng của mô hình."
+            }
+        };
+        let answered = {};
+        let score = 0;
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const question = this.closest('.quiz-question');
+                const questionNum = question.dataset.question;
+                if (answered[questionNum]) return;
+                answered[questionNum] = true;
+                const selectedAnswer = this.dataset.option;
+                const isCorrect = selectedAnswer === correctAnswers[questionNum];
+                const feedback = question.querySelector('.question-feedback');
+                const feedbackTitle = feedback.querySelector('.feedback-title');
+                const feedbackText = feedback.querySelector('.feedback-text');
+                question.querySelectorAll('.quiz-option').forEach(opt => opt.classList.add('disabled'));
+                if (isCorrect) {
+                    this.classList.add('correct');
+                    feedback.classList.add('correct', 'show');
+                    feedbackTitle.textContent = '✓ Chính xác!';
+                    feedbackText.textContent = explanations[questionNum].correct;
+                    score++;
+                } else {
+                    this.classList.add('incorrect');
+                    question.querySelector(`[data-option="${correctAnswers[questionNum]}"]`).classList.add('correct');
+                    feedback.classList.add('incorrect', 'show');
+                    feedbackTitle.textContent = '✗ Chưa đúng';
+                    feedbackText.textContent = explanations[questionNum].incorrect;
+                }
+                if (Object.keys(answered).length === 3) {
+                    document.getElementById('score').textContent = score;
+                    document.querySelector('.quiz-result').classList.add('show');
+                }
+            });
+        });
+        function resetQuiz() {
+            answered = {};
+            score = 0;
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('correct', 'incorrect', 'disabled');
+            });
+            document.querySelectorAll('.question-feedback').forEach(fb => {
+                fb.classList.remove('correct', 'incorrect', 'show');
+            });
+            document.querySelector('.quiz-result').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

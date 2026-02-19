@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 2.5: Giới Hạn TIER 1 và Preview TIER 2</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================
+       🎨 GEM DESIGN SYSTEM - V5.3 FACEBOOK-STYLE
+       ========================================== */
+    :root {
+      --color-navy: #112250;
+      --color-navy-dark: #0A0F1A;
+      --color-gold: #FFBD59;
+      --color-gold-dark: #E5A84D;
+      --color-burgundy: #9C0612;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-warning: #F59E0B;
+      --color-white: #FFFFFF;
+      --color-text: #E8E8E8;
+      --color-text-secondary: rgba(255, 255, 255, 0.7);
+      --color-text-muted: rgba(255, 255, 255, 0.5);
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.08);
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(255, 189, 89, 0.3);
+      --text-padding: 16px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 20px;
+      --radius-sm: 0;
+      --radius-md: 0;
+      --radius-lg: 0;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --glass-blur: blur(40px);
+    }
+
+    @media (min-width: 600px) {
+      :root {
+        --text-padding: 24px;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      font-size: 15px;
+      color: var(--color-text);
+      background: linear-gradient(180deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-dark) 100%);
+      min-height: 100vh;
+    }
+
+    @media (min-width: 600px) { body { font-size: 16px; line-height: 1.7; } }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(106, 91, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .lesson-container { max-width: 900px; margin: 0 auto; padding: 0; }
+    @media (min-width: 600px) { .lesson-container { padding: 16px; } }
+
+    .lesson-header {
+      text-align: center;
+      padding: var(--space-lg) var(--text-padding);
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: var(--space-md);
+    }
+
+    @media (min-width: 600px) {
+      .lesson-header {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        margin-bottom: var(--space-xl);
+      }
+    }
+
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-gold), var(--color-cyan), var(--color-gold));
+    }
+
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, var(--color-burgundy), #c41e2a);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+    }
+
+    @media (min-width: 600px) { .lesson-badge { font-size: 13px; padding: 6px 16px; } }
+
+    .lesson-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.5rem, 6vw, 2.5rem);
+      font-weight: 800;
+      color: var(--color-gold);
+      margin-bottom: var(--space-sm);
+      line-height: 1.2;
+      text-shadow: 0 0 30px rgba(255, 189, 89, 0.3);
+    }
+
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    .lesson-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--color-text-muted);
+      font-size: 12px;
+    }
+
+    @media (min-width: 600px) { .lesson-meta-item { font-size: 14px; } }
+    .lesson-meta-icon { color: var(--color-cyan); }
+
+    .lesson-content { background: transparent; border-radius: 0; padding: 0; backdrop-filter: none; border: none; }
+
+    @media (min-width: 600px) {
+      .lesson-content {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        padding: var(--text-padding);
+        backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--border-subtle);
+      }
+    }
+
+    .section { margin-bottom: var(--space-xl); }
+
+    h2, h3, p, ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      h2, h3, p, ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+
+    h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.25rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid rgba(255, 189, 89, 0.3);
+    }
+
+    @media (min-width: 600px) { h2 { font-size: 1.75rem; } }
+
+    h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-cyan);
+      margin-top: var(--space-lg);
+      margin-bottom: var(--space-sm);
+    }
+
+    @media (min-width: 600px) { h3 { font-size: 1.25rem; } }
+
+    p { margin-bottom: var(--space-md); }
+    strong { color: var(--color-gold); font-weight: 600; }
+
+    ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+      margin-bottom: var(--space-md);
+      padding-left: calc(var(--text-padding) + 20px);
+    }
+
+    @media (min-width: 600px) {
+      ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) { padding-left: 24px; }
+    }
+
+    ul li { margin-bottom: var(--space-xs); }
+
+    .opening-hook {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(17, 34, 80, 0.4));
+      border-left: 4px solid var(--color-burgundy);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin-bottom: var(--space-lg);
+      font-size: 15px;
+      font-style: italic;
+    }
+
+    @media (min-width: 600px) { .opening-hook { border-radius: var(--radius-md); font-size: 17px; } }
+    .opening-hook p { padding-left: 0; padding-right: 0; }
+    .opening-hook p:last-child { margin-bottom: 0; }
+
+    .highlight-box {
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-md) 0;
+      border-left: 4px solid;
+    }
+
+    @media (min-width: 600px) { .highlight-box { border-radius: var(--radius-md); } }
+    .highlight-box p, .highlight-box ul { padding-left: 0 !important; padding-right: 0 !important; }
+
+    .highlight-box.important { background: rgba(255, 189, 89, 0.1); border-color: var(--color-gold); }
+    .highlight-box.tip { background: rgba(0, 240, 255, 0.1); border-color: var(--color-cyan); }
+    .highlight-box.warning { background: rgba(245, 158, 11, 0.1); border-color: var(--color-warning); }
+    .highlight-box.success { background: rgba(16, 185, 129, 0.1); border-color: var(--color-green); }
+    .highlight-box.definition { background: rgba(106, 91, 255, 0.1); border-color: var(--color-purple); }
+
+    .highlight-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (min-width: 600px) { .highlight-title { font-size: 17px; } }
+
+    .highlight-box.important .highlight-title { color: var(--color-gold); }
+    .highlight-box.tip .highlight-title { color: var(--color-cyan); }
+    .highlight-box.warning .highlight-title { color: var(--color-warning); }
+    .highlight-box.success .highlight-title { color: var(--color-green); }
+    .highlight-box.definition .highlight-title { color: var(--color-purple); }
+
+    .lesson-image {
+      margin: var(--space-md) 0;
+      text-align: center;
+      overflow: hidden;
+      border-radius: 0;
+    }
+
+    @media (min-width: 600px) { .lesson-image { border-radius: var(--radius-md); margin: var(--space-lg) 0; } }
+
+    .lesson-image img { width: 100%; height: auto; display: block; border-radius: 0; }
+
+    @media (min-width: 600px) {
+      .lesson-image img {
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-subtle);
+      }
+    }
+
+    .image-caption {
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 12px;
+      margin-top: var(--space-sm);
+      font-style: italic;
+      padding: 0 var(--text-padding);
+    }
+
+    @media (min-width: 600px) { .image-caption { font-size: 14px; padding: 0; } }
+
+    .key-concept-box {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.15), rgba(17, 34, 80, 0.3));
+      border: none;
+      border-left: 4px solid var(--color-burgundy);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .key-concept-box {
+        border: 2px solid var(--color-burgundy);
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl);
+      }
+    }
+
+    .key-concept-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (min-width: 600px) { .key-concept-title { font-size: 1.25rem; } }
+
+    .key-concept-list { list-style: none; padding: 0; margin: 0; }
+
+    .key-concept-list li {
+      padding: 6px 0;
+      padding-left: 24px;
+      position: relative;
+      color: var(--color-text);
+      font-size: 14px;
+    }
+
+    @media (min-width: 600px) { .key-concept-list li { font-size: 16px; padding: 8px 0; padding-left: 28px; } }
+    .key-concept-list li::before { content: "✓"; position: absolute; left: 0; color: var(--color-green); font-weight: bold; }
+
+    .quiz-section {
+      background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05));
+      border: none;
+      border-left: 4px solid var(--color-purple);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .quiz-section {
+        border: 2px solid var(--color-purple);
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl);
+      }
+    }
+
+    .quiz-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.2rem;
+      color: var(--color-purple);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (min-width: 600px) { .quiz-title { font-size: 1.5rem; } }
+
+    .quiz-question {
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-lg);
+      border-bottom: 1px solid rgba(106, 91, 255, 0.2);
+    }
+
+    .quiz-question:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+    .quiz-question-text {
+      font-weight: 600;
+      color: var(--color-white);
+      margin-bottom: var(--space-sm);
+      font-size: 15px;
+    }
+
+    @media (min-width: 600px) { .quiz-question-text { font-size: 17px; } }
+
+    .quiz-options { list-style: none; padding: 0; }
+
+    .quiz-option {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      margin-bottom: 6px;
+      background: rgba(17, 34, 80, 0.4);
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    @media (min-width: 600px) { .quiz-option { font-size: 15px; padding: var(--space-md); } }
+    .quiz-option:hover { background: rgba(17, 34, 80, 0.6); border-color: var(--color-purple); }
+
+    .quiz-option-letter {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      background: rgba(106, 91, 255, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--color-purple);
+    }
+
+    @media (min-width: 600px) { .quiz-option-letter { width: 30px; height: 30px; font-size: 14px; } }
+
+    .quiz-answer {
+      margin-top: var(--space-sm);
+      padding: var(--space-md);
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 3px solid var(--color-green);
+      border-radius: 8px;
+      display: none;
+      font-size: 14px;
+    }
+
+    @media (min-width: 600px) { .quiz-answer { font-size: 15px; } }
+    .quiz-answer.show { display: block; }
+    .quiz-answer-label { font-weight: 600; color: var(--color-green); margin-bottom: 4px; }
+
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-xl) var(--text-padding);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: var(--space-lg);
+      background: var(--bg-card);
+    }
+
+    @media (min-width: 600px) { .lesson-footer { background: transparent; padding: var(--space-xl) 0; } }
+
+    .footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--color-gold);
+      margin-bottom: 4px;
+    }
+
+    .footer-link { color: var(--color-text-muted); font-size: 13px; }
+    .footer-link a { color: var(--color-cyan); text-decoration: none; }
+    .footer-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+
+<body>
+  <div class="lesson-container">
+
+    <!-- HEADER -->
+    <header class="lesson-header">
+      <span class="lesson-badge">📚 TIER 1 • Chương 2 • Bài 2.5</span>
+      <h1 class="lesson-title">Giới Hạn TIER 1 và Preview TIER 2</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">⏱️</span>
+          12 phút đọc
+        </span>
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">📚</span>
+          ~1500 từ
+        </span>
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">✅</span>
+          2 câu quiz
+        </span>
+      </div>
+    </header>
+
+    <!-- LESSON CONTENT -->
+    <div class="lesson-content">
+      
+      <div class="opening-hook">
+        <p>Bạn đã hoàn thành những bài học quan trọng về Vùng Tần Số cơ bản. Tuy nhiên, những gì bạn học ở TIER 1 mới chỉ là bề mặt của phương pháp GEM Frequency. Trong bài học cuối cùng của chapter này, tôi sẽ nói rõ những giới hạn của kiến thức TIER 1 và preview những gì đang chờ bạn ở TIER 2.</p>
+        <p>Mục đích không phải để bán TIER 2 cho bạn, mà để bạn hiểu rõ mình đang ở đâu trên hành trình học tập và cần những gì để tiến xa hơn.</p>
+      </div>
+
+      <section class="section">
+        <h2>Những Gì Bạn Đã Học Ở TIER 1</h2>
+
+        <p>Trong TIER 1, bạn đã được trang bị những kiến thức nền tảng quan trọng:</p>
+
+        <ul>
+          <li><strong>Nguyên lý cốt lõi:</strong> Hiểu về sự mất cân bằng cung cầu</li>
+          <li><strong>Smart Money:</strong> Biết cách tư duy theo những người chơi lớn</li>
+          <li><strong>HFZ và LFZ:</strong> Nhận diện vùng tần số bằng mắt</li>
+          <li><strong>Nguyên tắc giao dịch:</strong> Đợi retest, nến xác nhận, quản lý rủi ro</li>
+          <li><strong>Classic Patterns:</strong> 5 patterns cơ bản (Double Top/Bottom, H&S...)</li>
+        </ul>
+
+        <div class="highlight-box success">
+          <div class="highlight-title">✅ Bạn Có Thể Làm Gì Với Kiến Thức TIER 1?</div>
+          <p>Với những gì đã học, bạn có thể: nhận diện zone bằng mắt, hiểu logic đằng sau sự di chuyển giá, paper trade với 5 classic patterns cơ bản, sử dụng GEM Scanner và Chatbot ở mức cơ bản. Đây là nền tảng vững chắc để bạn bắt đầu hành trình trading.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Giới Hạn Của Kiến Thức TIER 1</h2>
+
+        <p>Tuy nhiên, TIER 1 có những giới hạn rõ ràng mà bạn cần nhận thức:</p>
+
+        <div class="highlight-box warning">
+          <div class="highlight-title">⚠️ TIER 1 KHÔNG Bao Gồm</div>
+          <p><strong>4 Patterns Độc Quyền GEM:</strong> DPD, UPU, UPD, DPU - Đây là 4 công thức để xác định zone CHÍNH XÁC, không chỉ bằng mắt. Ở TIER 1, bạn nhận diện zone bằng cảm quan, nhưng ở TIER 2, bạn sẽ có công thức rõ ràng với độ chính xác cao hơn.</p>
+          <p><strong>HFZ/LFZ Chi Tiết:</strong> Cách vẽ zone chính xác với 2 đường biên, chiến lược entry cụ thể, multi-timeframe zone analysis.</p>
+          <p><strong>6 Classic Patterns Nâng Cao:</strong> Doji, Rounding, Triangle patterns.</p>
+          <p><strong>Zone Scoring:</strong> Hệ thống chấm điểm chất lượng zone.</p>
+        </div>
+
+        <h3>So Sánh Độ Chính Xác</h3>
+
+        <p>Khi nhận diện zone bằng mắt (TIER 1), độ chính xác khoảng 55-60%. Khi sử dụng 4 patterns GEM độc quyền (TIER 2), độ chính xác tăng lên 65-70%. Sự khác biệt này đến từ việc có công thức rõ ràng để xác định zone thay vì dựa vào cảm quan.</p>
+      </section>
+
+      <section class="section">
+        <h2>Preview: 6 Công Thức Độc Quyền Ở TIER 2</h2>
+
+        <p>Ở TIER 2, bạn sẽ được học 6 công thức độc quyền của phương pháp GEM Frequency:</p>
+
+        <h3>4 Patterns Xác Định Zone</h3>
+        <ul>
+          <li><strong>DPD (Down-Pause-Down):</strong> Pattern tiếp diễn giảm, tạo HFZ - Win Rate 68%</li>
+          <li><strong>UPU (Up-Pause-Up):</strong> Pattern tiếp diễn tăng, tạo LFZ - Win Rate 71%</li>
+          <li><strong>UPD (Up-Pause-Down):</strong> Pattern đảo chiều giảm, tạo HFZ - Win Rate 65%</li>
+          <li><strong>DPU (Down-Pause-Up):</strong> Pattern đảo chiều tăng, tạo LFZ - Win Rate 69%</li>
+        </ul>
+
+        <h3>2 Loại Zone Mastery</h3>
+        <ul>
+          <li><strong>HFZ Mastery:</strong> Cách vẽ chính xác, chiến lược entry, multi-TF analysis</li>
+          <li><strong>LFZ Mastery:</strong> Cách vẽ chính xác, chiến lược entry, multi-TF analysis</li>
+        </ul>
+
+        <div class="highlight-box tip">
+          <div class="highlight-title">💡 Tại Sao 4 Patterns Này Quan Trọng?</div>
+          <p>4 patterns DPD, UPU, UPD, DPU không chỉ giúp bạn xác định zone chính xác, mà còn cho bạn biết sức mạnh của zone đó. Patterns đảo chiều (UPD, DPU) thường mạnh hơn patterns tiếp diễn (DPD, UPU). Hiểu được điều này giúp bạn ưu tiên những setup có xác suất cao hơn.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Bước Tiếp Theo Cho Bạn</h2>
+
+        <p>Bạn có 3 lựa chọn sau khi hoàn thành TIER 1:</p>
+
+        <ul>
+          <li><strong>Tiếp tục với TIER 1:</strong> Thực hành những gì đã học, paper trade với classic patterns, sử dụng GEM tools. Đây là lựa chọn phù hợp nếu bạn muốn củng cố nền tảng trước.</li>
+          <li><strong>Upgrade lên TIER 2:</strong> Học 6 công thức độc quyền để nâng cao độ chính xác. Đây là lựa chọn phù hợp nếu bạn muốn tăng tốc quá trình học tập và có công cụ mạnh mẽ hơn.</li>
+          <li><strong>Trở thành Partner:</strong> Chia sẻ GEM với người khác và nhận hoa hồng. Đây là cơ hội kiếm thêm thu nhập trong khi học trading.</li>
+        </ul>
+
+        <div class="highlight-box important">
+          <div class="highlight-title">⭐ Lời Khuyên</div>
+          <p>Không có con đường sai, chỉ có con đường phù hợp với bạn. Điều quan trọng là bạn hãy hoàn thành TIER 1 trước, thực hành những gì đã học, và sau đó quyết định bước tiếp theo dựa trên mục tiêu và điều kiện của mình.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Tóm Tắt Bài Học</h2>
+
+        <div class="key-concept-box">
+          <div class="key-concept-title">🔑 Điểm Chính Cần Nhớ</div>
+          <ul class="key-concept-list">
+            <li>TIER 1 cung cấp nền tảng: nhận diện zone bằng mắt, 5 classic patterns, nguyên tắc cơ bản</li>
+            <li>TIER 2 có 4 patterns độc quyền (DPD, UPU, UPD, DPU) để xác định zone chính xác</li>
+            <li>Độ chính xác tăng từ 55-60% (TIER 1) lên 65-70% (TIER 2)</li>
+            <li>Bạn có thể tiếp tục TIER 1, upgrade TIER 2, hoặc trở thành Partner</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- QUIZ SECTION -->
+      <div class="quiz-section">
+        <div class="quiz-title">📝 Kiểm Tra Kiến Thức</div>
+        
+        <div class="quiz-question">
+          <div class="quiz-question-text">Câu 1: 4 patterns độc quyền của phương pháp GEM Frequency là gì?</div>
+          <ul class="quiz-options">
+            
+            <li class="quiz-option">
+              <span class="quiz-option-letter">A</span>
+              <span>Double Top, Double Bottom, H&S, Inverse H&S</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">B</span>
+              <span>DPD, UPU, UPD, DPU</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">C</span>
+              <span>Triangle, Flag, Wedge, Pennant</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">D</span>
+              <span>Doji, Hammer, Engulfing, Star</span>
+            </li>
+          </ul>
+          <div class="quiz-answer">
+            <div class="quiz-answer-label">✓ Đáp án đúng: B</div>
+            <p>4 patterns độc quyền của GEM là DPD (Down-Pause-Down), UPU (Up-Pause-Up), UPD (Up-Pause-Down), và DPU (Down-Pause-Up). Đây là công thức để xác định zone chính xác, được dạy ở TIER 2.</p>
+          </div>
+        </div>
+        <div class="quiz-question">
+          <div class="quiz-question-text">Câu 2: Sự khác biệt chính giữa TIER 1 và TIER 2 là gì?</div>
+          <ul class="quiz-options">
+            
+            <li class="quiz-option">
+              <span class="quiz-option-letter">A</span>
+              <span>TIER 2 có nhiều bài học hơn</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">B</span>
+              <span>TIER 2 dạy cách xác định zone chính xác bằng 4 patterns</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">C</span>
+              <span>TIER 2 dành cho người đã có kinh nghiệm</span>
+            </li>
+            <li class="quiz-option">
+              <span class="quiz-option-letter">D</span>
+              <span>TIER 2 miễn phí còn TIER 1 mất phí</span>
+            </li>
+          </ul>
+          <div class="quiz-answer">
+            <div class="quiz-answer-label">✓ Đáp án đúng: B</div>
+            <p>Khác biệt chính là TIER 2 dạy 4 patterns độc quyền (DPD, UPU, UPD, DPU) để xác định zone CHÍNH XÁC thay vì chỉ bằng mắt như TIER 1, giúp tăng độ chính xác từ 55-60% lên 65-70%.</p>
+          </div>
+        </div>
+
+        <p style="text-align: center; color: var(--color-text-muted); margin-top: var(--space-lg);">
+          <em>💡 Click vào đáp án để kiểm tra</em>
+        </p>
+      </div>
+
+      
+      <!-- NEXT LESSON -->
+      <div class="highlight-box tip">
+        <div class="highlight-title">📚 Bài Tiếp Theo</div>
+        <p>Trong <strong>Bài 3.1: Double Top (Đỉnh Đôi)</strong>, bạn sẽ tiếp tục khám phá những kiến thức quan trọng để nâng cao kỹ năng trading của mình.</p>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="lesson-footer">
+      <div class="footer-logo">GEM Trading Academy</div>
+      <div class="footer-link">
+        <a href="https://gemral.com" target="_blank">gemral.com</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    document.querySelectorAll('.quiz-option').forEach(option => {
+      option.addEventListener('click', function() {
+        const question = this.closest('.quiz-question');
+        const answer = question.querySelector('.quiz-answer');
+        answer.classList.toggle('show');
+        question.querySelectorAll('.quiz-option').forEach(opt => { opt.style.opacity = '0.5'; });
+        this.style.opacity = '1';
+        this.style.borderColor = 'var(--color-purple)';
+      });
+    });
+  </script>
+</body>
+</html>

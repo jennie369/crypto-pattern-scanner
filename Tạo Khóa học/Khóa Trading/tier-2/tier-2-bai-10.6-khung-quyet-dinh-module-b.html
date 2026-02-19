@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 10.6: Khung Quyết Định - Module B</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-label {
+            display: inline-block;
+            background: linear-gradient(90deg, var(--navy-dark), transparent);
+            padding: 4px 12px;
+            border-radius: 4px;
+            color: var(--cyan);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            border-left: 3px solid var(--cyan);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        .image-caption { text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; font-style: italic; }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .highlight-box.green {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border-color: var(--success);
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4 { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .framework-step {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            align-items: flex-start;
+        }
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: var(--navy-dark);
+            flex-shrink: 0;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+        .step-content h4 { color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1.1rem; }
+        .step-content p { font-size: 0.95rem; margin: 0; }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid var(--glass-border);
+            padding: 12px;
+            text-align: left;
+            color: var(--text-secondary);
+        }
+        .comparison-table th { background: rgba(17, 34, 80, 0.8); color: var(--cyan); }
+        .comparison-table tr:nth-child(even) { background: rgba(255,255,255,0.03); }
+
+        .checklist { list-style: none; padding: 0; }
+        .checklist li {
+            position: relative;
+            padding-left: 2rem;
+            margin-bottom: 0.8rem;
+        }
+        .checklist li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: 800;
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0; }
+        @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+        .grid-item {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+        }
+        .grid-item.gold { border-top: 3px solid var(--gold); }
+        .grid-item.cyan { border-top: 3px solid var(--cyan); }
+        .grid-item.purple { border-top: 3px solid var(--purple); }
+        .grid-item.green { border-top: 3px solid var(--success); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-box li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-lg) 16px;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-question { margin-bottom: 1.5rem; }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; }
+        .quiz-option {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .quiz-option:hover { background: rgba(255,255,255,0.05); border-color: var(--cyan); }
+        .quiz-option.correct { border-color: var(--success); background: rgba(0,200,83,0.1); }
+        .quiz-option.incorrect { border-color: var(--error); background: rgba(255,82,82,0.1); }
+        .option-letter {
+            width: 24px; height: 24px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 700;
+        }
+        .quiz-result { margin-top: 8px; font-size: 0.9rem; font-style: italic; min-height: 1.4em; }
+        .quiz-score { text-align: center; margin-top: 2rem; border-top: 1px solid var(--glass-border); padding-top: 1rem; }
+        .retake-btn {
+            background: var(--gold); color: var(--navy-dark);
+            border: none; padding: 8px 24px; border-radius: 4px;
+            font-weight: 700; cursor: pointer; margin-top: 10px;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--glass-border);
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <div class="lesson-header">
+            <span class="lesson-badge">Module B - Chương 10</span>
+            <h1 class="lesson-title">Bài 10.6: Khung Quyết Định (Decision Framework)</h1>
+            <p class="lesson-subtitle">Chiến lược ra quyết định tối ưu cho sự nghiệp Trading của bạn</p>
+        </div>
+
+        <!-- 1. OPENING -->
+        <div class="content-section">
+            <span class="section-label">📋 Mở Đầu</span>
+            <h2 class="section-title">Tại Sao Cần Một Framework Quyết Định?</h2>
+            <p>Chào bạn, chúng ta đang đứng ở những mét cuối cùng của Module B. Lúc này, có thể trong đầu bạn đang có rất nhiều câu hỏi: "Mình nên làm gì tiếp theo?", "Liệu mình có nên đầu tư thêm vào Tier 3 không?", "Hay là mình nên tự học tiếp?".</p>
+            <p>Trong trading, mỗi quyết định vào lệnh (Entry) đều cần một bộ quy tắc (Checklist). Tương tự, những quyết định lớn về sự nghiệp cũng cần một <strong>Framework (Khung tư duy)</strong> rõ ràng để bạn không bị cảm xúc chi phối.</p>
+            <p>Bài học này sẽ cung cấp cho bạn chiếc la bàn đó. Không phải là lời khuyên "hãy chọn cái này đi", mà là công cụ để BẠN tự tìm ra câu trả lời đúng đắn nhất cho chính mình.</p>
+            
+            <div class="highlight-box">
+                <p><strong>🎯 Mục đích của Framework:</strong></p>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>Loại bỏ FOMO và nỗi sợ hãi khi ra quyết định.</li>
+                    <li>Đánh giá khách quan chi phí cơ hội (Opportunity Cost).</li>
+                    <li>Align (Căn chỉnh) quyết định với nguồn lực thực tế của bạn.</li>
+                    <li>Xác định con đường ngắn nhất để đạt được mục tiêu tài chính.</li>
+                </ul>
+            </div>
+            
+            <div class="image-placeholder">
+                <img src="https://via.placeholder.com/700x350/112250/FFBD59?text=Framework+Quyet+Dinh+-+Overview" alt="Framework quyết định">
+                <p class="image-caption">Hình 10.6.1: Tổng quan Khung Quyết Định 5 Bước</p>
+            </div>
+        </div>
+
+        <!-- 2. DEEP DIVE: 5 STEPS -->
+        <div class="content-section">
+            <span class="section-label">🔢 5 Bước Chiến Lược</span>
+            <h2 class="section-title">5-Step Decision Framework</h2>
+            <p>Hãy lấy giấy bút ra và thực hiện từng bước một. Đừng nhảy cóc.</p>
+
+            <div class="framework-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Xác Định Mục Tiêu (The "Why")</h4>
+                    <p>Bạn muốn đạt được gì trong 12 tháng tới? Thu nhập thụ động $1,000/tháng? Hay trở thành Full-time Trader? Hay chỉ là hiểu biết thêm để quản lý tiền cá nhân? Mục tiêu khác nhau sẽ dẫn đến con đường khác nhau.</p>
+                </div>
+            </div>
+
+            <div class="framework-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Đánh Giá Thực Tế (The Reality Check)</h4>
+                    <p>Hãy trung thực tàn nhẫn với bản thân. Vốn hiện có là bao nhiêu? (Đừng tính tiền đi vay). Thời gian rảnh mỗi ngày là bao nhiêu? (1 tiếng hay 8 tiếng?). Kiến thức hiện tại đang ở mức nào? (Đã master Tier 1 & 2 chưa?).</p>
+                </div>
+            </div>
+
+            <div class="framework-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Liệt Kê Các Lựa Chọn (The Options)</h4>
+                    <p>Dựa trên thực tế, bạn có các lựa chọn nào? (A) Tự học tiếp và thực hành trên Demo. (B) Đầu tư vào Tier 3 để học chuyên sâu. (C) Tham gia chương trình Partner để vừa học vừa làm.</p>
+                </div>
+            </div>
+
+            <div class="framework-step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>Phân Tích Chi Phí - Lợi Ích (Cost/Benefit)</h4>
+                    <p>Chi phí không chỉ là tiền học phí. Chi phí còn là THỜI GIAN. Tự học tốn $0 tiền nhưng có thể mất 2-3 năm thử sai. Có người dẫn dắt tốn tiền nhưng tiết kiệm được 2 năm cuộc đời. Cái giá nào đắt hơn?</p>
+                </div>
+            </div>
+
+            <div class="framework-step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h4>Đưa Ra Quyết Định và Cam Kết (Commitment)</h4>
+                    <p>Khi đã chọn, hãy cam kết 100%. Đừng chọn A rồi đứng núi này trông núi nọ sang B. Sự nửa vời là kẻ thù của thành công.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. COMPARISON MATRIX -->
+        <div class="content-section">
+            <span class="section-label">⚖️ Ma Trận So Sánh</span>
+            <h2 class="section-title">Ma Trận Quyết Định: 3 Con Đường</h2>
+            <p>Để giúp bạn dễ hình dung, tôi đã lập bảng so sánh 3 con đường phổ biến nhất mà học viên GEM thường đối mặt:</p>
+
+            <div class="image-placeholder">
+                <img src="https://via.placeholder.com/700x400/112250/00F0FF?text=Ma+Tran+Quyet+Dinh+-+3+Lua+Chon" alt="Ma trận quyết định">
+                <p class="image-caption">Hình 10.6.2: So sánh Tự Học vs Tier 3 vs Partner</p>
+            </div>
+
+            <table class="comparison-table">
+                <tr>
+                    <th>Tiêu Chí</th>
+                    <th>Tự Học (Solo)</th>
+                    <th>Học Chuyên Sâu (Tier 3)</th>
+                    <th>Đối Tác (Partner)</th>
+                </tr>
+                <tr>
+                    <td><strong>Chi phí tài chính</strong></td>
+                    <td>Thấp ($0 - ít)</td>
+                    <td>Trung bình ($$$)</td>
+                    <td>Cao ($$$$)</td>
+                </tr>
+                <tr>
+                    <td><strong>Chi phí thời gian</strong></td>
+                    <td>Cao (2-5 năm)</td>
+                    <td>Trung bình (6-12 tháng)</td>
+                    <td>Thấp (3-6 tháng)</td>
+                </tr>
+                <tr>
+                    <td><strong>Rủi ro sai đường</strong></td>
+                    <td>Rất cao</td>
+                    <td>Thấp</td>
+                    <td>Rất thấp</td>
+                </tr>
+                <tr>
+                    <td><strong>Hỗ trợ & Cộng đồng</strong></td>
+                    <td>Không có</td>
+                    <td>Cộng đồng học viên</td>
+                    <td>Mentorship 1-1</td>
+                </tr>
+                <tr>
+                    <td><strong>Thu nhập tiềm năng</strong></td>
+                    <td>Từ trading cá nhân</td>
+                    <td>Trading + Tín hiệu</td>
+                    <td>Trading + Hoa hồng hệ thống</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- 4. CHECKLIST -->
+        <div class="content-section">
+            <span class="section-label">✅ Checklist Tự Vấn</span>
+            <h2 class="section-title">Bộ Câu Hỏi Self-Audit</h2>
+            <p>Trước khi đưa ra quyết định cuối cùng, hãy trả lời trung thực các câu hỏi sau (Yes/No):</p>
+
+            <ul class="checklist">
+                <li>Tôi đã hoàn thành và hiểu rõ toàn bộ nội dung Tier 1 & 2 chưa?</li>
+                <li>Tôi có đủ vốn nhàn rỗi để đầu tư cho việc học mà không ảnh hưởng đến cuộc sống không?</li>
+                <li>Tôi có cam kết dành ít nhất 1-2 giờ mỗi ngày để thực hành không?</li>
+                <li>Tôi có đang tìm kiếm "chén thánh" làm giàu nhanh không? (Nếu Yes -> Dừng lại, GEM không phù hợp).</li>
+                <li>Tôi có muốn biến Trading thành một nghề nghiệp nghiêm túc hay chỉ là sở thích?</li>
+                <li>Tôi có sẵn sàng chịu trách nhiệm 100% cho kết quả của mình không?</li>
+            </ul>
+
+            <div class="image-placeholder">
+                <img src="https://via.placeholder.com/700x350/112250/10B981?text=Checklist+Tu+Danh+Gia" alt="Checklist tự đánh giá">
+                <p class="image-caption">Hình 10.6.3: Checklist tự đánh giá năng lực và tư duy</p>
+            </div>
+        </div>
+
+        <!-- 5. PROFILES -->
+        <div class="content-section">
+            <span class="section-label">🎯 Định Vị Bản Thân</span>
+            <h2 class="section-title">Bạn Thuộc Nhóm Nào?</h2>
+
+            <div class="grid-2">
+                <div class="grid-item gold">
+                    <h4 style="color: #FFBD59; margin-bottom: 0.5rem;">👤 Nhóm 1: The Explorer (Người Khám Phá)</h4>
+                    <p style="font-size: 0.9rem;"><strong>Đặc điểm:</strong> Mới bắt đầu, vốn ít, nhiều thời gian, thích tự mày mò.<br><strong>Lời khuyên:</strong> Hãy bắt đầu với Tự Học + Tài khoản Demo. Đừng vội nạp tiền thật.</p>
+                </div>
+                <div class="grid-item cyan">
+                    <h4 style="color: #00F0FF; margin-bottom: 0.5rem;">🚀 Nhóm 2: The Achiever (Người Cầu Tiến)</h4>
+                    <p style="font-size: 0.9rem;"><strong>Đặc điểm:</strong> Đã có kinh nghiệm, có vốn, muốn rút ngắn thời gian thành công.<br><strong>Lời khuyên:</strong> Tier 3 là lựa chọn tối ưu để hệ thống hóa kiến thức.</p>
+                </div>
+                <div class="grid-item purple">
+                    <h4 style="color: #8B5CF6; margin-bottom: 0.5rem;">💎 Nhóm 3: The Builder (Người Xây Dựng)</h4>
+                    <p style="font-size: 0.9rem;"><strong>Đặc điểm:</strong> Tư duy kinh doanh, muốn xây dựng hệ thống thu nhập thụ động song song với trading.<br><strong>Lời khuyên:</strong> Chương trình Partner là con đường nhanh nhất.</p>
+                </div>
+                <div class="grid-item green">
+                    <h4 style="color: #10B981; margin-bottom: 0.5rem;">🌟 Nhóm 4: The Professional</h4>
+                    <p style="font-size: 0.9rem;"><strong>Đặc điểm:</strong> Trader full-time, cần công cụ chuyên sâu và cộng đồng tinh hoa.<br><strong>Lời khuyên:</strong> Cần lộ trình Mentorship riêng biệt.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. MISTAKES & WARNINGS -->
+        <div class="content-section">
+            <span class="section-label">⚠️ Cảnh Báo</span>
+            <h2 class="section-title">Những Cái Bẫy Khi Ra Quyết Định</h2>
+
+            <div class="highlight-box" style="border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1);">
+                <p><strong>❌ Analysis Paralysis (Tê liệt phân tích):</strong></p>
+                <p style="font-size: 0.95rem; margin-top: 0.5rem;">Suy nghĩ quá nhiều, cân nhắc quá lâu nhưng không hành động. "Quyết định sai còn hơn là không quyết định gì cả".</p>
+                <p><strong>❌ FOMO Decision Making:</strong></p>
+                <p style="font-size: 0.95rem; margin-top: 0.5rem;">Thấy người khác đăng ký Tier 3 cũng đăng ký theo trong khi tài chính chưa cho phép. Hãy quyết định dựa trên ví tiền của BẠN.</p>
+            </div>
+
+            <div class="highlight-box green">
+                <p><strong>✓ Quy tắc 72 Giờ:</strong></p>
+                <p style="font-size: 0.95rem; margin-top: 0.5rem;">Khi muốn đưa ra quyết định tài chính quan trọng, hãy chờ 72 giờ. Nếu sau 3 ngày bạn vẫn thấy nó cần thiết và đúng đắn, hãy làm.</p>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://via.placeholder.com/700x300/112250/FFBD59?text=Quyet+Dinh+Dung+Dan+-+Checklist" alt="Quyết định đúng đắn">
+                <p class="image-caption">Hình 10.6.4: Tư duy đúng dẫn đến hành động đúng</p>
+            </div>
+        </div>
+
+        <!-- 7. SUMMARY -->
+        <div class="summary-box">
+            <h3>📋 Tổng Kết Bài Học</h3>
+            <ul class="summary-list">
+                <li>Quyết định sự nghiệp cần dựa trên Framework 5 bước, không phải cảm xúc.</li>
+                <li>Chi phí cơ hội (Thời gian) thường đắt hơn chi phí tài chính.</li>
+                <li>Xác định đúng Profile bản thân để chọn con đường phù hợp nhất.</li>
+                <li>Tránh bẫy "Tê liệt phân tích" và áp dụng quy tắc 72 giờ.</li>
+                <li>Cam kết 100% với con đường đã chọn là chìa khóa thành công.</li>
+            </ul>
+        </div>
+
+        <!-- 8. QUIZ -->
+        <div class="quiz-section">
+            <span class="section-label">📝 Kiểm Tra</span>
+            <h2 class="section-title">Quiz Nhanh</h2>
+
+            <div class="quiz-question" data-correct="1">
+                <p class="question-text">1. Yếu tố nào thường bị bỏ qua nhưng lại quan trọng nhất khi tính chi phí cơ hội?</p>
+                <div class="quiz-option" data-index="0">
+                    <span class="option-letter">A</span>
+                    <span>Tiền học phí</span>
+                </div>
+                <div class="quiz-option" data-index="1">
+                    <span class="option-letter">B</span>
+                    <span>Thời gian</span>
+                </div>
+                <div class="quiz-option" data-index="2">
+                    <span class="option-letter">C</span>
+                    <span>Công sức bỏ ra</span>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <p class="question-text">2. Nếu bạn có vốn ít, nhiều thời gian và thích tự khám phá, bạn thuộc nhóm nào?</p>
+                <div class="quiz-option" data-index="0">
+                    <span class="option-letter">A</span>
+                    <span>The Achiever</span>
+                </div>
+                <div class="quiz-option" data-index="1">
+                    <span class="option-letter">B</span>
+                    <span>The Builder</span>
+                </div>
+                <div class="quiz-option" data-index="2">
+                    <span class="option-letter">C</span>
+                    <span>The Explorer</span>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <p class="score-text">Kết quả: <span id="correct-count">0</span>/2</p>
+                <button class="retake-btn" onclick="location.reload()">Làm Lại</button>
+            </div>
+        </div>
+
+        <div class="lesson-footer">
+            <p>© 2025 GEM Trading Academy - Module B: Cơ Hội & Lựa Chọn</p>
+        </div>
+    </div>
+
+    <script>
+        const totalQuestions = 2;
+        let answeredCount = 0;
+        let correctCount = 0;
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác! Thời gian là tài sản quý giá nhất.';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy xem lại phần phân tích chi phí.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

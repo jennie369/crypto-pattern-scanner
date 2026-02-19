@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 7.1: Con Người Cũ và Con Người Mới</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================
+       GEM DESIGN SYSTEM - V5.3 FACEBOOK-STYLE
+       ========================================== */
+    :root {
+      --color-navy: #112250;
+      --color-navy-dark: #0A0F1A;
+      --color-gold: #FFBD59;
+      --color-gold-dark: #E5A84D;
+      --color-burgundy: #9C0612;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-warning: #F59E0B;
+      --color-white: #FFFFFF;
+      --color-text: #E8E8E8;
+      --color-text-secondary: rgba(255, 255, 255, 0.7);
+      --color-text-muted: rgba(255, 255, 255, 0.5);
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.08);
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(255, 189, 89, 0.3);
+      --text-padding: 16px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 20px;
+      --radius-sm: 0;
+      --radius-md: 0;
+      --radius-lg: 0;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --glass-blur: blur(40px);
+    }
+
+    @media (min-width: 600px) {
+      :root {
+        --text-padding: 24px;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      font-size: 15px;
+      color: var(--color-text);
+      background: linear-gradient(180deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-dark) 100%);
+      min-height: 100vh;
+    }
+
+    @media (min-width: 600px) { body { font-size: 16px; line-height: 1.7; } }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(106, 91, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .lesson-container { max-width: 900px; margin: 0 auto; padding: 0; }
+    @media (min-width: 600px) { .lesson-container { padding: 16px; } }
+
+    .lesson-header {
+      text-align: center;
+      padding: var(--space-lg) var(--text-padding);
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: var(--space-md);
+    }
+
+    @media (min-width: 600px) {
+      .lesson-header {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        margin-bottom: var(--space-xl);
+      }
+    }
+
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-gold), var(--color-cyan), var(--color-gold));
+    }
+
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, var(--color-burgundy), #c41e2a);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+    }
+
+    @media (min-width: 600px) { .lesson-badge { font-size: 13px; padding: 6px 16px; } }
+
+    .lesson-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.5rem, 6vw, 2.5rem);
+      font-weight: 800;
+      color: var(--color-gold);
+      margin-bottom: var(--space-sm);
+      line-height: 1.2;
+      text-shadow: 0 0 30px rgba(255, 189, 89, 0.3);
+    }
+
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    .lesson-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--color-text-muted);
+      font-size: 12px;
+    }
+
+    @media (min-width: 600px) { .lesson-meta-item { font-size: 14px; } }
+    .lesson-meta-icon { color: var(--color-cyan); }
+
+    .lesson-content { background: transparent; border-radius: 0; padding: 0; backdrop-filter: none; border: none; }
+
+    @media (min-width: 600px) {
+      .lesson-content {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        padding: var(--text-padding);
+        backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--border-subtle);
+      }
+    }
+
+    .section { margin-bottom: var(--space-xl); }
+
+    h2, h3, p, ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      h2, h3, p, ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+
+    h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.25rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid rgba(255, 189, 89, 0.3);
+    }
+
+    @media (min-width: 600px) { h2 { font-size: 1.75rem; } }
+
+    h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-cyan);
+      margin-top: var(--space-lg);
+      margin-bottom: var(--space-sm);
+    }
+
+    @media (min-width: 600px) { h3 { font-size: 1.25rem; } }
+
+    p { margin-bottom: var(--space-md); }
+    strong { color: var(--color-gold); font-weight: 600; }
+
+    ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+      margin-bottom: var(--space-md);
+      padding-left: calc(var(--text-padding) + 20px);
+    }
+
+    @media (min-width: 600px) {
+      ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) { padding-left: 24px; }
+    }
+
+    ul li { margin-bottom: var(--space-xs); }
+
+    .opening-hook {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(17, 34, 80, 0.4));
+      border-left: 4px solid var(--color-burgundy);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin-bottom: var(--space-lg);
+      font-size: 15px;
+      font-style: italic;
+    }
+
+    @media (min-width: 600px) { .opening-hook { border-radius: var(--radius-md); font-size: 17px; } }
+    .opening-hook p { padding-left: 0; padding-right: 0; }
+    .opening-hook p:last-child { margin-bottom: 0; }
+
+    .highlight-box {
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-md) 0;
+      border-left: 4px solid;
+    }
+
+    @media (min-width: 600px) { .highlight-box { border-radius: var(--radius-md); } }
+    .highlight-box p, .highlight-box ul { padding-left: 0 !important; padding-right: 0 !important; }
+
+    .highlight-box.important { background: rgba(255, 189, 89, 0.1); border-color: var(--color-gold); }
+    .highlight-box.tip { background: rgba(0, 240, 255, 0.1); border-color: var(--color-cyan); }
+    .highlight-box.warning { background: rgba(245, 158, 11, 0.1); border-color: var(--color-warning); }
+    .highlight-box.success { background: rgba(16, 185, 129, 0.1); border-color: var(--color-green); }
+    .highlight-box.definition { background: rgba(106, 91, 255, 0.1); border-color: var(--color-purple); }
+
+    .highlight-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (min-width: 600px) { .highlight-title { font-size: 17px; } }
+
+    .highlight-box.important .highlight-title { color: var(--color-gold); }
+    .highlight-box.tip .highlight-title { color: var(--color-cyan); }
+    .highlight-box.warning .highlight-title { color: var(--color-warning); }
+    .highlight-box.success .highlight-title { color: var(--color-green); }
+    .highlight-box.definition .highlight-title { color: var(--color-purple); }
+
+    .key-concept-box {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.15), rgba(17, 34, 80, 0.3));
+      border: none;
+      border-left: 4px solid var(--color-burgundy);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .key-concept-box {
+        border: 2px solid var(--color-burgundy);
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl);
+      }
+    }
+
+    .key-concept-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (min-width: 600px) { .key-concept-title { font-size: 1.25rem; } }
+
+    .key-concept-list { list-style: none; padding: 0; margin: 0; }
+
+    .key-concept-list li {
+      padding: 6px 0;
+      padding-left: 24px;
+      position: relative;
+      color: var(--color-text);
+      font-size: 14px;
+    }
+
+    @media (min-width: 600px) { .key-concept-list li { font-size: 16px; padding: 8px 0; padding-left: 28px; } }
+    .key-concept-list li::before { content: "✓"; position: absolute; left: 0; color: var(--color-green); font-weight: bold; }
+
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-xl) var(--text-padding);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: var(--space-lg);
+      background: var(--bg-card);
+    }
+
+    @media (min-width: 600px) { .lesson-footer { background: transparent; padding: var(--space-xl) 0; } }
+
+    .footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--color-gold);
+      margin-bottom: 4px;
+    }
+
+    .footer-link { color: var(--color-text-muted); font-size: 13px; }
+    .footer-link a { color: var(--color-cyan); text-decoration: none; }
+    .footer-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+
+<body>
+  <div class="lesson-container">
+
+    <!-- HEADER -->
+    <header class="lesson-header">
+      <span class="lesson-badge">📚 TIER 1 • Chương 7 • Bài 7.1</span>
+      <h1 class="lesson-title">Con Người Cũ và Con Người Mới</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">⏱️</span>
+          10 phút đọc
+        </span>
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">📚</span>
+          Module A - Hành Trình Chuyển Hóa
+        </span>
+      </div>
+    </header>
+
+    <!-- LESSON CONTENT -->
+    <div class="lesson-content">
+
+      <div class="opening-hook">
+        <p>Bạn đã đi được một chặng đường dài trong khóa học này. Hãy dừng lại một chút và nhìn lại bản thân. Con người bạn hôm nay đã khác xa so với khi mới bắt đầu. Những thay đổi đó có thể bạn chưa nhận ra, nhưng chúng đang định hình lại cách bạn nhìn nhận thị trường và cuộc sống.</p>
+      </div>
+
+      <!-- HÌNH 7.1.1 -->
+      <div class="image-placeholder">
+        <div class="placeholder-icon">🖼️</div>
+        <div class="placeholder-text">HÌNH 7.1.1: SỰ ĐỐI LẬP GIỮA CŨ VÀ MỚI</div>
+      </div>
+
+      <section class="section">
+        <h2>Phiên Bản Cũ Của Bạn</h2>
+
+        <p>Hãy nhớ lại lúc bạn mới bắt đầu tìm hiểu về trading. Khi đó, bạn có thể đã tin rằng trading là cách kiếm tiền nhanh chóng. Bạn nghĩ chỉ cần học vài chỉ báo là có thể chiến thắng thị trường. Bạn thấy những người khoe lợi nhuận trên mạng xã hội và muốn được như họ.</p>
+
+        <p>Phiên bản cũ của bạn có thể đã từng FOMO khi thấy coin tăng giá. Bạn mua vào vì sợ bỏ lỡ cơ hội làm giàu. Bạn không có kế hoạch rõ ràng khi vào lệnh. Bạn để cảm xúc chi phối mọi quyết định giao dịch của mình.</p>
+
+        <div class="highlight-box warning">
+          <div class="highlight-title">Những Sai Lầm Phổ Biến</div>
+          <p>Đa số traders mới đều mắc phải những sai lầm giống nhau. Họ giao dịch quá nhiều vì nghĩ càng trade nhiều càng kiếm được nhiều. Họ không dùng stop loss vì tin rằng giá sẽ quay lại. Họ đặt kỳ vọng phi thực tế về lợi nhuận hàng tháng.</p>
+        </div>
+
+        <!-- HÌNH 7.1.2 -->
+        <div class="image-placeholder">
+          <div class="placeholder-icon">🖼️</div>
+          <div class="placeholder-text">HÌNH 7.1.2: VÒNG LẶP CẢM XÚC TIÊU CỰC</div>
+        </div>
+
+        <p>Phiên bản cũ của bạn có thể đã từng thua lỗ và tự trách bản thân. Bạn cảm thấy mình không đủ thông minh cho việc này. Bạn so sánh mình với những traders thành công và cảm thấy thua kém. Những suy nghĩ tiêu cực đó đã từng kéo bạn xuống.</p>
+
+        <h3>Tâm Lý Của Người Mới</h3>
+
+        <p>Người mới thường có tâm lý muốn giàu nhanh và không chấp nhận thua lỗ. Họ xem mỗi lệnh thua như một thất bại cá nhân. Họ không hiểu rằng thua lỗ là một phần tất yếu của trading. Họ chưa biết cách quản lý vốn và cảm xúc.</p>
+
+        <p>Tâm lý này hoàn toàn bình thường và ai cũng từng trải qua giai đoạn đó. Điều quan trọng là bạn đã nhận ra và đang thay đổi từng ngày.</p>
+      </section>
+
+      <section class="section">
+        <h2>Phiên Bản Mới Đang Hình Thành</h2>
+
+        <p>Sau khi học xong TIER 1, bạn đã có những thay đổi căn bản về tư duy. Bạn hiểu rằng trading là một nghề nghiệp cần thời gian để thành thạo. Bạn biết rằng không có con đường tắt nào dẫn đến thành công. Bạn chấp nhận việc học hỏi liên tục là điều kiện bắt buộc.</p>
+
+        <div class="highlight-box success">
+          <div class="highlight-title">Những Thay Đổi Tích Cực</div>
+          <p>Bạn đã bắt đầu xem thị trường với con mắt khác biệt. Bạn nhìn thấy những vùng HFZ và LFZ mà trước đây hoàn toàn vô hình. Bạn hiểu được logic đằng sau mỗi chuyển động giá. Bạn không còn giao dịch theo cảm xúc như trước.</p>
+        </div>
+
+        <!-- HÌNH 7.1.3 -->
+        <div class="image-placeholder">
+          <div class="placeholder-icon">🖼️</div>
+          <div class="placeholder-text">HÌNH 7.1.3: TƯ DUY CỦA TRADER CHUYÊN NGHIỆP</div>
+        </div>
+
+        <p>Phiên bản mới của bạn có kỷ luật hơn trong việc tuân thủ kế hoạch. Bạn biết chờ đợi setup đúng thay vì vội vàng vào lệnh. Bạn đặt stop loss cho mỗi giao dịch như một thói quen. Bạn hiểu rằng bảo toàn vốn quan trọng hơn kiếm lợi nhuận.</p>
+
+        <h3>Sự Chuyển Đổi Về Tư Duy</h3>
+
+        <p>Tư duy của bạn đã chuyển từ "kiếm tiền nhanh" sang "phát triển bền vững". Bạn không còn tìm kiếm những tips hay signals miễn phí trên mạng. Bạn hiểu giá trị của việc tự học và xây dựng hệ thống riêng. Bạn biết rằng chỉ có bản thân mới chịu trách nhiệm cho kết quả.</p>
+
+        <p>Bạn cũng đã học được cách quản lý kỳ vọng của mình. Bạn không còn mơ mộng về việc x10 tài khoản trong một tháng. Bạn đặt mục tiêu thực tế và tập trung vào quá trình học hỏi. Bạn hiểu rằng consistent profit quan trọng hơn big wins.</p>
+      </section>
+
+      <section class="section">
+        <h2>Hành Trình Chuyển Hóa Chưa Kết Thúc</h2>
+
+        <p>Mặc dù bạn đã có những tiến bộ đáng kể, nhưng hành trình vẫn còn dài phía trước. TIER 1 chỉ là nền tảng giúp bạn hiểu về thị trường và phương pháp GEM. Những kiến thức thực chiến sẽ được học ở TIER 2 và TIER 3.</p>
+
+        <div class="highlight-box important">
+          <div class="highlight-title">Điều Quan Trọng Cần Nhớ</div>
+          <p>Sự chuyển hóa thực sự không xảy ra qua một đêm. Đó là quá trình tích lũy từng ngày, từng tuần, từng tháng. Mỗi bài học bạn hoàn thành là một bước tiến nhỏ. Mỗi lần bạn kiểm soát được cảm xúc là một chiến thắng lớn.</p>
+        </div>
+
+        <p>Hãy tự hào về những gì bạn đã đạt được đến thời điểm này. Không phải ai cũng có đủ kiên nhẫn để học hết TIER 1. Không phải ai cũng sẵn sàng thay đổi bản thân để trở thành trader tốt hơn. Bạn đã làm được điều mà nhiều người bỏ cuộc giữa chừng.</p>
+
+        <!-- HÌNH 7.1.4 -->
+        <div class="image-placeholder">
+          <div class="placeholder-icon">🖼️</div>
+          <div class="placeholder-text">HÌNH 7.1.4: LỘ TRÌNH PHÁT TRIỂN NĂNG LỰC</div>
+        </div>
+
+        <h3>Lời Nhắn Cho Bản Thân</h3>
+
+        <p>Phiên bản cũ của bạn đã đưa bạn đến đây. Nhưng để tiến xa hơn, bạn cần tiếp tục phát triển phiên bản mới. Hãy nhớ rằng mỗi ngày bạn đều có cơ hội để trở nên tốt hơn. Đừng để những thất bại trong quá khứ định nghĩa tương lai của bạn.</p>
+      </section>
+
+      <section class="section">
+        <h2>Tóm Tắt Bài Học</h2>
+
+        <div class="key-concept-box">
+          <div class="key-concept-title">Những Điểm Cốt Lõi</div>
+          <ul class="key-concept-list">
+            <li>Phiên bản cũ của bạn có nhiều sai lầm về tư duy và cảm xúc trong trading</li>
+            <li>Phiên bản mới đang hình thành với tư duy kỷ luật và có hệ thống hơn</li>
+            <li>Sự chuyển hóa là quá trình liên tục, không phải điểm đến cuối cùng</li>
+            <li>Hãy tự hào về những tiến bộ bạn đã đạt được trong khóa học</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- NEXT LESSON -->
+      <div class="highlight-box tip">
+        <div class="highlight-title">Bài Tiếp Theo</div>
+        <p>Trong <strong>Bài 7.2: Bản Đồ Hành Trình Của Bạn</strong>, bạn sẽ được hướng dẫn vẽ ra lộ trình phát triển cá nhân trong trading. Đây là bước quan trọng để bạn biết mình đang ở đâu và cần đi đến đâu.</p>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="lesson-footer">
+      <div class="footer-logo">GEM Trading Academy</div>
+      <div class="footer-link">
+        <a href="https://gemral.com" target="_blank">gemral.com</a>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

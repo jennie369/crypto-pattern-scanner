@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 1.6: Nguyên Tắc Vàng - Đợi Retest | GEM Trading Academy</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;family=Noto+Sans+Display:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       🎨 GEM DESIGN SYSTEM - V5.3 FACEBOOK-STYLE
+       Full-width components, text-only padding
+       ========================================== */
+    :root {
+      /* Colors */
+      --color-navy: #112250;
+      --color-navy-dark: #0A0F1A;
+      --color-navy-light: #1a3a6e;
+      --color-gold: #FFBD59;
+      --color-gold-dark: #E5A84D;
+      --color-burgundy: #9C0612;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-white: #FFFFFF;
+      --color-text: #E8E8E8;
+      --color-text-secondary: rgba(255, 255, 255, 0.7);
+      --color-text-muted: rgba(255, 255, 255, 0.5);
+      
+      /* Backgrounds */
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.08);
+      
+      /* Borders */
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(255, 189, 89, 0.3);
+      
+      /* V5.3: Text-only padding */
+      --text-padding: 16px;
+      
+      /* Spacing */
+      --space-xs: 0.125rem;
+      --space-sm: 0.25rem;
+      --space-md: 0.5rem;
+      --space-lg: 0.75rem;
+      --space-xl: 1rem;
+      --space-2xl: 1.25rem;
+      --space-3xl: 1.5rem;
+      
+      /* V5.3: No container padding on mobile */
+      --container-padding: 0;
+      --card-padding: 0.75rem;
+      --table-padding: 0.375rem;
+      
+      /* Border Radius */
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      
+      /* Shadows */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --shadow-glow-cyan: 0 0 15px rgba(0, 240, 255, 0.3);
+      
+      /* Glassmorphism */
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: blur(40px);
+    }
+    
+    /* ========================================
+       V5.3: Desktop (600px+)
+       ======================================== */
+    @media (min-width: 600px) {
+      :root {
+        --text-padding: 24px;
+        --container-padding: 1.5rem;
+        --card-padding: 1rem;
+        --table-padding: 0.75rem;
+        --radius-lg: 16px;
+        --radius-xl: 24px;
+      }
+    }
+    
+    /* ==========================================
+       🔄 RESET & BASE
+       ========================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      font-size: 0.9rem;
+      color: var(--color-text);
+      background: linear-gradient(180deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-dark) 100%);
+      min-height: 100vh;
+    }
+    
+    @media (min-width: 600px) {
+      body {
+        font-size: 1rem;
+        line-height: 1.7;
+      }
+    }
+    
+    /* Background Bokeh Effects */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(106, 91, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--color-white);
+    }
+    
+    /* ==========================================
+       📐 V5.3 CONTAINER - No padding mobile
+       ========================================== */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .container {
+        padding: var(--container-padding);
+      }
+    }
+    
+    /* ==========================================
+       🏷️ HEADER - V5.3 Full-width mobile
+       ========================================== */
+    .lesson-header {
+      text-align: center;
+      margin-bottom: 1px;
+      padding: var(--card-padding);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-gold), var(--color-cyan), var(--color-gold));
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-header {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        margin-bottom: var(--space-xl);
+      }
+    }
+    
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      background: linear-gradient(135deg, var(--color-gold), var(--color-burgundy));
+      color: white;
+      padding: var(--space-xs) var(--space-md);
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-badge {
+        font-size: 0.85rem;
+        padding: var(--space-xs) var(--space-lg);
+      }
+    }
+    
+    .lesson-title {
+      font-size: clamp(1.3rem, 5vw, 2.2rem);
+      margin-bottom: var(--space-sm);
+      background: linear-gradient(135deg, var(--color-gold), var(--color-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+    
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      color: var(--color-text-muted);
+      font-size: 0.75rem;
+      flex-wrap: wrap;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-meta {
+        gap: var(--space-xl);
+        font-size: 0.9rem;
+      }
+    }
+    
+    .lesson-meta span {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+    
+    /* ==========================================
+       📦 SECTION - V5.3 Full-width mobile
+       ========================================== */
+    .section {
+      background: var(--glass-bg);
+      border: none;
+      border-bottom: 1px solid var(--glass-border);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin-bottom: 1px;
+      backdrop-filter: var(--glass-blur);
+    }
+    
+    @media (min-width: 600px) {
+      .section {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+        margin-bottom: var(--space-xl);
+      }
+    }
+    
+    .section-title {
+      font-size: 1.1rem;
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      border-bottom: 2px solid var(--color-gold);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .section-title {
+        font-size: 1.5rem;
+        gap: var(--space-md);
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+    
+    .section-title .icon {
+      font-size: 1.2rem;
+    }
+    
+    @media (min-width: 600px) {
+      .section-title .icon {
+        font-size: 1.8rem;
+      }
+    }
+    
+    /* V5.3: Text elements get padding */
+    .section > p {
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      margin-bottom: var(--space-md);
+    }
+    
+    @media (min-width: 600px) {
+      .section > p {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+    
+    /* ==========================================
+       🎯 OBJECTIVE LIST - V5.3 Full-width
+       ========================================== */
+    .objective-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .objective-list li {
+      padding: var(--space-sm);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      margin-bottom: 1px;
+      background: rgba(255, 189, 89, 0.1);
+      border-left: 4px solid var(--color-gold);
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 0.85rem;
+    }
+    
+    @media (min-width: 600px) {
+      .objective-list li {
+        padding: var(--space-md);
+        margin-bottom: var(--space-sm);
+        font-size: 1rem;
+        gap: var(--space-md);
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        border-left: 3px solid var(--color-gold);
+      }
+    }
+    
+    .objective-list .check {
+      color: var(--color-green);
+      font-size: 1rem;
+    }
+    
+    /* ==========================================
+       ⭐ GOLDEN RULE - V5.3 Full-width
+       ========================================== */
+    .golden-rule {
+      background: linear-gradient(135deg, rgba(255, 189, 89, 0.2), rgba(156, 6, 18, 0.2));
+      border: none;
+      border-left: 4px solid var(--color-gold);
+      border-radius: 0;
+      padding: var(--space-lg);
+      padding-left: calc(var(--text-padding) - 4px);
+      padding-right: var(--text-padding);
+      text-align: center;
+      margin: 1px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    @media (min-width: 600px) {
+      .golden-rule {
+        border: 3px solid var(--color-gold);
+        border-radius: var(--radius-lg);
+        padding: var(--space-2xl);
+        margin: var(--space-lg) 0;
+      }
+    }
+    
+    .golden-rule::before {
+      content: '⭐';
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.8rem;
+      background: var(--color-navy-dark);
+      padding: 0 var(--space-sm);
+      display: none;
+    }
+    
+    @media (min-width: 600px) {
+      .golden-rule::before {
+        display: block;
+        top: -20px;
+        font-size: 2.5rem;
+        padding: 0 var(--space-md);
+      }
+    }
+    
+    .golden-rule .rule-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--color-gold);
+      margin-bottom: var(--space-sm);
+      margin-top: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .golden-rule .rule-title {
+        font-size: 1.8rem;
+        margin-bottom: var(--space-md);
+        margin-top: var(--space-md);
+      }
+    }
+    
+    .golden-rule .rule-text {
+      font-size: 1rem;
+      color: var(--color-white);
+      line-height: 1.6;
+    }
+    
+    @media (min-width: 600px) {
+      .golden-rule .rule-text {
+        font-size: 1.3rem;
+        line-height: 1.8;
+      }
+    }
+    
+    .golden-rule .rule-highlight {
+      display: inline-block;
+      background: var(--color-gold);
+      color: var(--color-navy-dark);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      margin: 0 var(--space-xs);
+      font-size: 0.9rem;
+    }
+    
+    @media (min-width: 600px) {
+      .golden-rule .rule-highlight {
+        padding: var(--space-xs) var(--space-md);
+        font-size: 1rem;
+      }
+    }
+    
+    /* ==========================================
+       🖼️ IMAGE - V5.3 Full-width
+       ========================================== */
+    .image-container {
+      margin: var(--space-md) 0;
+      text-align: center;
+    }
+    
+    .image-container img {
+      width: 100%;
+      border-radius: 0;
+      box-shadow: var(--shadow-md);
+      display: block;
+    }
+    
+    @media (min-width: 600px) {
+      .image-container img {
+        border-radius: var(--radius-md);
+        border: 2px solid var(--glass-border);
+      }
+    }
+    
+    .image-caption {
+      margin-top: var(--space-sm);
+      color: var(--color-text-muted);
+      font-size: 0.75rem;
+      font-style: italic;
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .image-caption {
+        font-size: 0.9rem;
+        padding: 0;
+      }
+    }
+    
+    /* Placeholder - V5.3 */
+    .image-placeholder {
+      background: linear-gradient(135deg, var(--color-navy-light), var(--color-navy));
+      border: none;
+      border-left: 4px dashed var(--color-gold);
+      border-radius: 0;
+      padding: var(--space-xl);
+      padding-left: calc(var(--text-padding) - 4px);
+      padding-right: var(--text-padding);
+      text-align: center;
+      color: var(--color-text-muted);
+    }
+    
+    @media (min-width: 600px) {
+      .image-placeholder {
+        padding: var(--space-3xl);
+        border: 2px dashed var(--color-gold);
+        border-radius: var(--radius-md);
+      }
+    }
+    
+    .image-placeholder .placeholder-icon {
+      font-size: 2rem;
+      margin-bottom: var(--space-sm);
+      opacity: 0.5;
+    }
+    
+    @media (min-width: 600px) {
+      .image-placeholder .placeholder-icon {
+        font-size: 3rem;
+        margin-bottom: var(--space-md);
+      }
+    }
+    
+    .image-placeholder .placeholder-text {
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 600px) {
+      .image-placeholder .placeholder-text {
+        font-size: 0.9rem;
+      }
+    }
+    
+    /* ==========================================
+       💡 HIGHLIGHT BOX - V5.3 Full-width
+       ========================================== */
+    .highlight-box {
+      padding: var(--card-padding);
+      padding-left: calc(var(--text-padding) - 4px);
+      padding-right: var(--text-padding);
+      border-radius: 0;
+      margin: var(--space-md) 0;
+      border: none;
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box {
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+      }
+    }
+    
+    .highlight-box.default {
+      background: rgba(255, 189, 89, 0.1);
+      border-left: 4px solid var(--color-gold);
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box.default {
+        border: 1px solid rgba(255, 189, 89, 0.3);
+        border-left: 4px solid var(--color-gold);
+      }
+    }
+    
+    .highlight-box.important {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid var(--color-red);
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box.important {
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-left: 4px solid var(--color-red);
+      }
+    }
+    
+    .highlight-box.success {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 4px solid var(--color-green);
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box.success {
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-left: 4px solid var(--color-green);
+      }
+    }
+    
+    .highlight-box.info {
+      background: rgba(0, 240, 255, 0.1);
+      border-left: 4px solid var(--color-cyan);
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box.info {
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-left: 4px solid var(--color-cyan);
+      }
+    }
+    
+    .highlight-box .highlight-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 0.9rem;
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box .highlight-title {
+        font-size: 1rem;
+      }
+    }
+    
+    .highlight-box p {
+      margin-bottom: 0;
+    }
+    
+    .highlight-box ul {
+      margin: 0;
+      padding-left: var(--space-lg);
+      font-size: 0.85rem;
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box ul {
+        font-size: 1rem;
+      }
+    }
+    
+    .highlight-box ul li {
+      margin-bottom: var(--space-xs);
+    }
+    
+    /* ==========================================
+       ❌✅ COMPARISON CARDS - V5.3 Full-width
+       ========================================== */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      margin: var(--space-md) 0;
+      background: var(--glass-border);
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-grid {
+        gap: var(--space-xl);
+        background: transparent;
+      }
+    }
+    
+    .comparison-card {
+      padding: var(--space-md);
+      border-radius: 0;
+      position: relative;
+      border: none;
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-card {
+        padding: var(--space-xl);
+        border-radius: var(--radius-md);
+      }
+    }
+    
+    .comparison-card.wrong {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(156, 6, 18, 0.15));
+      border-left: 4px solid var(--color-red);
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-card.wrong {
+        border: 2px solid var(--color-red);
+      }
+    }
+    
+    .comparison-card.right {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(0, 240, 255, 0.15));
+      border-left: 4px solid var(--color-green);
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-card.right {
+        border: 2px solid var(--color-green);
+      }
+    }
+    
+    .comparison-card .card-badge {
+      position: absolute;
+      top: var(--space-sm);
+      left: 50%;
+      transform: translateX(-50%);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.6rem;
+      white-space: nowrap;
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-card .card-badge {
+        top: -12px;
+        font-size: 0.85rem;
+        padding: var(--space-xs) var(--space-lg);
+      }
+    }
+    
+    .comparison-card.wrong .card-badge {
+      background: var(--color-red);
+      color: var(--color-white);
+    }
+    
+    .comparison-card.right .card-badge {
+      background: var(--color-green);
+      color: var(--color-white);
+    }
+    
+    .comparison-card .card-icon {
+      font-size: 2rem;
+      text-align: center;
+      margin: var(--space-lg) 0 var(--space-md) 0;
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-card .card-icon {
+        font-size: 3rem;
+        margin: var(--space-lg) 0;
+      }
+    }
+    
+    .comparison-card .card-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem;
+      text-align: center;
+      margin-bottom: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-card .card-title {
+        font-size: 1.2rem;
+        margin-bottom: var(--space-md);
+      }
+    }
+    
+    .comparison-card.wrong .card-title {
+      color: var(--color-red);
+    }
+    
+    .comparison-card.right .card-title {
+      color: var(--color-green);
+    }
+    
+    .comparison-card .card-list {
+      list-style: none;
+    }
+    
+    .comparison-card .card-list li {
+      padding: var(--space-xs) 0;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-xs);
+      font-size: 0.75rem;
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-card .card-list li {
+        padding: var(--space-sm) 0;
+        gap: var(--space-sm);
+        font-size: 0.95rem;
+      }
+    }
+    
+    .comparison-card.wrong .card-list li::before {
+      content: '❌';
+      font-size: 0.7rem;
+    }
+    
+    .comparison-card.right .card-list li::before {
+      content: '✅';
+      font-size: 0.7rem;
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-card.wrong .card-list li::before,
+      .comparison-card.right .card-list li::before {
+        font-size: 0.9rem;
+      }
+    }
+    
+    /* ==========================================
+       📊 STATISTICS BOX - V5.3 Full-width
+       ========================================== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      margin: var(--space-md) 0;
+      background: var(--glass-border);
+    }
+    
+    @media (min-width: 600px) {
+      .stats-grid {
+        gap: var(--space-lg);
+        background: transparent;
+      }
+    }
+    
+    .stat-card {
+      background: var(--glass-bg);
+      border: none;
+      border-radius: 0;
+      padding: var(--space-sm);
+      text-align: center;
+    }
+    
+    @media (min-width: 600px) {
+      .stat-card {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: var(--space-lg);
+      }
+    }
+    
+    .stat-card .stat-value {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: var(--space-xs);
+    }
+    
+    @media (min-width: 600px) {
+      .stat-card .stat-value {
+        font-size: 2.5rem;
+        margin-bottom: var(--space-sm);
+      }
+    }
+    
+    .stat-card.green .stat-value {
+      color: var(--color-green);
+    }
+    
+    .stat-card.red .stat-value {
+      color: var(--color-red);
+    }
+    
+    .stat-card.gold .stat-value {
+      color: var(--color-gold);
+    }
+    
+    .stat-card .stat-label {
+      font-size: 0.65rem;
+      color: var(--color-text-muted);
+    }
+    
+    @media (min-width: 600px) {
+      .stat-card .stat-label {
+        font-size: 0.9rem;
+      }
+    }
+    
+    /* ==========================================
+       📈 SCENARIO BOX - V5.3 Full-width
+       ========================================== */
+    .scenario-box {
+      background: var(--glass-bg);
+      border: none;
+      border-left: 4px solid var(--color-cyan);
+      border-radius: 0;
+      padding: var(--card-padding);
+      padding-left: calc(var(--text-padding) - 4px);
+      padding-right: var(--text-padding);
+      margin: var(--space-md) 0;
+    }
+    
+    @media (min-width: 600px) {
+      .scenario-box {
+        border: 2px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+    
+    .scenario-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.95rem;
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .scenario-title {
+        font-size: 1.2rem;
+        margin-bottom: var(--space-lg);
+        gap: var(--space-md);
+      }
+    }
+    
+    .scenario-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-xs);
+      flex-wrap: wrap;
+      padding: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .scenario-flow {
+        gap: var(--space-md);
+        padding: var(--space-lg);
+      }
+    }
+    
+    .flow-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+    
+    .flow-step .step-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--color-white);
+    }
+    
+    @media (min-width: 600px) {
+      .flow-step .step-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+      }
+    }
+    
+    .flow-step .step-icon.zone {
+      background: linear-gradient(135deg, var(--color-gold), var(--color-burgundy));
+    }
+    
+    .flow-step .step-icon.breakout {
+      background: var(--color-purple);
+    }
+    
+    .flow-step .step-icon.retest {
+      background: var(--color-cyan);
+    }
+    
+    .flow-step .step-icon.entry {
+      background: var(--color-green);
+    }
+    
+    .flow-step .step-label {
+      font-size: 0.6rem;
+      color: var(--color-text-muted);
+      text-align: center;
+    }
+    
+    @media (min-width: 600px) {
+      .flow-step .step-label {
+        font-size: 0.8rem;
+      }
+    }
+    
+    .flow-arrow {
+      font-size: 1rem;
+      color: var(--color-gold);
+    }
+    
+    @media (min-width: 600px) {
+      .flow-arrow {
+        font-size: 1.5rem;
+      }
+    }
+    
+    /* ==========================================
+       🎭 EXAMPLE CARDS - V5.3 Full-width
+       ========================================== */
+    .example-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      margin: var(--space-md) 0;
+      background: var(--glass-border);
+    }
+    
+    @media (min-width: 600px) {
+      .example-grid {
+        gap: var(--space-lg);
+        background: transparent;
+      }
+    }
+    
+    .example-card {
+      background: var(--glass-bg);
+      border: none;
+      border-radius: 0;
+      padding: var(--card-padding);
+      transition: all 0.3s ease;
+    }
+    
+    @media (min-width: 600px) {
+      .example-card {
+        border: 2px solid var(--glass-border);
+        border-radius: var(--radius-md);
+      }
+      
+      .example-card:hover {
+        border-color: var(--color-gold);
+        transform: translateY(-2px);
+      }
+    }
+    
+    .example-card .example-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    @media (min-width: 600px) {
+      .example-card .example-header {
+        gap: var(--space-md);
+        margin-bottom: var(--space-md);
+        padding-bottom: var(--space-md);
+      }
+    }
+    
+    .example-card .example-icon {
+      font-size: 1.3rem;
+    }
+    
+    @media (min-width: 600px) {
+      .example-card .example-icon {
+        font-size: 2rem;
+      }
+    }
+    
+    .example-card .example-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.8rem;
+      color: var(--color-gold);
+    }
+    
+    @media (min-width: 600px) {
+      .example-card .example-title {
+        font-size: 1.1rem;
+      }
+    }
+    
+    .example-card p {
+      font-size: 0.75rem;
+      margin-bottom: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .example-card p {
+        font-size: 0.9rem;
+      }
+    }
+    
+    .example-card .example-result {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-top: var(--space-sm);
+      padding: var(--space-sm);
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    @media (min-width: 600px) {
+      .example-card .example-result {
+        padding: var(--space-md);
+        font-size: 0.9rem;
+      }
+    }
+    
+    .example-card .example-result.win {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--color-green);
+    }
+    
+    .example-card .example-result.lose {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--color-red);
+    }
+    
+    /* ==========================================
+       📝 SUMMARY BOX - V5.3 Full-width
+       ========================================== */
+    .summary-box {
+      background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(0, 240, 255, 0.1));
+      border: none;
+      border-left: 4px solid var(--color-gold);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin: var(--space-lg) 0;
+    }
+    
+    @media (min-width: 600px) {
+      .summary-box {
+        border: 2px solid var(--color-gold);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+    
+    .summary-box .summary-title {
+      font-size: 1.1rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      text-align: center;
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .summary-box .summary-title {
+        font-size: 1.3rem;
+        margin-bottom: var(--space-lg);
+        padding: 0;
+      }
+    }
+    
+    .summary-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .summary-list li {
+      padding: var(--space-sm);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      margin-bottom: 1px;
+      background: var(--glass-bg);
+      border-radius: 0;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 600px) {
+      .summary-list li {
+        padding: var(--space-md);
+        margin-bottom: var(--space-sm);
+        font-size: 0.95rem;
+        gap: var(--space-md);
+        border-radius: var(--radius-sm);
+      }
+    }
+    
+    .summary-list .number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      background: var(--color-gold);
+      color: var(--color-navy-dark);
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .summary-list .number {
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
+      }
+    }
+    
+    /* ==========================================
+       🎉 COMPLETION BOX - V5.3 Full-width
+       ========================================== */
+    .completion-box {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(0, 240, 255, 0.2));
+      border: none;
+      border-left: 4px solid var(--color-green);
+      border-radius: 0;
+      padding: var(--card-padding);
+      padding-left: calc(var(--text-padding) - 4px);
+      padding-right: var(--text-padding);
+      text-align: center;
+      margin: var(--space-lg) 0;
+    }
+    
+    @media (min-width: 600px) {
+      .completion-box {
+        border: 3px solid var(--color-green);
+        border-radius: var(--radius-lg);
+        padding: var(--space-2xl);
+      }
+    }
+    
+    .completion-box .completion-icon {
+      font-size: 2.5rem;
+      margin-bottom: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .completion-box .completion-icon {
+        font-size: 4rem;
+        margin-bottom: var(--space-md);
+      }
+    }
+    
+    .completion-box .completion-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-green);
+      margin-bottom: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .completion-box .completion-title {
+        font-size: 1.5rem;
+        margin-bottom: var(--space-md);
+      }
+    }
+    
+    .completion-box .completion-text {
+      font-size: 0.85rem;
+      color: var(--color-text);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    @media (min-width: 600px) {
+      .completion-box .completion-text {
+        font-size: 1.1rem;
+      }
+    }
+    
+    /* ==========================================
+       ❓ QUIZ SECTION - V5.3 Full-width
+       ========================================== */
+    .quiz-section {
+      background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(0, 240, 255, 0.05));
+      border: none;
+      border-left: 4px solid var(--color-purple);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin: var(--space-lg) 0;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-section {
+        border: 2px solid var(--color-purple);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+    
+    .quiz-title {
+      font-size: 1.1rem;
+      color: var(--color-purple);
+      margin-bottom: var(--space-md);
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-title {
+        font-size: 1.5rem;
+        margin-bottom: var(--space-xl);
+        gap: var(--space-md);
+        padding: 0;
+      }
+    }
+    
+    .quiz-question {
+      background: var(--glass-bg);
+      border: none;
+      border-radius: 0;
+      border-bottom: 1px solid var(--glass-border);
+      padding: var(--card-padding);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      margin-bottom: 1px;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-question {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+        margin-bottom: var(--space-md);
+      }
+    }
+    
+    .question-number {
+      display: inline-block;
+      background: var(--color-purple);
+      color: var(--color-white);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: 50px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .question-number {
+        font-size: 0.85rem;
+        padding: var(--space-xs) var(--space-md);
+        margin-bottom: var(--space-md);
+      }
+    }
+    
+    .question-text {
+      font-size: 0.9rem;
+      margin-bottom: var(--space-md);
+      color: var(--color-white);
+    }
+    
+    @media (min-width: 600px) {
+      .question-text {
+        font-size: 1.1rem;
+        margin-bottom: var(--space-lg);
+      }
+    }
+    
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--glass-border);
+      margin: 0 calc(-1 * var(--text-padding));
+    }
+    
+    @media (min-width: 600px) {
+      .options {
+        gap: var(--space-sm);
+        background: transparent;
+        margin: 0;
+      }
+    }
+    
+    .option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      background: rgba(255, 255, 255, 0.02);
+      border: none;
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 600px) {
+      .option {
+        padding: var(--space-md);
+        gap: var(--space-md);
+        font-size: 0.95rem;
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-sm);
+      }
+      
+      .option:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--color-gold);
+      }
+    }
+    
+    .option input[type="radio"] {
+      display: none;
+    }
+    
+    .option .radio-custom {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--color-text-muted);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+    
+    @media (min-width: 600px) {
+      .option .radio-custom {
+        width: 20px;
+        height: 20px;
+      }
+    }
+    
+    .option input[type="radio"]:checked + .radio-custom {
+      border-color: var(--color-gold);
+      background: var(--color-gold);
+    }
+    
+    .option input[type="radio"]:checked + .radio-custom::after {
+      content: '✓';
+      color: var(--color-navy-dark);
+      font-weight: bold;
+      font-size: 0.65rem;
+    }
+    
+    @media (min-width: 600px) {
+      .option input[type="radio"]:checked + .radio-custom::after {
+        font-size: 0.8rem;
+      }
+    }
+    
+    .option.correct {
+      background: rgba(16, 185, 129, 0.2);
+      border-left: 4px solid var(--color-green);
+    }
+    
+    @media (min-width: 600px) {
+      .option.correct {
+        border: 1px solid var(--color-green);
+        border-left: 4px solid var(--color-green);
+      }
+    }
+    
+    .option.incorrect {
+      background: rgba(239, 68, 68, 0.2);
+      border-left: 4px solid var(--color-red);
+    }
+    
+    @media (min-width: 600px) {
+      .option.incorrect {
+        border: 1px solid var(--color-red);
+        border-left: 4px solid var(--color-red);
+      }
+    }
+    
+    .feedback {
+      margin-top: var(--space-sm);
+      padding: var(--space-sm);
+      border-radius: var(--radius-sm);
+      display: none;
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 600px) {
+      .feedback {
+        padding: var(--space-md);
+        font-size: 0.9rem;
+      }
+    }
+    
+    .feedback.correct {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--color-green);
+      color: var(--color-green);
+      display: block;
+    }
+    
+    .feedback.incorrect {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid var(--color-red);
+      color: var(--color-red);
+      display: block;
+    }
+    
+    /* ==========================================
+       📱 FOOTER - V5.3 Full-width
+       ========================================== */
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-lg);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-footer {
+        background: transparent;
+        margin-top: var(--space-lg);
+      }
+    }
+    
+    .footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .footer-link {
+      color: var(--color-text-muted);
+      font-size: 0.8rem;
+    }
+    
+    .footer-link a {
+      color: var(--color-cyan);
+      text-decoration: none;
+    }
+    
+    .footer-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+
+
+  <div class="container">
+    
+    <!-- ==========================================
+         🏷️ LESSON HEADER
+         ========================================== -->
+    <header class="lesson-header">
+      <span class="lesson-badge">📚 TIER 1 • Chương 1 • Bài 1.6</span>
+      <h1 class="lesson-title">Nguyên Tắc Vàng - Đợi Retest</h1>
+      <div class="lesson-meta">
+        <span>⏱️ 12 phút đọc</span>
+        <span>📝 2 câu quiz</span>
+        <span>🖼️ 4 hình minh họa</span>
+      </div>
+    </header>
+    
+    <!-- ==========================================
+         🎯 MỤC TIÊU BÀI HỌC
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">🎯</span>
+        Mục Tiêu Bài Học
+      </h2>
+      <ul class="objective-list">
+        <li>
+          <span class="check">✓</span>
+          Hiểu sâu sắc tại sao <strong>Retest</strong> là "bảo hiểm" cho vốn của bạn.
+        </li>
+        <li>
+          <span class="check">✓</span>
+          Nắm vững cơ chế "Bẫy Breakout" của Smart Money để tránh mất tiền oan.
+        </li>
+        <li>
+          <span class="check">✓</span>
+          Phân tích toán học R:R (Risk:Reward) giữa Breakout và Retest.
+        </li>
+        <li>
+          <span class="check">✓</span>
+          Sở hữu quy trình vào lệnh chuẩn 4 bước của GEM Frequency Method.
+        </li>
+      </ul>
+    </section>
+    
+    <!-- ==========================================
+         👋 OPENING: CÂU CHUYỆN QUEN THUỘC
+         ========================================== -->
+    <section class="section">
+        <h2 class="section-title">
+          <span class="icon">🔥</span>
+          Cảm Giác Bị "Úp Bô"
+        </h2>
+        
+        <p>
+          Hãy để tôi kể cho bạn nghe một câu chuyện mà có lẽ bạn đã trải qua ít nhất một lần (hoặc hàng trăm lần).
+        </p>
+        <p>
+          Bạn đang theo dõi biểu đồ Bitcoin. Giá đang tích lũy ngay dưới kháng cự $50,000. Cả thị trường đang nín thở. Đột nhiên, một cây nến xanh khổng lồ xuất hiện, đâm thủng mốc $50,000 và bay thẳng lên $50,200... $50,500!
+        </p>
+        <p>
+          Tim bạn đập thình thịch. "Lỡ tàu rồi!", bạn nghĩ. "Nó sẽ bay lên $60,000 ngay bây giờ!". Sự sợ hãi bị bỏ lỡ (FOMO) xâm chiếm tâm trí bạn. Bạn vội vàng nhấn nút <strong>BUY MARKET</strong> tại $50,500.
+        </p>
+        <p>
+          Và rồi... thảm họa xảy ra.
+        </p>
+        <p>
+          Ngay khi lệnh của bạn khớp, giá khựng lại. Cây nến xanh bắt đầu rút râu. Nó chuyển sang màu đỏ. Giá rơi tự do về $49,800, rồi $49,500. Bạn bị Stop Loss. Và cay đắng thay, ngay sau khi bạn cắt lỗ, giá từ từ quay lại $50,000 và bắt đầu tăng trưởng bền vững lên $55,000 - đúng như nhận định ban đầu của bạn, nhưng tài khoản của bạn thì đã "chảy máu".
+        </p>
+        <p>
+          Chào mừng bạn đến với thế giới của <strong>Breakout Trading</strong>. Và hôm nay, tôi sẽ đưa cho bạn liều thuốc giải cho nỗi đau này. Đó là <strong>Nguyên Tắc Vàng: Đợi Retest</strong>.
+        </p>
+    </section>
+
+    <!-- ==========================================
+         ⭐ NGUYÊN TẮC VÀNG
+         ========================================== -->
+    <div class="golden-rule">
+      <div class="rule-title">NGUYÊN TẮC VÀNG</div>
+      <div class="rule-text">
+        <span class="rule-highlight">KHÔNG BAO GIỜ</span> entry khi giá vừa phá vỡ (Breakout) Zone.<br>
+        <span class="rule-highlight">LUÔN LUÔN</span> kiên nhẫn đợi giá quay lại kiểm tra (Retest) Zone.
+      </div>
+    </div>
+    
+    <!-- ==========================================
+         ❌ BREAKOUT TRADING: CÁI BẪY CỦA SMART MONEY
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">💥</span>
+        Tại Sao Breakout Là Cái Bẫy?
+      </h2>
+      
+      <p>
+        Để hiểu tại sao bạn không nên trade breakout, bạn cần hiểu cách Smart Money (Cá Mập) vận hành.
+      </p>
+      
+      <div class="highlight-box important">
+        <div class="highlight-title">🧠 Tư Duy Smart Money</div>
+        <p>
+            Smart Money sở hữu lượng tiền khổng lồ. Họ không thể mua hết 10,000 BTC tại một mức giá duy nhất mà không làm giá trượt (slippage) đi quá xa. Họ cần <strong>Thanh Khoản (Liquidity)</strong>. Và ai là người cung cấp thanh khoản cho họ? Chính là những Retail Traders đang FOMO mua vào khi giá breakout!
+        </p>
+      </div>
+
+      <p>
+        Khi giá phá vỡ một kháng cự quan trọng, hàng loạt lệnh Buy Stop của retail traders được kích hoạt, cộng với những người nhảy vào mua đuổi. Đây là cơ hội vàng để Smart Money... <strong>BÁN RA (Chốt lời)</strong> hoặc thực hiện các pha quét Stop Hunt (Săn Stop Loss). Đó là lý do tại sao 60-70% các pha breakout là giả (Fakeout).
+      </p>
+      
+      <!-- Hình 1: Breakout Trading -->
+      <div class="image-container">
+        
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlcib4m-1tefp6-img1.webp" alt="Minh họa Breakout Trap - Giá phá vỡ giả và quay đầu">
+        <p class="image-caption">Hình 1.6.1: Cơ chế của một cú Fakeout điển hình - Giá phá vỡ để dụ người mua, sau đó đảo chiều.</p>
+      </div>
+      
+      <h3>4 Lý Do Khiến Breakout Trading Thất Bại:</h3>
+      <ul class="objective-list">
+          <li><strong>Rủi ro cao (Low R:R):</strong> Khi bạn mua đuổi, Stop Loss của bạn phải đặt tít dưới đáy của vùng tích lũy. Khoảng cách quá xa khiến tỷ lệ R:R thường chỉ đạt 1:1 hoặc tệ hơn.</li>
+          <li><strong>Tâm lý yếu:</strong> Mua ở đỉnh khiến bạn luôn lo sợ. Chỉ cần giá hồi nhẹ, bạn sẽ hoảng loạn cắt lỗ ngay đáy.</li>
+          <li><strong>Fake Breakout (Bẫy giá):</strong> Như đã nói, phần lớn breakout là giả. Bạn đang đánh cược với xác suất thua >60%.</li>
+          <li><strong>Slippage (Trượt giá):</strong> Trong những pha breakout mạnh, bạn thường bị khớp lệnh ở giá xấu hơn nhiều so với dự tính.</li>
+      </ul>
+    </section>
+    
+    <!-- ==========================================
+         ✅ RETEST TRADING: SỨC MẠNH CỦA SỰ KIÊN NHẪN
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">🎯</span>
+        Retest Trading - Lối Đi Của Người Chiến Thắng
+      </h2>
+      
+      <p>
+        Vậy, giải pháp là gì? Hãy để thị trường chạy. Hãy để những kẻ FOMO lao vào trước. Chúng ta - những GEM Traders - sẽ ngồi yên và quan sát.
+      </p>
+      <p>
+        <strong>Retest (Kiểm tra lại)</strong> là hiện tượng giá quay trở lại vùng nó vừa phá vỡ. Kháng cự cũ giờ trở thành Hỗ trợ mới (hoặc ngược lại). Đây là lúc Smart Money gom thêm hàng lần cuối trước khi đẩy giá đi thật xa. Và đó là lúc chúng ta vào lệnh.
+      </p>
+      
+      <!-- Hình 2: Retest Trading -->
+      <div class="image-container">
+        
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlcib4m-1tefp6-img2.webp" alt="Mô hình Retest chuẩn - Giá quay lại kiểm tra vùng vừa phá vỡ">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlcib4m-1tefp6-img3.webp" alt="Biểu đồ nến minh họa điểm Entry tại Retest">
+        <p class="image-caption">Hình 1.6.2: Mô hình Retest chuẩn - Điểm vào lệnh an toàn và tối ưu lợi nhuận.</p>
+      </div>
+      
+      <!-- Flow visualization -->
+      <div class="scenario-box">
+        <h4 class="scenario-title">📈 Quy Trình Entry Chuẩn GEM Frequency</h4>
+        <div class="scenario-flow">
+          <div class="flow-step">
+            <div class="step-icon zone">1</div>
+            <span class="step-label">Xác định<br>Zone</span>
+          </div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-icon breakout">2</div>
+            <span class="step-label">Giá<br>Breakout</span>
+          </div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-icon retest">3</div>
+            <span class="step-label">Kiên Nhẫn<br>Đợi Retest</span>
+          </div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-step">
+            <div class="step-icon entry">4</div>
+            <span class="step-label">Entry<br>Tại Zone</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="highlight-box success">
+        <div class="highlight-title">✅ Tại sao Retest lại mạnh mẽ đến vậy?</div>
+        <ul>
+          <li><strong>Xác nhận xu hướng (Confirmation):</strong> Việc giá quay lại test zone và bật lên chứng tỏ phe Mua đang bảo vệ vùng giá này. Đây không còn là "đoán mò" nữa, mà là sự xác nhận của dòng tiền.</li>
+          <li><strong>Tối ưu hóa Stop Loss:</strong> Bạn đặt SL ngay dưới vùng Retest. Khoảng cách rất ngắn, giúp bạn tăng khối lượng lệnh mà rủi ro vẫn thấp.</li>
+          <li><strong>Loại bỏ Fakeout:</strong> Nếu đó là Fake Breakout, giá sẽ đâm thủng zone và đi xuống luôn, không có retest đẹp. Bằng cách đợi, bạn đã tự động lọc bỏ các tín hiệu nhiễu.</li>
+          <li><strong>Tâm lý vững vàng:</strong> Bạn vào lệnh ở vị thế "người chờ sẵn", không phải người "đuổi theo". Sự bình tĩnh này giúp bạn giữ lệnh lâu hơn.</li>
+        </ul>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         📊 SO SÁNH TOÁN HỌC: CON SỐ KHÔNG BIẾT NÓI DỐI
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">📊</span>
+        Bài Toán Lợi Nhuận
+      </h2>
+      
+      <p>
+        Hãy cùng làm một bài toán đơn giản để thấy sự khác biệt khủng khiếp giữa hai phong cách giao dịch này. Giả sử bạn có 10 lệnh giao dịch.
+      </p>
+      
+      <div class="stats-grid">
+        <div class="stat-card red">
+          <div class="stat-value">38%</div>
+          <div class="stat-label">Win Rate Breakout</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-value">68%</div>
+          <div class="stat-label">Win Rate Retest</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-value">+2.5R</div>
+          <div class="stat-label">Lợi Nhuận Trung Bình</div>
+        </div>
+      </div>
+      
+      <!-- Hình 3: So sánh Breakout vs Retest -->
+      <div class="image-container">
+        
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlcib4m-1tefp6-img4.webp" alt="So sánh R:R giữa Breakout và Retest">
+        <p class="image-caption">Hình 1.6.3: Với Retest, cùng một điểm chốt lời nhưng Stop Loss ngắn hơn nhiều -> Lợi nhuận gấp bội.</p>
+      </div>
+      
+      <div class="comparison-grid">
+        <!-- Breakout -->
+        <div class="comparison-card wrong">
+          <span class="card-badge">CÁCH CỦA ĐÁM ĐÔNG</span>
+          <div class="card-icon">💥</div>
+          <h4 class="card-title">BREAKOUT TRADER</h4>
+          <ul class="card-list">
+            <li>Vào lệnh giá xấu (mua đỉnh)</li>
+            <li>SL: 50 pips (rất xa)</li>
+            <li>TP: 50 pips</li>
+            <li><strong>R:R = 1:1</strong></li>
+            <li>Thắng 4/10 lệnh = Lỗ phí sàn</li>
+          </ul>
+        </div>
+        
+        <!-- Retest -->
+        <div class="comparison-card right">
+          <span class="card-badge">CÁCH CỦA PRO</span>
+          <div class="card-icon">🎯</div>
+          <h4 class="card-title">RETEST TRADER</h4>
+          <ul class="card-list">
+            <li>Vào lệnh giá tốt (mua khi giá hồi)</li>
+            <li>SL: 15 pips (rất gần)</li>
+            <li>TP: 50 pips</li>
+            <li><strong>R:R = 1:3.3</strong></li>
+            <li>Thắng 6/10 lệnh = Lợi nhuận lớn</li>
+          </ul>
+        </div>
+      </div>
+      <p>
+          Bạn thấy đấy, chỉ cần thay đổi điểm vào lệnh, bạn đã biến một hệ thống giao dịch thua lỗ thành một cỗ máy in tiền. Đó chính là sức mạnh của <strong>GEM Frequency Method</strong>.
+      </p>
+    </section>
+    
+    <!-- ==========================================
+         💡 VÍ DỤ THỰC TẾ: CÂU CHUYỆN HAI NGƯỜI BẠN
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">💡</span>
+        Ví Dụ Thực Tế: Hùng vs. Dũng
+      </h2>
+      
+      <p>
+          Hùng và Dũng cùng trade cặp Vàng (XAUUSD). Cả hai đều nhận định Vàng sẽ tăng khi phá vỡ cản 2000.
+      </p>
+
+      <!-- Hình 4: Ví dụ thực tế -->
+      <div class="image-container">
+        
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/optimized/ch1/lesson-mjlcib4m-1tefp6-img5.webp" alt="Biểu đồ so sánh điểm vào lệnh của Hùng và Dũng">
+        <p class="image-caption">Hình 1.6.4: Biểu đồ minh họa diễn biến tâm lý và giá của 2 trader.</p>
+      </div>
+      
+      <div class="example-grid">
+        <!-- Trader A -->
+        <div class="example-card">
+          <div class="example-header">
+            <span class="example-icon">👤</span>
+            <div class="example-title">Hùng (FOMO Trader)</div>
+          </div>
+          <p>
+            Thấy nến xanh dựng đứng phá 2000, Hùng sợ mất cơ hội. Cậu ấy Buy Market ngay tại <strong>2005</strong>.
+          </p>
+          <p>
+            Để an toàn, Hùng phải đặt SL dưới vùng cản, tại 1995.<br>
+            → Rủi ro: <strong>10 giá ($1000/lot)</strong>.
+          </p>
+          <p>
+            Giá lên 2007 rồi quay đầu test lại 2000. Hùng hoảng sợ khi thấy lệnh chuyển đỏ, tâm lý lung lay. Giá quét nhẹ xuống 1998 trước khi bật lên, Hùng có thể đã bị cắt lỗ hoặc tâm lý bị tra tấn nặng nề.
+          </p>
+          <div class="example-result lose">
+            <span>❌</span>
+            <span>Rủi ro cao, Tâm lý yếu</span>
+          </div>
+        </div>
+        
+        <!-- Trader B -->
+        <div class="example-card">
+          <div class="example-header">
+            <span class="example-icon">🧠</span>
+            <div class="example-title">Dũng (GEM Trader)</div>
+          </div>
+          <p>
+            Dũng thấy giá phá 2000. Cậu ấy... đi pha cà phê. Dũng biết giá sẽ quay lại.
+          </p>
+          <p>
+            30 phút sau, giá hồi về 2001. Dũng đặt lệnh Limit tại <strong>2000.5</strong>.<br>
+            SL của Dũng đặt tại 1998 (ngay dưới chân nến retest).<br>
+            → Rủi ro: <strong>2.5 giá ($250/lot)</strong>.
+          </p>
+          <p>
+            Giá chạm 2000.5, khớp lệnh của Dũng và bật tăng mạnh lên 2020. Dũng ung dung chốt lời với tỷ lệ R:R tuyệt vời.
+          </p>
+          <div class="example-result win">
+            <span>✅</span>
+            <span>Rủi ro thấp, Lợi nhuận cao</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="highlight-box info">
+        <div class="highlight-title">💡 Bài học cốt lõi</div>
+        <p>
+          Thị trường luôn cho bạn cơ hội thứ hai. Đừng bao giờ đuổi theo một chuyến tàu đã rời bến. Chuyến tàu tiếp theo (Retest) mới là chuyến tàu VIP dành cho bạn.
+        </p>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         ⚠️ NHỮNG SAI LẦM KHI ĐỢI RETEST
+         ========================================== -->
+    <section class="section">
+        <h2 class="section-title">
+          <span class="icon">🚧</span>
+          Cạm Bẫy Khi Đợi Retest
+        </h2>
+        <p>Ngay cả khi bạn đã quyết định đợi retest, bạn vẫn có thể mắc sai lầm. Dưới đây là những lỗi thường gặp:</p>
+        
+        <ul class="objective-list">
+            <li>
+                <span class="check">❌</span>
+                <strong>Đặt lệnh Limit mù quáng (Blind Limit):</strong> Đặt sẵn lệnh chờ tại vùng zone mà không quan sát phản ứng của giá. Nếu giá lao xuống như một con dao rơi, lệnh của bạn sẽ bị "xiên" ngay lập tức.
+            </li>
+            <li>
+                <span class="check">❌</span>
+                <strong>Vào lệnh quá sớm (Impatience):</strong> Giá chưa chạm hẳn vào zone mà mới chỉ lơ lửng ở trên, bạn đã sợ lỡ cơ hội và vào lệnh sớm. Điều này làm tăng rủi ro và giảm R:R.
+            </li>
+            <li>
+                <span class="check">❌</span>
+                <strong>Không đợi nến xác nhận:</strong> Quy tắc an toàn nhất là đợi một cây nến đảo chiều (Pinbar, Engulfing) xuất hiện tại vùng retest rồi mới vào lệnh.
+            </li>
+        </ul>
+    </section>
+    
+    <!-- ==========================================
+         📝 TÓM TẮT & HÀNH ĐỘNG
+         ========================================== -->
+    <div class="summary-box">
+      <h3 class="summary-title">📝 Tóm Tắt Bài Học</h3>
+      <ul class="summary-list">
+        <li>
+          <span class="number">1</span>
+          <span><strong>Kiên nhẫn là Vàng:</strong> Tiền được chuyển từ túi người nôn nóng sang túi người kiên nhẫn.</span>
+        </li>
+        <li>
+          <span class="number">2</span>
+          <span><strong>No Retest = No Entry:</strong> Nếu giá đi luôn mà không retest, hãy bỏ qua. Có hàng ngàn cơ hội khác, đừng tiếc nuối.</span>
+        </li>
+        <li>
+          <span class="number">3</span>
+          <span><strong>Chất lượng hơn Số lượng:</strong> 1 lệnh Retest chuẩn có giá trị bằng 5 lệnh Breakout may rủi.</span>
+        </li>
+        <li>
+          <span class="number">4</span>
+          <span><strong>Bảo vệ vốn là ưu tiên số 1:</strong> Entry tại Retest giúp bạn giữ mức Stop Loss nhỏ nhất có thể.</span>
+        </li>
+      </ul>
+    </div>
+    
+    <!-- ==========================================
+         🎉 COMPLETION BOX
+         ========================================== -->
+    <div class="completion-box">
+      <div class="completion-icon">🎉</div>
+      <h3 class="completion-title">Hoàn Thành Chương 1!</h3>
+      <p class="completion-text">
+        Chúc mừng bạn đã hoàn thành <strong>Chương 1: Giới Thiệu GEM Frequency Method</strong>! Bạn đã nắm vững tư duy và nguyên tắc cốt lõi để sống sót trên thị trường. Ở chương tiếp theo, chúng ta sẽ đi vào chi tiết kỹ thuật từng Pattern cụ thể, bắt đầu với <strong>DPD Pattern</strong>. Hãy sẵn sàng!
+      </p>
+    </div>
+    
+    <!-- ==========================================
+         ❓ QUIZ SECTION
+         ========================================== -->
+    <section class="quiz-section">
+      <h2 class="quiz-title">
+        <span>❓</span>
+        Kiểm Tra Kiến Thức
+      </h2>
+      
+      <!-- Câu 1 -->
+      <div class="quiz-question" id="q1">
+        <span class="question-number">Câu 1/2</span>
+        <p class="question-text">Tại sao chiến lược Retest lại giúp tối ưu hóa tỷ lệ Risk:Reward (R:R)?</p>
+        <div class="options">
+          <label class="option" data-correct="false">
+            <input type="radio" name="q1" value="a">
+            <span class="radio-custom"></span>
+            <span>A. Vì giá thường di chuyển nhanh hơn sau khi retest.</span>
+          </label>
+          <label class="option" data-correct="true">
+            <input type="radio" name="q1" value="b">
+            <span class="radio-custom"></span>
+            <span>B. Vì điểm vào lệnh gần vùng hỗ trợ/kháng cự hơn, cho phép đặt Stop Loss ngắn hơn (Tight Stop Loss).</span>
+          </label>
+          <label class="option" data-correct="false">
+            <input type="radio" name="q1" value="c">
+            <span class="radio-custom"></span>
+            <span>C. Vì Retest đảm bảo lệnh thắng 100%.</span>
+          </label>
+          <label class="option" data-correct="false">
+            <input type="radio" name="q1" value="d">
+            <span class="radio-custom"></span>
+            <span>D. Vì sàn giao dịch ưu tiên khớp lệnh retest.</span>
+          </label>
+        </div>
+        <div class="feedback" id="fb1"></div>
+      </div>
+      
+      <!-- Câu 2 -->
+      <div class="quiz-question" id="q2">
+        <span class="question-number">Câu 2/2</span>
+        <p class="question-text">Nếu giá phá vỡ Zone nhưng đi thẳng lên luôn mà KHÔNG quay lại Retest, bạn nên làm gì?</p>
+        <div class="options">
+          <label class="option" data-correct="false">
+            <input type="radio" name="q2" value="a">
+            <span class="radio-custom"></span>
+            <span>A. Mua đuổi ngay lập tức (Market Order) vì sợ lỡ cơ hội.</span>
+          </label>
+          <label class="option" data-correct="false">
+            <input type="radio" name="q2" value="b">
+            <span class="radio-custom"></span>
+            <span>B. Vào lệnh với khối lượng nhỏ hơn để test.</span>
+          </label>
+          <label class="option" data-correct="true">
+            <input type="radio" name="q2" value="c">
+            <span class="radio-custom"></span>
+            <span>C. Bỏ qua cơ hội đó và kiên nhẫn chờ setup khác. Không Retest = Không vào lệnh.</span>
+          </label>
+          <label class="option" data-correct="false">
+            <input type="radio" name="q2" value="d">
+            <span class="radio-custom"></span>
+            <span>D. Short ngược lại vì nghĩ giá đã tăng quá cao.</span>
+          </label>
+        </div>
+        <div class="feedback" id="fb2"></div>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         🦶 FOOTER - gemral.com
+         ========================================== -->
+    <footer class="lesson-footer">
+      <div class="footer-logo">GEM Trading Academy</div>
+      <div class="footer-link">
+        <a href="https://gemral.com" target="_blank">gemral.com</a>
+      </div>
+    </footer>
+    
+  </div>
+  
+  <!-- ==========================================
+       📜 QUIZ JAVASCRIPT
+       ========================================== -->
+  <script>
+    const quizData = {
+      q1: {
+        correct: 'b',
+        explanation: {
+          correct: '✅ Chính xác! Điểm mạnh nhất của Retest là cho phép bạn đặt SL ngay sau vùng Zone, giúp khoảng cách SL rất ngắn. Với cùng một mục tiêu chốt lời, SL ngắn hơn nghĩa là R:R cao hơn gấp nhiều lần.',
+          incorrect: '❌ Sai rồi! Lý do chính nằm ở vị trí đặt Stop Loss. Khi retest, bạn mua sát vùng hỗ trợ nên SL rất ngắn. Breakout thì phải đặt SL xa tít bên dưới.'
+        }
+      },
+      q2: {
+        correct: 'c',
+        explanation: {
+          correct: '✅ Chính xác! Kỷ luật là sức mạnh. Thà bỏ lỡ một cơ hội (Miss opportunity) còn hơn là mất tiền (Lose money). Thị trường luôn còn đó, cơ hội khác sẽ đến.',
+          incorrect: '❌ Sai rồi! Đây là tư duy FOMO sẽ giết chết tài khoản của bạn. Nguyên tắc vàng của GEM là: "No Retest, No Entry". Hãy giữ kỷ luật!'
+        }
+      }
+    };
+    
+    document.querySelectorAll('.option').forEach(option => {
+      option.addEventListener('click', function() {
+        const questionDiv = this.closest('.quiz-question');
+        const questionId = questionDiv.id;
+        const feedbackDiv = document.getElementById('fb' + questionId.slice(1));
+        const isCorrect = this.dataset.correct === 'true';
+        
+        questionDiv.querySelectorAll('.option').forEach(opt => {
+          opt.classList.remove('correct', 'incorrect');
+        });
+        
+        if (isCorrect) {
+          this.classList.add('correct');
+          feedbackDiv.className = 'feedback correct';
+          feedbackDiv.textContent = quizData[questionId].explanation.correct;
+        } else {
+          this.classList.add('incorrect');
+          questionDiv.querySelector('.option[data-correct="true"]').classList.add('correct');
+          feedbackDiv.className = 'feedback incorrect';
+          feedbackDiv.textContent = quizData[questionId].explanation.incorrect;
+        }
+        
+        this.querySelector('input').checked = true;
+      });
+    });
+  </script>
+
+</body>
+</html>

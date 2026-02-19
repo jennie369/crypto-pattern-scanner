@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.3: Triangle Patterns - Tam Giác (Ascending, Descending, Symmetrical) | GEM Trading Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --navy: #112250; --navy-dark: #0a1628; --gold: #FFBD59; --gold-dark: #E5A73D; --cyan: #00F0FF; --purple: #6A5BFF; --burgundy: #9C0612; --burgundy-light: #C41E2A; --success: #00C853; --error: #FF5252; --bg-primary: #0a1628; --bg-card: rgba(17, 34, 80, 0.6); --text-primary: #FFFFFF; --text-secondary: rgba(255, 255, 255, 0.85); --text-muted: rgba(255, 255, 255, 0.6); --glass-bg: rgba(17, 34, 80, 0.4); --glass-border: rgba(255, 189, 89, 0.2); --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px; --radius-md: 12px; --radius-lg: 16px; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--success), var(--cyan)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); color: var(--navy-dark); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .warning-box { background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05)); border: 1px solid rgba(156, 6, 18, 0.4); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .warning-box { border: none; border-radius: 0; border-left: 4px solid var(--burgundy); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .warning-box-title { font-weight: 700; color: var(--burgundy-light); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+        .summary-box { background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02)); border: 2px solid var(--success); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--success); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--success); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--success); font-weight: 700; }
+        .quiz-section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; padding: 0; margin-top: 0; border-top: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: var(--space-lg) 16px var(--space-md); margin-bottom: 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-question { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin-bottom: 0; border-bottom: 1px solid var(--glass-border); } }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; font-weight: 700; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); line-height: 1.6; }
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        @media (max-width: 600px) { .quiz-options { gap: 1px; background: var(--glass-border); margin-left: calc(-16px - 4px); margin-right: -16px; } }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; }
+        @media (max-width: 600px) { .quiz-option { border: none; border-radius: 0; border-left: 4px solid transparent; padding: var(--space-md) 16px; } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.correct { border-left-color: var(--success) !important; } }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.incorrect { border-left-color: var(--error) !important; } }
+        .quiz-option.disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-marker { width: 28px; height: 28px; min-width: 28px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; }
+        .quiz-option.incorrect .option-marker { background: var(--error); border-color: var(--error); color: white; }
+        .option-text { flex: 1; color: var(--text-secondary); }
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--space-sm); display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-buttons { padding: var(--space-lg) 16px; } }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container"><div class="bg-layer-base"></div><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge"><span>🔺</span><span>Continuation</span></div>
+            <div class="lesson-chapter">Chapter 3 - Classic Patterns</div>
+            <h1 class="lesson-title">Bài 3.3: Triangle Patterns - Mô Hình Tam Giác</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 3.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🔥</span> Câu Chuyện Mở Đầu</h2>
+            <p>Tháng 10/2024, ETH dao động trong một vùng giá ngày càng hẹp, từ $2,300-$2,700 dần thu hẹp về $2,400-$2,550. Nhiều trader bỏ qua giai đoạn "nhàm chán" này. Nhưng những ai nhận ra Ascending Triangle đang hình thành đã chuẩn bị sẵn sàng. Ngày 5/11, ETH break lên $2,700 với volume khủng và không dừng lại cho đến $4,100 - một cú tăng 52% chỉ trong 4 tuần.</p>
+
+            <p>Triangle pattern là một trong những pattern mạnh nhất vì nó đại diện cho sự tích lũy năng lượng trước một động thái lớn. Giống như lò xo bị nén, giá bị "ép" trong vùng ngày càng hẹp cho đến khi năng lượng được giải phóng qua breakout. Bài học này sẽ giúp bạn nhận diện 3 loại Triangle và biết cách trade chúng hiệu quả.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Tại Sao Triangle Pattern Mạnh?</div>
+                <p>Triangle pattern cho thấy sự cân bằng tạm thời giữa phe mua và phe bán. Khi một bên chiến thắng (breakout), bên thua phải đóng vị thế, tạo ra momentum mạnh theo hướng breakout. Đây là lý do tại sao breakout từ triangle thường dẫn đến những đợt di chuyển lớn hơn các pattern khác. Thống kê cho thấy target của triangle đạt được trong 70% trường hợp.</p>
+            </div>
+        </section>
+
+        <!-- MỤC TIÊU BÀI HỌC -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Mục Tiêu Bài Học</h2>
+            <p>Sau khi hoàn thành bài học này, bạn sẽ có khả năng nhận diện và giao dịch cả 3 loại Triangle pattern một cách tự tin.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📋</span> Bạn Sẽ Học Được</div>
+                <p>• Phân biệt 3 loại Triangle: Ascending, Descending, và Symmetrical<br>
+                • Hiểu bias (xu hướng) của từng loại triangle<br>
+                • Xác định entry point, stop loss, và target chính xác<br>
+                • Biết khi nào breakout mạnh và khi nào nên tránh<br>
+                • Kết hợp triangle với volume analysis để tăng xác suất thành công</p>
+            </div>
+        </section>
+
+        <!-- ASCENDING TRIANGLE -->
+        <section class="section">
+            <h2 class="section-title"><span>📈</span> Ascending Triangle - Tam Giác Tăng</h2>
+            <p>Ascending Triangle (Tam giác tăng) là pattern bullish có đặc điểm: đỉnh phẳng (flat resistance) và đáy ngày càng cao (higher lows). Pattern này cho thấy buyers ngày càng aggressive - họ sẵn sàng mua ở giá cao hơn mỗi lần giá pullback.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.3/6-3-1.webp" alt="Ascending Triangle Structure">
+            </div>
+            <div class="image-caption">Hình 1: Cấu trúc Ascending Triangle - Flat resistance + Higher lows</div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📊</span> Đặc Điểm Nhận Dạng</div>
+                <p><strong>Resistance:</strong> Đường ngang (flat) - giá test 2-3 lần nhưng chưa vượt qua<br>
+                <strong>Support:</strong> Đường chéo đi lên - mỗi đáy cao hơn đáy trước<br>
+                <strong>Volume:</strong> Giảm dần khi pattern hình thành, spike khi breakout<br>
+                <strong>Thời gian:</strong> Thường kéo dài 3-6 tuần<br>
+                <strong>Bias:</strong> Bullish - khoảng 70% break lên trên resistance</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🧠</span> Tâm Lý Đằng Sau Pattern</div>
+                <p>Hãy tưởng tượng có một "tường" giá tại vùng resistance. Mỗi lần giá chạm tường, sellers xuất hiện và đẩy giá xuống. Nhưng mỗi lần giá xuống, buyers mua vào ở mức cao hơn trước. Điều này cho thấy buyers đang ngày càng aggressive và sellers đang dần kiệt sức. Cuối cùng, khi không còn ai bán ở resistance nữa, giá sẽ phá vỡ bức tường và tăng mạnh.</p>
+            </div>
+        </section>
+
+        <!-- DESCENDING TRIANGLE -->
+        <section class="section">
+            <h2 class="section-title"><span>📉</span> Descending Triangle - Tam Giác Giảm</h2>
+            <p>Descending Triangle (Tam giác giảm) là bản đảo ngược của Ascending - đáy phẳng (flat support) và đỉnh ngày càng thấp (lower highs). Pattern này bearish vì cho thấy sellers đang kiểm soát - họ bán ở giá thấp hơn mỗi lần giá rally.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.3/6-3-2.webp" alt="Descending Triangle Structure">
+            </div>
+            <div class="image-caption">Hình 2: Cấu trúc Descending Triangle - Flat support + Lower highs</div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📊</span> Đặc Điểm Nhận Dạng</div>
+                <p><strong>Support:</strong> Đường ngang (flat) - giá test 2-3 lần nhưng chưa phá vỡ<br>
+                <strong>Resistance:</strong> Đường chéo đi xuống - mỗi đỉnh thấp hơn đỉnh trước<br>
+                <strong>Volume:</strong> Giảm dần khi pattern hình thành, spike khi breakdown<br>
+                <strong>Thời gian:</strong> Thường kéo dài 3-6 tuần<br>
+                <strong>Bias:</strong> Bearish - khoảng 70% break xuống dưới support</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Cảnh Báo Quan Trọng</div>
+                <p>Mặc dù Descending Triangle có bias bearish, 30% vẫn break lên. Điều này thường xảy ra khi pattern hình thành trong một uptrend lớn hơn. Do đó, luôn đợi breakout confirmation trước khi entry, và LUÔN có stop loss. Không bao giờ giả định hướng breakout dựa trên bias.</p>
+            </div>
+        </section>
+
+        <!-- SYMMETRICAL TRIANGLE -->
+        <section class="section">
+            <h2 class="section-title"><span>⚖️</span> Symmetrical Triangle - Tam Giác Cân</h2>
+            <p>Symmetrical Triangle (Tam giác cân) có cả hai đường đều nghiêng về phía apex (đỉnh nhọn). Pattern này trung tính - không có bias rõ ràng, mà thường break theo hướng của trend trước đó.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.3/6-3-3.webp" alt="Symmetrical Triangle Structure">
+            </div>
+            <div class="image-caption">Hình 3: Cấu trúc Symmetrical Triangle - Both trendlines angled</div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📊</span> Đặc Điểm Nhận Dạng</div>
+                <p><strong>Resistance:</strong> Đường chéo đi xuống (lower highs)<br>
+                <strong>Support:</strong> Đường chéo đi lên (higher lows)<br>
+                <strong>Apex:</strong> Điểm mà hai đường gặp nhau<br>
+                <strong>Volume:</strong> Giảm mạnh khi tiến về apex, spike khi breakout<br>
+                <strong>Bias:</strong> Trung tính - theo hướng trend trước đó (60% theo trend, 40% ngược trend)</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Quy Tắc Break Cho Symmetrical</div>
+                <p>• Trong Uptrend rõ ràng → 60% break lên<br>
+                • Trong Downtrend rõ ràng → 60% break xuống<br>
+                • Không có trend rõ ràng → 50/50, đợi confirmation<br><br>
+                Điểm quan trọng: Symmetrical Triangle là pattern "chờ đợi". Không nên đoán hướng mà hãy đợi giá tự "nói" cho bạn biết nó muốn đi đâu thông qua breakout với volume.</p>
+            </div>
+        </section>
+
+        <!-- CÁCH TRADE TRIANGLE -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Chiến Lược Trade Triangle</h2>
+            <p>Áp dụng chung cho cả 3 loại triangle với một số điều chỉnh nhỏ tùy loại:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Entry Strategy</div>
+                <p><strong>Standard Entry:</strong> Đợi nến đóng cửa ngoài trendline với volume spike ít nhất 1.5x so với trung bình. Đây là entry an toàn nhất vì đã có confirmation.<br><br>
+                <strong>Aggressive Entry:</strong> Entry khi giá test lần thứ 3 vào trendline hướng breakout (ví dụ: lần test thứ 3 vào support trong Ascending Triangle). Entry này rủi ro hơn nhưng có R:R tốt hơn vì SL rất gần.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🛡️</span> Stop Loss Placement</div>
+                <p><strong>Breakout lên:</strong> SL đặt dưới đáy gần nhất bên trong triangle, hoặc dưới trendline support, cộng buffer 1-2%.<br><br>
+                <strong>Breakout xuống:</strong> SL đặt trên đỉnh gần nhất bên trong triangle, hoặc trên trendline resistance, cộng buffer 1-2%.<br><br>
+                <strong>Quy tắc:</strong> Nếu SL yêu cầu hơn 5% từ entry, có thể pattern không chất lượng hoặc bạn đang entry quá muộn.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Target Calculation</div>
+                <p><strong>Phương pháp Height:</strong> Đo chiều cao của triangle tại phần rộng nhất (từ đỉnh đầu tiên đến đáy đầu tiên), rồi project từ điểm breakout.<br><br>
+                <strong>Ví dụ:</strong> Triangle có chiều cao $500 (từ $2,200 đến $2,700). Breakout tại $2,700 → Target = $2,700 + $500 = $3,200.<br><br>
+                <strong>TP1:</strong> 50% height = $2,950 (chốt 50% vị thế)<br>
+                <strong>TP2:</strong> 100% height = $3,200 (chốt 50% còn lại)</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Apex Warning - Quan Trọng!</div>
+                <p>Triangle break tốt nhất trong 2/3 đầu của pattern. Nếu giá tiến quá gần apex (điểm nhọn) trước khi break, pattern mất đi sức mạnh đáng kể. Lý do: khi ở gần apex, biên độ quá hẹp khiến breakout dễ bị false break, và target không còn hấp dẫn vì chiều cao pattern đã bị "ăn mòn".</p>
+            </div>
+        </section>
+
+        <!-- VÍ DỤ THỰC TẾ -->
+        <section class="section">
+            <h2 class="section-title"><span>📈</span> Ví Dụ Thực Tế</h2>
+            <p>Phân tích Ascending Triangle trên ETH trong tháng 10-11/2024:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📊</span> Case Study: ETH Ascending Triangle 10-11/2024</div>
+                <p><strong>Bối cảnh:</strong> ETH sideway sau khi đạt $2,700 vào tháng 9<br><br>
+                <strong>Hình thành:</strong> 1/10 - 5/11/2024 (5 tuần)<br>
+                <strong>Resistance:</strong> Flat tại $2,700 - test 4 lần<br>
+                <strong>Support:</strong> Higher lows: $2,300 → $2,400 → $2,480 → $2,550<br>
+                <strong>Volume:</strong> Giảm từ 25M xuống 12M trong 5 tuần<br><br>
+                <strong>Breakout:</strong> 5/11/2024, ETH đóng cửa tại $2,780 với volume 45M (3.5x)<br>
+                <strong>Entry:</strong> $2,780 (breakout confirmed)<br>
+                <strong>SL:</strong> $2,500 (dưới higher low gần nhất)<br>
+                <strong>Height:</strong> $2,700 - $2,300 = $400<br>
+                <strong>Target:</strong> $2,780 + $400 = $3,180<br><br>
+                <strong>Kết quả:</strong> ETH đạt $4,100 vào cuối tháng 11 - vượt xa target, profit +47.5% nếu hold đến $4,100.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch6/6.3/6-3-4.webp" alt="ETH Ascending Triangle Trade">
+            </div>
+            <div class="image-caption">Hình 4: Ascending Triangle trên ETH/USDT khung D1, tháng 10-11/2024</div>
+        </section>
+
+        <!-- CÂU HỎI THƯỜNG GẶP -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+            <p>Những thắc mắc phổ biến khi trade Triangle patterns:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>❓</span> Bao nhiêu lần test trendline thì đủ để xác nhận triangle?</div>
+                <p>Tối thiểu 2 lần test mỗi trendline (tổng cộng 4 điểm). Tuy nhiên, triangle chất lượng cao thường có 3+ lần test mỗi bên. Nhiều lần test hơn = pattern mạnh hơn vì nó cho thấy vùng giá đó được "công nhận" bởi thị trường. Lưu ý: quá nhiều lần test (hơn 5-6) có thể làm pattern "già đi" và mất sức mạnh.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>❓</span> Làm sao phân biệt false breakout với real breakout?</div>
+                <p>Real breakout có 3 đặc điểm: (1) Volume spike ít nhất 1.5-2x so với trung bình, (2) Nến đóng cửa rõ ràng ngoài trendline - không phải chỉ wick chạm, (3) Các nến tiếp theo tiếp tục xu hướng breakout. False breakout thường có volume thấp và giá quay đầu ngay sau 1-2 nến. Cách tốt nhất: đợi nến đóng cửa khung H4 hoặc D1 để confirm.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>❓</span> Triangle có thể fail hoàn toàn không?</div>
+                <p>Có. Khoảng 10-15% triangles không breakout mà "tan rã" - giá di chuyển sideway vượt qua apex mà không có động thái rõ ràng. Điều này thường xảy ra khi volume không giảm đúng cách trong quá trình hình thành, hoặc khi có tin tức lớn làm thay đổi cấu trúc thị trường. Nếu giá vượt qua apex mà không breakout, hãy bỏ qua pattern đó.</p>
+            </div>
+        </section>
+
+        <!-- HÀNH ĐỘNG THỰC HÀNH -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Hành Động Thực Hành</h2>
+            <p>Để thành thạo Triangle patterns, hãy thực hành ngay:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Làm Ngay Hôm Nay</div>
+                <p>1. Mở TradingView → ETH/USDT khung D1 → Cuộn về tháng 10-11/2024<br>
+                2. Tìm và vẽ Ascending Triangle đã phân tích ở trên<br>
+                3. Đo chiều cao và tính target, so sánh với bài học<br>
+                4. Tìm thêm 1 Descending và 1 Symmetrical Triangle trên BTC hoặc altcoins khác<br>
+                5. Ghi chép: Loại triangle, Số lần test mỗi trendline, Volume pattern, Kết quả breakout</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📋</span> Bài Tập Tuần Này</div>
+                <p>1. Tạo "Triangle Checklist" với các tiêu chí: Loại triangle? Số điểm test? Volume giảm? Break ở đâu trong pattern?<br>
+                2. Scan top 20 coins, tìm tất cả triangles đang hình thành hoặc vừa breakout<br>
+                3. Phân loại: Ascending, Descending, hay Symmetrical<br>
+                4. Theo dõi các triangles đang hình thành và ghi nhận kết quả breakout<br>
+                5. Mục tiêu: Nhận diện ít nhất 5 triangles và paper trade 2-3 setups</p>
+            </div>
+        </section>
+
+        <!-- TỔNG KẾT -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Tổng Kết Bài Học</h2>
+            <div class="summary-box">
+                <div class="summary-title"><span>🎯</span> Những Điểm Chính Cần Nhớ</div>
+                <ul class="summary-list">
+                    <li>Ascending Triangle: Flat resistance + Higher lows → 70% break lên (Bullish)</li>
+                    <li>Descending Triangle: Flat support + Lower highs → 70% break xuống (Bearish)</li>
+                    <li>Symmetrical Triangle: Both angled → Theo hướng trend trước đó (60%)</li>
+                    <li>Target = Chiều cao triangle tại phần rộng nhất, projected từ breakout point</li>
+                    <li>Break tốt nhất trong 2/3 đầu của pattern - tránh entry khi giá quá gần apex</li>
+                    <li>Volume phải giảm trong quá trình hình thành và spike khi breakout</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎓</span> Tiếp Theo</div>
+                <p>Trong bài 3.4, chúng ta sẽ học về Head & Shoulders Pattern - một trong những reversal patterns đáng tin cậy nhất trong phân tích kỹ thuật. Pattern này đã được sử dụng hơn 100 năm và vẫn hoạt động hiệu quả trên thị trường crypto!</p>
+            </div>
+        </section>
+
+        <footer class="section" style="text-align: center; padding: var(--space-xl);">
+            <p style="color: var(--gold); font-weight: 600;">Hoàn thành Bài 3.3 - Triangle Patterns</p>
+            <p style="color: var(--text-muted);">Tiếp theo: <strong style="color: var(--text-primary);">Bài 3.4 - Head & Shoulders Pattern</strong></p>
+        </footer>
+
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Chọn đáp án để nhận phản hồi ngay lập tức</p>
+            </div>
+            <div class="quiz-question" data-question="1" data-correct="A">
+                <div class="question-number">1</div>
+                <div class="question-text">Ascending Triangle có đặc điểm nhận dạng nào?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Flat resistance + Higher lows (đáy cao dần)</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Flat support + Lower highs (đỉnh thấp dần)</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Cả hai đường đều nghiêng</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Hai đường song song</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+            <div class="quiz-question" data-question="2" data-correct="C">
+                <div class="question-number">2</div>
+                <div class="question-text">Symmetrical Triangle có bias như thế nào?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Luôn bullish - 70% break lên</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Luôn bearish - 70% break xuống</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Trung tính - theo hướng trend trước đó (60%)</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Không thể dự đoán - hoàn toàn ngẫu nhiên</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+            <div class="quiz-question" data-question="3" data-correct="B">
+                <div class="question-number">3</div>
+                <div class="question-text">Triangle break tốt nhất ở vị trí nào trong pattern?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Tại apex (đỉnh nhọn) - khi giá bị nén nhất</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Trong 2/3 đầu của pattern - trước khi đến apex</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Ngay khi pattern bắt đầu hình thành</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Vị trí không quan trọng, chỉ cần có volume</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+            <div class="quiz-result"><div class="result-score">0/3</div><div class="result-text">Hoàn thành!</div><div class="result-message"></div></div>
+            <div class="quiz-buttons"><button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button></div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+            let answeredCount = 0, correctCount = 0;
+            const totalQuestions = 3;
+            const explanations = {
+                1: { correct: '✓ Chính xác! Ascending Triangle có flat resistance (đỉnh ngang) + higher lows (đáy cao dần), cho thấy buyers ngày càng aggressive.', incorrect: '✗ Sai! Ascending Triangle có Flat resistance + Higher lows. Flat support + Lower highs là Descending Triangle.' },
+                2: { correct: '✓ Chính xác! Symmetrical Triangle là pattern trung tính, có xu hướng break theo hướng của trend trước đó với xác suất khoảng 60%.', incorrect: '✗ Sai! Symmetrical Triangle không có bias cố định. Nó thường theo hướng trend trước đó với xác suất khoảng 60%.' },
+                3: { correct: '✓ Chính xác! Triangle break trong 2/3 đầu của pattern là tốt nhất. Break quá gần apex làm pattern yếu đi và target không còn hấp dẫn.', incorrect: '✗ Sai! Break tại apex làm pattern yếu đi. Break tốt nhất là trong 2/3 đầu của pattern, trước khi tiến quá gần đỉnh nhọn.' }
+            };
+            questions.forEach(q => {
+                const opts = q.querySelectorAll('.quiz-option');
+                opts.forEach(o => {
+                    o.addEventListener('click', function() {
+                        if (q.classList.contains('answered')) return;
+                        q.classList.add('answered'); answeredCount++;
+                        const sel = this.dataset.option, corr = q.dataset.correct, isCor = sel === corr;
+                        opts.forEach(op => op.classList.add('disabled'));
+                        if (isCor) { this.classList.add('correct'); correctCount++; q.querySelector('.question-feedback').classList.add('correct'); }
+                        else { this.classList.add('incorrect'); q.querySelector('.question-feedback').classList.add('incorrect'); opts.forEach(op => { if(op.dataset.option === corr) op.classList.add('correct'); }); }
+                        q.querySelector('.feedback-title').textContent = isCor ? '✓ Chính xác!' : '✗ Sai rồi!';
+                        q.querySelector('.feedback-text').textContent = explanations[q.dataset.question][isCor ? 'correct' : 'incorrect'];
+                        q.querySelector('.question-feedback').classList.add('show');
+                        if (answeredCount === totalQuestions) {
+                            resultDiv.querySelector('.result-score').textContent = `${correctCount}/${totalQuestions}`;
+                            resultDiv.querySelector('.result-message').textContent = correctCount === totalQuestions ? '🎉 Xuất sắc!' : '📚 Ôn lại bài nhé!';
+                            resultDiv.classList.add('show'); retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0; correctCount = 0;
+                questions.forEach(q => { q.classList.remove('answered'); q.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('correct', 'incorrect', 'disabled')); q.querySelector('.question-feedback').classList.remove('show', 'correct', 'incorrect'); });
+                resultDiv.classList.remove('show'); retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

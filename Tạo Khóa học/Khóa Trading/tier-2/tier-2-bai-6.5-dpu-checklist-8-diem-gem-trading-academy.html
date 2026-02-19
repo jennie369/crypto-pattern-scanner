@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 6.5: DPU Checklist 8 Điểm | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250; --navy-dark: #0a1628; --gold: #FFBD59; --gold-dark: #E5A73D;
+            --cyan: #00F0FF; --purple: #6A5BFF; --burgundy: #9C0612; --burgundy-light: #C41E2A;
+            --success: #00C853; --error: #FF5252; --bg-primary: #0a1628; --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF; --text-secondary: rgba(255, 255, 255, 0.85); --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4); --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px;
+            --radius-md: 12px; --radius-lg: 16px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); }
+        .lesson-badge { display: inline-block; padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--success), var(--cyan)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.4rem, 5vw, 2.2rem); font-weight: 800; background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: var(--space-md); }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 16px; border-radius: 0; border: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.4rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); border-bottom: 1px solid var(--glass-border); padding-bottom: var(--space-sm); }
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border-left: 4px solid var(--gold); padding: var(--space-lg); margin: var(--space-lg) 0; border-radius: 4px; }
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border-left: 4px solid var(--cyan); padding: var(--space-lg); margin: var(--space-lg) 0; border-radius: 4px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--success); }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .pattern-flow { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        .flow-phase { display: flex; gap: var(--space-md); padding: var(--space-md); background: var(--bg-card); border-left: 4px solid var(--gold); border-radius: 4px; }
+        .phase-icon { font-size: 2rem; min-width: 50px; text-align: center; }
+        .phase-content { flex: 1; }
+        .phase-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .phase-desc { font-size: 0.9rem; color: var(--text-muted); }
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        .summary-box { background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02)); border: 2px solid var(--success); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--success); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--success); font-weight: 700; }
+        .quiz-section { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option { padding: var(--space-md); background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; margin-bottom: var(--space-sm); transition: 0.3s; display: flex; gap: 12px; align-items: center; }
+        .quiz-option:hover { border-color: var(--gold); }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        .option-marker { min-width: 28px; height: 28px; background: var(--navy); border: 1px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
+        .question-feedback { margin-top: 12px; padding: 12px; border-radius: 4px; display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.1); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.1); border-left: 4px solid var(--error); }
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container"><div class="bg-layer-base"></div><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge"><span>📋</span><span>Quality Check</span></div>
+            <div class="lesson-chapter">Chapter 6 - DPU Pattern Mastery</div>
+            <h1 class="lesson-title">Bài 6.5: DPU Checklist 8 Điểm</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 6.5</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Mở Đầu: Đừng Trade Mù Quáng!</h2>
+            <p>Chào mừng bạn đến với bài học quan trọng nhất trong Chapter 6. Bạn đã biết DPU là gì, cấu trúc 3 phases ra sao, và cách vẽ LFZ. Nhưng có một sự thật phũ phàng: <strong>Không phải DPU nào cũng giống nhau.</strong></p>
+            <p>Một số DPU có tỷ lệ thắng lên tới 80%, trong khi số khác chỉ là "bẫy" với tỷ lệ thắng dưới 40%. Làm sao để phân biệt? Câu trả lời nằm ở "Bộ lọc chất lượng". Checklist 8 điểm này chính là bộ lọc đó. Nó giúp bạn loại bỏ những setup rác và chỉ tập trung vốn vào những cơ hội "ngon ăn" nhất.</p>
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Quy Tắc Vàng</div>
+                <p>Hãy coi checklist này là "giấy phép thông hành". Nếu setup không đạt đủ điểm, TUYỆT ĐỐI KHÔNG TRADE. Kỷ luật này sẽ cứu tài khoản của bạn khỏi vô số lệnh thua lỗ không đáng có.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📋</span> Checklist 8 Điểm Chi Tiết</h2>
+            <p>Mỗi tiêu chí dưới đây tương ứng với 1 điểm. Hãy đánh giá setup của bạn một cách khách quan nhất.</p>
+            
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.5/5-5-1.webp" alt="DPU 8 Point Checklist">
+                <p class="image-caption">Hình 1: Tổng quan 8 tiêu chí đánh giá chất lượng DPU Pattern</p>
+            </div>
+
+            <div class="pattern-flow">
+                <div class="flow-phase" style="border-left-color: var(--error);">
+                    <div class="phase-icon">1️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Phase DOWN Rõ Ràng (1 điểm)</div>
+                        <div class="phase-desc">Giá phải có một nhịp giảm mạnh và dứt khoát trước đó (giảm >10%). Điều này đảm bảo phe bán đã xả hàng mạnh mẽ và tạo ra sự hoảng loạn cần thiết để Smart Money gom hàng.</div>
+                    </div>
+                </div>
+                <div class="flow-phase" style="border-left-color: var(--gold);">
+                    <div class="phase-icon">2️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Chạm Vùng Support Quan Trọng (1 điểm)</div>
+                        <div class="phase-desc">Đáy của Phase 2 (Pause) phải chạm vào một vùng hỗ trợ mạnh (Key Level) trên khung lớn hơn, hoặc các mốc Fibonacci quan trọng (0.618, 0.786).</div>
+                    </div>
+                </div>
+                <div class="flow-phase" style="border-left-color: var(--gold);">
+                    <div class="phase-icon">3️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Volume Cạn Trong Phase PAUSE (1 điểm)</div>
+                        <div class="phase-desc">Đây là yếu tố then chốt. Volume trong vùng tích lũy phải GIẢM MẠNH (thấp hơn 50% so với trung bình). Nó chứng tỏ nguồn cung đã cạn kiệt.</div>
+                    </div>
+                </div>
+                <div class="flow-phase" style="border-left-color: var(--gold);">
+                    <div class="phase-icon">4️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">LFZ Hình Thành Đủ Thời Gian (1 điểm)</div>
+                        <div class="phase-desc">Vùng đi ngang phải kéo dài ít nhất 3-5 cây nến. Thời gian tích lũy càng lâu, lực bật lên càng mạnh. Tránh những vùng pause quá ngắn.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.5/5-5-2.webp" alt="Checklist Items 5-8">
+                <p class="image-caption">Hình 2: Các tiêu chí xác nhận xu hướng và quản lý rủi ro</p>
+            </div>
+
+            <div class="pattern-flow">
+                <div class="flow-phase" style="border-left-color: var(--success);">
+                    <div class="phase-icon">5️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Nến Break LFZ Với Volume Lớn (1 điểm)</div>
+                        <div class="phase-desc">Cây nến phá vỡ vùng Pause (Phase 3) phải là một nến xanh thân dài, kèm theo Volume tăng vọt (gấp 1.5 - 2 lần trung bình).</div>
+                    </div>
+                </div>
+                <div class="flow-phase" style="border-left-color: var(--success);">
+                    <div class="phase-icon">6️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">RSI/MACD Confirmation (1 điểm)</div>
+                        <div class="phase-desc">Có sự phân kỳ dương (Bullish Divergence) trên RSI hoặc MACD cắt lên. Đây là tín hiệu động lượng ủng hộ đà tăng.</div>
+                    </div>
+                </div>
+                <div class="flow-phase" style="border-left-color: var(--cyan);">
+                    <div class="phase-icon">7️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Higher TF Không Bearish Mạnh (1 điểm)</div>
+                        <div class="phase-desc">Kiểm tra khung thời gian lớn hơn (ví dụ D1 nếu trade H4). Xu hướng lớn không được là giảm mạnh (Strong Bearish). Tốt nhất là Sideway hoặc Uptrend.</div>
+                    </div>
+                </div>
+                <div class="flow-phase" style="border-left-color: var(--cyan);">
+                    <div class="phase-icon">8️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">R:R Ratio ≥ 2.5:1 (1 điểm)</div>
+                        <div class="phase-desc">Khoảng cách đến vùng cản tiếp theo (Target) phải đủ xa để đạt tỷ lệ Lợi nhuận/Rủi ro tối thiểu là 2.5. Nếu R:R < 2, bỏ qua.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Hệ Thống Xếp Hạng & Ra Quyết Định</h2>
+            <p>Sau khi chấm điểm, hãy cộng tổng số điểm lại và xem setup của bạn thuộc loại nào:</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" style="color: var(--success);">8/8</div>
+                    <div class="stat-label">Grade A - Hoàn Hảo</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: var(--gold);">7/8</div>
+                    <div class="stat-label">Grade B - Tốt</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: var(--error);">≤ 6/8</div>
+                    <div class="stat-label">Grade C - Yếu</div>
+                </div>
+            </div>
+
+            <div class="definition-box" style="border-left-color: var(--success);">
+                <div class="definition-box-title" style="color: var(--success);"><span>✅</span> Grade A (8 điểm): All-in Tự Tin</div>
+                <p>Đây là những cơ hội "vàng mười". Mọi yếu tố đều ủng hộ bạn. Hãy vào lệnh với khối lượng tiêu chuẩn (Full Size) hoặc thậm chí có thể aggressive hơn một chút nếu bạn có kinh nghiệm.</p>
+            </div>
+
+            <div class="definition-box" style="border-left-color: var(--gold);">
+                <div class="definition-box-title" style="color: var(--gold);"><span>⚠️</span> Grade B (7 điểm): Cẩn Trọng</div>
+                <p>Setup tốt nhưng vẫn có 1 điểm yếu nhỏ. Hãy vào lệnh nhưng giảm khối lượng xuống còn 70-80% so với bình thường. Theo dõi sát sao diễn biến giá.</p>
+            </div>
+
+            <div class="definition-box" style="border-left-color: var(--error);">
+                <div class="definition-box-title" style="color: var(--error);"><span>❌</span> Grade C (≤ 6 điểm): Bỏ Qua Ngay!</div>
+                <p>Rủi ro quá cao so với lợi nhuận. Đừng cố gắng "ép" thị trường. Hãy kiên nhẫn chờ đợi cơ hội khác tốt hơn. "No trade" cũng là một vị thế thắng lợi.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🔍</span> Ví Dụ Thực Tế Chấm Điểm</h2>
+            <p>Hãy cùng thực hành chấm điểm một setup trên ETH để bạn hiểu rõ cách áp dụng checklist.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.5/5-5-3.webp" alt="Scoring Example ETH">
+                <p class="image-caption">Hình 3: Ví dụ chấm điểm setup DPU trên ETH/USDT</p>
+            </div>
+
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin-bottom: 10px;">✅ <strong>1. Phase Down:</strong> Giá giảm 18% dứt khoát. (Đạt)</li>
+                <li style="margin-bottom: 10px;">✅ <strong>2. Support:</strong> Chạm đúng Fib 0.618 + Đáy cũ. (Đạt)</li>
+                <li style="margin-bottom: 10px;">✅ <strong>3. Volume Pause:</strong> Giảm 55% so với Phase 1. (Đạt)</li>
+                <li style="margin-bottom: 10px;">✅ <strong>4. LFZ Time:</strong> 5 nến H4 đi ngang. (Đạt)</li>
+                <li style="margin-bottom: 10px;">✅ <strong>5. Break Volume:</strong> Tăng gấp 2 lần trung bình. (Đạt)</li>
+                <li style="margin-bottom: 10px;">✅ <strong>6. Indicator:</strong> RSI phân kỳ dương rõ ràng. (Đạt)</li>
+                <li style="margin-bottom: 10px;">✅ <strong>7. Higher TF:</strong> Khung D1 đang Sideway, không giảm mạnh. (Đạt)</li>
+                <li style="margin-bottom: 10px;">✅ <strong>8. R:R Ratio:</strong> Tính toán cho thấy R:R = 3.2. (Đạt)</li>
+            </ul>
+            <p><strong>Kết luận:</strong> Tổng điểm 8/8. Đây là setup Grade A. Chúng ta sẽ vào lệnh Buy Limit ngay tại LFZ!</p>
+        </section>
+
+        <div class="summary-box">
+            <div class="summary-title"><span>📝</span> Tổng Kết Bài Học</div>
+            <ul class="summary-list">
+                <li>Checklist 8 điểm là bộ lọc quan trọng giúp nâng cao Win Rate.</li>
+                <li>Chỉ trade các setup đạt từ 7 điểm trở lên (Grade A, B).</li>
+                <li>Kiên quyết bỏ qua các setup Grade C (≤ 6 điểm) để bảo vệ vốn.</li>
+                <li>Luôn chấm điểm khách quan, không thiên vị cảm xúc.</li>
+            </ul>
+        </div>
+
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Chọn đáp án đúng nhất</p>
+            </div>
+
+            <div class="quiz-question" data-question="1" data-correct="C">
+                <div class="question-number">1</div>
+                <div class="question-text">Tối thiểu setup DPU cần đạt bao nhiêu điểm để được xem xét vào lệnh?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">4/8 điểm</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">5/8 điểm</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">7/8 điểm</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">8/8 điểm</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="A">
+                <div class="question-number">2</div>
+                <div class="question-text">Tiêu chí về Volume trong Phase Pause là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Giảm ít nhất 50% so với trung bình Phase Down.</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Tăng mạnh đột biến.</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Đi ngang bằng với Phase Down.</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Không quan trọng.</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+
+            <div class="quiz-question" data-question="3" data-correct="B">
+                <div class="question-number">3</div>
+                <div class="question-text">Nếu setup đạt 6/8 điểm, bạn nên làm gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Vào lệnh với 50% khối lượng.</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Bỏ qua, không trade (No Trade).</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Vào lệnh Full Size nhưng dời SL gần hơn.</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Chờ thêm tín hiệu từ các nhóm tín hiệu.</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score">0/3</div>
+                <div class="result-text">Hoàn thành!</div>
+                <div class="result-message"></div>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại Quiz</button>
+            </div>
+        </section>
+
+        <footer class="lesson-footer" style="text-align: center; padding: 40px 0; border-top: 1px solid var(--glass-border); margin-top: 40px;">
+            <div class="footer-brand" style="font-weight: 800; color: var(--gold); margin-bottom: 10px;">GEM Trading Academy</div>
+            <div class="footer-text" style="color: var(--text-muted); font-size: 0.8rem;">© 2024 GEM Academy. Nền tảng đào tạo phân tích tần số dòng tiền chuyên nghiệp.</div>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+            let answeredCount = 0; let correctCount = 0; const totalQuestions = 3;
+
+            const explanations = {
+                1: { correct: '✓ Chính xác! Chúng ta chỉ nên mạo hiểm tiền của mình với những setup chất lượng cao (Grade A hoặc B).', incorrect: '✗ Chưa đúng. 4-5 điểm là quá thấp, rủi ro cao. Hãy kiên nhẫn chờ setup tốt hơn.' },
+                2: { correct: '✓ Chính xác! Volume cạn kiệt cho thấy phe bán đã hết lực, tạo điều kiện cho đảo chiều.', incorrect: '✗ Sai rồi. Volume tăng ở vùng Pause thường là dấu hiệu xấu (phân phối tiếp diễn).' },
+                3: { correct: '✓ Chính xác! Với setup Grade C (≤ 6 điểm), rủi ro > lợi nhuận. Tốt nhất là đứng ngoài quan sát.', incorrect: '✗ Nguy hiểm! Cố trade setup yếu là cách nhanh nhất để cháy tài khoản.' }
+            };
+
+            questions.forEach(question => {
+                const options = question.querySelectorAll('.quiz-option');
+                const correctAnswer = question.dataset.correct;
+                const questionNum = question.dataset.question;
+                const feedbackDiv = question.querySelector('.question-feedback');
+                const feedbackTitle = feedbackDiv.querySelector('.feedback-title');
+                const feedbackText = feedbackDiv.querySelector('.feedback-text');
+
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        if (question.classList.contains('answered')) return;
+                        question.classList.add('answered'); answeredCount++;
+                        const selectedOption = this.dataset.option;
+                        const isCorrect = selectedOption === correctAnswer;
+                        options.forEach(opt => opt.classList.add('disabled'));
+                        if (isCorrect) {
+                            this.classList.add('correct'); correctCount++;
+                            feedbackDiv.classList.add('correct');
+                            feedbackTitle.textContent = '✓ Chính xác!';
+                            feedbackText.textContent = explanations[questionNum].correct;
+                        } else {
+                            this.classList.add('incorrect');
+                            feedbackDiv.classList.add('incorrect');
+                            feedbackTitle.textContent = '✗ Sai rồi!';
+                            feedbackText.textContent = explanations[questionNum].incorrect;
+                            options.forEach(opt => { if (opt.dataset.option === correctAnswer) opt.classList.add('correct'); });
+                        }
+                        feedbackDiv.classList.add('show');
+                        if (answeredCount === totalQuestions) {
+                            resultDiv.querySelector('.result-score').textContent = `${correctCount}/${totalQuestions}`;
+                            if (correctCount === totalQuestions) resultDiv.querySelector('.result-message').textContent = '🎉 Xuất sắc! Bạn đã sẵn sàng để lọc kèo!';
+                            else resultDiv.querySelector('.result-message').textContent = '📚 Hãy ôn lại checklist để nắm vững hơn!';
+                            resultDiv.classList.add('show'); retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+            retakeBtn.addEventListener('click', function() { location.reload(); });
+        });
+    </script>
+</body>
+</html>

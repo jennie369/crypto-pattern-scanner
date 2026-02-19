@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 2.1: LFZ Là Gì? | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-navy: #112250;
+            --accent-gold: #FFBD59;
+            --accent-cyan: #00F0FF;
+            --accent-purple: #6A5BFF;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0AEC0;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --bg-card-hover: rgba(255, 255, 255, 0.08);
+            --border-subtle: rgba(255, 255, 255, 0.1);
+            --gradient-gold: linear-gradient(135deg, #FFBD59 0%, #FFCF87 100%);
+            --gradient-green: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--primary-navy);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--primary-navy);
+        }
+
+        /* HEADER */
+        .lesson-header {
+            padding: 2rem 1.5rem;
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.15) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border-subtle);
+            text-align: center;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--gradient-green);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #000;
+            margin-bottom: 1rem;
+        }
+
+        .lesson-chapter {
+            font-size: 0.875rem;
+            color: var(--success-green);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .lesson-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* CONTENT SECTION */
+        .content-section {
+            padding: 0;
+        }
+
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            margin: 1rem;
+            padding: 1.5rem;
+            border-left: 4px solid var(--success-green);
+        }
+
+        .content-card h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--success-green);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .content-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.25rem 0 0.75rem 0;
+            color: var(--text-primary);
+        }
+
+        .content-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9375rem;
+        }
+
+        .content-card ul, .content-card ol {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .content-card li {
+            margin-bottom: 0.5rem;
+            font-size: 0.9375rem;
+        }
+
+        /* IMAGE PLACEHOLDER */
+        .image-placeholder {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
+            border: 2px dashed var(--success-green);
+            border-radius: 0.75rem;
+            padding: 3rem 1.5rem;
+            text-align: center;
+            margin: 1.25rem 0;
+        }
+
+        .image-placeholder .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .image-placeholder .label {
+            font-size: 0.875rem;
+            color: var(--success-green);
+            font-weight: 600;
+        }
+
+        .image-placeholder .dimensions {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* HIGHLIGHT BOXES */
+        .highlight-box {
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .highlight-box.important {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--success-green);
+        }
+
+        .highlight-box.warning {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--error-red);
+        }
+
+        .highlight-box.info {
+            background: rgba(0, 240, 255, 0.1);
+            border-left: 4px solid var(--accent-cyan);
+        }
+
+        .highlight-title {
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .important .highlight-title { color: var(--success-green); }
+        .warning .highlight-title { color: var(--error-red); }
+        .info .highlight-title { color: var(--accent-cyan); }
+
+        .highlight-box p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* PATTERN BOX */
+        .pattern-box {
+            background: rgba(16, 185, 129, 0.15);
+            border: 2px solid var(--success-green);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .pattern-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--success-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .pattern-meaning {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        /* COMPARISON GRID */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .compare-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .compare-card.lfz {
+            border-color: var(--success-green);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .compare-card.hfz {
+            border-color: var(--error-red);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .compare-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .compare-card.lfz .compare-title {
+            color: var(--success-green);
+        }
+
+        .compare-card.hfz .compare-title {
+            color: var(--error-red);
+        }
+
+        .compare-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* FEATURE LIST */
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-card);
+            border-radius: 0.5rem;
+        }
+
+        .feature-icon {
+            width: 2rem;
+            height: 2rem;
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .feature-content h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .feature-content p {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* SUMMARY BOX */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 1rem;
+        }
+
+        .summary-box h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--success-green);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .summary-box li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.625rem;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        }
+
+        .summary-box li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success-green);
+            font-weight: bold;
+        }
+
+        /* QUIZ SECTION */
+        .quiz-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            margin: 1.5rem 1rem;
+            padding: 1.5rem;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 0.25rem;
+        }
+
+        .quiz-header p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .quiz-question {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .quiz-option {
+            padding: 0.875rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+        }
+
+        .quiz-option:hover:not(.correct):not(.incorrect) {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-gold);
+        }
+
+        .quiz-option.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--success-green);
+            color: var(--success-green);
+        }
+
+        .quiz-option.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--error-red);
+            color: var(--error-red);
+        }
+
+        .quiz-result {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .quiz-result.show {
+            display: block;
+        }
+
+        .quiz-result.correct {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+        }
+
+        .quiz-result.incorrect {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-red);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .quiz-score.show {
+            display: block;
+        }
+
+        .score-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .retake-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-gold);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #000;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .retake-btn:hover {
+            transform: scale(1.02);
+        }
+
+        /* FOOTER */
+        .lesson-footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-logo .gem {
+            color: var(--accent-gold);
+        }
+
+        .footer-text {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 600px) {
+            .content-card {
+                margin: 0.75rem 0;
+                border-radius: 0;
+                border-left: 4px solid var(--success-green);
+                border-right: none;
+                border-top: none;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+
+            .summary-box,
+            .quiz-section {
+                margin: 1rem 0;
+                border-radius: 0;
+            }
+
+            .lesson-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .lesson-title {
+                font-size: 1.5rem;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="header-badge">
+                <span>📈</span>
+                <span>Tier 2 - Nâng Cao</span>
+            </div>
+            <div class="lesson-chapter">Chapter 2 - LFZ Mastery</div>
+            <h1 class="lesson-title">Bài 2.1: LFZ Là Gì? Bản Chất Và Cơ Chế Dòng Tiền</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 2.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>1,450 từ</span></div>
+            </div>
+        </header>
+
+        <!-- CONTENT -->
+        <main class="content-section">
+            
+            <!-- SECTION 1: OPENING HOOK -->
+            <div class="content-card">
+                <h2>📌 1. MỞ ĐẦU: TẠI SAO BẠN THƯỜNG "HỤT" NHỮNG ĐỢT SÓNG LỚN?</h2>
+                <p>Bạn đã bao giờ rơi vào tình huống này chưa: Bạn thấy thị trường đang tăng rất mạnh, bạn sợ lỡ cơ hội (FOMO) nên nhảy vào mua ngay lập tức. Nhưng vừa mua xong thì giá lại quay đầu giảm, cắn đúng Stop Loss của bạn rồi mới thực sự... bay vút lên trời? Cảm giác đó thực sự rất ức chế, đúng không? Đó là vì bạn đang "đuổi theo giá" thay vì "đón lõng giá" tại những nơi mà dòng tiền thông minh đang chờ sẵn.</p>
+                <p>Chào mừng bạn đến với bài học quan trọng nhất của Tier 2: <strong>LFZ - Low Frequency Zone</strong>. Trong bài học này, tôi sẽ không chỉ dạy bạn định nghĩa khô khan về một vùng hỗ trợ. Tôi sẽ chỉ cho bạn cách "đọc vị" nơi mà các tổ chức lớn (Smart Money) đang đặt những "cái bẫy mua" khổng lồ. Đến cuối bài học này, bạn sẽ hiểu không chỉ PHẢI LÀM GÌ, mà còn TẠI SAO nó hoạt động - và quan trọng hơn, làm thế nào để áp dụng vào tình huống trading của chính bạn.</p>
+                
+                <div class="highlight-box info">
+                    <div class="highlight-title">ℹ️ Insight Nâng Cao: Tần Số Và Dòng Tiền</div>
+                    <p>Trong hệ thống GEM Frequency, mọi vùng giá đều được định nghĩa qua "tần suất" lệnh. LFZ không chỉ là một vùng kỹ thuật, nó là dấu vết còn sót lại của những đợt gom hàng quy mô lớn mà Smart Money không thể thực hiện xong trong một nốt nhạc.</p>
+                </div>
+            </div>
+
+            <!-- SECTION 2: CONCEPT INTRODUCTION -->
+            <div class="content-card">
+                <h2>🟢 2. KHÁI NIỆM: LFZ - VÙNG TẦN SỐ THẤP CỦA DÒNG TIỀN</h2>
+                <div class="pattern-box">
+                    <div class="pattern-name">LFZ - Low Frequency Zone</div>
+                    <div class="pattern-meaning">Vùng tập trung thanh khoản MUA (Vùng có nhiều lệnh MUA chờ khớp)</div>
+                </div>
+                
+                <h3>A. Định Nghĩa Cơ Bản</h3>
+                <p><strong>LFZ (Low Frequency Zone)</strong> là vùng giá mà tại đó có rất nhiều lệnh BUY đang chờ được thực hiện. Đây là vùng giá mà Smart Money (những "tay chơi lớn" trên thị trường) đã ra quyết định mua một lượng tài sản cực lớn nhưng chưa khớp hết lệnh ngay lập tức, do đó họ để lại những "lệnh chờ" (Unfilled Orders) và đang chờ giá quay về để khớp nốt phần còn lại.</p>
+
+                <h3>B. Giải Thích "Low Frequency"</h3>
+                <p>Tại sao chúng ta không gọi là Support? Hãy hiểu rằng trong GEM Frequency Method, chúng ta coi trọng "Tần suất giao dịch". Một vùng được gọi là Low Frequency (Tần số thấp) vì giá rất ít khi quay lại vùng này sau khi đã bứt phá mạnh mẽ. Nhưng một khi giá quay về, đó là "cơ hội ngàn vàng" để các lệnh mua tiềm ẩn được kích hoạt đồng loạt.</p>
+
+                <div class="image-placeholder">
+                    <div class="icon">📊</div>
+                    <div class="label">Hình 2.1.1: LFZ - Vùng Mua Với Nhiều Lệnh Chờ</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+
+                <div class="highlight-box important">
+                    <div class="highlight-title">💡 Quy Tắc Vàng: Freshness Là Kim Cương</div>
+                    <p>Hãy nhớ rằng, giá trị lớn nhất của LFZ nằm ở sự "tươi mới" (Fresh). Càng ít lần bị chạm vào, lượng lệnh chờ mua càng nhiều. Một LFZ bị test quá 3 lần sẽ mất đi sức mạnh vốn có của nó.</p>
+                </div>
+            </div>
+
+            <!-- SECTION 3: DEEP DIVE -->
+            <div class="content-card">
+                <h2>🔍 3. PHÂN TÍCH SÂU: LFZ ĐƯỢC TẠO TỪ NHỮNG PATTERN NÀO?</h2>
+                <p>LFZ không tự nhiên sinh ra. Nó là kết quả của một quá trình di chuyển có chủ đích của dòng tiền lớn. Dựa trên tài liệu <strong>BANG_TONG_HOP_24_PATTERNS_HOAN_CHINH</strong>, có 2 cấu trúc chính tạo nên LFZ cực mạnh mà bạn cần phải ghi nhớ sâu sắc:</p>
+
+                <h3>A. UPU Pattern (Up-Pause-Up) - Tiếp Diễn Xu Hướng Tăng</h3>
+                <p>Hãy tưởng tượng giá đang tăng mạnh (Up), sau đó Smart Money dừng lại một chút để "nghỉ ngơi" và thu gom thêm thanh khoản từ những người muốn bán sớm (Pause), rồi tiếp tục đẩy giá lên một tầm cao mới (Up). Vùng Pause ngắn ngủi 1-5 nến đó chính là nơi LFZ được hình thành.</p>
+                
+                <div class="image-placeholder">
+                    <div class="icon">📈</div>
+                    <div class="label">Hình 2.1.2: UPU Pattern Tạo LFZ</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+
+                <h3>B. DPU Pattern (Down-Pause-Up) - Đảo Chiều Từ Giảm Sang Tăng</h3>
+                <p>Đây là kịch bản thú vị hơn: Giá đang trong đà giảm mạnh khiến đám đông hoảng loạn (Down), sau đó tại một vùng giá cụ thể, Smart Money nhảy vào "chặn đứng" đà giảm bằng cách mua hết mọi lệnh bán (Pause), và ngay sau đó đảo chiều xu hướng sang tăng (Up). Vùng Pause ở "đáy" này là một LFZ cực kỳ chất lượng cho các lệnh Swing Trade dài hạn.</p>
+
+                <div class="image-placeholder">
+                    <div class="icon">🔄</div>
+                    <div class="label">Hình 2.1.3: DPU Pattern Tạo LFZ</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+
+                <div class="highlight-box success">
+                    <div class="highlight-title">✅ Tại Sao Trade Tại LFZ Lại Hiệu Quả?</div>
+                    <p>Khi bạn mua tại LFZ, bạn đang mua cùng với Smart Money tại nơi họ bắt đầu cuộc chơi. Điều này mang lại cho bạn lợi thế về <strong>Risk:Reward (R:R)</strong> cực tốt: Stop Loss rất ngắn (ngay dưới zone) và Target rất xa (vùng kháng cự tiếp theo).</p>
+                </div>
+            </div>
+
+            <!-- SECTION 4: POSITION & COMPARISON -->
+            <div class="content-card">
+                <h2>📍 4. VỊ TRÍ VÀ SO SÁNH: LFZ NẰM Ở ĐÂU?</h2>
+                <p>Xác định đúng vị trí là chìa khóa để tránh những lệnh trade sai lầm. Hãy nhớ quy tắc "Sống còn" này trong GEM Trading:</p>
+
+                <div class="highlight-box warning">
+                    <div class="highlight-title">⚠️ Quy Tắc Vàng: Vị Trí Tuyệt Đối</div>
+                    <p><strong>LFZ luôn nằm DƯỚI giá hiện tại!</strong> (Price is above LFZ). Nếu bạn thấy một zone nằm trên đầu giá hiện tại, đó tuyệt đối không phải LFZ, mà là HFZ (Vùng Bán). Việc mua nhầm tại HFZ là cách nhanh nhất để cháy tài khoản.</p>
+                </div>
+
+                <p>Tại sao LFZ luôn ở dưới? Vì đây là vùng mua - Smart Money cần giá GIẢM về vùng này (Pullback) để họ có thể khớp nốt những lệnh mua còn lại với giá rẻ hơn. Chúng ta gọi đây là hành động "Về trạm đón khách".</p>
+
+                <div class="image-placeholder">
+                    <div class="icon">🗺️</div>
+                    <div class="label">Hình 2.1.4: Vị Trí LFZ So Với Giá Hiện Tại</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+
+                <h3>So Sánh LFZ và HFZ</h3>
+                <p>Để giúp bạn không bao giờ nhầm lẫn, hãy xem bảng so sánh dưới đây:</p>
+
+                <div class="comparison-grid">
+                    <div class="compare-card lfz">
+                        <div class="compare-title">🟢 LFZ (Vùng Mua)</div>
+                        <div class="compare-text">
+                            Nằm DƯỚI giá hiện tại<br>
+                            Signal: LONG (Mua)<br>
+                            Tạo bởi UPU / DPU
+                        </div>
+                    </div>
+                    <div class="compare-card hfz">
+                        <div class="compare-title">🔴 HFZ (Vùng Bán)</div>
+                        <div class="compare-text">
+                            Nằm TRÊN giá hiện tại<br>
+                            Signal: SHORT (Bán)<br>
+                            Tạo bởi DPD / UPD
+                        </div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">⚖️</div>
+                    <div class="label">Hình 2.1.5: So Sánh LFZ vs HFZ Trên Biểu Đồ</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: REAL-WORLD EXAMPLES -->
+            <div class="content-card">
+                <h2>🖼️ 5. VÍ DỤ THỰC TẾ: NHÌN QUA CON MẮT CỦA SMART MONEY</h2>
+                <p>Hãy cùng phân tích một trường hợp điển hình trên chart BTC/USDT khung 4H. Vào ngày [DD/MM/YYYY], sau một đợt tăng mạnh, giá bắt đầu đi ngang trong 4 cây nến tại vùng $60,000, sau đó bứt phá mạnh lên $65,000. </p>
+                
+                <p>Ở đây, vùng $60,000 chính là <strong>UPU LFZ</strong>. Lúc này, nhiều trader nhỏ lẻ đang hưng phấn mua đuổi ở $64,000-$65,000. Nhưng một trader GEM sẽ làm gì? Họ sẽ bình tĩnh đánh dấu vùng LFZ tại $60,000 và kiên nhẫn đợi. </p>
+                
+                <p>Khi giá có cú sụt giảm bất ngờ (Flash Crash) về lại $60,200 - chạm đúng vào LFZ - đó chính là lúc các lệnh chờ của Smart Money được kích hoạt. Giá rút chân cực nhanh và quay lại xu hướng tăng. Những người mua ở $65,000 đã bị "chia tài khoản" hoặc dính Stop Loss, trong khi trader mua tại LFZ có một vị thế tuyệt vời với R:R lên đến 1:4.</p>
+
+                <div class="highlight-box info">
+                    <div class="highlight-title">ℹ️ Bài Học Rút Ra</div>
+                    <p>Thị trường luôn có xu hướng quay lại "kiểm tra" nơi dòng tiền bắt đầu. Việc của bạn không phải là dự đoán tương lai, mà là chuẩn bị sẵn kế hoạch tại những vùng tần suất thấp như LFZ.</p>
+                </div>
+            </div>
+
+            <!-- SECTION 6: PRACTICAL APPLICATION -->
+            <div class="content-card">
+                <h2>🎯 6. ỨNG DỤNG: CÁCH TRADE VỚI LFZ HIỆU QUẢ</h2>
+                <p>Để trade với LFZ thành công, bạn không thể chỉ "thấy là vào". Hãy tuân thủ quy trình 3 bước sau:</p>
+                
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">🏦</div>
+                        <div class="feature-content">
+                            <h4>Bước 1: Xác Định Pattern</h4>
+                            <p>Tìm cấu trúc UPU hoặc DPU rõ ràng. Lưu ý cú bứt phá (Departure) phải mạnh mẽ để xác nhận sự mất cân bằng cung cầu.</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-content">
+                            <h4>Bước 2: Vẽ Zone Chính Xác</h4>
+                            <p>Vẽ vùng Pause (Chúng ta sẽ học sâu kỹ thuật này ở bài 2.2). Đảm bảo zone nằm DƯỚI giá hiện tại.</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🛡️</div>
+                        <div class="feature-content">
+                            <h4>Bước 3: Đợi Retest & Xác Nhận</h4>
+                            <p>Kiên nhẫn chờ giá quay lại test zone. Chỉ vào lệnh khi thấy nến xác nhận đảo chiều (Bullish Confirmation) ngay tại LFZ.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight-box warning">
+                    <div class="highlight-title">🚨 Sai Lầm Chết Người</div>
+                    <p>Đừng bao giờ cố gắng mua tại một LFZ đã bị "xuyên thủng" (Broken Zone). Một khi nến đóng cửa dưới zone, toàn bộ lệnh chờ đã bị tiêu thụ hoặc Smart Money đã thay đổi ý định. Hãy bỏ qua và tìm zone mới.</p>
+                </div>
+            </div>
+
+            <!-- SECTION 7: SUMMARY & TRANSITION -->
+            <div class="summary-box">
+                <h3>📋 7. TÓM TẮT VÀ KẾT LUẬN</h3>
+                <ul>
+                    <li><strong>LFZ là Low Frequency Zone:</strong> Vùng mua mạnh nhất của Smart Money.</li>
+                    <li><strong>Nguyên lý:</strong> Hoạt động dựa trên các lệnh chờ chưa khớp (Unfilled Orders).</li>
+                    <li><strong>Nhận diện:</strong> Được tạo từ pattern UPU (tiếp diễn) và DPU (đảo chiều).</li>
+                    <li><strong>Vị trí:</strong> Luôn nằm DƯỚI giá hiện tại (Price > LFZ).</li>
+                    <li><strong>Chiến lược:</strong> Chỉ mua tại LFZ còn Fresh và có xác nhận từ nến.</li>
+                </ul>
+                <p><strong>BÀI HỌC CỐT LÕI:</strong> Trong trading, kiên nhẫn đợi giá về LFZ chính là cách bạn bảo vệ túi tiền của mình và đi theo bước chân của những kẻ khổng lồ.</p>
+                <p>Bây giờ, bạn đã hiểu LFZ là gì và tại sao nó lại mạnh mẽ đến thế. Nhưng làm thế nào để vẽ một cái zone "chuẩn chỉnh" đến từng pixel? Đường Entry nằm đâu và đường Stop Loss đặt chỗ nào? Chúng ta sẽ giải quyết triệt để trong bài tiếp theo: <strong>Bài 2.2: Cách Vẽ LFZ Chính Xác</strong>. Hãy cùng tiếp tục nhé!</p>
+            </div>
+
+            <!-- SECTION 8: QUIZ -->
+            <div class="quiz-section">
+                <div class="quiz-header">
+                    <h3>🎯 8. KIỂM TRA KIẾN THỨC</h3>
+                    <p>Hãy trả lời 3 câu hỏi dưới đây để chắc chắn bạn đã nắm vững bản chất LFZ.</p>
+                </div>
+
+                <div class="quiz-question" data-correct="1">
+                    <div class="question-text">Câu 1: LFZ là viết tắt của gì và có ý nghĩa bản chất là gì?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-index="0">Low Frequency Zone - Vùng có ít người giao dịch nên không an toàn</div>
+                        <div class="quiz-option" data-index="1">Low Frequency Zone - Vùng có nhiều lệnh MUA chờ khớp của Smart Money</div>
+                        <div class="quiz-option" data-index="2">Long Frequency Zone - Vùng mở lệnh Long liên tục của nhỏ lẻ</div>
+                    </div>
+                    <div class="quiz-result"></div>
+                </div>
+
+                <div class="quiz-question" data-correct="2">
+                    <div class="quiz-text">Câu 2: Một LFZ chuẩn GEM Trading phải nằm ở vị trí nào?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-index="0">Nằm TRÊN giá hiện tại để chờ giá phá qua rồi mua</div>
+                        <div class="quiz-option" data-index="1">Có thể nằm bất cứ đâu, miễn là có pattern</div>
+                        <div class="quiz-option" data-index="2">Luôn nằm DƯỚI giá hiện tại (Price > LFZ)</div>
+                    </div>
+                    <div class="quiz-result"></div>
+                </div>
+
+                <div class="quiz-question" data-correct="0">
+                    <div class="quiz-text">Câu 3: Patterns nào sau đây là "cha đẻ" tạo ra vùng LFZ?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-index="0">UPU (Up-Pause-Up) và DPU (Down-Pause-Up)</div>
+                        <div class="quiz-option" data-index="1">DPD (Down-Pause-Down) và UPD (Up-Pause-Down)</div>
+                        <div class="quiz-option" data-index="2">Head and Shoulders và Double Bottom</div>
+                    </div>
+                    <div class="quiz-result"></div>
+                </div>
+
+                <div class="quiz-score">
+                    <div class="score-text">🎉 Tuyệt vời! Bạn trả lời đúng <span id="correct-count">0</span>/3 câu!</div>
+                    <button class="retake-btn" onclick="resetQuiz()">Làm Lại Quiz</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <div class="footer-logo">
+                <span class="gem">GEM</span> Trading Academy
+            </div>
+            <div class="footer-text">© 2024 GEM Trading Academy. Bản quyền thuộc về hệ thống GEM Frequency Method.</div>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác! Bạn đã nắm vững bản chất của LFZ.';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy nhớ LFZ là vùng MUA (tạo bởi UPU/DPU) và luôn nằm DƯỚI giá.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function resetQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                question.querySelector('.quiz-result').className = 'quiz-result';
+            });
+
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

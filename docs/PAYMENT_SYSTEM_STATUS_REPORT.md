@@ -61,9 +61,9 @@ Chủ TK: CT TNHH GEM CAPITAL HOLDING
 
 | Function | Mục đích | Trạng thái |
 |----------|----------|------------|
-| `shopify-order-webhook` | Nhận webhook khi có order mới, tạo pending_payment | ✅ Deployed |
+| `shopify-order-webhook` | Nhận webhook khi có order mới (ALL payment types), tạo pending_payment | ✅ Deployed v32 |
 | `casso-webhook` | Nhận webhook từ Casso khi có giao dịch, auto verify | ✅ Deployed |
-| `get-order-number` | API để extension lấy order number từ DB | ✅ Deployed |
+| `get-order-number` | API để extension lấy order number từ DB (exact match only) | ✅ Deployed v24 |
 | `shopify-paid-webhook` | Xử lý khi order đã thanh toán | ✅ Deployed |
 
 ### 2.3 Database Schema
@@ -82,6 +82,7 @@ Chủ TK: CT TNHH GEM CAPITAL HOLDING
 - transfer_content (TEXT) -- DH4734
 - qr_code_url (TEXT)
 - payment_status (TEXT)   -- pending/paid/verifying/expired
+- payment_method (TEXT)   -- bank_transfer/credit_card/shopify_payments (added 2026-02-19)
 - bank_transaction_id (TEXT)
 - verified_amount (DECIMAL)
 - verified_at (TIMESTAMP)
@@ -113,17 +114,20 @@ Chủ TK: CT TNHH GEM CAPITAL HOLDING
 
 ## 3. LUỒNG XỬ LÝ CHI TIẾT
 
-### 3.1 Khi khách đặt hàng (Bank Transfer)
+### 3.1 Khi khách đặt hàng (ALL payment types - updated 2026-02-19)
 
 ```
-1. Khách checkout với "Bank Transfer"
+1. Khách checkout (Bank Transfer HOẶC Credit Card HOẶC bất kỳ)
 2. Shopify gửi webhook orders/create
 3. shopify-order-webhook:
    - Verify HMAC signature
-   - Check payment gateway (bank/manual/pending)
-   - Tạo record trong pending_payments
+   - Detect payment method từ payment_gateway_names
+   - Tạo record trong pending_payments cho TẤT CẢ payment types
+   - Bank transfer → payment_status = 'pending', payment_method = 'bank_transfer'
+   - Credit card  → payment_status = 'paid', payment_method = 'credit_card',
+                    verified_at = NOW(), verification_method = 'shopify_verified'
    - Generate QR code URL
-   - Log event
+   - Log event (order_created hoặc payment_verified)
 4. Trả về success
 ```
 
@@ -134,9 +138,8 @@ Chủ TK: CT TNHH GEM CAPITAL HOLDING
 2. Lấy orderIdentityId, confirmationNumber, totalAmount từ Shopify API
 3. Gọi API get-order-number với các params trên
 4. API query pending_payments:
-   - Strategy 1: Match by shopify_order_id
-   - Strategy 2: Match by total_amount (recent)
-   - Strategy 3: Get most recent pending
+   - Exact match by shopify_order_id (only strategy - updated 2026-02-19)
+   - Trả 404 nếu không tìm thấy (không fallback sang order khác)
 5. Trả về order_number
 6. Extension generate VietQR EMVCo string
 7. Hiển thị QR code với native <s-qr-code> component

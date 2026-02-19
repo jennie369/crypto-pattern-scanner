@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 7.7: Kết Hợp Triangles Với GEM Zones | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-navy: #112250;
+            --accent-gold: #FFBD59;
+            --accent-cyan: #00F0FF;
+            --accent-purple: #6A5BFF;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0AEC0;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --bg-card-hover: rgba(255, 255, 255, 0.08);
+            --border-subtle: rgba(255, 255, 255, 0.1);
+            --gradient-gold: linear-gradient(135deg, #FFBD59 0%, #FFCF87 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--primary-navy);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--primary-navy);
+        }
+
+        /* HEADER */
+        .lesson-header {
+            padding: 2rem 1.5rem;
+            background: linear-gradient(180deg, rgba(255, 189, 89, 0.15) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border-subtle);
+            text-align: center;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--gradient-gold);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #000;
+            margin-bottom: 1rem;
+        }
+
+        .lesson-chapter {
+            font-size: 0.875rem;
+            color: var(--accent-gold);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .lesson-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* CONTENT */
+        .content-section {
+            padding: 0;
+        }
+
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            margin: 1rem;
+            padding: 1.5rem;
+            border-left: 4px solid var(--accent-gold);
+        }
+
+        .content-card h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--accent-gold);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .content-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.25rem 0 0.75rem 0;
+            color: var(--text-primary);
+        }
+
+        .content-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9375rem;
+        }
+
+        .content-card ul, .content-card ol {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .content-card li {
+            margin-bottom: 0.5rem;
+            font-size: 0.9375rem;
+        }
+
+        /* IMAGE PLACEHOLDER */
+        .image-placeholder {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.1) 100%);
+            border: 2px dashed var(--accent-gold);
+            border-radius: 0.75rem;
+            padding: 3rem 1.5rem;
+            text-align: center;
+            margin: 1.25rem 0;
+        }
+
+        .image-placeholder .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .image-placeholder .label {
+            font-size: 0.875rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        .image-placeholder .dimensions {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* COMBO CARD */
+        .combo-card {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin: 1rem 0;
+        }
+
+        .combo-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .combo-icon {
+            font-size: 2rem;
+        }
+
+        .combo-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .combo-subtitle {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        .combo-winrate {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: rgba(16, 185, 129, 0.2);
+            padding: 0.375rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--success-green);
+            margin-top: 0.75rem;
+        }
+
+        /* INFO BOX */
+        .info-box {
+            background: rgba(255, 189, 89, 0.1);
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .info-box.cyan {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: rgba(0, 240, 255, 0.3);
+        }
+
+        .info-box.cyan .info-box-title {
+            color: var(--accent-cyan);
+        }
+
+        .info-box-title {
+            font-weight: 600;
+            color: var(--accent-gold);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-box p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* HIGHLIGHT BOXES (New additions from Specs) */
+        .highlight-box {
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin: 1.25rem 0;
+            border-left: 4px solid;
+        }
+
+        .highlight-box.important {
+            background: rgba(255, 189, 89, 0.1);
+            border-color: var(--accent-gold);
+        }
+
+        .highlight-box.warning {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--error-red);
+        }
+
+        .highlight-box.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success-green);
+        }
+
+        .highlight-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .highlight-box.important .highlight-title { color: var(--accent-gold); }
+        .highlight-box.warning .highlight-title { color: var(--error-red); }
+        .highlight-box.success .highlight-title { color: var(--success-green); }
+
+        /* STEP CARDS */
+        .step-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .step-card {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .step-number {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #000;
+            flex-shrink: 0;
+        }
+
+        .step-content h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .step-content p {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* SUMMARY BOX */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 1rem;
+        }
+
+        .summary-box h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .summary-box li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.625rem;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        }
+
+        .summary-box li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent-gold);
+            font-weight: bold;
+        }
+
+        /* QUIZ SECTION */
+        .quiz-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            margin: 1.5rem 1rem;
+            padding: 1.5rem;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 0.25rem;
+        }
+
+        .quiz-header p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .quiz-question {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .quiz-option {
+            padding: 0.875rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+        }
+
+        .quiz-option:hover:not(.correct):not(.incorrect) {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-gold);
+        }
+
+        .quiz-option.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--success-green);
+            color: var(--success-green);
+        }
+
+        .quiz-option.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--error-red);
+            color: var(--error-red);
+        }
+
+        .quiz-result {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .quiz-result.show {
+            display: block;
+        }
+
+        .quiz-result.correct {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+        }
+
+        .quiz-result.incorrect {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-red);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .quiz-score.show {
+            display: block;
+        }
+
+        .score-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .retake-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-gold);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #000;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .retake-btn:hover {
+            transform: scale(1.02);
+        }
+
+        /* FOOTER */
+        .lesson-footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-logo .gem {
+            color: var(--accent-gold);
+        }
+
+        .footer-text {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 600px) {
+            .content-card {
+                margin: 0.75rem 0;
+                border-radius: 0;
+                border-left: 4px solid var(--accent-gold);
+                border-right: none;
+                border-top: none;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+
+            .summary-box,
+            .quiz-section {
+                margin: 1rem 0;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="header-badge">
+                <span>🔥</span>
+                <span>Tier 2 - Nâng Cao</span>
+            </div>
+            <div class="lesson-chapter">Chapter 7 - Advanced Triangles</div>
+            <h1 class="lesson-title">Bài 7.7: Kết Hợp Triangles Với GEM Zones</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 7.7</span></div>
+                <div class="meta-item"><span>⏱️</span><span>15 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>2 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- CONTENT -->
+        <main class="content-section">
+            
+            <!-- 1. OPENING HOOK -->
+            <div class="content-card">
+                <h2>1. Lời Mở Đầu: Bí Mật Đằng Sau Tỷ Lệ Thắng 78%</h2>
+                <p>Bạn đã bao giờ gặp tình huống này chưa: Bạn phát hiện một mô hình Tam Giác (Triangle Pattern) tuyệt đẹp trên biểu đồ. Mọi thứ có vẻ hoàn hảo. Giá phá vỡ (breakout) mạnh mẽ, bạn vội vàng vào lệnh vì sợ lỡ cơ hội (FOMO). Nhưng ngay khi khớp lệnh, giá quay đầu, cắt lỗ của bạn bị hit, và sau đó... nó lại đi đúng hướng bạn dự đoán ban đầu?</p>
+                <p>Cảm giác đó thật sự ức chế. Nhưng bạn không cô đơn. Hàng ngàn trader mất tiền mỗi ngày vì "cạm bẫy breakout" này. Vấn đề không nằm ở mô hình Tam Giác – chúng vẫn là một trong những cấu trúc giá mạnh mẽ nhất. Vấn đề nằm ở <strong>điểm vào lệnh (Entry Point)</strong> của bạn.</p>
+                <p>Trong bài học này, tôi sẽ chia sẻ với bạn một "vũ khí bí mật" của GEM Trading: sự kết hợp giữa <strong>Classic Triangles</strong> và <strong>GEM Zones (HFZ/LFZ)</strong>. Khi hai yếu tố này hội tụ, chúng ta không chỉ có một setup thông thường, mà là một "Super Setup" với tỷ lệ thắng lên đến 78% (dựa trên backtest 2,000 lệnh). Đến cuối bài, bạn sẽ biết chính xác làm thế nào để biến những mô hình cổ điển thành cỗ máy in tiền với độ chính xác của một sniper.</p>
+            </div>
+
+            <!-- 2. CONCEPT INTRODUCTION -->
+            <div class="content-card">
+                <h2>2. Khái Niệm Cốt Lõi: Sức Mạnh Của Sự Hợp Lưu (Confluence)</h2>
+                
+                <h3>A. Định Nghĩa</h3>
+                <p>Hãy bắt đầu với những điều cơ bản. Sự kết hợp Triangles và GEM Zones là kỹ thuật sử dụng các vùng HFZ (High Frequency Zone) hoặc LFZ (Low Frequency Zone) <strong>nằm ngay bên trong hoặc tại điểm breakout</strong> của mô hình Tam Giác để làm điểm vào lệnh chính xác.</p>
+                <p>Thay vì trade mù quáng theo mô hình hình học, chúng ta sử dụng bản chất Cung/Cầu của GEM Zones để xác nhận sức mạnh của mô hình đó.</p>
+
+                <h3>B. Giải Thích Quan Niệm Sai</h3>
+                <p>Bạn có thể đang nghĩ: "Chỉ cần trade breakout Tam Giác là đủ rồi, cần gì phải phức tạp hóa vấn đề?" Đó là suy nghĩ khiến 90% trader thua lỗ. Breakout giả (False Breakout) xảy ra thường xuyên hơn bạn tưởng do hành vi "quét thanh khoản" của Smart Money. Nếu chỉ dựa vào đường trendline mỏng manh, bạn đang đánh bạc chứ không phải trading.</p>
+
+                <h3>C. Tại Sao Điều Này Quan Trọng?</h3>
+                <p>Đây là lý do kỹ thuật này sẽ thay đổi kết quả trading của bạn:</p>
+                <ul>
+                    <li><strong>Xác suất thắng cao hơn:</strong> Bạn có "Double Confirmation" (Mô hình giá + Vùng Cung Cầu).</li>
+                    <li><strong>R:R (Risk/Reward) tốt hơn:</strong> Entry tại Zone cho phép đặt Stop Loss chặt chẽ hơn nhiều so với entry breakout thông thường.</li>
+                    <li><strong>Tránh FOMO:</strong> Bạn có một kế hoạch cụ thể để chờ đợi, thay vì đuổi theo giá.</li>
+                </ul>
+
+                <h3>D. Phép So Sánh</h3>
+                <p>Hãy nghĩ về nó theo cách này: Mô hình Tam Giác giống như một chiếc <strong>lò xo đang bị nén lại</strong> (tích lũy năng lượng). Còn GEM Zone chính là cái <strong>lẫy (trigger)</strong>. Bạn không muốn đứng trước lò xo khi nó nén (nguy hiểm), bạn muốn là người gạt cái lẫy để phóng nó đi đúng hướng.</p>
+
+                <div class="image-placeholder">
+                    <div class="icon">🔥</div>
+                    <div class="label">Hình 7.7.1: Minh họa Ascending Triangle kết hợp LFZ Entry</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+            </div>
+
+            <!-- 3. DEEP EXPLANATION -->
+            <div class="content-card">
+                <h2>3. Phân Tích Chuyên Sâu: Cơ Chế Hoạt Động</h2>
+
+                <h3>A. THE "WHAT" - Chúng Ta Đang Tìm Kiếm Gì?</h3>
+                <p>Chúng ta sẽ tập trung vào hai combo mạnh nhất:</p>
+                <ul>
+                    <li><strong>Combo 1: Ascending Triangle + LFZ (Vùng Mua):</strong> Trong mô hình Tam Giác Tăng, các đáy cao dần (Higher Lows) thường được hình thành bởi các pattern UPU (Up-Pause-Up) hoặc DPU nhỏ. Những vùng Pause này chính là LFZ.</li>
+                    <li><strong>Combo 2: Descending Triangle + HFZ (Vùng Bán):</strong> Trong mô hình Tam Giác Giảm, các đỉnh thấp dần (Lower Highs) thường tạo ra các pattern DPD (Down-Pause-Down) hoặc UPD. Những vùng Pause này chính là HFZ.</li>
+                </ul>
+
+                <h3>B. THE "WHY" - Tại Sao Nó Hiệu Quả?</h3>
+                <p>Tại sao sự kết hợp này lại mạnh mẽ đến vậy? Hãy nhìn sâu vào tâm lý thị trường:</p>
+                <p>Trong một <strong>Ascending Triangle</strong>, bên Mua đang trở nên hung hăng hơn, chấp nhận mua ở giá cao hơn (tạo Higher Lows). Trong khi đó, bên Bán đang cố thủ ở một mức giá cố định (Flat Resistance). Khi giá quay lại test đường trendline tăng, nó không chỉ chạm vào một đường kẻ vô hình, mà nó đang chạm vào một vùng giá trị (LFZ) nơi Smart Money đã từng gom hàng trước đó. </p>
+                <p>Lệnh chờ mua (Pending Buy Orders) tại LFZ sẽ kích hoạt, tạo ra lực đẩy mạnh mẽ. Khi giá phá vỡ kháng cự ngang, đó là lúc "phe Gấu" bỏ cuộc hoàn toàn và phải cover lệnh short, cộng thêm "phe Bò" lao vào mua breakout -> Giá bùng nổ (Explosion).</p>
+
+                <h3>C. THE "HOW" - Quy Trình Thực Hiện</h3>
+                <p>Đây là quy trình từng bước để bạn săn mồi:</p>
+
+                <div class="step-cards">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Bước 1: Nhận Diện Cấu Trúc Lớn</h4>
+                            <p>Tìm mô hình Tam Giác rõ ràng trên khung thời gian lớn (H4, D1). Yêu cầu tối thiểu 2 điểm chạm cho mỗi cạnh.</p>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Bước 2: Tìm "Zone Trong Tam Giác"</h4>
+                            <p>Quan sát cạnh nghiêng của tam giác (Rising Support hoặc Falling Resistance). Tìm các vùng Pause (nến thân nhỏ) tạo nên các điểm chạm đó. Đó là GEM Zones tiềm năng.</p>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Bước 3: Chờ Retest & Confirm</h4>
+                            <p>Đừng entry ngay. Đợi giá quay lại test Zone đó. Tìm tín hiệu xác nhận (Pinbar, Engulfing). Entry ngay khi nến xác nhận đóng cửa.</p>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Bước 4: Quản Lý Rủi Ro</h4>
+                            <p>SL đặt ngay sau Zone (an toàn hơn và ngắn hơn đặt sau đáy cũ). TP đặt theo chiều cao của tam giác (Measured Move).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight-box important">
+                    <div class="highlight-title">💡 Nguyên Tắc Vàng</div>
+                    <p><strong>Không có Zone = Không có Trade.</strong> Dù tam giác đẹp đến đâu, nếu không có một vùng HFZ/LFZ rõ ràng để tựa vào, đó chỉ là một hình vẽ 50/50. Zone chính là "bảo hiểm" cho lệnh trade của bạn.</p>
+                </div>
+            </div>
+
+            <!-- 4. REAL-WORLD EXAMPLES -->
+            <div class="content-card">
+                <h2>4. Ví Dụ Thực Tế: Từ Lý Thuyết Đến Lợi Nhuận</h2>
+
+                <h3>Ví Dụ 1: BTC/USDT - Ascending Triangle + LFZ (Thắng Lớn)</h3>
+                <p><strong>📅 Ngày:</strong> 15/10/2023 | <strong>⏱️ Timeframe:</strong> 4H | <strong>💰 Giá:</strong> ~$27,500</p>
+                
+                <p><strong>BỐI CẢNH:</strong> Bitcoin đang trong giai đoạn tích lũy sau một đợt tăng nhẹ. Giá tạo ra một đường kháng cự ngang cứng tại $28,000 và một loạt đáy cao dần.</p>
+                
+                <p><strong>SETUP:</strong></p>
+                <ul>
+                    <li>Mô hình Ascending Triangle hình thành rõ rệt.</li>
+                    <li>Tại lần chạm thứ 3 của đường trendline tăng, giá hình thành một pattern <strong>DPU (Down-Pause-Up)</strong> nhỏ ở khung H1, tạo ra một LFZ tại vùng $27,400 - $27,500.</li>
+                    <li>Volume giảm dần khi giá đi về phía cuối tam giác (dấu hiệu nén chuẩn).</li>
+                </ul>
+
+                <p><strong>EXECUTION:</strong></p>
+                <ul>
+                    <li><strong>Entry:</strong> Limit Buy tại $27,450 (Mép trên LFZ).</li>
+                    <li><strong>Stop Loss:</strong> $27,100 (Dưới LFZ và trendline). Risk = $350.</li>
+                    <li><strong>Target:</strong> $29,500 (Chiều cao tam giác cộng thêm). Reward = $2,050.</li>
+                    <li><strong>R:R:</strong> 1:5.8 (Tuyệt vời!)</li>
+                </ul>
+
+                <p><strong>KẾT QUẢ:</strong> Giá chạm LFZ, rút chân mạnh tạo nến Hammer, sau đó bật tăng phá vỡ $28,000 và bay thẳng lên $30,000 trong 3 ngày tiếp theo. Lệnh thắng lớn với mức rủi ro cực thấp.</p>
+
+                <div class="image-placeholder">
+                    <div class="icon">📈</div>
+                    <div class="label">Hình 7.7.2: Chart BTC/USDT H4 - Ascending Triangle + LFZ Entry</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 2rem 0;">
+
+                <h3>Ví Dụ 2: EUR/USD - Descending Triangle Fail (Bài Học Xương Máu)</h3>
+                <p><strong>📅 Bối cảnh:</strong> Downtrend mạnh, giá hình thành Descending Triangle. Trader vội vàng Short khi giá chạm trendline giảm nhưng <strong>không có HFZ</strong> hỗ trợ.</p>
+                <p><strong>LỖI SAI:</strong> Trader entry chỉ vì "chạm trendline". Thực tế, không có vùng cung (Supply Zone) nào ở đó. Smart Money không bảo vệ vùng giá này.</p>
+                <p><strong>KẾT QUẢ:</strong> Giá xuyên qua trendline, hit Stop Loss, sau đó tạo một HFZ mới cao hơn rồi mới sập. Bài học: Trendline chỉ là đường kẻ, Zone mới là nơi có tiền.</p>
+
+                <div class="image-placeholder">
+                    <div class="icon">📉</div>
+                    <div class="label">Hình 7.7.3: Ví dụ sai lầm khi trade không có Zone</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+
+            <!-- 5. COMMON QUESTIONS -->
+            <div class="content-card">
+                <h2>5. Hỏi Đáp & Tháo Gỡ Thắc Mắc</h2>
+
+                <div class="info-box">
+                    <div class="info-box-title">❓ Câu hỏi 1: Tại sao không trade breakout cho nhanh?</div>
+                    <p><strong>Trả lời:</strong> Trade breakout (phá vỡ) có 2 rủi ro lớn: 1) False Break (phá vỡ giả) - giá nhú lên rồi sập lại. 2) Slippage (trượt giá) - bạn vào lệnh ở giá rất xấu khi thị trường biến động mạnh. Trade tại Zone trong tam giác (Pre-breakout) hoặc chờ Retest Zone (Post-breakout) giúp bạn có giá tốt hơn và an toàn hơn nhiều.</p>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-box-title">❓ Câu hỏi 2: Nếu giá không về test Zone mà bay luôn thì sao?</div>
+                    <p><strong>Trả lời:</strong> Hãy bỏ qua (Skip). Thị trường luôn có cơ hội khác. Nguyên tắc của GEM Trading là "Bảo vệ vốn trước, kiếm lời sau". Đuổi theo giá (Chasing) là cách nhanh nhất để cháy tài khoản. Nếu lỡ nhịp trong tam giác, hãy đợi Breakout -> Tạo Zone Mới -> Retest Zone Mới rồi vào.</p>
+                </div>
+                
+                 <div class="info-box">
+                    <div class="info-box-title">❓ Câu hỏi 3: Khung thời gian nào tốt nhất cho chiến lược này?</div>
+                    <p><strong>Trả lời:</strong> H4 và D1 là tốt nhất vì độ nhiễu thấp và Zone rất đáng tin cậy. Tuy nhiên, bạn có thể áp dụng ở M15 nếu bạn là Day Trader, nhưng bắt buộc phải nhìn xu hướng H4 để không trade ngược dòng.</p>
+                </div>
+            </div>
+
+            <!-- 6. PRACTICAL APPLICATION -->
+            <div class="content-card">
+                <h2>6. Kế Hoạch Hành Động</h2>
+                <p>Kiến thức chỉ là sức mạnh tiềm năng. Hành động mới tạo ra kết quả. Đây là bài tập cho bạn trong tuần này:</p>
+
+                <div class="highlight-box success">
+                    <div class="highlight-title">🎯 Nhiệm Vụ Tuần Này</div>
+                    <p><strong>Bước 1:</strong> Mở biểu đồ của 5 cặp tiền chính hoặc Top 5 Coin.</p>
+                    <p><strong>Bước 2:</strong> Quét (Scan) tìm các mô hình Tam Giác đang hình thành trên khung H4.</p>
+                    <p><strong>Bước 3:</strong> Vẽ các GEM Zones (HFZ/LFZ) nằm ngay trên các cạnh của tam giác.</p>
+                    <p><strong>Bước 4:</strong> Đặt cảnh báo (Alert) khi giá chạm Zone. Đừng vào lệnh ngay, hãy quan sát phản ứng giá.</p>
+                    <p><strong>Bước 5:</strong> Ghi lại nhật ký: Có bao nhiêu lần giá chạm Zone trong tam giác và phản ứng đúng như dự kiến?</p>
+                </div>
+                
+                <p>Hãy nhớ, bạn không cần phải trade mọi setup. Chỉ cần chọn 1 setup đẹp nhất ("A+ Setup") với đầy đủ các yếu tố hợp lưu.</p>
+            </div>
+            
+            <!-- Breakout Section preserved and integrated -->
+            <div class="content-card">
+                <h2>🚀 Kỹ Thuật Nâng Cao: Breakout Retest Zone</h2>
+
+                <p>Đôi khi bạn sẽ bỏ lỡ điểm vào lệnh bên trong tam giác. Đừng lo, thị trường thường cho bạn cơ hội thứ hai.</p>
+
+                <h3>Chiến Thuật: Zone Retest Entry</h3>
+                <ul>
+                    <li><strong>Step 1:</strong> Đợi breakout xảy ra với <strong>volume đột biến</strong> (dấu hiệu Smart Money tham gia).</li>
+                    <li><strong>Step 2:</strong> Quan sát vùng giá vừa bị phá vỡ. Nó thường sẽ chuyển đổi vai trò (Kháng cự thành Hỗ trợ hoặc ngược lại) và tạo thành một <strong>LFZ/HFZ mới</strong>.</li>
+                    <li><strong>Step 3:</strong> Đợi giá pullback về Zone mới này.</li>
+                    <li><strong>Step 4:</strong> Entry khi có nến xác nhận tại Zone.</li>
+                </ul>
+
+                <div class="info-box cyan">
+                    <div class="info-box-title">🎯 Ví Dụ Cụ Thể</div>
+                    <p>Ascending Triangle breakout tại $50,000. Giá rally lên $52,000 rồi pullback nhẹ về $50,000. Tại đây, giá đi ngang 3 cây nến H1 (tạo Pause/Zone). Đây chính là LFZ mới. Entry LONG tại $50,100, SL $49,500.</p>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">🚀</div>
+                    <div class="label">Hình 7.7.4: Breakout + Retest Zone Entry</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+            
+             <!-- Confluence Scoring preserved -->
+            <div class="content-card">
+                <h2>📊 Bảng Chấm Điểm (Confluence Score)</h2>
+
+                <p>Đừng đoán mò. Hãy chấm điểm setup của bạn trước khi xuống tiền:</p>
+
+                <ul>
+                    <li><strong>+1 điểm:</strong> Triangle pattern rõ ràng trên H4/D1 (≥3 touches).</li>
+                    <li><strong>+1 điểm:</strong> GEM Zone (HFZ/LFZ) trùng khít với cạnh tam giác.</li>
+                    <li><strong>+1 điểm:</strong> Zone là Fresh (chưa bị test quá 2 lần).</li>
+                    <li><strong>+1 điểm:</strong> Volume giảm dần về phía cuối tam giác.</li>
+                    <li><strong>+1 điểm:</strong> Xu hướng khung lớn (Trend) ủng hộ hướng breakout.</li>
+                </ul>
+
+                <div class="info-box">
+                    <div class="info-box-title">🎯 Quyết Định Giao Dịch</div>
+                    <p><strong>3 điểm:</strong> Setup trung bình - Giảm volume hoặc bỏ qua.<br>
+                    <strong>4 điểm:</strong> Good setup - Trade với rủi ro tiêu chuẩn (1-2%).<br>
+                    <strong>5 điểm:</strong> A+ Setup - Tự tin vào lệnh, có thể hold lâu dài.</p>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- 7. SUMMARY & TRANSITION -->
+        <div class="summary-box">
+            <h3>📋 Tóm Tắt & Bước Tiếp Theo</h3>
+            <p>Chúng ta đã đi qua một chặng đường dài trong bài học này. Hãy điểm lại những ý chính:</p>
+            <ul>
+                <li>Tam Giác không chỉ là các đường kẻ, chúng là cấu trúc nén giá. GEM Zones là "ngòi nổ".</li>
+                <li><strong>Ascending Triangle + LFZ:</strong> Tìm điểm mua tại các đáy cao dần.</li>
+                <li><strong>Descending Triangle + HFZ:</strong> Tìm điểm bán tại các đỉnh thấp dần.</li>
+                <li>Luôn đợi <strong>Retest & Confirmation</strong>, không trade breakout mù quáng.</li>
+                <li>Sử dụng Bảng Chấm Điểm để lọc ra những cơ hội tốt nhất.</li>
+            </ul>
+            
+            <p><strong>🎯 BÀI HỌC LỚN NHẤT:</strong> Sự kiên nhẫn chờ đợi giá về đúng Zone trong Tam Giác sẽ mang lại tỷ lệ thắng cao hơn gấp đôi so với việc đua lệnh breakout.</p>
+
+            <p style="margin-top: 1rem;">Bạn đã nắm vững cách kết hợp Zones với mô hình giá cổ điển. Nhưng làm thế nào để biết một Zone có thực sự mạnh hay không khi nhìn vào <strong>đa khung thời gian</strong>? Bài tiếp theo "Nguyên Tắc Đa Khung Thời Gian Tier 2" sẽ là mảnh ghép cuối cùng để hoàn thiện kỹ năng của bạn.</p>
+        </div>
+
+        <!-- 8. QUIZ -->
+        <div class="quiz-section">
+            <div class="quiz-header">
+                <h3>🎯 Kiểm Tra Kiến Thức</h3>
+                <p>Hãy chắc chắn bạn đã hiểu bài trước khi đi tiếp</p>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <div class="question-text">Câu 1: Trong mô hình Ascending Triangle (Tam Giác Tăng), đâu là vị trí Entry an toàn và hiệu quả nhất theo GEM Method?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Tại các vùng LFZ (Pause) được tạo ra trên đường Rising Support (cạnh dưới).</div>
+                    <div class="quiz-option" data-index="1">Ngay khi giá vừa chạm vào đường kháng cự ngang (Flat Resistance).</div>
+                    <div class="quiz-option" data-index="2">Ngay khi có một cây nến xanh lớn phá vỡ kháng cự (Breakout).</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <div class="question-text">Câu 2: Tại sao chúng ta KHÔNG NÊN trade breakout ngay lập tức mà không có xác nhận?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Vì phí giao dịch cao hơn.</div>
+                    <div class="quiz-option" data-index="1">Vì thị trường luôn đi ngược lại đám đông.</div>
+                    <div class="quiz-option" data-index="2">Vì rủi ro False Break (phá vỡ giả) cao và điểm đặt Stop Loss thường quá xa (R:R thấp).</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-text">🎉 Bạn trả lời đúng <span id="correct-count">0</span>/2 câu!</div>
+                <button class="retake-btn" onclick="resetQuiz()">Làm Lại Quiz</button>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <div class="footer-logo">
+                <span class="gem">GEM</span> Trading Academy
+            </div>
+            <div class="footer-text">© 2026 GEM Trading Academy. All rights reserved.</div>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 2;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác! Entry tại LFZ cho điểm vào tốt hơn và SL ngắn hơn.';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy nhớ lại phần so sánh giữa Entry tại Zone và Breakout.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function resetQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                question.querySelector('.quiz-result').className = 'quiz-result';
+            });
+
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

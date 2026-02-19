@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 8.7: Đặt Stop Loss Đúng Cách - Tier 2</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        /* CONTENT CARDS & SECTIONS */
+        .content-card, .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+            overflow: hidden; /* contain floats/margins */
+        }
+        @media (max-width: 600px) {
+            .content-card, .section {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .card-header h2, .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            border-bottom: 1px solid rgba(255, 189, 89, 0.2);
+            padding-bottom: var(--space-md);
+        }
+
+        .section p, .card-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+            font-size: 1rem;
+        }
+
+        .section ul, .card-content ul, ul.styled-list {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .card-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); font-weight: 600; }
+
+        /* IMAGES */
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+            transition: transform 0.3s ease;
+        }
+        .image-placeholder:hover { transform: scale(1.01); }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        /* HIGHLIGHT BOXES */
+        .info-box, .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .info-box-title, .highlight-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: 8px; }
+        
+        .info-box.warning, .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+        }
+        .info-box.warning .info-box-title, .warning-box h4 { color: var(--error); }
+
+        .info-box.success, .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+        }
+        .info-box.success .info-box-title, .success-box h4 { color: var(--success); }
+
+        .info-box.definition, .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+        .info-box.definition .info-box-title, .definition-box h4 { color: var(--cyan); }
+
+        /* RULES GRID */
+        .rules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        .rule-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+        }
+        .rule-card.do { border-top: 3px solid var(--success); }
+        .rule-card.dont { border-top: 3px solid var(--error); }
+        
+        .rule-title { font-weight: 700; margin-bottom: var(--space-sm); font-size: 1.1rem; }
+        .rule-card.do .rule-title { color: var(--success); }
+        .rule-card.dont .rule-title { color: var(--error); }
+        .rule-desc { font-size: 0.95rem; color: var(--text-secondary); }
+
+        /* SUMMARY & QUIZ */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        .summary-box h3 { color: var(--success); margin-bottom: var(--space-lg); font-weight: 700; }
+        .summary-list li { display: flex; gap: 10px; margin-bottom: 12px; }
+        .summary-list li::before { content: "✓"; color: var(--success); font-weight: bold; }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        .quiz-title { color: var(--gold); margin-bottom: var(--space-lg); font-size: 1.5rem; font-weight: 700; }
+        .quiz-question { margin-bottom: var(--space-xl); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: var(--space-lg); }
+        .quiz-question:last-child { border-bottom: none; }
+        .question-text { font-weight: 600; margin-bottom: var(--space-md); font-size: 1.1rem; }
+        .quiz-option {
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); }
+        .quiz-option.correct { background: rgba(0, 200, 83, 0.2); border-color: var(--success); color: var(--success); }
+        .quiz-option.incorrect { background: rgba(255, 82, 82, 0.2); border-color: var(--error); color: var(--error); }
+        .quiz-result { margin-top: 10px; font-weight: 600; display: none; }
+        .quiz-result.show { display: block; }
+
+        .highlight-red { color: var(--error); font-weight: 600; }
+        .highlight-green { color: var(--success); font-weight: 600; }
+        
+        .lesson-footer { text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid var(--glass-border); color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <span class="header-badge">🛡️ Tier 2 - Bài 8.7</span>
+            <h1 class="lesson-title">Đặt Stop Loss Đúng Cách</h1>
+            <p class="lesson-subtitle">Nghệ thuật bảo vệ vốn và sống sót trong thị trường</p>
+        </header>
+
+        <!-- 1. OPENING HOOK -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>1. Mở Đầu: Chiếc Phanh Cứu Mạng</h2>
+            </div>
+            <div class="card-content">
+                <p>Bạn đã bao giờ rơi vào tình huống này chưa: Bạn vào một lệnh, giá đi ngược lại một chút. Bạn nghĩ: "Chắc nó sẽ hồi lại thôi, mình dời Stop Loss ra xa một chút cho an toàn". Rồi giá lại giảm thêm. Bạn lại dời Stop Loss thêm lần nữa. Cuối cùng, một lệnh thua nhỏ biến thành một thảm họa cháy tài khoản?</p>
+                
+                <p>Nếu câu trả lời là "Có", thì bạn không cô đơn. Đó là cái bẫy tâm lý phổ biến nhất mà mọi trader mới đều mắc phải. Nhưng hôm nay, tôi muốn bạn thay đổi hoàn toàn tư duy về Stop Loss (Cắt lỗ).</p>
+                
+                <p>Trong GEM Trading, chúng tôi không coi Stop Loss là một "thất bại". Chúng tôi coi đó là <strong>Chi phí kinh doanh (Cost of Doing Business)</strong>. Giống như bạn mở quán cà phê phải trả tiền điện nước, trading phải có chi phí cắt lỗ để bảo vệ "cửa hàng" (tài khoản) của bạn không bị phá sản.</p>
+                
+                <p>Bài học này sẽ không chỉ dạy bạn đặt Stop Loss ở đâu, mà còn giải thích TẠI SAO nó phải ở đó, và làm thế nào để biến Stop Loss thành vũ khí bảo vệ lợi nhuận của bạn.</p>
+            </div>
+        </div>
+
+        <!-- 2. CONCEPT INTRODUCTION -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>2. Khái Niệm: Giải Phẫu Một Stop Loss Hoàn Hảo</h2>
+            </div>
+            <div class="card-content">
+                <p>Trước khi đi vào chi tiết, hãy định nghĩa lại Stop Loss trong hệ thống GEM Frequency.</p>
+
+                <div class="info-box definition">
+                    <div class="info-box-title">ℹ️ Định Nghĩa Stop Loss (SL)</div>
+                    <p><strong>Stop Loss</strong> là mức giá được xác định trước, nơi bạn thừa nhận rằng nhận định của mình đã SAI và chấp nhận thoát khỏi thị trường để bảo toàn vốn. Trong GEM Trading, SL luôn được đặt dựa trên cấu trúc của Zone (HFZ/LFZ), không phải dựa trên cảm tính hay số tiền bạn muốn mất.</p>
+                </div>
+
+                <p>Có hai thành phần chính bạn cần nhớ khi đặt SL:</p>
+                <ul class="styled-list">
+                    <li><strong>Distal Line (Đường Xa):</strong> Là biên xa nhất của Zone so với giá hiện tại (Đỉnh cao nhất của HFZ hoặc Đáy thấp nhất của LFZ).</li>
+                    <li><strong>Buffer (Vùng Đệm):</strong> Một khoảng cách nhỏ cộng thêm vào Distal Line để tránh bị "quét râu" (Stop Hunt) do biến động nhiễu của thị trường.</li>
+                </ul>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x350/112250/EF4444?text=Anatomy+of+Stop+Loss:+Distal+Line+%2B+Buffer" alt="Giải phẫu Stop Loss: Distal Line + Buffer">
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. DEEP DIVE -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>3. Phân Tích Chuyên Sâu: Tại Sao Phải "Ngoài Zone"?</h2>
+            </div>
+            <div class="card-content">
+                <p>Tại sao GEM Trading lại có quy tắc bất di bất dịch: <strong>"SL phải nằm ngoài Zone + Buffer"</strong>? Tại sao không đặt ngay tại mép Zone cho tiết kiệm?</p>
+
+                <h3>A. Cơ Chế "Thở" Của Thị Trường</h3>
+                <p>Thị trường không bao giờ di chuyển theo đường thẳng. Nó luôn dao động, co giãn như một nhịp thở. Tại các vùng HFZ/LFZ, Smart Money thường thực hiện các động tác "kiểm tra thanh khoản" (Liquidity Test). Họ có thể đẩy giá vượt qua mép Zone một chút để khớp nốt các lệnh chờ hoặc rũ bỏ các trader yếu tay trước khi đảo chiều thật sự.</p>
+                <p>Nếu bạn đặt SL quá sát mép Zone, bạn sẽ trở thành nạn nhân của những cú "quét râu" này. Bạn bị đá ra khỏi lệnh đúng đáy/đỉnh, và sau đó nhìn giá chạy đúng hướng mình dự đoán. Đó là cảm giác đau đớn nhất trong trading.</p>
+
+                <h3>B. Công Thức Tính Buffer (Vùng Đệm)</h3>
+                <p>Làm thế nào để tính Buffer một cách khoa học? Chúng ta không đoán mò. Dưới đây là công thức chuẩn:</p>
+                
+                <div class="info-box success">
+                    <div class="info-box-title">📌 Công Thức Buffer Chuẩn</div>
+                    <p><strong>Buffer = 0.5% x Giá Distal Line</strong> (Đối với Crypto)</p>
+                    <p>Ví dụ: Bạn đang canh Short tại HFZ, Distal Line (đỉnh Zone) là $50,000.</p>
+                    <p>Buffer = $50,000 x 0.005 = $250.</p>
+                    <p><strong>Stop Loss = $50,000 + $250 = $50,250.</strong></p>
+                </div>
+
+                <p><em>Lưu ý: Với các cặp Forex, Buffer thường được tính bằng pips (ví dụ: 5-10 pips + spread). Với Crypto biến động mạnh, 0.5% là con số an toàn để tránh nhiễu.</em></p>
+
+                <h3>C. Khái Niệm Nâng Cao: MPL (Maximum Pain Level)</h3>
+                <p>Trong phần Advanced Concepts, chúng ta đã nhắc đến <strong>MPL (Maximum Pain Level)</strong>. Đây là mức giá "tối hậu" mà nếu giá vượt qua đó, toàn bộ cấu trúc Zone coi như bị phá vỡ hoàn toàn.</p>
+                <ul class="styled-list">
+                    <li>Trong mô hình <strong>Quasimodo (QM)</strong>, MPL chính là đỉnh đầu (Head) đối với lệnh Short, hoặc đáy đầu (Head) đối với lệnh Long.</li>
+                    <li>Đặt SL sau MPL là cách an toàn nhất, nhưng đôi khi nó làm khoảng cách SL quá xa, ảnh hưởng đến tỷ lệ R:R (Risk:Reward).</li>
+                    <li>Vì vậy, kỹ năng "Refine Zone" (thu hẹp Zone) trên khung thời gian nhỏ là cực kỳ quan trọng để có được điểm MPL gần hơn.</li>
+                </ul>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x400/112250/10B981?text=SL+Below+Zone+%2B+Buffer+vs+MPL" alt="So sánh SL thường và MPL SL">
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. REAL WORLD EXAMPLES -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>4. Ví Dụ Thực Tế: Tính Toán Stop Loss</h2>
+            </div>
+            <div class="card-content">
+                <h3>Ví Dụ 1: Setup LONG BTC/USDT (Mua lên)</h3>
+                <p><strong>Bối cảnh:</strong> Bạn xác định được một LFZ (Vùng Mua) trên khung 4H.</p>
+                <ul class="styled-list">
+                    <li><strong>Proximal Line (Mép trên - Entry):</strong> $42,500</li>
+                    <li><strong>Distal Line (Mép dưới - Đáy Zone):</strong> $42,000</li>
+                </ul>
+                <p><strong>Tính toán SL:</strong></p>
+                <p>Bạn không đặt SL tại $42,000. Bạn cần cộng thêm Buffer (trừ đi vì là lệnh Long).</p>
+                <p>Buffer = $42,000 x 0.5% = $210.</p>
+                <p><strong>Stop Loss Chính Xác = $42,000 - $210 = $41,790.</strong></p>
+                <p>Tại sao? Vì nếu giá rớt xuống $41,900 (quét qua đáy Zone một chút) rồi bật lên, lệnh của bạn vẫn an toàn.</p>
+
+                <h3>Ví Dụ 2: Setup SHORT ETH/USDT (Bán xuống)</h3>
+                <p><strong>Bối cảnh:</strong> Bạn xác định được một HFZ (Vùng Bán) trên khung 1H.</p>
+                <ul class="styled-list">
+                    <li><strong>Proximal Line (Mép dưới - Entry):</strong> $2,450</li>
+                    <li><strong>Distal Line (Mép trên - Đỉnh Zone):</strong> $2,500</li>
+                </ul>
+                <p><strong>Tính toán SL:</strong></p>
+                <p>Bạn cần cộng thêm Buffer vào Distal Line.</p>
+                <p>Buffer = $2,500 x 0.5% = $12.5.</p>
+                <p><strong>Stop Loss Chính Xác = $2,500 + $12.5 = $2,512.5.</strong></p>
+                
+                <div class="info-box warning">
+                    <div class="info-box-title">⚠️ Quan Trọng</div>
+                    <p>Luôn làm tròn số SL ra xa một chút cho các mức giá chẵn (Psychological Levels). Ví dụ: Nếu tính ra $2,500, hãy đặt $2,502 để tránh bị khớp đúng số tròn.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. MISTAKES TO AVOID -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>5. Các Sai Lầm "Chết Người" Khi Đặt SL ☠️</h2>
+            </div>
+            <div class="card-content">
+                <div class="rules-grid">
+                    <div class="rule-card dont">
+                        <div class="rule-title">❌ Sai Lầm 1: Mở Rộng Stop Loss</div>
+                        <div class="rule-desc">Đây là tội lỗi lớn nhất. Khi giá đến gần SL, bạn dời nó ra xa vì "hy vọng" giá sẽ đảo chiều. Kết quả: Khoản lỗ nhỏ biến thành khoản lỗ khổng lồ. <strong>Tuyệt đối cấm!</strong></div>
+                    </div>
+                    <div class="rule-card dont">
+                        <div class="rule-title">❌ Sai Lầm 2: Đặt SL Quá Chặt</div>
+                        <div class="rule-desc">Vì muốn đánh volume lớn, bạn ép SL sát vào giá entry (ví dụ chỉ cách 0.1%). Kết quả: Bạn đúng hướng nhưng bị đá ra khỏi lệnh trước khi giá chạy. Hãy tôn trọng "nhịp thở" của thị trường.</div>
+                    </div>
+                    <div class="rule-card dont">
+                        <div class="rule-title">❌ Sai Lầm 3: Dời SL Về Entry Quá Sớm</div>
+                        <div class="rule-desc">Vừa thấy xanh 1 chút đã dời SL về hòa vốn (Breakeven). Giá quay lại test entry (retest) rồi mới bay, bạn mất lệnh ăn. Chỉ dời SL khi giá đã chạy được ít nhất 1:1 R:R.</div>
+                    </div>
+                    <div class="rule-card dont">
+                        <div class="rule-title">❌ Sai Lầm 4: "Mental Stop" (Cắt Lỗ Bằng Mồm)</div>
+                        <div class="rule-desc">Bạn tự nhủ "xuống đó mình sẽ cắt tay". Nhưng khi giá xuống đó, bạn bị tê liệt (freeze) và không dám bấm nút. Luôn đặt Hard Stop Loss trên sàn.</div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x350/112250/FFBD59?text=Avoid+Widening+Stop+Loss" alt="Minh họa việc không mở rộng SL">
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. APPLICATION -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>6. Ứng Dụng: Quy Trình Trailing Stop (Dời Lỗ)</h2>
+            </div>
+            <div class="card-content">
+                <p>Stop Loss không chỉ để cắt lỗ, nó còn dùng để <strong>bảo vệ lợi nhuận</strong>. Kỹ thuật này gọi là Trailing Stop. Dưới đây là quy trình chuẩn của GEM:</p>
+
+                <ul class="styled-list">
+                    <li><strong>Giai đoạn 1 (Vùng Nguy Hiểm):</strong> Giá chưa chạm TP1. <strong>GIỮ NGUYÊN SL</strong>. Không đụng vào nó.</li>
+                    <li><strong>Giai đoạn 2 (An Toàn):</strong> Giá chạm TP1 (thường là R:R 1:1). Chốt 50% lợi nhuận. <strong>Dời SL về Entry (Breakeven)</strong>. Lúc này trade của bạn là Free Trade (không còn rủi ro).</li>
+                    <li><strong>Giai đoạn 3 (Gồng Lời):</strong> Giá tiếp tục chạy và tạo cấu trúc đỉnh/đáy mới. Dời SL theo sau các đáy mới (với lệnh Long) hoặc đỉnh mới (với lệnh Short).</li>
+                </ul>
+
+                <div class="info-box success">
+                    <div class="info-box-title">💡 Mẹo Nhỏ</div>
+                    <p>Khi dời SL về Entry, hãy cộng thêm một chút phí giao dịch (phí sàn) để đảm bảo nếu bị hit, bạn vẫn hòa vốn thực sự chứ không bị lỗ phí.</p>
+                </div>
+                
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x350/112250/FFBD59?text=Trailing+Stop+Example" alt="Ví dụ về Trailing Stop">
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. SUMMARY -->
+        <div class="summary-box">
+            <h3>📋 Tổng Kết Bài Học</h3>
+            <ul class="summary-list">
+                <li>Stop Loss là <strong>chi phí kinh doanh</strong> bắt buộc, không phải sự thất bại.</li>
+                <li>Công thức chuẩn: <strong>SL = Distal Line + Buffer (0.5%)</strong>.</li>
+                <li>Mục tiêu của Buffer là tránh bị Stop Hunt bởi biến động nhiễu.</li>
+                <li><strong>KHÔNG BAO GIỜ</strong> mở rộng SL khi đang thua.</li>
+                <li>Chỉ dời SL về Entry (Breakeven) sau khi đã chốt lời một phần (TP1).</li>
+                <li>Luôn xác định SL <strong>TRƯỚC</strong> khi vào lệnh. Nếu SL quá xa khiến R:R xấu (< 1:2), hãy bỏ qua lệnh đó.</li>
+            </ul>
+        </div>
+
+        <!-- 8. QUIZ SECTION -->
+        <div class="quiz-section">
+            <h3 class="quiz-title">📝 Kiểm Tra Kiến Thức</h3>
+
+            <div class="quiz-question" data-correct="0">
+                <p class="question-text">1. Bạn đang setup một lệnh LONG. LFZ có đáy thấp nhất (Distal Line) là $42,000. Bạn nên đặt Stop Loss ở đâu để an toàn nhất?</p>
+                <button class="quiz-option" data-index="0">Khoảng $41,790 (Dưới LFZ + Buffer 0.5%).</button>
+                <button class="quiz-option" data-index="1">Ngay tại $42,000 (Tiết kiệm pip).</button>
+                <button class="quiz-option" data-index="2">Tại $42,250 (Giữa Zone).</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <p class="question-text">2. Hành động nào sau đây là "Tối Kỵ" (Tuyệt đối cấm) trong quản lý Stop Loss?</p>
+                <button class="quiz-option" data-index="0">Dời SL về Entry khi đã có lợi nhuận.</button>
+                <button class="quiz-option" data-index="1">Dời SL ra xa hơn khi giá đang tiến gần đến mức cắt lỗ ban đầu.</button>
+                <button class="quiz-option" data-index="2">Đặt SL dựa trên cấu trúc Zone thay vì số tiền cố định.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <p class="question-text">3. Buffer (Vùng đệm) có tác dụng gì?</p>
+                <button class="quiz-option" data-index="0">Giúp tăng lợi nhuận lên cao nhất.</button>
+                <button class="quiz-option" data-index="1">Làm cho lệnh dễ khớp hơn.</button>
+                <button class="quiz-option" data-index="2">Tránh bị thị trường "quét râu" (Stop Hunt) do biến động nhiễu tại rìa Zone.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-number"><span id="correct-count">0</span>/3</div>
+                <div class="score-label">Câu trả lời đúng</div>
+                <button class="retake-btn" onclick="retakeQuiz()">Làm Lại Quiz</button>
+            </div>
+        </div>
+
+        <footer class="lesson-footer">
+            <p>GEM Trading Academy - Tier 2</p>
+            <p>© 2025 GEM Frequency Trading Method</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác! Bạn đã nắm vững nguyên tắc bảo vệ vốn.';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy nhớ: SL luôn phải có Buffer để tránh bị quét.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function retakeQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => opt.classList.remove('correct', 'incorrect'));
+                question.querySelector('.quiz-result').className = 'quiz-result';
+            });
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+
+</body>
+</html>

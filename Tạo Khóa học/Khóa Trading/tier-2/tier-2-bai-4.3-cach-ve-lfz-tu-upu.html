@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.3: Cách Vẽ LFZ Từ UPU | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--success), var(--cyan)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); color: var(--navy-dark); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .section > ul, .section > ol { color: var(--text-secondary); padding-left: 1.5em; margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > ul, .section > ol { padding-left: calc(16px + 1.5em); padding-right: 16px; } }
+        .section li { margin-bottom: var(--space-sm); }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .warning-box { background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05)); border: 1px solid rgba(156, 6, 18, 0.4); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .warning-box { border: none; border-radius: 0; border-left: 4px solid var(--burgundy); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .warning-box-title { font-weight: 700; color: var(--burgundy-light); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .summary-box { background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02)); border: 2px solid var(--success); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--success); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--success); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--success); font-weight: 700; }
+
+        .quiz-section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; padding: 0; margin-top: 0; border-top: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: var(--space-lg) 16px var(--space-md); margin-bottom: 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-question { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin-bottom: 0; border-bottom: 1px solid var(--glass-border); } }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; font-weight: 700; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); line-height: 1.6; }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        @media (max-width: 600px) { .quiz-options { gap: 1px; background: var(--glass-border); margin-left: calc(-16px - 4px); margin-right: -16px; } }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .quiz-option { border: none; border-radius: 0; border-left: 4px solid transparent; padding: var(--space-md) 16px; } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); background: var(--bg-card); }
+        @media (max-width: 600px) { .quiz-option:hover:not(.disabled) { border-left-color: var(--gold); } }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.correct { border-left-color: var(--success) !important; } }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.incorrect { border-left-color: var(--error) !important; } }
+        .quiz-option.disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-marker { width: 28px; height: 28px; min-width: 28px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; }
+        .quiz-option.incorrect .option-marker { background: var(--error); border-color: var(--error); color: white; }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--space-sm); display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-buttons { padding: var(--space-lg) 16px; } }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>📈</span>
+                <span>Bullish Pattern</span>
+            </div>
+            <div class="lesson-chapter">Chapter 4 - UPU Pattern Mastery</div>
+            <h1 class="lesson-title">Cách Vẽ LFZ Từ UPU</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 4.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>15 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <section class="section">
+            <h2 class="section-title"><span>👋</span> Lời Mở Đầu: Đừng Để Lỡ Chuyến Tàu</h2>
+            <p>Chào bạn, tôi rất vui khi thấy bạn đã đi tới đây. Trong các bài học trước, bạn đã học cách nhận diện mô hình <strong>Up-Pause-Up (UPU)</strong> - một trong những dấu chân rõ nét nhất của Smart Money trên thị trường. Nhưng tôi muốn hỏi bạn một câu chân thành: Bạn đã bao giờ thấy một pattern UPU cực đẹp, giá tăng vọt sau vùng Pause, bạn vội vàng đặt một lệnh mua ở đâu đó "trong vùng giá đó" và rồi nhìn giá quay lại, không chạm tới lệnh của bạn chỉ vài giá, rồi bay vọt lên hàng nghìn giá chưa?</p>
+            
+            <p>Hoặc tệ hơn, bạn đặt lệnh mua ngay khi giá vừa quay lại, nhưng giá lại "xuyên táo" qua vị trí đó, quét Stop Loss của bạn rồi mới thực sự tăng mạnh? Tôi tin rằng bạn đã ít nhất một lần nếm trải cảm giác cay đắng đó. Đó không phải vì bạn đoán sai xu hướng, mà là vì bạn <strong>vẽ vùng zone sai cách</strong>.</p>
+
+            <p>Trong trading, sự khác biệt giữa một triệu phú và một người cháy tài khoản đôi khi chỉ nằm ở vài pixel trên biểu đồ. Bài học hôm nay không chỉ là về việc "vẽ một cái hộp màu xanh". Tôi sẽ dạy bạn cách "đọc vị" chính xác nơi cá mập đang để lại hàng tỷ đô la lệnh chờ mua. Khi bạn vẽ được một <strong>LFZ (Low Frequency Zone)</strong> chuẩn xác, bạn không chỉ đang trading, bạn đang đặt bẫy cùng với những tay chơi lớn nhất thị trường.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Mục Tiêu Bài Học</div>
+                <p>Kết thúc bài giảng chuyên sâu này, tôi muốn bạn đạt được 3 kỹ năng cốt tử:
+                <ul>
+                    <li><strong>Làm chủ kỹ thuật vẽ LFZ:</strong> Không còn cảm tính, mọi đường kẻ của bạn phải có cơ sở logic.</li>
+                    <li><strong>Xác định điểm vàng Entry & Stop Loss:</strong> Tối ưu hóa tỷ lệ R:R tối thiểu 1:2.5 cho mỗi lệnh.</li>
+                    <li><strong>Hiểu về "Tâm lý vùng giá":</strong> Biết tại sao giá lại phản ứng tại đỉnh zone mà không phải đáy zone.</li>
+                </ul>
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🧠</span> Khái Niệm: LFZ Là Gì Và Tại Sao UPU Lại Tạo Ra Nó?</h2>
+            <p>Để tôi giải thích cho bạn rõ hơn về bản chất của <strong>LFZ (Low Frequency Zone)</strong>. Trong hệ thống GEM Frequency, LFZ không đơn thuần là "hỗ trợ". Hãy tưởng tượng nó giống như một kho chứa hàng khổng lồ của các ngân hàng lớn.</p>
+
+            <p>Khi mô hình UPU hình thành, Phase 1 (Up) cho thấy Smart Money bắt đầu gom hàng. Nhưng họ không bao giờ gom hết tất cả trong một lần - vì điều đó sẽ làm giá tăng quá nhanh và họ phải mua với giá đắt. Họ cần một khoảng nghỉ - đó chính là <strong>Phase 2 (Pause)</strong>. Tại vùng Pause này, các tổ chức lớn sẽ đặt hàng nghìn lệnh chờ mua (Limit Orders) ở các mức giá cụ thể. Khi giá bùng nổ lên Phase 3 (Up), nó xác nhận rằng vùng Pause đó chính là nơi "tích lũy năng lượng" cực đại.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Định Nghĩa Chuẩn GEM</div>
+                <p><strong>LFZ (Low Frequency Zone):</strong> Là vùng giá được tạo ra từ Phase 2 (Pause) của mô hình UPU hoặc DPU. Đây là vùng có sự mất cân bằng cung-cầu nghiêm trọng, nơi <strong>Lực Mua (Demand) vượt xa Lực Bán (Supply)</strong>. Khi giá quay lại đây lần đầu tiên (First Time Back), xác suất giá bật tăng trở lại là rất cao do các lệnh chờ chưa khớp còn tồn đọng.</p>
+            </div>
+
+            <p>Bạn có thể đang thắc mắc: "Tại sao gọi là Low Frequency (Tần số thấp)?". Đơn giản thôi, vì tại đây giá không "dao động" nhiều lần. Nó chạm vào và bật đi ngay lập tức với tốc độ cực nhanh. Nếu giá cứ lờ đờ ở đó quá lâu, đó không còn là LFZ mạnh nữa.</p>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Sai Lầm Kinh Điển</div>
+                <p>Hầu hết trader nhầm lẫn LFZ với vùng tích lũy (Accumulation) dài hạn. Nhớ kỹ lời tôi: LFZ trong UPU phải là một vùng <strong>Pause ngắn gọn (1-5 nến)</strong>. Nếu vùng nghỉ quá dài, dòng tiền đã bị phân tán, và vùng đó sẽ mất đi "tần số" đặc trưng của Smart Money.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📐</span> Deep Dive: Quy Trình 4 Bước Vẽ LFZ "Bất Bại"</h2>
+            <p>Bây giờ, hãy cầm chuột lên và cùng tôi đi qua từng bước một. Đừng bỏ qua bất kỳ bước nào, vì mỗi đường kẻ đều mang theo rủi ro và lợi nhuận của bạn.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Bước 1: Xác Thực Pattern UPU Hoàn Chỉnh</div>
+                        <div class="flow-step-desc">Đây là sai lầm số 1 của người mới: Vẽ zone khi giá mới đang ở Phase 2. Tuyệt đối không! Bạn chỉ được phép vẽ LFZ khi và chỉ khi <strong>Phase 3 đã hình thành dứt khoát</strong> (giá tăng mạnh vượt đỉnh Phase 2 ít nhất 2%). Phase 3 chính là bằng chứng xác thực rằng phe Mua đã thắng thế hoàn toàn tại vùng Pause.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Bước 2: Xác Định Biên Trên (Giá Entry)</div>
+                        <div class="flow-step-desc">Đường kẻ đầu tiên của bạn sẽ đi qua <strong>Giá cao nhất (High)</strong> của toàn bộ cụm nến trong vùng Pause. Tôi gọi đây là "Tiền tuyến". Tại sao lại là đỉnh zone? Vì khi giá giảm từ trên xuống (Pullback), đỉnh zone chính là nơi đầu tiên nó va phải bức tường lệnh chờ mua của cá mập. Đừng tham rẻ mà đợi ở giữa zone, bạn sẽ lỡ tàu 70% số lần trade đấy!</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Bước 3: Xác Định Biên Dưới (Giá Stop Loss Gốc)</div>
+                        <div class="flow-step-desc">Đường kẻ thứ hai đi qua <strong>Giá thấp nhất (Low)</strong> của vùng Pause. Lưu ý: Phải bao gồm cả râu nến (Wicks). Râu nến chính là bằng chứng của việc Smart Money đã quét sạch thanh khoản trước khi đẩy giá lên. Đây là giới hạn cuối cùng của zone. Nếu giá đóng cửa dưới đường này, toàn bộ setup UPU của bạn bị vô hiệu hóa (Invalidated).</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Bước 4: Đóng Hộp Và Đặt Buffer</div>
+                        <div class="flow-step-desc">Sử dụng công cụ Rectangle để nối hai đường kẻ trên thành một vùng diện tích. Đừng quên quy tắc <strong>Buffer 0.5%</strong>. Stop Loss thực tế của bạn phải nằm dưới biên dưới một khoảng bằng 0.5% giá trị tài sản. Điều này bảo vệ bạn khỏi các cú quét râu (Stop Hunt) của sàn giao dịch hoặc các "cá con" đang cố gắng bắt đáy giống bạn.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.3/3.3-1.webp" alt="LFZ Drawing Steps">
+            </div>
+            <div class="image-caption">Hình 1: Minh họa trực quan 4 bước từ nhận diện Phase đến khi hình thành Rectangle LFZ hoàn chỉnh</div>
+
+            <h3 class="section-title" style="font-size: 1.2rem; margin-top: 2rem;">📍 Chi Tiết: Entry và Stop Loss</h3>
+            <p>Hiểu rõ cách xác định Entry và Stop là chìa khóa để vẽ zone chính xác. Nhiều trader mới thắc mắc: "Tại sao entry ở đỉnh zone mà không phải giữa zone?" - hãy cùng tìm hiểu sâu hơn về cơ chế này.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Giá Entry (Đỉnh Zone) - Tại Sao?</div>
+                <p>
+                    <strong>Đỉnh Zone = Giá cao nhất của vùng Pause</strong><br><br>
+                    Khi giá retest từ trên xuống (pullback), đây là điểm đầu tiên giá sẽ chạm. Entry tại đỉnh zone giúp bạn:<br>
+                    • <strong>Có R:R tốt hơn:</strong> Khoảng cách đến SL ngắn, khoảng cách đến TP dài.<br>
+                    • <strong>Fill order nhanh hơn:</strong> Giá chạm đỉnh zone thường xuyên hơn chạm giữa hay đáy zone.<br>
+                    • <strong>Xác nhận nhanh:</strong> Nếu giá không phản ứng tại đỉnh zone, bạn biết ngay zone yếu và có thể thoát lệnh sớm.<br><br>
+                    <strong>Lưu ý:</strong> Một số trader entry tại mid-zone (giữa đỉnh và đáy) để tăng xác suất khớp lệnh trong các thị trường biến động cực mạnh, nhưng hãy nhớ R:R của bạn sẽ bị sụt giảm đáng kể.
+                </p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🛑</span> Giá Stop Loss (Đáy Zone + Buffer)</div>
+                <p>
+                    <strong>Stop Loss = Đáy Zone - 0.5% Buffer</strong><br><br>
+                    Tại sao cần buffer 0.5%? Vì thị trường crypto rất volatile và đầy rẫy các bẫy thanh khoản:<br>
+                    • <strong>Spike xuống:</strong> Thường có những cây nến bóng dài quét stop của retail trước khi thực sự tăng.<br>
+                    • <strong>Slippage:</strong> Khi stop loss được kích hoạt ở các vùng thanh khoản thấp, giá thực tế có thể khác giá bạn đặt.<br>
+                    • <strong>Wicks:</strong> Các bóng nến có thể xuyên qua đáy zone 0.3-0.5% rồi quay lại ngay lập tức.<br><br>
+                    <strong>Công thức:</strong> Stop Loss = Low của Phase 2 × (1 - 0.005)<br>
+                    <strong>Ví dụ:</strong> Low = $46,800 → SL = $46,800 × 0.995 = $46,566.
+                </p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Ví Dụ So Sánh: ETH 20/11/2023</div>
+                <p>Hãy xem sự khác biệt giữa hai tư duy entry: ETH tạo LFZ tại $1,950-$1,980. Trader A entry tại đỉnh $1,980, SL $1,940. Trader B entry tại mid $1,965, SL $1,940. Cả hai TP tại $2,050. <br>
+                - <strong>Trader A:</strong> Risk $40, Reward $70, R:R = 1:1.75. <br>
+                - <strong>Trader B:</strong> Risk $25, Reward $85, R:R = 1:3.4. <br>
+                <strong>Kết quả:</strong> Trader A được fill 100% vị thế và chốt lời thành công, còn Trader B chỉ fill 70% lệnh (giá chỉ chạm mép trên rồi bay luôn không chạm tới mid). Đây là bài học về việc chọn xác suất khớp lệnh hay chọn tỷ lệ R:R cao.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.3/3.3-2.webp" alt="Entry and Stop">
+            </div>
+            <div class="image-caption">Hình 2: Vị trí Entry (đỉnh zone) và Stop Loss (đáy zone - buffer) trong LFZ</div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📏</span> Quy Luật Độ Dày: "Goldilocks Zone"</h2>
+            <p>Đây là phần mà nhiều trader tự học thường bỏ qua, nhưng nó lại là yếu tố quyết định bạn là "thợ săn" hay là "con mồi". Độ dày của zone không được quá lớn cũng không được quá nhỏ.</p>
+
+            <div class="formula-box">
+                <div class="formula-title">⚖️ Công thức tính độ dày (%)</div>
+                <p style="font-size: 1.2rem; font-weight: 800; color: var(--gold);">Thickness = (Đỉnh Zone - Đáy Zone) / Đỉnh Zone × 100%</p>
+            </div>
+
+            <p>Độ dày zone ảnh hưởng trực tiếp đến R:R (Risk:Reward) và xác suất thành công của lệnh. Hãy ghi nhớ 3 phân loại sau:</p>
+            <ul>
+                <li><strong>Zone mỏng (0.5-1%):</strong> R:R cao (1:3 - 1:5), nhưng dễ bị phá vỡ bởi các cú spike nhẹ. Win rate khoảng 65%. Thường chỉ phù hợp với các cặp có thanh khoản cực cao.</li>
+                <li><strong>Zone vừa (1-1.5%):</strong> Cân bằng hoàn hảo giữa R:R (1:2 - 1:3) và độ tin cậy. Win rate đạt mức cao nhất khoảng 71%. <strong>Đây là zone lý tưởng cho mọi cấp độ trader.</strong></li>
+                <li><strong>Zone dày (&gt;1.5%):</strong> Không đạt tiêu chuẩn Pause của GEM - vùng này thường cho thấy sự tranh chấp quá lớn, dòng tiền không còn tập trung. Win rate giảm mạnh xuống 45-50%. <strong>NÊN BỎ QUA!</strong></li>
+            </ul>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⭐</span> Zone Lý Tưởng - "Goldilocks Zone"</div>
+                <p>Zone tốt nhất có độ dày từ <strong>1.0% - 1.5%</strong> (gọi là "Goldilocks Zone" - không quá mỏng, không quá dày). <br>
+                - Với BTC giá $45,000, zone lý tưởng dày khoảng $450 - $675. <br>
+                - Với ETH giá $2,000, zone lý tưởng dày khoảng $20 - $30. <br>
+                Dữ liệu verify từ hơn 2,000 trades cho thấy zone này mang lại sự ổn định tâm lý và lợi nhuận bền vững nhất.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Ví Dụ Tính Toán Độ Dày</div>
+                <p>
+                    <strong>BTC LFZ:</strong> Đỉnh = $47,500, Đáy = $46,800<br>
+                    Độ dày = ($47,500 - $46,800) / $47,500 × 100% = 1.47% → <strong>Hợp lệ! (Goldilocks)</strong><br><br>
+                    <strong>ETH LFZ:</strong> Đỉnh = $2,050, Đáy = $1,980<br>
+                    Độ dày = ($2,050 - $1,980) / $2,050 × 100% = 3.41% → <strong>Quá dày, hãy bỏ qua và tìm setup khác!</strong>
+                </p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.3/3.3-3.webp" alt="Zone Thickness">
+            </div>
+            <div class="image-caption">Hình 3: So sánh độ dày zone - Zone 1.2% (lý tưởng) vs Zone 2.5% (quá dày)</div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp (FAQs)</h2>
+            <p>Trong quá trình giảng dạy, tôi đã nhận được hàng trăm câu hỏi. Đây là 2 câu hỏi quan trọng nhất mà tôi muốn bạn phải thông suốt.</p>
+
+            <div class="highlight-box" style="border-left-color: var(--cyan);">
+                <p><strong>Hỏi:</strong> "Thưa mentor, nếu Phase 2 có râu nến dưới rất dài, tôi có nên bao gồm nó vào zone không?"</p>
+                <p><strong>Trả lời:</strong> Một câu hỏi tuyệt vời! Nếu râu nến dài bất thường (gấp đôi thân nến), đó có thể là dấu hiệu của một cú quét thanh khoản. Bạn <strong>PHẢI</strong> bao gồm nó để xác định điểm SL an toàn nhất. Tuy nhiên, nếu râu nến đó làm zone của bạn dày quá 2%, hãy tinh chỉnh (Refine) xuống khung thời gian nhỏ hơn để tìm zone thực sự bên trong, hoặc chấp nhận bỏ qua trade đó để bảo vệ vốn.</p>
+            </div>
+
+            <div class="highlight-box" style="border-left-color: var(--cyan);">
+                <p><strong>Hỏi:</strong> "Tôi có thể vẽ LFZ trên khung M5 để scalping không?"</p>
+                <p><strong>Trả lời:</strong> Có thể, nhưng không khuyến khích cho người mới. Tần số nhiễu ở khung M5 cực lớn. Theo hệ thống GEM, LFZ phát huy sức mạnh khủng khiếp nhất ở <strong>khung 4H và 1D</strong>. Hãy học cách đi bộ vững vàng ở khung lớn trước khi tập chạy ở khung nhỏ, bạn nhé.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>⚠️</span> 3 Lỗi "Chết Người" Cần Tránh Tuyệt Đối</h2>
+            <p>Nếu bạn không muốn tặng tiền cho sàn giao dịch, hãy ghi nhớ 3 điều cấm kỵ sau:</p>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>❌</span> 1. Vẽ Zone "Tưởng Tượng"</div>
+                <p>Đây là lỗi tâm lý FOMO. Bạn quá muốn vào lệnh nên cố tình coi một vài cây nến lộn xộn là vùng Pause. Nhớ kỹ: Pause phải có cấu trúc rõ ràng, nến thân nhỏ và biên độ hẹp. Nếu bạn phải "cố gắng" mới thấy zone, thì thực ra <strong>chẳng có cái zone nào ở đó cả</strong>.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>❌</span> 2. Quên Buffer Stop Loss</div>
+                <p>Đặt SL đúng ngay mép đáy zone là một hành động tự sát. Các thuật toán của Market Maker luôn biết nơi đám đông đặt SL. Hãy cho lệnh của bạn một "khoảng thở" 0.5%. Khoảng cách nhỏ này chính là ranh giới giữa một trader chiến thắng và một người bị quét lệnh đầy cay đắng.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>❌</span> 3. Trade Zone Đã Bị Phá (Invalidated)</div>
+                <p>Nếu giá đã từng đóng cửa dưới zone rồi quay lại, zone đó không còn là LFZ nữa. Nó đã bị "thủng". Đừng cố chấp bám lấy những vùng giá đã mất đi tính chất nguyên bản của nó.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Ứng Dụng Thực Tế: Bài Tập Cho Bạn</h2>
+            <p>Học mà không hành thì chỉ là lý thuyết suông. Ngay sau khi kết thúc bài đọc này, tôi muốn bạn thực hiện quy trình sau trên biểu đồ TradingView:</p>
+            
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thực Hành Vẽ</div>
+                        <div class="flow-step-desc">Tìm ít nhất 5 pattern UPU trên khung 4H của BTC hoặc ETH. Vẽ Rectangle cho từng LFZ.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tính Toán %</div>
+                        <div class="flow-step-desc">Sử dụng công cụ Price Range để đo độ dày từng zone. Ghi chú lại xem có bao nhiêu zone đạt chuẩn "Goldilocks" (1.0% - 1.5%).</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Kiểm Chứng (Backtest)</div>
+                        <div class="flow-step-desc">Kéo biểu đồ sang phải xem giá phản ứng như thế nào khi quay lại các zone bạn vừa vẽ. Bạn sẽ ngạc nhiên về độ chính xác của nó đấy!</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch3/3.3/3.3-4.webp" alt="TradingView Drawing">
+            </div>
+            <div class="image-caption">Hình 4: Cách thiết lập Rectangle Tool và Label trên TradingView theo chuẩn GEM chuyên nghiệp</div>
+        </section>
+
+        <div class="summary-box">
+            <div class="summary-title"><span>📝</span> Tóm Tắt Bài Học - Những Điểm Cốt Tử</div>
+            <ul class="summary-list">
+                <li><strong>LFZ là vùng Demand:</strong> Được tạo từ Phase 2 (Pause) của UPU khi Phase 3 đã xác nhận thành công.</li>
+                <li><strong>Entry luôn ở Đỉnh Zone:</strong> Để tối ưu xác suất khớp lệnh (Fill rate).</li>
+                <li><strong>Stop Loss = Đáy Zone - 0.5% Buffer:</strong> Chống quét râu và biến động bất ngờ.</li>
+                <li><strong>Độ dày vàng 1.0% - 1.5%:</strong> Mang lại sự cân bằng hoàn hảo giữa rủi ro và lợi nhuận.</li>
+                <li><strong>Màu sắc quy ước:</strong> Luôn dùng màu Xanh cho LFZ để giữ cho tâm trí bạn luôn ở trạng thái "Sẵn sàng Mua".</li>
+            </ul>
+            <p style="margin-top: 1rem; font-style: italic; color: var(--success); text-align: center;">"Vẽ zone đúng là bạn đã thắng 50% cuộc chơi. 50% còn lại là sự kiên nhẫn đợi giá quay về."</p>
+        </div>
+
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Hãy chắc chắn bạn đã hiểu sâu trước khi bước sang bài tiếp theo</p>
+            </div>
+
+            <div class="quiz-question" data-question="1" data-correct="A">
+                <div class="question-number">1</div>
+                <div class="question-text">Tại sao chúng ta ưu tiên đặt lệnh mua (Entry) tại đỉnh của LFZ thay vì ở giữa hoặc đáy zone?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Để tối đa hóa cơ hội được khớp lệnh (Fill rate) vì giá thường chạm đỉnh zone rồi bật lên ngay.</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Vì đỉnh zone là nơi có giá rẻ nhất để mua vào.</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Vì sàn giao dịch yêu cầu đặt lệnh tại đó.</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Để có Stop Loss dài hơn, an toàn hơn.</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="C">
+                <div class="question-number">2</div>
+                <div class="question-text">Một zone LFZ trên khung 4H có độ dày 3.5% thì bạn nên làm gì theo phương pháp GEM?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Vẫn vào lệnh bình thường vì zone khung 4H rất uy tín.</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Tăng gấp đôi khối lượng lệnh để bù đắp rủi ro.</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Bỏ qua setup này vì zone quá dày, chứng tỏ sự mất cân bằng không còn tập trung, win rate sẽ thấp.</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Chỉ vẽ zone dựa trên thân nến để làm nó mỏng lại.</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="3" data-correct="B">
+                <div class="question-number">3</div>
+                <div class="question-text">Quy tắc "Buffer 0.5%" khi đặt Stop Loss có ý nghĩa gì quan trọng nhất?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Để trả phí giao dịch cho sàn.</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Bảo vệ lệnh khỏi các cú quét râu nến (Stop Hunt) và sự biến động mạnh của thị trường Crypto.</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Để làm cho lệnh của bạn trông chuyên nghiệp hơn.</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Giúp lệnh khớp nhanh hơn khi giá giảm mạnh.</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score">0/3</div>
+                <div class="result-text">Hoàn thành!</div>
+                <div class="result-message"></div>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+
+            let answeredCount = 0;
+            let correctCount = 0;
+            const totalQuestions = 2;
+
+            const explanations = {
+                1: {
+                    correct: '✓ Chính xác! Entry đặt tại đỉnh của vùng Pause - điểm đầu tiên giá chạm khi retest.',
+                    incorrect: '✗ Sai! Entry cho LFZ là đỉnh của vùng Pause (gần giá hiện tại khi retest từ trên xuống).'
+                },
+                2: {
+                    correct: '✓ Chính xác! Stop Loss đặt dưới đáy LFZ với buffer 0.5% để tránh bị quét.',
+                    incorrect: '✗ Sai! Stop Loss cần đặt DƯỚI đáy LFZ với buffer 0.5%.'
+                }
+            };
+
+            questions.forEach(question => {
+                const options = question.querySelectorAll('.quiz-option');
+                const correctAnswer = question.dataset.correct;
+                const questionNum = question.dataset.question;
+                const feedbackDiv = question.querySelector('.question-feedback');
+                const feedbackTitle = feedbackDiv.querySelector('.feedback-title');
+                const feedbackText = feedbackDiv.querySelector('.feedback-text');
+
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        if (question.classList.contains('answered')) return;
+
+                        question.classList.add('answered');
+                        answeredCount++;
+
+                        const selectedOption = this.dataset.option;
+                        const isCorrect = selectedOption === correctAnswer;
+
+                        options.forEach(opt => opt.classList.add('disabled'));
+
+                        if (isCorrect) {
+                            this.classList.add('correct');
+                            correctCount++;
+                            feedbackDiv.classList.add('correct');
+                            feedbackTitle.textContent = '✓ Chính xác!';
+                            feedbackText.textContent = explanations[questionNum].correct;
+                        } else {
+                            this.classList.add('incorrect');
+                            feedbackDiv.classList.add('incorrect');
+                            feedbackTitle.textContent = '✗ Sai rồi!';
+                            feedbackText.textContent = explanations[questionNum].incorrect;
+                            options.forEach(opt => {
+                                if (opt.dataset.option === correctAnswer) {
+                                    opt.classList.add('correct');
+                                }
+                            });
+                        }
+
+                        feedbackDiv.classList.add('show');
+
+                        if (answeredCount === totalQuestions) {
+                            const scoreDiv = resultDiv.querySelector('.result-score');
+                            const messageDiv = resultDiv.querySelector('.result-message');
+                            scoreDiv.textContent = correctCount + '/' + totalQuestions;
+
+                            if (correctCount === totalQuestions) {
+                                messageDiv.textContent = '🎉 Xuất sắc!';
+                            } else if (correctCount >= 1) {
+                                messageDiv.textContent = '👍 Tốt lắm!';
+                            } else {
+                                messageDiv.textContent = '📚 Xem lại bài học nhé!';
+                            }
+
+                            resultDiv.classList.add('show');
+                            retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0;
+                correctCount = 0;
+
+                questions.forEach(question => {
+                    question.classList.remove('answered');
+                    const options = question.querySelectorAll('.quiz-option');
+                    const feedbackDiv = question.querySelector('.question-feedback');
+
+                    options.forEach(opt => {
+                        opt.classList.remove('correct', 'incorrect', 'disabled');
+                    });
+                    feedbackDiv.classList.remove('show', 'correct', 'incorrect');
+                });
+
+                resultDiv.classList.remove('show');
+                retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

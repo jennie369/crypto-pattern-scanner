@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 8.2: Hệ Thống 3 Khung Thời Gian - Tier 2</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section, .content-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section, .content-card {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title, .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p, .card-content p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul, .styled-list {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box, .info-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .info-box.success {
+             background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+             border-color: var(--success);
+        }
+        .info-box.warning {
+             background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+             border-color: var(--error);
+        }
+        
+        @media (max-width: 600px) {
+            .highlight-box, .info-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+             .info-box.success { border-left-color: var(--success); }
+             .info-box.warning { border-left-color: var(--error); }
+        }
+        .highlight-box h4, .info-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .info-box.success .info-box-title { color: var(--success); }
+        .info-box.warning .info-box-title { color: var(--error); }
+        
+        .highlight-box p, .info-box p { color: var(--text-secondary); margin: 0; }
+
+        .style-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-md) 0;
+        }
+        .style-table th, .style-table td {
+            text-align: left;
+            padding: var(--space-sm);
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+        }
+        .style-table th { color: var(--cyan); }
+        
+        .combo-grid {
+             display: grid;
+             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+             gap: var(--space-md);
+             margin: var(--space-md) 0;
+        }
+        .combo-card {
+            background: var(--bg-primary);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--glass-border);
+        }
+        .combo-card.recommended {
+            border-color: var(--success);
+            background: rgba(0, 200, 83, 0.05);
+        }
+        .combo-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-sm); }
+        .combo-tf { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-sm); font-family: monospace; }
+        .tf-htf { color: var(--gold); }
+        .tf-itf { color: var(--cyan); }
+        .tf-ltf { color: var(--success); }
+        .combo-arrow { color: var(--text-muted); }
+        .combo-desc { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-box li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-lg) 16px;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .quiz-question h4, .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            width: 100%;
+            text-align: left;
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+            color: var(--error);
+        }
+
+        .quiz-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .quiz-result.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent);
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .quiz-score h3, .quiz-score-text { color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-score p { color: var(--text-secondary); }
+
+        .retake-btn {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border: none;
+                border-radius: 0;
+                margin-top: 0;
+                padding: var(--space-lg) 16px;
+            }
+        }
+        .lesson-footer p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .lesson-footer .highlight { color: var(--gold); font-weight: 600; }
+
+        strong { color: var(--gold); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <!-- 1. OPENING -->
+        <header class="lesson-header">
+            <span class="header-badge">📊 Tier 2 - Bài 8.2</span>
+            <h1 class="lesson-title">Hệ Thống 3 Khung Thời Gian</h1>
+            <p class="lesson-subtitle">Multi-Timeframe Mastery: The Fractal Nature of Markets</p>
+        </header>
+
+        <div class="content-card">
+            <div class="card-header">
+                <h2>🌍 Tại Sao Một Bản Đồ Là Không Đủ?</h2>
+            </div>
+            <div class="card-content">
+                <p>Hãy tưởng tượng bạn đang lái xe xuyên việt từ Hà Nội vào Sài Gòn. Bạn sẽ cần những loại bản đồ nào?</p>
+                <p>Đầu tiên, bạn cần một <strong>bản đồ toàn quốc</strong> để biết hướng đi chung (đường Quốc lộ 1A). Nhưng khi vào đến thành phố Đà Nẵng, bản đồ toàn quốc trở nên vô dụng; bạn cần một <strong>bản đồ thành phố</strong> để biết đi đường nào tránh kẹt xe. Và khi bạn muốn tìm một quán phở ngon trong ngõ nhỏ, bạn cần <strong>Google Maps chế độ Zoom cận cảnh</strong>.</p>
+                <p>Trading cũng y hệt như vậy. Nếu bạn chỉ nhìn vào một khung thời gian (Timeframe), bạn giống như đang lái xe với một cái ống nhòm bị bịt một mắt. Bạn có thể thấy rõ ổ gà trước mặt (M5), nhưng lại không thấy chiếc xe tải đang lao tới từ xa (H4). Hoặc ngược lại.</p>
+                <p>Trong bài học này, chúng ta sẽ xây dựng một hệ thống quan sát đa chiều - <strong>Hệ Thống 3 Khung Thời Gian (Triple Timeframe System)</strong> của GEM Frequency. Đây là vũ khí tối thượng để bạn không bao giờ bị lạc lối giữa rừng nến xanh đỏ.</p>
+            </div>
+        </div>
+
+        <!-- 2. CONCEPT -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>📐 Nguyên Lý "Bộ Ba Quyền Lực"</h2>
+            </div>
+            <div class="card-content">
+                <p>Trong hệ thống GEM, chúng ta không bao giờ trade dựa trên một khung thời gian đơn lẻ. Chúng ta luôn sử dụng bộ 3 khung thời gian với vai trò phân cấp rõ ràng, giống như cấu trúc quân đội:</p>
+
+                <ul class="styled-list">
+                    <li><strong>HTF (Higher Timeframe) - Vị Tướng Quân (The General):</strong> Người đưa ra chiến lược tổng thể. Xu hướng là tăng hay giảm? Chúng ta đang ở đâu trong bức tranh lớn? Vị tướng không quan tâm từng biến động nhỏ, ông chỉ quan tâm đến kết cục cuộc chiến.</li>
+                    <li><strong>ITF (Intermediate Timeframe) - Trung Úy (The Lieutenant):</strong> Người triển khai chiến thuật. Dựa trên lệnh của Tướng, Trung Úy sẽ tìm kiếm các vị trí thuận lợi (Zones) để dàn quân. Đây là nơi chúng ta vẽ các HFZ và LFZ.</li>
+                    <li><strong>LTF (Lower Timeframe) - Lính Bắn Tỉa (The Sniper):</strong> Người thực thi nhiệm vụ. Khi giá đi vào vùng phục kích, Sniper sẽ tìm thời điểm chính xác từng giây để bóp cò (Entry) với rủi ro thấp nhất.</li>
+                </ul>
+
+                <div class="info-box success">
+                    <div class="info-box-title">✅ Tỷ Lệ Vàng: 4x - 6x</div>
+                    <p>Để hệ thống này hoạt động trơn tru, khoảng cách giữa các khung thời gian phải tuân theo tỷ lệ vàng từ <strong>4 đến 6 lần</strong>.</p>
+                    <p>Tại sao? Nếu tỷ lệ quá nhỏ (ví dụ 1H và 2H), thông tin sẽ bị trùng lặp, nhiễu loạn. Nếu quá lớn (ví dụ Daily và 5M), bạn sẽ mất kết nối giữa bức tranh lớn và hành động giá hiện tại. Tỷ lệ 4x-6x là điểm cân bằng hoàn hảo để lọc nhiễu mà vẫn giữ được chi tiết.</p>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x350/112250/00F0FF?text=Timeframe+Ratio+4x-6x" alt="Timeframe Ratio">
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. DEEP DIVE -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>🔍 Phân Tích Chuyên Sâu: Fractal Nature</h2>
+            </div>
+            <div class="card-content">
+                <p>Bạn có nhớ khái niệm "Fractal" (Phân dạng) không? Thị trường tài chính có tính chất phân dạng, nghĩa là các mô hình giá lặp lại giống hệt nhau ở các quy mô thời gian khác nhau.</p>
+                
+                <h3>Tại Sao Phải Là 3 Khung?</h3>
+                <p>Nhiều trader hỏi tôi: "Tại sao không phải là 2? Hay 4?". Câu trả lời nằm ở sự ổn định của chiếc kiềng 3 chân:</p>
+                <ul class="styled-list">
+                    <li><strong>Trend (Xu hướng):</strong> Bạn cần ít nhất 1 khung để thấy xu hướng chủ đạo.</li>
+                    <li><strong>Zone (Vùng giá):</strong> Bạn cần 1 khung để thấy cấu trúc Supply/Demand rõ ràng.</li>
+                    <li><strong>Trigger (Điểm kích hoạt):</strong> Bạn cần 1 khung để tối ưu hóa R:R (Risk/Reward).</li>
+                </ul>
+
+                <h3>Sức Mạnh Của "Zone In Zone" (Vùng Lồng Vùng)</h3>
+                <p>Đây là bí mật của các lệnh trade có R:R khủng (1:10 trở lên). Khi bạn tìm thấy một LFZ của khung H1 nằm <strong>lọt thỏm bên trong</strong> một LFZ của khung Daily, đó là "Vùng Lồng Vùng".</p>
+                <p>Nghĩa là gì? Nghĩa là tại mức giá đó, cả "Vị Tướng" (Daily traders) và "Lính Bắn Tỉa" (H1 traders) đều đang chờ mua. Sự cộng hưởng (Confluence) này tạo ra một lực đẩy cực mạnh, giống như lò xo bị nén ở cả hai đầu.</p>
+
+                <div class="info-box warning">
+                    <div class="info-box-title">⚠️ Sự Nguy Hiểm Của Việc "Nhảy Khung"</div>
+                    <p>Một sai lầm chết người là phân tích trend trên Daily (D1) nhưng lại vào lệnh ở 5 phút (M5) mà bỏ qua bước trung gian (H1/H4). Bạn sẽ bị "say sóng" bởi những biến động nhiễu loạn của M5 mà tưởng là trend đảo chiều, trong khi D1 chỉ mới "hắt hơi" một cái. Đừng bao giờ bỏ qua bước trung gian!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. EXAMPLES -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>🎯 Combo Khung Thời Gian Chuẩn Mực</h2>
+            </div>
+            <div class="card-content">
+                <p>Tùy thuộc vào quỹ thời gian và tính cách của bạn, hãy chọn <strong>DUY NHẤT MỘT</strong> combo và làm chủ nó. Đừng đứng núi này trông núi nọ.</p>
+
+                <h3>1. The Swing Trader (Khuyên Dùng Cho Người Mới)</h3>
+                <p>Đây là combo cân bằng nhất, phù hợp với người có công việc full-time nhưng vẫn muốn kiếm tiền từ market.</p>
+                
+                <div class="combo-grid">
+                    <div class="combo-card recommended">
+                        <div class="combo-title">⭐ Daily → 4H → 1H</div>
+                        <div class="combo-tf">
+                            <span class="tf-htf">D1 (Trend)</span>
+                            <span class="combo-arrow">→</span>
+                            <span class="tf-itf">4H (Zone)</span>
+                            <span class="combo-arrow">→</span>
+                            <span class="tf-ltf">1H (Entry)</span>
+                        </div>
+                        <div class="combo-desc">Tần suất lệnh: 2-3 lệnh/tuần. Giữ lệnh: Vài ngày đến vài tuần. Ít nhiễu, độ chính xác cao.</div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x400/112250/10B981?text=D1+4H+1H+Combo+Example" alt="Swing Trade Combo">
+                </div>
+
+                <h3>2. The Day Trader (Cho Trader Full-time)</h3>
+                <p>Dành cho những bạn có thể ngồi trước màn hình 4-6 tiếng/ngày và thích chốt lệnh trong ngày.</p>
+
+                <div class="combo-grid">
+                    <div class="combo-card">
+                        <div class="combo-title">⚡ 4H → 1H → 15M</div>
+                        <div class="combo-tf">
+                            <span class="tf-htf">4H (Trend)</span>
+                            <span class="combo-arrow">→</span>
+                            <span class="tf-itf">1H (Zone)</span>
+                            <span class="combo-arrow">→</span>
+                            <span class="tf-ltf">15M (Entry)</span>
+                        </div>
+                        <div class="combo-desc">Tần suất lệnh: 1-2 lệnh/ngày. Giữ lệnh: Vài giờ. Yêu cầu tâm lý vững vàng.</div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x400/112250/00F0FF?text=4H+1H+15M+Day+Trade" alt="Day Trade Combo">
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. MISTAKES -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>🚨 Các Sai Lầm "Cháy Tài Khoản" Thường Gặp</h2>
+            </div>
+            <div class="card-content">
+                <p>Hiểu lý thuyết là một chuyện, thực hành lại là chuyện khác. Dưới đây là những cái bẫy mà 90% trader mắc phải khi áp dụng đa khung thời gian:</p>
+
+                <div class="warning-box">
+                    <h4>1. Phân Tích Quá Nhiều Khung (Analysis Paralysis)</h4>
+                    <p>Bạn mở chart ra, xem Monthly, rồi Weekly, Daily, H4, H1, M30, M15, M5... Kết quả? Bạn bị tẩu hỏa nhập ma. Khung lớn bảo tăng, khung nhỏ bảo giảm. Bạn không biết nghe ai. <br><strong>Giải pháp:</strong> Chỉ dùng đúng 3 khung. Đóng tất cả các tab khác lại.</p>
+                </div>
+
+                <div class="warning-box">
+                    <h4>2. Vào Lệnh Ngược Trend HTF</h4>
+                    <p>Thấy M15 có cấu trúc tăng đẹp, bạn Buy ngay lập tức. Nhưng bạn quên mất H4 đang là Downtrend mạnh. Bạn vừa trở thành thanh khoản cho cá mập H4 xả hàng. <br><strong>Giải pháp:</strong> Luôn check HTF trước. "Trend is your friend" - nhưng phải là Big Trend.</p>
+                </div>
+
+                <div class="warning-box">
+                    <h4>3. Thay Đổi Timeframe Lung Tung</h4>
+                    <p>Lúc thắng thì dùng D1/H4, lúc thua lại nhảy sang M5/M1 để gỡ. Đây là công thức chắc chắn dẫn đến thảm họa. <br><strong>Giải pháp:</strong> Cam kết với combo của mình ít nhất 3 tháng.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. APPLICATION -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>🔄 Workflow: Quy Trình 3 Bước Thực Chiến</h2>
+            </div>
+            <div class="card-content">
+                <p>Hãy in quy trình này ra và dán trước màn hình trading của bạn. Đừng click chuột nếu chưa đi qua đủ 3 bước:</p>
+
+                <div class="info-box">
+                    <div class="info-box-title" style="color: var(--accent-purple);">Bước 1: HTF - Định Hướng (The Bias)</div>
+                    <ul class="styled-list">
+                        <li>Mở chart HTF (ví dụ Daily).</li>
+                        <li>Hỏi: Cấu trúc hiện tại là gì? (Higher Highs/Higher Lows?).</li>
+                        <li>Chúng ta đang ở đâu? (Gần kháng cự hay hỗ trợ?).</li>
+                        <li>Quyết định: Hôm nay mình chỉ canh BUY, hay chỉ canh SELL? (Nếu HTF là Uptrend -> Chỉ canh BUY).</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-box-title" style="color: var(--accent-cyan);">Bước 2: ITF - Tìm Vùng (The Zone)</div>
+                    <ul class="styled-list">
+                        <li>Chuyển sang chart ITF (ví dụ H4).</li>
+                        <li>Vẽ các HFZ/LFZ rõ ràng nhất.</li>
+                        <li>Tìm "Fresh Zone" - vùng chưa bị test.</li>
+                        <li>Đặt cảnh báo giá (Price Alert) tại mép zone. Đi làm việc khác.</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-box-title" style="color: var(--success-green);">Bước 3: LTF - Bóp Cò (The Entry)</div>
+                    <ul class="styled-list">
+                        <li>Khi điện thoại báo giá đã chạm zone ITF.</li>
+                        <li>Mở chart LTF (ví dụ H1).</li>
+                        <li>Chờ tín hiệu xác nhận (Nến đảo chiều, mô hình 2 đáy/2 đỉnh...).</li>
+                        <li>Vào lệnh với Stop Loss chặt chẽ dưới zone LTF.</li>
+                    </ul>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x450/112250/FFBD59?text=3-Step+MTF+Workflow" alt="MTF Workflow">
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. SUMMARY -->
+        <div class="summary-box">
+            <h3>📋 Tổng Kết Bài Học</h3>
+            <ul class="summary-list">
+                <li>Trading thành công đòi hỏi góc nhìn đa chiều: <strong>Toàn cảnh (HTF), Chiến thuật (ITF) và Chi tiết (LTF)</strong>.</li>
+                <li>Tỷ lệ vàng giữa các khung thời gian là <strong>4x đến 6x</strong>.</li>
+                <li><strong>Swing Trading (D1/H4/H1)</strong> là combo khuyến nghị cho người mới bắt đầu.</li>
+                <li>Luôn tuân thủ quy trình <strong>Top-Down Analysis</strong> (Từ trên xuống dưới). Không bao giờ làm ngược lại.</li>
+                <li>Kỷ luật là sức mạnh: Đừng "nhảy" timeframe khi gặp khó khăn.</li>
+            </ul>
+        </div>
+
+        <!-- 8. QUIZ -->
+        <div class="quiz-section">
+            <h3 class="quiz-title">📝 Kiểm Tra Kiến Thức</h3>
+
+            <div class="quiz-question" data-correct="1">
+                <p class="question-text">1. Tại sao tỷ lệ giữa các khung thời gian nên là 4x - 6x?</p>
+                <button class="quiz-option" data-index="0">Vì đó là con số may mắn trong trading.</button>
+                <button class="quiz-option" data-index="1">Để cân bằng giữa việc lọc nhiễu (noise) và giữ được độ chi tiết cần thiết.</button>
+                <button class="quiz-option" data-index="2">Để có thể vào được nhiều lệnh hơn trong ngày.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <p class="question-text">2. Nếu HTF (D1) đang là Downtrend mạnh, nhưng LTF (H1) xuất hiện tín hiệu Buy, bạn nên làm gì?</p>
+                <button class="quiz-option" data-index="0">Vào lệnh Buy ngay vì LTF nhanh hơn HTF.</button>
+                <button class="quiz-option" data-index="1">Vào lệnh Buy nhưng với volume lớn để gỡ nhanh.</button>
+                <button class="quiz-option" data-index="2">Bỏ qua hoặc chờ tín hiệu Sell đồng thuận với HTF. Chống lại HTF là rủi ro cao.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <p class="question-text">3. Bước đầu tiên trong quy trình Workflow 3 bước là gì?</p>
+                <button class="quiz-option" data-index="0">Xác định xu hướng và Bias (định kiến) trên khung HTF.</button>
+                <button class="quiz-option" data-index="1">Vẽ Zone trên khung nhỏ nhất M5.</button>
+                <button class="quiz-option" data-index="2">Tìm điểm vào lệnh ngay lập tức khi mở máy.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-number"><span id="correct-count">0</span>/3</div>
+                <div class="score-label">Câu trả lời đúng</div>
+                <button class="retake-btn" onclick="retakeQuiz()">Làm Lại Quiz</button>
+            </div>
+        </div>
+
+        <footer class="lesson-footer">
+            <p>GEM Trading Academy - Tier 2</p>
+            <p class="highlight">© 2025 GEM Frequency Trading Method</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác! Bạn đã hiểu đúng bản chất.';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy nhớ: Cấu trúc HTF luôn quan trọng nhất.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function retakeQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                question.querySelector('.quiz-result').className = 'quiz-result';
+            });
+
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+
+</body>
+</html>

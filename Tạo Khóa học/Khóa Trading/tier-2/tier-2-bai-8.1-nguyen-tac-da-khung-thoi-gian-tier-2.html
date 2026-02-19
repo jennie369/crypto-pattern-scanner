@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 8.1: Nguyên Tắc Đa Khung Thời Gian - Tier 2</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        /* CONTENT CARDS & SECTIONS */
+        .content-card, .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+            overflow: hidden; /* contain floats/margins */
+        }
+        @media (max-width: 600px) {
+            .content-card, .section {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .card-header h2, .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            border-bottom: 1px solid rgba(255, 189, 89, 0.2);
+            padding-bottom: var(--space-md);
+        }
+
+        .section p, .card-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+            font-size: 1rem;
+        }
+
+        .section ul, .card-content ul, ul.styled-list {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .card-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); font-weight: 600; }
+
+        /* IMAGES */
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+            transition: transform 0.3s ease;
+        }
+        .image-placeholder:hover { transform: scale(1.01); }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        /* HIGHLIGHT BOXES */
+        .info-box, .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .info-box-title, .highlight-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: 8px; }
+        
+        .info-box.warning, .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+        }
+        .info-box.warning .info-box-title, .warning-box h4 { color: var(--error); }
+
+        .info-box.success, .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+        }
+        .info-box.success .info-box-title, .success-box h4 { color: var(--success); }
+
+        .info-box.definition, .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+        .info-box.definition .info-box-title, .definition-box h4 { color: var(--cyan); }
+
+        /* FLOW DIAGRAMS & GRIDS */
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+            flex-wrap: wrap;
+        }
+        .flow-box {
+            background: var(--bg-primary);
+            border: 1px solid var(--glass-border);
+            padding: var(--space-md) var(--space-lg);
+            border-radius: var(--radius-md);
+            text-align: center;
+            min-width: 100px;
+        }
+        .flow-arrow { font-size: 1.5rem; color: var(--text-muted); }
+
+        .tf-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        .tf-card {
+            background: rgba(10, 22, 40, 0.5);
+            border: 1px solid var(--glass-border);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+        .tf-name { font-size: 1.5rem; font-weight: 800; margin: var(--space-xs) 0; }
+        .tf-card.htf .tf-name { color: var(--purple); }
+        .tf-card.itf .tf-name { color: var(--cyan); }
+        .tf-card.ltf .tf-name { color: var(--success); }
+
+        /* SUMMARY & QUIZ */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        .summary-box h3 { color: var(--success); margin-bottom: var(--space-lg); font-weight: 700; }
+        .summary-list li { display: flex; gap: 10px; margin-bottom: 12px; }
+        .summary-list li::before { content: "✓"; color: var(--success); font-weight: bold; }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        .quiz-title { color: var(--gold); margin-bottom: var(--space-lg); font-size: 1.5rem; font-weight: 700; }
+        .quiz-question { margin-bottom: var(--space-xl); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: var(--space-lg); }
+        .quiz-question:last-child { border-bottom: none; }
+        .question-text { font-weight: 600; margin-bottom: var(--space-md); font-size: 1.1rem; }
+        .quiz-option {
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); }
+        .quiz-option.correct { background: rgba(0, 200, 83, 0.2); border-color: var(--success); color: var(--success); }
+        .quiz-option.incorrect { background: rgba(255, 82, 82, 0.2); border-color: var(--error); color: var(--error); }
+        .quiz-result { margin-top: 10px; font-weight: 600; display: none; }
+        .quiz-result.show { display: block; }
+
+        .highlight { color: var(--gold); font-weight: 600; }
+        .highlight-purple { color: var(--purple); font-weight: 600; }
+        .highlight-green { color: var(--success); font-weight: 600; }
+        
+        .lesson-footer { text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid var(--glass-border); color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <span class="header-badge">📊 Tier 2 - Bài 8.1</span>
+            <h1 class="lesson-title">Nguyên Tắc Đa Khung Thời Gian</h1>
+            <p class="lesson-subtitle">Chìa khóa để nhìn thấy "Bức Tranh Lớn" và tối ưu điểm vào lệnh</p>
+        </header>
+
+        <!-- 1. OPENING HOOK -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>1. Mở Đầu: Bạn Có Đang Lái Xe Trong Sương Mù?</h2>
+            </div>
+            <div class="card-content">
+                <p>Hãy tưởng tượng bạn đang lái xe trên một con đường đèo quanh co vào ban đêm. Nếu bạn chỉ nhìn vào 5 mét trước đầu xe (khung thời gian thấp), bạn sẽ liên tục giật mình và đánh lái gấp mỗi khi gặp khúc cua. Bạn bị động và đầy rủi ro.</p>
+                
+                <p>Nhưng nếu bạn có một bản đồ GPS nhìn từ trên cao (khung thời gian lớn), bạn biết chính xác khúc cua nào sắp đến, đoạn nào đường thẳng, và đoạn nào nguy hiểm. Bạn lái xe một cách bình tĩnh, chủ động và an toàn.</p>
+                
+                <p>Trong trading cũng vậy. Rất nhiều trader thua lỗ vì họ bị "cuốn" vào những biến động nhỏ trên khung 5 phút hoặc 15 phút mà không hề hay biết rằng họ đang cố gắng chặn đầu một "đoàn tàu hỏa" trên khung Daily. Họ nhìn thấy một tín hiệu mua nhỏ, nhưng không thấy cả một xu hướng giảm khổng lồ đang đè nặng phía trên.</p>
+                
+                <p>Trong bài học này, tôi sẽ không chỉ dạy bạn cách nhìn bản đồ. Tôi sẽ hướng dẫn bạn cách kết hợp "bản đồ vệ tinh" (HTF), "bản đồ đường phố" (ITF) và "kính hiển vi" (LTF) để tạo ra những cú trade có độ chính xác phẫu thuật.</p>
+            </div>
+        </div>
+
+        <!-- 2. CONCEPT INTRODUCTION -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>2. Khái Niệm: Phân Tích Đa Khung Thời Gian (MTF)</h2>
+            </div>
+            <div class="card-content">
+                <div class="info-box definition">
+                    <div class="info-box-title">ℹ️ Định Nghĩa MTF</div>
+                    <p><strong>Phân Tích Đa Khung Thời Gian (Multi-Timeframe Analysis - MTF)</strong> là việc quan sát cùng một cặp tiền hoặc tài sản trên các khung thời gian khác nhau (ví dụ: Daily, 4H, 1H) để xác định xu hướng tổng thể, vùng giá quan trọng và điểm vào lệnh tối ưu.</p>
+                </div>
+
+                <p>Tại sao chúng ta không thể chỉ dùng một khung thời gian? Hãy nghĩ về sự mâu thuẫn này:</p>
+                <ul class="styled-list">
+                    <li>Trên khung <strong>Daily</strong>, giá đang trong xu hướng TĂNG mạnh.</li>
+                    <li>Trên khung <strong>1H</strong>, giá đang GIẢM điều chỉnh.</li>
+                    <li>Trên khung <strong>5M</strong>, giá đang đi NGANG (sideways).</li>
+                </ul>
+                
+                <p>Vậy bạn nên Mua hay Bán? Nếu bạn chỉ nhìn 1H, bạn sẽ Bán (ngược trend Daily). Nếu bạn chỉ nhìn 5M, bạn sẽ không làm gì cả. Chỉ khi kết hợp cả ba, bạn mới thấy bức tranh toàn cảnh: <em>"Giá đang điều chỉnh trên 1H về vùng hỗ trợ của Daily, đây là cơ hội để Mua lên theo xu hướng chính."</em></p>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x400/112250/00F0FF?text=Single+TF+vs+Multi-TF+Vision" alt="So sánh tầm nhìn Single TF và Multi-TF">
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. DEEP DIVE -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>3. Phân Tích Chuyên Sâu: Hệ Thống 3 Khung Thời Gian</h2>
+            </div>
+            <div class="card-content">
+                <p>Để tránh bị rối loạn thông tin (Analysis Paralysis), GEM Trading sử dụng nguyên tắc <strong>"Bộ Ba Quyền Lực" (The Power of Three)</strong>. Chúng ta luôn phân tích dựa trên 3 khung thời gian cố định, được phân cấp rõ ràng:</p>
+
+                <div class="flow-diagram">
+                    <div class="flow-box htf">
+                        <div style="font-weight: 700; color: var(--purple); font-size: 1.2rem;">HTF</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Higher Timeframe</div>
+                        <div style="font-size: 0.9rem; font-weight: 600; margin-top: 5px;">BIG PICTURE</div>
+                    </div>
+                    <span class="flow-arrow">➜</span>
+                    <div class="flow-box itf">
+                        <div style="font-weight: 700; color: var(--cyan); font-size: 1.2rem;">ITF</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Intermediate TF</div>
+                        <div style="font-size: 0.9rem; font-weight: 600; margin-top: 5px;">THE SETUP</div>
+                    </div>
+                    <span class="flow-arrow">➜</span>
+                    <div class="flow-box ltf">
+                        <div style="font-weight: 700; color: var(--success); font-size: 1.2rem;">LTF</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">Lower Timeframe</div>
+                        <div style="font-size: 0.9rem; font-weight: 600; margin-top: 5px;">THE TRIGGER</div>
+                    </div>
+                </div>
+
+                <h3>A. HTF (Higher Timeframe) - La Bàn Chỉ Hướng</h3>
+                <p>Đây là khung thời gian lớn nhất trong bộ ba của bạn. Nhiệm vụ của nó KHÔNG PHẢI là để tìm điểm vào lệnh, mà là để xác định <strong>Dominant Trend (Xu hướng chủ đạo)</strong> và <strong>Curve (Vị trí giá)</strong>.</p>
+                <ul class="styled-list">
+                    <li><strong>Trend:</strong> Chúng ta đang trong Uptrend hay Downtrend?</li>
+                    <li><strong>Key Levels:</strong> Đâu là các vùng HFZ/LFZ lớn mà giá phải tôn trọng?</li>
+                    <li><strong>Bias:</strong> Hôm nay chúng ta chỉ canh Buy hay chỉ canh Sell?</li>
+                </ul>
+                <div class="info-box success">
+                    <div class="info-box-title">✅ Quy Tắc Bất Di Bất Dịch</div>
+                    <p>Bạn không bao giờ được trade ngược lại xu hướng của HTF trừ khi bạn là một pro trader đang bắt sóng hồi (counter-trend) tại các vùng cực trị.</p>
+                </div>
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x350/112250/6A5BFF?text=HTF+Trend+%26+Key+Levels" alt="HTF Trend và Key Levels">
+                </div>
+
+                <h3>B. ITF (Intermediate Timeframe) - Nơi Tìm Setup</h3>
+                <p>Đây là khung thời gian "làm việc" chính của bạn. Sau khi biết hướng đi từ HTF, bạn xuống ITF để tìm kiếm các cơ hội cụ thể.</p>
+                <ul class="styled-list">
+                    <li>Tìm các mô hình <strong>GEM Patterns</strong> (UPU, DPD, vv).</li>
+                    <li>Xác định chính xác các vùng <strong>HFZ/LFZ</strong> để giao dịch.</li>
+                    <li>Đợi giá hồi về (Retest) các vùng này.</li>
+                </ul>
+                <p>Ví dụ: Nếu HTF là Daily đang tăng, bạn sẽ xuống 4H (ITF) để tìm các vùng LFZ (Vùng Mua) và chờ giá hồi về đó.</p>
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x350/112250/00F0FF?text=ITF+Zone+Identification" alt="ITF Zone Identification">
+                </div>
+
+                <h3>C. LTF (Lower Timeframe) - Điểm Bấm Cò</h3>
+                <p>Đây là khung thời gian nhỏ nhất, dùng để tối ưu hóa điểm vào lệnh (Sniper Entry). Khi giá đã về đến zone của ITF, bạn zoom vào LTF để tìm tín hiệu xác nhận.</p>
+                <ul class="styled-list">
+                    <li>Tìm sự thay đổi cấu trúc (Change of Character).</li>
+                    <li>Tìm các nến đảo chiều (Engulfing, Pinbar) với rủi ro thấp nhất.</li>
+                    <li>Giúp thu hẹp Stoploss, tăng tỷ lệ R:R lên mức cao nhất.</li>
+                </ul>
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x350/112250/10B981?text=LTF+Entry+Trigger" alt="LTF Entry Trigger">
+                </div>
+
+                <h3>Các Combo Khung Thời Gian Chuẩn</h3>
+                <p>Tùy thuộc vào phong cách giao dịch (Style), bạn sẽ chọn bộ ba phù hợp:</p>
+                <div class="tf-grid">
+                    <div class="tf-card htf">
+                        <div class="tf-name">Swing Trader</div>
+                        <div style="font-size: 0.9rem; margin-top: 10px;">
+                            <span style="color:var(--purple)">HTF: Daily</span><br>
+                            <span style="color:var(--cyan)">ITF: 4H</span><br>
+                            <span style="color:var(--success)">LTF: 1H</span>
+                        </div>
+                    </div>
+                    <div class="tf-card itf">
+                        <div class="tf-name">Day Trader</div>
+                        <div style="font-size: 0.9rem; margin-top: 10px;">
+                            <span style="color:var(--purple)">HTF: 4H</span><br>
+                            <span style="color:var(--cyan)">ITF: 1H</span><br>
+                            <span style="color:var(--success)">LTF: 15m</span>
+                        </div>
+                    </div>
+                    <div class="tf-card ltf">
+                        <div class="tf-name">Scalper</div>
+                        <div style="font-size: 0.9rem; margin-top: 10px;">
+                            <span style="color:var(--purple)">HTF: 1H</span><br>
+                            <span style="color:var(--cyan)">ITF: 15m</span><br>
+                            <span style="color:var(--success)">LTF: 5m</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. REAL WORLD EXAMPLE -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>4. Ví Dụ Thực Tế: Phân Tích BTC/USDT</h2>
+            </div>
+            <div class="card-content">
+                <p>Hãy cùng đi qua một quy trình phân tích thực tế để bạn thấy sức mạnh của sự đồng bộ hóa (Alignment).</p>
+
+                <h4>Bước 1: HTF - Daily Chart</h4>
+                <p>Bạn mở biểu đồ Ngày. Bạn thấy giá đang tạo các đỉnh cao hơn (Higher Highs) và đáy cao hơn (Higher Lows). Trend là <strong>TĂNG</strong>. Tuy nhiên, giá đang có một nhịp điều chỉnh giảm nhẹ về vùng hỗ trợ $60,000.</p>
+                <p>➔ <strong>Kế hoạch:</strong> Chỉ canh MUA (Long). Chúng ta sẽ đợi giá về quanh $60,000.</p>
+
+                <h4>Bước 2: ITF - 4H Chart</h4>
+                <p>Giá đã về đến vùng $60,000. Tại đây, trên khung 4H, bạn thấy một mô hình <strong>DPU (Down-Pause-Up)</strong> vừa hình thành. Vùng Pause của mô hình này tạo ra một LFZ (Vùng Mua) tiềm năng.</p>
+                <p>➔ <strong>Setup:</strong> Chờ giá test lại vùng LFZ của 4H này.</p>
+
+                <h4>Bước 3: LTF - 1H/15m Chart</h4>
+                <p>Giá bắt đầu chạm vào mép trên của LFZ 4H. Bạn chuyển sang khung 15m. Bạn thấy giá đang giảm chững lại, volume bán cạn kiệt. Đột ngột, một cây nến <strong>Bullish Engulfing</strong> xuất hiện, nuốt trọn cây nến giảm trước đó.</p>
+                <p>➔ <strong>Trigger:</strong> Vào lệnh Buy ngay khi nến 15m đóng cửa. Stoploss đặt ngay dưới râu nến Engulfing (rất ngắn). Target đặt theo đỉnh cũ của khung Daily (rất xa).</p>
+
+                <div class="info-box success">
+                    <div class="info-box-title">🏆 Kết Quả</div>
+                    <p>Bằng cách kết hợp 3 khung, bạn có được sự an toàn của xu hướng Daily, sự rõ ràng của vùng giá 4H, và mức rủi ro siêu nhỏ của điểm vào lệnh 15m. Tỷ lệ Risk:Reward của trade này có thể lên tới 1:5 hoặc 1:10.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. BENEFITS & COMPARISON -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>5. Lợi Ích Cốt Lõi Của MTF</h2>
+            </div>
+            <div class="card-content">
+                <p>Tại sao phải phức tạp hóa vấn đề như vậy? Tại sao không trade luôn một khung cho nhanh? Hãy xem bảng so sánh dưới đây:</p>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x400/112250/FFBD59?text=MTF+Benefits+Comparison" alt="So sánh lợi ích MTF">
+                </div>
+
+                <div class="highlight-box">
+                    <div class="highlight-title">💎 Sự Khác Biệt Về Tâm Lý</div>
+                    <p>Khi bạn trade đơn khung, mỗi cây nến ngược chiều đều làm bạn lo sợ. "Chết rồi, giá đảo chiều rồi sao?".</p>
+                    <p>Khi bạn có MTF, cây nến ngược chiều trên LTF chỉ là "nhiễu" hoặc cơ hội để vào lệnh thêm. Bạn có sự bình tĩnh của một vị tướng quan sát chiến trường từ trên cao, thay vì nỗi sợ của một người lính trong chiến hào.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. COMMON MISTAKES -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>6. Sai Lầm Chết Người Cần Tránh ⚠️</h2>
+            </div>
+            <div class="card-content">
+                <div class="warning-box">
+                    <h4>1. Tunnel Vision (Tầm Nhìn Ống)</h4>
+                    <p>Đây là lỗi phổ biến nhất. Trader mải mê nhìn chart 5 phút, thấy giá tăng mạnh thì FOMO mua đuổi, không hề biết rằng giá vừa chạm vào một HFZ (Vùng Bán) cực mạnh của khung Daily ngay phía trên đầu. Kết quả: Mua đúng đỉnh.</p>
+                </div>
+
+                <div class="warning-box">
+                    <h4>2. Phân Tích Quá Nhiều Khung (Analysis Paralysis)</h4>
+                    <p>Ngược lại với lỗi trên. Trader bật từ Monthly, Weekly, Daily, 12H, 8H, 6H, 4H... cho đến 1 phút. Khung này bảo tăng, khung kia bảo giảm. Cuối cùng, họ bị loạn và không dám vào lệnh. <strong>Giải pháp:</strong> Chỉ dùng đúng 3 khung trong bộ quy tắc của bạn.</p>
+                </div>
+
+                <div class="warning-box">
+                    <h4>3. Mixing Timeframes (Râu Ông Nọ Cắm Cằm Bà Kia)</h4>
+                    <p>Phân tích xu hướng trên 15m (ngắn hạn) nhưng lại đặt Target theo khung Daily (dài hạn). Hoặc vào lệnh theo Daily nhưng lại sợ hãi cắt lỗ vì một biến động trên 5m. Hãy nhất quán: Vào lệnh khung nào, quản lý lệnh theo logic của khung đó (hoặc khung lớn hơn liền kề).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. PRACTICAL APPLICATION -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>7. Bài Tập Ứng Dụng: Quy Trình 3 Bước</h2>
+            </div>
+            <div class="card-content">
+                <p>Để biến kiến thức này thành kỹ năng, hãy thực hiện bài tập sau trong 3 ngày tới mỗi khi bạn mở chart:</p>
+                
+                <p><strong>Bước 1 (HTF Check):</strong> Mở khung Daily. Tự hỏi: "Phe nào đang kiểm soát?".</p>
+                <ul class="styled-list">
+                    <li>Nếu đỉnh sau cao hơn đỉnh trước: Phe Bò (Buy).</li>
+                    <li>Nếu đáy sau thấp hơn đáy trước: Phe Gấu (Sell).</li>
+                    <li>Nếu đi ngang: Đứng ngoài hoặc trade biên.</li>
+                </ul>
+
+                <p><strong>Bước 2 (ITF Zone):</strong> Mở khung 4H.</p>
+                <ul class="styled-list">
+                    <li>Nếu Daily là Buy: Tìm các vùng LFZ (DPU/UPU) bên dưới giá hiện tại. Vẽ ra.</li>
+                    <li>Nếu Daily là Sell: Tìm các vùng HFZ (UPD/DPD) bên trên giá hiện tại. Vẽ ra.</li>
+                </ul>
+
+                <p><strong>Bước 3 (Alert):</strong> Đặt cảnh báo giá (Price Alert) tại mép các vùng đó và đi làm việc khác. Đừng nhìn chart cho đến khi Alert kêu.</p>
+
+                <p>Chỉ khi Alert kêu, bạn mới mở khung LTF (1H hoặc 15m) để tìm điểm vào lệnh. Đây là cách trade nhàn hạ và hiệu quả nhất.</p>
+            </div>
+        </div>
+
+        <!-- 8. SUMMARY -->
+        <div class="summary-box">
+            <h3>📋 Tổng Kết Bài Học</h3>
+            <ul class="summary-list">
+                <li><strong>Đa khung thời gian</strong> là yếu tố bắt buộc để có xác suất thắng cao.</li>
+                <li><strong>HTF (Higher TF)</strong> dùng để xác định xu hướng chủ đạo và vùng cản lớn. Đừng bao giờ trade ngược HTF.</li>
+                <li><strong>ITF (Intermediate TF)</strong> dùng để tìm setup và vùng vào lệnh (GEM Zones).</li>
+                <li><strong>LTF (Lower TF)</strong> dùng để tìm điểm kích hoạt (Trigger) và tối ưu rủi ro.</li>
+                <li><strong>Sự đồng bộ (Alignment)</strong> giữa 3 khung thời gian tạo ra các cơ hội giao dịch A+ (xác suất cao nhất).</li>
+                <li>Tránh lỗi <strong>Tunnel Vision</strong> (nhìn quá hẹp) và <strong>Analysis Paralysis</strong> (nhìn quá nhiều).</li>
+            </ul>
+        </div>
+
+        <!-- QUIZ SECTION -->
+        <div class="quiz-section">
+            <h3 class="quiz-title">📝 Kiểm Tra Kiến Thức</h3>
+
+            <div class="quiz-question" data-correct="1">
+                <p class="question-text">1. Vai trò chính của khung thời gian lớn nhất (HTF) trong bộ ba là gì?</p>
+                <button class="quiz-option" data-index="0">Tìm điểm vào lệnh sớm nhất có thể (Sniper Entry).</button>
+                <button class="quiz-option" data-index="1">Xác định xu hướng chủ đạo và các vùng cản lớn (Big Picture).</button>
+                <button class="quiz-option" data-index="2">Xác định các mô hình nến đảo chiều ngắn hạn.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <p class="question-text">2. Nếu khung Daily đang là Downtrend (Giảm), nhưng khung 1H đang có xu hướng Tăng nhẹ, bạn nên làm gì?</p>
+                <button class="quiz-option" data-index="0">Mua ngay lập tức vì 1H đang tăng mạnh.</button>
+                <button class="quiz-option" data-index="1">Đứng ngoài thị trường mãi mãi.</button>
+                <button class="quiz-option" data-index="2">Coi đà tăng của 1H là nhịp hồi, chờ giá hồi về vùng HFZ của Daily/4H để tìm cơ hội Sell (Short).</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <p class="question-text">3. "Tunnel Vision" (Tầm nhìn ống) là lỗi gì?</p>
+                <button class="quiz-option" data-index="0">Chỉ tập trung vào một khung thời gian nhỏ (LTF) mà bỏ qua bối cảnh lớn (HTF).</button>
+                <button class="quiz-option" data-index="1">Phân tích quá nhiều khung thời gian dẫn đến không dám vào lệnh.</button>
+                <button class="quiz-option" data-index="2">Sử dụng quá nhiều chỉ báo kỹ thuật trên màn hình.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-number"><span id="correct-count">0</span>/3</div>
+                <div class="score-label">Câu trả lời đúng</div>
+                <button class="retake-btn" onclick="retakeQuiz()">Làm Lại Quiz</button>
+            </div>
+        </div>
+
+        <footer class="lesson-footer">
+            <p>GEM Trading Academy - Tier 2</p>
+            <p>© 2025 GEM Frequency Trading Method</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác! Bạn đã nắm vững nguyên tắc.';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy xem lại phần lý thuyết tương ứng nhé.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function retakeQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                question.querySelector('.quiz-result').className = 'quiz-result';
+            });
+
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+
+</body>
+</html>

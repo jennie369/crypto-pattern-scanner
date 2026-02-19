@@ -1,0 +1,45 @@
+📐 HÌNH 8.1.1: NGÃ BA ĐƯỜNG TRADING
+Tên file: 8.1.1-the-crossroads.png | Tỷ lệ: 16:9 (Landscape)
+Bối cảnh: Minh họa vị trí hiện tại của học viên sau khi hoàn thành Tier 1.
+NỘI DUNG HÌNH:
+ - Hình ảnh một trader đứng trước 3 con đường rẽ:
+   1. Con đường bên trái (U ám): "Bỏ cuộc / Đánh bạc" - Dẫn đến vực thẳm.
+   2. Con đường ở giữa (Vòng lặp): "Tự mò mẫm / Vòng lặp Doom Loop" - Dẫn đi vòng tròn không lối thoát.
+   3. Con đường bên phải (Sáng sủa, dốc lên): "Hệ thống chuyên nghiệp / Tier 2" - Dẫn lên đỉnh núi thành công.
+ - Text nổi bật: "BẠN ĐANG ĐỨNG Ở ĐÂY"
+
+---
+
+📐 HÌNH 8.1.2: TẢNG BĂNG TRÔI KIẾN THỨC
+Tên file: 8.1.2-knowledge-iceberg.png | Tỷ lệ: 3:4 (Vertical)
+Bối cảnh: So sánh kiến thức Tier 1 với những gì thực sự cần để thành công (Tier 2/3).
+NỘI DUNG HÌNH:
+ - Hình ảnh tảng băng trôi trên mặt biển.
+ - Phần nổi (10% - Tier 1): "Khái niệm cơ bản", "Mô hình nến", "Zone cơ bản".
+ - Phần chìm (90% - Tier 2/3): "Quản lý tâm lý", "Kỹ năng thực chiến", "Quy tắc vào lệnh chi tiết", "Scanner tự động", "Backtesting", "Quản lý vốn nâng cao".
+ - Thông điệp: "Bạn chỉ mới thấy bề nổi của tảng băng."
+
+---
+
+📐 HÌNH 8.1.3: 3 LOẠI TRADER (TIMELINE)
+Tên file: 8.1.3-trader-timelines.png | Tỷ lệ: 16:9 (Landscape)
+Bối cảnh: Biểu đồ so sánh kết quả tài chính của 3 loại trader theo thời gian.
+NỘI DUNG HÌNH:
+ - Biểu đồ đường PnL (Lợi nhuận) theo Thời gian (Tháng).
+ - Đường 1 (Đỏ): Trader bỏ cuộc - Lao dốc nhanh chóng về 0 rồi dừng lại.
+ - Đường 2 (Vàng): Trader tự mò - Biến động mạnh, đi ngang hoặc giảm dần trong thời gian dài (1-2 năm).
+ - Đường 3 (Xanh): Trader chuyên nghiệp (GEM Member) - Có một đoạn "Dip" nhỏ (giai đoạn học tập Tier 2) sau đó tăng trưởng đều đặn và bền vững.
+ - Chú thích: "Con đường tắt thông minh giúp bạn tiết kiệm hàng năm trời thử sai."
+
+---
+
+📐 HÌNH 8.1.4: CÂY CẦU KHOẢNG CÁCH
+Tên file: 8.1.4-the-gap-bridge.png | Tỷ lệ: 16:9 (Landscape)
+Bối cảnh: Minh họa giải pháp để đi từ "Biết" đến "Làm được".
+NỘI DUNG HÌNH:
+ - Hai vách núi cách xa nhau.
+ - Vách trái: "BIẾT" (Lý thuyết, Khái niệm Tier 1).
+ - Vách phải: "LÀM ĐƯỢC" (Lợi nhuận, Kết quả thực tế).
+ - Ở giữa là vực sâu: "Thua lỗ", "Cảm xúc", "Thiếu kỷ luật".
+ - Cây cầu nối hai vách: "TIER 2 & TIER 3" (Công cụ, Mentor, Cộng đồng).
+ - Thông điệp: "Đừng cố nhảy qua vực thẳm một mình. Hãy đi trên cây cầu đã được xây sẵn."

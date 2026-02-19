@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 8.3: Zone Hierarchy - Phân Cấp Zone | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section, .content-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section, .content-card {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .card-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .card-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+            text-align: justify;
+        }
+
+        ul, .styled-list {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+            overflow: hidden;
+        }
+        .image-placeholder img { width: 100%; height: auto; display: block; }
+
+        .highlight-box, .info-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .highlight-box h4, .info-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p, .info-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box, .info-box.danger {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .warning-box h4, .info-box.danger .info-box-title { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+
+        .success-box, .info-box.success {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .success-box h4, .info-box.success .info-box-title { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+
+        .info-box.cyan {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+        }
+        .info-box.cyan .info-box-title { color: var(--cyan); }
+
+        .strength-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        .strength-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        .strength-icon { font-size: 2rem; margin-bottom: var(--space-sm); }
+        .strength-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .strength-score { font-size: 1.5rem; font-weight: 800; color: var(--gold); margin-bottom: var(--space-xs); }
+        .strength-desc { font-size: 0.85rem; color: var(--text-muted); }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-lg) 0;
+        }
+        .compare-table th, .compare-table td {
+            padding: var(--space-md);
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .compare-table th { color: var(--gold); font-weight: 600; }
+        .compare-table td { color: var(--text-secondary); }
+
+        .hierarchy-pyramid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-sm);
+            margin: var(--space-lg) 0;
+        }
+        .pyramid-level {
+            width: 80%;
+            padding: var(--space-md);
+            text-align: center;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            color: var(--navy-dark);
+        }
+        .pyramid-level.htf { background: var(--gold); width: 40%; }
+        .pyramid-level.itf { background: var(--cyan); width: 60%; }
+        .pyramid-level.ltf { background: var(--success); width: 80%; }
+        .pyramid-label { font-size: 0.8rem; font-weight: 400; margin-top: 4px; }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-box li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-box li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        .quiz-question p { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); }
+
+        .quiz-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-sm);
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+            color: var(--error);
+        }
+
+        .quiz-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .quiz-result.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent);
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .quiz-score-text { color: var(--gold); font-size: 1.5rem; font-weight: 700; margin-bottom: var(--space-sm); }
+
+        .btn-retake {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-xl);
+        }
+        .lesson-footer p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+
+        /* Highlights */
+        .highlight { color: var(--cyan); font-weight: 600; }
+        .highlight-gold { color: var(--gold); font-weight: 600; }
+        .highlight-green { color: var(--success); font-weight: 600; }
+        .highlight-red { color: var(--error); font-weight: 600; }
+        .highlight-purple { color: var(--purple); font-weight: 600; }
+
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <span class="header-badge">📊 Tier 2 - Bài 8.3</span>
+            <h1 class="lesson-title">Zone Hierarchy - Phân Cấp Zone</h1>
+            <p class="lesson-subtitle">Tại sao không phải tất cả các Zone đều sinh ra bình đẳng?</p>
+        </header>
+
+        <!-- Section 1: Opening Hook -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>👑 Tại Sao Bạn Lại Thua Lỗ Dù Đã Vẽ Đúng Zone?</h2>
+            </div>
+            <div class="card-content">
+                <p>Hãy tưởng tượng bạn đang lái một chiếc xe con (1H Zone) và đối đầu trực diện với một chiếc xe tải hạng nặng (Daily Zone). Ai sẽ thắng? Câu trả lời quá rõ ràng.</p>
+                <p>Một trong những sai lầm chết người nhất mà tôi thấy các trader Tier 1 mắc phải là: <strong>Đối xử với tất cả các Zone như nhau</strong>. Bạn thấy một LFZ đẹp trên khung 15 phút và bạn All-in, nhưng rồi giá xuyên qua nó như một tờ giấy mỏng. Tại sao? Vì bạn đã không nhìn thấy chiếc "xe tải" Daily HFZ đang lao tới từ phía đối diện.</p>
+                <p>Trong bài học này, chúng ta sẽ đi sâu vào <strong>Zone Hierarchy (Hệ thống phân cấp Zone)</strong>. Bạn sẽ học cách xếp hạng sức mạnh của từng vùng giá, biết khi nào nên "cứng đầu" giữ lệnh và khi nào nên "bỏ chạy" ngay lập tức. Đây chính là tấm khiên bảo vệ tài khoản của bạn khỏi những cú trade cảm tử.</p>
+            </div>
+        </div>
+
+        <!-- Section 2: Concept Definition -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>📚 Zone Hierarchy Là Gì?</h2>
+            </div>
+            <div class="card-content">
+                <p><span class="highlight-gold">Zone Hierarchy</span> là hệ thống xếp hạng sức mạnh và độ ưu tiên của các vùng Supply/Demand dựa trên khung thời gian (Timeframe) mà chúng được hình thành.</p>
+                <p>Nguyên tắc cốt lõi rất đơn giản nhưng cực kỳ quyền lực: <strong>Zone từ khung thời gian lớn hơn LUÔN LUÔN mạnh hơn và "đè bẹp" zone từ khung thời gian nhỏ hơn.</strong></p>
+
+                <div class="hierarchy-pyramid">
+                    <div class="pyramid-level htf">
+                        👑 HTF ZONE (Daily, Weekly, Monthly)
+                        <div class="pyramid-label">The Generals - Quyết định xu hướng chính</div>
+                    </div>
+                    <div class="pyramid-level itf">
+                        ⭐ ITF ZONE (4H, 1H)
+                        <div class="pyramid-label">The Captains - Nơi diễn ra các swing trade</div>
+                    </div>
+                    <div class="pyramid-level ltf">
+                        📍 LTF ZONE (15m, 5m)
+                        <div class="pyramid-label">The Soldiers - Chỉ dùng để tìm điểm vào lệnh</div>
+                    </div>
+                </div>
+
+                <div class="info-box warning">
+                    <div class="info-box-title">⚠️ Quy Tắc Bất Di Bất Dịch</div>
+                    <p>Đừng bao giờ dùng một LTF Zone (ví dụ 5m) để cản một con tàu đang chạy theo xu hướng của HTF Zone (ví dụ Daily). Đó là hành động tự sát tài chính.</p>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x400/112250/FFBD59?text=Zone+Hierarchy+Pyramid" alt="Zone Hierarchy">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Deep Dive -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>💎 Phân Tích Chuyên Sâu: Giải Mã Sức Mạnh</h2>
+            </div>
+            <div class="card-content">
+                <p>Tại sao khung thời gian lớn lại quan trọng đến vậy? Hãy nhìn vào dòng tiền.</p>
+                
+                <h3>1. Big Money chơi ở đâu?</h3>
+                <p>Các tổ chức tài chính lớn (Smart Money) quản lý hàng tỷ đô la. Họ không thể ra vào lệnh trên khung 5 phút hay 15 phút vì thanh khoản ở đó quá mỏng. Họ buộc phải giao dịch trên khung Daily, Weekly. Vì vậy, các Zone trên HTF chính là "dấu chân" của những gã khổng lồ này.</p>
+                <p>Khi giá chạm Daily Zone, đó là lúc các định chế tài chính bắt đầu kích hoạt hàng tấn lệnh chờ. Sức mạnh này đủ để đảo chiều bất kỳ xu hướng ngắn hạn nào.</p>
+
+                <h3>2. Hệ Thống Chấm Điểm Sức Mạnh (Zone Scoring)</h3>
+                <p>Để giúp bạn lượng hóa sức mạnh, chúng ta sử dụng hệ thống điểm 10:</p>
+
+                <div class="strength-grid">
+                    <div class="strength-card high">
+                        <div class="strength-icon">👑</div>
+                        <div class="strength-title">HTF Zone</div>
+                        <div class="strength-score">10/10</div>
+                        <div class="strength-desc">Weekly, Daily - "Bức tường bê tông"</div>
+                    </div>
+                    <div class="strength-card medium">
+                        <div class="strength-icon">⭐</div>
+                        <div class="strength-title">ITF Zone</div>
+                        <div class="strength-score">7/10</div>
+                        <div class="strength-desc">4H, 1H - "Hàng rào gỗ"</div>
+                    </div>
+                    <div class="strength-card low">
+                        <div class="strength-icon">📍</div>
+                        <div class="strength-title">LTF Zone</div>
+                        <div class="strength-score">4/10</div>
+                        <div class="strength-desc">15m, 5m - "Vạch phấn trắng"</div>
+                    </div>
+                </div>
+
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>Đặc Điểm</th>
+                            <th>HTF Zone (Daily+)</th>
+                            <th>ITF Zone (4H-1H)</th>
+                            <th>LTF Zone (15m-)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Độ Tin Cậy (Win Rate)</strong></td>
+                            <td style="color: var(--success-green);">Rất Cao (70-80%)</td>
+                            <td style="color: var(--accent-cyan);">Khá (60-70%)</td>
+                            <td style="color: var(--accent-gold);">Thấp (50-60%)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Phản Ứng Giá</strong></td>
+                            <td>Đảo chiều xu hướng</td>
+                            <td>Swing trade (sóng trung)</td>
+                            <td>Scalp (sóng ngắn)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Thời Gian Giữ Lệnh</strong></td>
+                            <td>Vài ngày đến vài tuần</td>
+                            <td>Vài giờ đến vài ngày</td>
+                            <td>Vài phút đến vài giờ</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Rủi Ro (Noise)</strong></td>
+                            <td>Rất thấp</td>
+                            <td>Trung bình</td>
+                            <td>Rất cao (nhiễu)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x350/112250/00F0FF?text=Zone+Strength+Comparison" alt="Zone Strength">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Advanced Scenarios -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>⚔️ Confluence và Conflict: Chiến Trường Thực Tế</h2>
+            </div>
+            <div class="card-content">
+                <p>Thị trường không phải lúc nào cũng đơn giản. Bạn sẽ thường xuyên gặp hai tình huống: Các zone đồng lòng (Confluence) hoặc các zone đánh nhau (Conflict).</p>
+
+                <h3>1. Confluence: "Thiên Thời Địa Lợi"</h3>
+                <p>Đây là chén thánh của trading. Khi một zone nhỏ nằm GỌN TRONG hoặc TRÙNG KHỚP với một zone lớn.</p>
+                <div class="info-box success">
+                    <div class="info-box-title">✅ Công Thức Vàng: HTF + ITF = SUPER ZONE</div>
+                    <p>Ví dụ: Bạn có một Daily LFZ (Vùng mua) ở giá $40,000. Bạn zoom vào 4H và cũng thấy một 4H LFZ đẹp ngay tại $40,000. <br>
+                    → Sức mạnh cộng hưởng: 10 + 7 = <strong>17/10</strong>. Đây là nơi bạn có thể tự tin vào lệnh với khối lượng chuẩn.</p>
+                </div>
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x400/112250/10B981?text=Confluence+Zone+Example" alt="Confluence Zones">
+                </div>
+
+                <h3>2. Conflict: "Trâu Bò Đánh Nhau"</h3>
+                <p>Tình huống nguy hiểm nhất: HTF bảo BÁN, nhưng LTF bảo MUA.</p>
+                <div class="info-box danger">
+                    <div class="info-box-title">❌ Kịch Bản Chết Người</div>
+                    <p>Giá đang chạm vào <strong>Daily HFZ (Vùng bán mạnh)</strong>. Nhưng trên khung 15 phút, bạn thấy một <strong>LTF LFZ (Vùng mua)</strong> vừa hình thành.<br>
+                    Rất nhiều trader non tay sẽ Buy tại LTF LFZ đó. Kết quả? Giá đâm thủng vùng mua 15 phút đó như không có gì cản trở để đi theo lực bán của Daily.</p>
+                </div>
+                
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x400/112250/EF4444?text=Zone+Conflict+Resolution" alt="Zone Conflict">
+                </div>
+
+                <div class="info-box cyan">
+                    <div class="info-box-title">💡 Giải Pháp Của Chuyên Gia</div>
+                    <ul class="styled-list">
+                        <li><strong>Quy tắc 1:</strong> Khi Conflict, HTF luôn thắng. Hãy trade theo hướng của HTF.</li>
+                        <li><strong>Quy tắc 2:</strong> Nếu muốn trade ngược HTF (Counter-trend), bắt buộc phải đợi giá thoát khỏi HTF Zone và tạo cấu trúc mới.</li>
+                        <li><strong>Quy tắc 3:</strong> Nếu không chắc chắn, hãy ĐỨNG NGOÀI (No trade is a good trade).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Application -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2>🎯 Quy Trình Phân Tích Đa Khung Thời Gian (Top-Down Analysis)</h2>
+            </div>
+            <div class="card-content">
+                <p>Để áp dụng Zone Hierarchy vào thực chiến, hãy tuân thủ quy trình 3 bước này mỗi sáng:</p>
+
+                <div class="info-box">
+                    <div class="info-box-title">☑️ Bước 1: The Big Picture (Daily/Weekly)</div>
+                    <p>Mở khung Daily. Xác định xu hướng chính và các Key Zone gần nhất. Giá đang ở đâu so với các "bức tường bê tông" này? <br>
+                    <em>Mục đích: Xác định Bias (Thiên kiến) - Hôm nay mình ưu tiên Buy hay Sell?</em></p>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-box-title">☑️ Bước 2: The Setup (4H/1H)</div>
+                    <p>Zoom vào 4H hoặc 1H. Tìm kiếm các Zone (Setup) thuận theo xu hướng của Daily. Tìm kiếm sự Confluence (trùng khớp) với các vùng Daily.<br>
+                    <em>Mục đích: Tìm khu vực giao dịch tiềm năng.</em></p>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-box-title">☑️ Bước 3: The Entry (15m/5m)</div>
+                    <p>Khi giá đi vào Zone 4H/1H của bạn, hãy zoom xuống 15m/5m để tìm tín hiệu xác nhận (Confirmation) hoặc tinh chỉnh điểm vào lệnh (Refine Entry) để có R:R tốt nhất.<br>
+                    <em>Mục đích: Tối ưu hóa điểm vào và cắt lỗ.</em></p>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/800x450/112250/6A5BFF?text=Zone+Hierarchy+Checklist+Workflow" alt="Hierarchy Checklist">
+                </div>
+
+                <div class="info-box success">
+                    <div class="info-box-title">✅ Pro Tip: Mã Hóa Màu Sắc</div>
+                    <p>Hãy thiết lập trading view của bạn ngay bây giờ:<br>
+                    <span class="highlight-purple">■ Zone Daily: Màu Tím (Đậm, Rõ)</span><br>
+                    <span class="highlight">■ Zone 4H: Màu Xanh Cyan (Vừa)</span><br>
+                    <span class="highlight-green">■ Zone 15m: Màu Xanh Lá (Nhạt, Mảnh)</span><br>
+                    Điều này giúp não bộ bạn nhận diện ngay lập tức cấp độ nguy hiểm của vùng giá.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary-box">
+            <h3>📋 Tóm Tắt Bài Học</h3>
+            <ul class="summary-list">
+                <li><strong>Hierarchy là luật:</strong> HTF Zone (Daily) luôn mạnh hơn và đè bẹp LTF Zone (15m).</li>
+                <li><strong>Confluence là vua:</strong> Khi HTF và LTF zone trùng nhau, đó là cơ hội xác suất thắng cao nhất (A+ Setup).</li>
+                <li><strong>Conflict là bẫy:</strong> Khi HTF và LTF ngược nhau, hãy theo phe HTF hoặc đứng ngoài.</li>
+                <li><strong>Top-Down Analysis:</strong> Luôn phân tích từ khung lớn xuống khung nhỏ. Không bao giờ làm ngược lại.</li>
+                <li><strong>Smart Money Footprint:</strong> HTF Zone là nơi các cá mập để lại dấu chân, hãy đi theo họ.</li>
+            </ul>
+        </div>
+
+        <!-- Quiz Section -->
+        <div class="quiz-section">
+            <h3 class="quiz-title">📝 Kiểm Tra Kiến Thức</h3>
+
+            <div class="quiz-question" data-correct="0">
+                <p>1. Trong hệ thống Zone Hierarchy, vùng giá nào có "quyền lực" cao nhất?</p>
+                <button class="quiz-option" data-index="0">HTF Zone (Daily, Weekly)</button>
+                <button class="quiz-option" data-index="1">ITF Zone (4H)</button>
+                <button class="quiz-option" data-index="2">LTF Zone (15m)</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <p>2. "Confluence Zone" (Vùng hợp lưu) xảy ra khi nào?</p>
+                <button class="quiz-option" data-index="0">Khi giá phá vỡ qua Zone</button>
+                <button class="quiz-option" data-index="1">Khi Zone từ khung lớn và khung nhỏ chồng lên nhau (overlap) tại cùng một mức giá</button>
+                <button class="quiz-option" data-index="2">Khi hai Zone nằm ở hai mức giá khác nhau hoàn toàn</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <p>3. Bạn nên làm gì nếu khung Daily đang báo BÁN (chạm Daily HFZ) nhưng khung 15 phút lại báo MUA (chạm 15m LFZ)?</p>
+                <button class="quiz-option" data-index="0">Mua ngay lập tức theo tín hiệu 15 phút vì nó nhanh hơn</button>
+                <button class="quiz-option" data-index="1">Vào lệnh với khối lượng gấp đôi để ăn cả hai đầu</button>
+                <button class="quiz-option" data-index="2">Ưu tiên tín hiệu BÁN của Daily hoặc đứng ngoài chờ đợi</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="quiz-score-text">Kết Quả: <span id="correct-count">0</span>/3</div>
+                <p>Bạn đã hoàn thành bài kiểm tra!</p>
+                <button class="btn-retake" onclick="retakeQuiz()">Làm Lại Quiz</button>
+            </div>
+        </div>
+
+        <footer class="lesson-footer">
+            <p>GEM Trading Academy - Tier 2</p>
+            <p>© 2025 GEM Frequency Trading Method</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác! Bạn đã hiểu đúng nguyên tắc Hierarchy.';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy nhớ: HTF luôn mạnh hơn LTF.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function retakeQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                question.querySelector('.quiz-result').className = 'quiz-result';
+            });
+
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+
+</body>
+</html>

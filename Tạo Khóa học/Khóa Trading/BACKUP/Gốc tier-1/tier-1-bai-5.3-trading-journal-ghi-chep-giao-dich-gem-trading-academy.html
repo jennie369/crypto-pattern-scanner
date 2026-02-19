@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 7.3: Trading Journal & Ghi Chép Giao Dịch - GEM Trading Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>:root{--navy:#112250;--navy-dark:#0a1628;--gold:#FFBD59;--gold-dark:#E5A73D;--cyan:#00F0FF;--purple:#6A5BFF;--burgundy:#9C0612;--success:#00C853;--error:#FF5252;--bg-primary:#0a1628;--bg-card:rgba(17,34,80,0.6);--text-primary:#FFFFFF;--text-secondary:rgba(255,255,255,0.85);--text-muted:rgba(255,255,255,0.6);--glass-bg:rgba(17,34,80,0.4);--glass-border:rgba(255,189,89,0.2);--space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--radius-md:12px;--radius-lg:16px}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}body{font-family:'Montserrat',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.7}img{max-width:100%;height:auto;display:block}.background-container{position:fixed;inset:0;z-index:-1}.bg-layer-base{position:absolute;inset:0;background:linear-gradient(180deg,var(--navy-dark) 0%,var(--navy) 50%,var(--navy-dark) 100%)}.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.3}.orb-1{width:400px;height:400px;background:var(--gold);top:-100px;right:-100px}.orb-2{width:300px;height:300px;background:var(--cyan);bottom:20%;left:-100px}.orb-3{width:250px;height:250px;background:var(--success);bottom:-50px;right:20%}.lesson-container{max-width:800px;margin:0 auto;padding:1.5rem}@media(max-width:600px){.lesson-container{padding:0}}.lesson-header{text-align:center;padding:var(--space-xl);margin-bottom:var(--space-xl);background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg)}@media(max-width:600px){.lesson-header{padding:var(--space-lg) 16px;margin-bottom:0;border:none;border-radius:0;border-bottom:8px solid var(--bg-primary)}}.lesson-badge{display:inline-flex;align-items:center;gap:var(--space-sm);padding:var(--space-sm) var(--space-md);background:linear-gradient(135deg,var(--success),var(--cyan));border-radius:50px;font-size:0.75rem;font-weight:700;text-transform:uppercase;margin-bottom:var(--space-md);color:var(--navy-dark)}.lesson-chapter{font-size:0.9rem;color:var(--gold);font-weight:600;margin-bottom:var(--space-sm);text-transform:uppercase;letter-spacing:2px}.lesson-title{font-size:clamp(1.75rem,5vw,2.5rem);font-weight:800;margin-bottom:var(--space-md);background:linear-gradient(135deg,var(--text-primary),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.lesson-meta{display:flex;justify-content:center;gap:var(--space-lg);flex-wrap:wrap;color:var(--text-muted);font-size:0.85rem}.section{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin-bottom:var(--space-lg)}@media(max-width:600px){.section{padding:0;margin-bottom:0;border:none;border-radius:0;border-bottom:8px solid var(--bg-primary)}}.section-title{font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-lg);display:flex;align-items:center;gap:var(--space-sm)}@media(max-width:600px){.section-title{padding:var(--space-lg) 16px var(--space-md) 16px;margin-bottom:0}}.section>p,.section>h3{color:var(--text-secondary);margin-bottom:var(--space-md)}@media(max-width:600px){.section>p,.section>h3{padding:0 16px}}.section>ul,.section>ol{color:var(--text-secondary);padding-left:1.5em;margin-bottom:var(--space-md)}@media(max-width:600px){.section>ul,.section>ol{padding-left:calc(16px + 1.5em);padding-right:16px}}.section li{margin-bottom:var(--space-sm)}.highlight-box{background:linear-gradient(135deg,rgba(255,189,89,0.15),rgba(255,189,89,0.05));border:1px solid rgba(255,189,89,0.3);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}@media(max-width:600px){.highlight-box{border:none;border-radius:0;border-left:4px solid var(--gold);padding:var(--space-md) 16px;margin:var(--space-md) 0}}.highlight-box-title{font-weight:700;color:var(--gold);margin-bottom:var(--space-sm)}.highlight-box p{color:var(--text-secondary);margin:0;margin-bottom:var(--space-sm)}.highlight-box p:last-child{margin-bottom:0}.definition-box{background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(0,240,255,0.02));border:1px solid rgba(0,240,255,0.2);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}@media(max-width:600px){.definition-box{border:none;border-radius:0;border-left:4px solid var(--cyan);padding:var(--space-md) 16px;margin:var(--space-md) 0}}.definition-box-title{font-weight:700;color:var(--cyan);margin-bottom:var(--space-sm)}.definition-box p{color:var(--text-secondary);margin-bottom:var(--space-sm)}.definition-box p:last-child{margin-bottom:0}.summary-box{background:linear-gradient(135deg,rgba(0,200,83,0.1),rgba(0,200,83,0.02));border:2px solid var(--success);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0}@media(max-width:600px){.summary-box{border:none;border-radius:0;border-left:4px solid var(--success);padding:var(--space-lg) 16px;margin:var(--space-md) 0}}.summary-title{font-size:1.25rem;font-weight:700;color:var(--success);margin-bottom:var(--space-lg)}.summary-box ul{list-style:none;padding:0}.summary-box li{display:flex;align-items:flex-start;gap:var(--space-sm);margin-bottom:var(--space-md);color:var(--text-secondary)}.summary-box li::before{content:"✓";color:var(--success);font-weight:700}.quiz-section{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin-top:var(--space-xl)}@media(max-width:600px){.quiz-section{border:none;border-radius:0;padding:0;margin-top:0;border-top:8px solid var(--bg-primary)}}.quiz-header{text-align:center;margin-bottom:var(--space-xl)}@media(max-width:600px){.quiz-header{padding:var(--space-lg) 16px var(--space-md);margin-bottom:0}}.quiz-title{font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-sm)}.quiz-subtitle{color:var(--text-muted);font-size:0.9rem}.quiz-question{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:var(--space-lg);margin-bottom:var(--space-lg)}@media(max-width:600px){.quiz-question{border:none;border-radius:0;border-left:4px solid var(--purple);padding:var(--space-md) 16px;margin-bottom:0;border-bottom:1px solid var(--glass-border)}}.question-number{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50%;font-weight:700;color:var(--navy-dark);margin-bottom:var(--space-md)}.question-text{font-weight:600;color:var(--text-primary);margin-bottom:var(--space-lg);line-height:1.6}.quiz-options{display:flex;flex-direction:column;gap:var(--space-sm)}@media(max-width:600px){.quiz-options{gap:1px;background:var(--glass-border);margin-left:calc(-16px - 4px);margin-right:-16px}}.quiz-option{display:flex;align-items:center;gap:var(--space-md);padding:var(--space-md);background:var(--glass-bg);border:2px solid var(--glass-border);border-radius:var(--radius-md);cursor:pointer;transition:all 0.3s ease}@media(max-width:600px){.quiz-option{border:none;border-radius:0;border-left:4px solid transparent;padding:var(--space-md) 16px}}.quiz-option:hover:not(.disabled){border-color:var(--gold);background:var(--bg-card)}@media(max-width:600px){.quiz-option:hover:not(.disabled){border-left-color:var(--gold)}}.quiz-option.correct{border-color:var(--success)!important;background:rgba(0,200,83,0.15)!important}.quiz-option.incorrect{border-color:var(--error)!important;background:rgba(255,82,82,0.15)!important}.quiz-option.disabled{opacity:0.7;cursor:not-allowed}.option-marker{width:28px;height:28px;min-width:28px;background:var(--glass-bg);border:2px solid var(--glass-border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem}.quiz-option.correct .option-marker{background:var(--success);border-color:var(--success);color:white}.quiz-option.incorrect .option-marker{background:var(--error);border-color:var(--error);color:white}.option-text{flex:1;color:var(--text-secondary)}.question-feedback{margin-top:var(--space-md);padding:var(--space-md);border-radius:var(--radius-md);display:none}@media(max-width:600px){.question-feedback{margin:var(--space-md) 0 0 0;border-radius:0}}.question-feedback.show{display:block}.question-feedback.correct{background:rgba(0,200,83,0.15);border-left:4px solid var(--success)}.question-feedback.incorrect{background:rgba(255,82,82,0.15);border-left:4px solid var(--error)}.feedback-title{font-weight:700;margin-bottom:var(--space-xs)}.question-feedback.correct .feedback-title{color:var(--success)}.question-feedback.incorrect .feedback-title{color:var(--error)}.feedback-text{font-size:0.9rem;color:var(--text-secondary);line-height:1.6}.quiz-result{text-align:center;padding:var(--space-xl);display:none}.quiz-result.show{display:block}.result-score{font-size:3rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.footer{text-align:center;padding:var(--space-xl);color:var(--text-muted)}@media(max-width:600px){.footer{padding:var(--space-lg) 16px}}</style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge"><span>📓</span><span>Journal</span></div>
+            <div class="lesson-chapter">Chapter 7 - Paper Trading</div>
+            <h1 class="lesson-title">Trading Journal & Ghi Chép Giao Dịch</h1>
+            <div class="lesson-meta">
+                <span>📚 Bài 7.3</span>
+                <span>⏱️ 12 phút đọc</span>
+                <span>📝 3 câu quiz</span>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title">🎯 Tại Sao Trader Giỏi Nhất Đều Viết Nhật Ký?</h2>
+            <p>Bạn có biết điểm chung của những trader thành công như Paul Tudor Jones, Ray Dalio hay Stanley Druckenmiller là gì không? Họ đều có một Trading Journal - nhật ký giao dịch ghi lại chi tiết mọi trade họ thực hiện. Không phải vì họ có trí nhớ kém, mà vì họ hiểu rằng cải tiến liên tục đòi hỏi dữ liệu và phân tích khách quan.</p>
+            <p>Nghiên cứu từ TraderPsychology.com cho thấy những trader có journal ghi chép đầy đủ có win rate cao hơn 15-20% so với những người không ghi chép. Con số này không phải ngẫu nhiên - khi bạn buộc mình phải viết ra lý do vào lệnh, phân tích khi thua, và lessons learned từ mỗi trade, bạn tự động trở nên kỷ luật hơn và tránh lặp lại những sai lầm cũ. Trading Journal không chỉ là công cụ ghi nhớ - đó là vũ khí bí mật giúp bạn cải thiện nhanh chóng. Bài học hôm nay sẽ hướng dẫn bạn cách xây dựng và sử dụng Trading Journal hiệu quả.</p>
+        </section>
+
+        <!-- MỤC TIÊU BÀI HỌC -->
+        <section class="section">
+            <h2 class="section-title">📚 Mục Tiêu Bài Học</h2>
+            <div class="definition-box">
+                <div class="definition-box-title">💎 Sau bài học này, bạn sẽ:</div>
+                <p>Hiểu tầm quan trọng của Trading Journal và cách nó giúp cải thiện performance trading.</p>
+                <p>Nắm được template chi tiết để ghi chép mỗi trade một cách đầy đủ và có hệ thống.</p>
+                <p>Biết các chỉ số (metrics) quan trọng cần theo dõi hàng tuần và hàng tháng.</p>
+                <p>Thực hiện được quy trình Weekly Review để phân tích và rút ra bài học từ trades của mình.</p>
+            </div>
+        </section>
+
+        <!-- ĐỊNH NGHĨA VÀ TẦM QUAN TRỌNG -->
+        <section class="section">
+            <h2 class="section-title">📖 Trading Journal Là Gì Và Tại Sao Quan Trọng?</h2>
+            <p><strong>Trading Journal</strong> (Nhật ký giao dịch) là hệ thống ghi chép chi tiết về mọi trade bạn thực hiện, bao gồm lý do vào lệnh, setup, kết quả, và bài học rút ra. Khác với việc chỉ nhìn số liệu P&L trong app, journal giúp bạn hiểu sâu hơn về QUÁ TRÌNH trading của mình và identify được patterns trong hành vi.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📈 4 Lợi Ích Chính Của Trading Journal</div>
+                <p><strong>1. Phát hiện sai lầm lặp lại (Pattern Recognition):</strong> Khi nhìn lại 20 trades thua, bạn có thể phát hiện ra rằng 15 trong số đó là do vào lệnh vào giờ thấp thanh khoản (châu Á session). Không có journal, bạn sẽ không bao giờ nhận ra pattern này.</p>
+                <p><strong>2. Đo lường tiến bộ theo thời gian:</strong> Win rate của bạn tháng 1 là 45%, tháng 3 là 58%. Journal cho phép bạn so sánh và thấy rõ sự tiến bộ hoặc suy giảm.</p>
+                <p><strong>3. Nhận biết tâm lý ảnh hưởng trading:</strong> Khi ghi lại "cảm xúc khi vào lệnh", bạn sẽ thấy rằng 80% trades thua xảy ra khi bạn đang "FOMO" hoặc "muốn gỡ lỗ".</p>
+                <p><strong>4. Tinh chỉnh chiến lược dựa trên dữ liệu thực:</strong> Thay vì đoán mò, bạn có data cụ thể: "Pattern UPU trên 4H có win rate 67% trong khi Triangle chỉ đạt 52%".</p>
+            </div>
+
+            <p>Một trong những lý do nhiều trader không giữ journal là vì họ nghĩ nó mất thời gian. Thực tế, việc ghi chép mỗi trade chỉ mất 2-3 phút, nhưng insight thu được có thể tiết kiệm cho bạn hàng nghìn đô la từ những sai lầm lặp lại. Hãy xem journal như một khoản đầu tư nhỏ mang lại lợi nhuận lớn.</p>
+
+            <!-- HÌNH 7.3.1 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch7/7.3/7-3-1.webp" alt="4 lợi ích của Trading Journal">
+                <div class="image-caption">Hình 7.3.1: Biểu đồ 4 lợi ích chính của Trading Journal - Pattern Recognition, Progress Tracking, Psychology Insights, Strategy Optimization</div>
+            </div>
+        </section>
+
+        <!-- TEMPLATE CHI TIẾT -->
+        <section class="section">
+            <h2 class="section-title">📝 Template Ghi Chép Cho Mỗi Trade</h2>
+            <p>Dưới đây là template chi tiết mà tôi khuyên bạn sử dụng cho mỗi trade. Template này được thiết kế để bao quát tất cả thông tin cần thiết mà không quá phức tạp khiến bạn bỏ cuộc sau vài ngày.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title">📋 Trade Entry Template - 10 Trường Thông Tin</div>
+                <p><strong>1. Trade ID & Date:</strong> Số thứ tự trade và ngày giờ vào lệnh (VD: #47 - 2024-12-15 14:30 UTC)</p>
+                <p><strong>2. Symbol & Direction:</strong> Cặp coin và hướng giao dịch (VD: BTC/USDT - LONG)</p>
+                <p><strong>3. Timeframe:</strong> Khung thời gian chính bạn sử dụng (VD: 4H, với confirmation từ D1)</p>
+                <p><strong>4. Pattern/Setup:</strong> Pattern hoặc setup bạn nhận diện (VD: DPU - Break LFZ với volume spike 2.1x average)</p>
+                <p><strong>5. Entry Reason:</strong> Lý do chi tiết tại sao bạn vào lệnh (2-3 câu mô tả setup và confirmation)</p>
+                <p><strong>6. Entry/SL/TP:</strong> Các mức giá cụ thể (VD: Entry $42,700 | SL $41,200 | TP $46,500)</p>
+                <p><strong>7. R:R & Position Size:</strong> Risk:Reward ratio và size lệnh (VD: R:R = 2.5:1 | Size: $500 = 5% portfolio)</p>
+                <p><strong>8. Emotional State:</strong> Cảm xúc khi vào lệnh (Calm/Confident/FOMO/Revenge/Anxious)</p>
+                <p><strong>9. Result:</strong> Kết quả trade (Win/Loss/BE, P&L bằng số và %)</p>
+                <p><strong>10. Lessons Learned:</strong> Bài học rút ra từ trade này (1-2 câu, cụ thể và actionable)</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">💡 Ví Dụ Entry Hoàn Chỉnh</div>
+                <p><strong>Trade #47 - 15/12/2024 14:30 UTC</strong></p>
+                <p><strong>BTC/USDT - LONG</strong> | Timeframe: 4H</p>
+                <p><strong>Pattern:</strong> DPU đang hoàn thành, break LFZ $42,500 với volume spike 2.1x average</p>
+                <p><strong>Entry Reason:</strong> BTC đã có Phase DOWN từ $45,000 về $41,000, sau đó PAUSE 5 ngày với volume cạn. D1 trend neutral cho phép LONG. Break LFZ $42,500 với strong bullish candle + volume confirmation.</p>
+                <p><strong>Entry:</strong> $42,700 | SL: $41,200 (-3.5%) | TP: $46,500 (+8.9%) | R:R = 2.5:1</p>
+                <p><strong>Size:</strong> $500 (5% portfolio, max loss $17.5 = 0.175%)</p>
+                <p><strong>Emotional State:</strong> Confident - setup rõ ràng, đã chờ 5 ngày cho pattern hoàn chỉnh</p>
+                <p><strong>Result:</strong> ✅ TP HIT sau 48h | +$475 (+8.9% on position, +4.75% on portfolio)</p>
+                <p><strong>Lessons:</strong> DPU trên 4H với D1 neutral cho kết quả tốt. Volume confirmation quan trọng - spike ≥2x average là dấu hiệu mạnh. Patience paid off!</p>
+            </div>
+
+            <p>Trong GEM App, bạn có thể sử dụng trường "Notes" khi tạo paper trade để ghi lại các thông tin này. Tuy nhiên, tôi khuyên bạn nên có một file Google Sheets hoặc Notion riêng để lưu trữ đầy đủ hơn và dễ phân tích sau này.</p>
+
+            <!-- HÌNH 7.3.2 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch7/7.3/7-3-2.webp" alt="Mẫu Trading Journal 10 trường">
+                <div class="image-caption">Hình 7.3.2: Template Trading Journal với 10 trường thông tin cần ghi chép cho mỗi trade</div>
+            </div>
+        </section>
+
+        <!-- METRICS CẦN TRACK -->
+        <section class="section">
+            <h2 class="section-title">📊 Các Chỉ Số (Metrics) Cần Theo Dõi</h2>
+            <p>Sau khi có data từ journal, bước tiếp theo là tổng hợp và phân tích các chỉ số quan trọng. Đây là những con số sẽ cho bạn biết chiến lược của mình đang hoạt động tốt hay cần điều chỉnh.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📈 5 Core Metrics (Bắt Buộc Phải Track)</div>
+                <p><strong>1. Win Rate:</strong> Số trades thắng ÷ Tổng số trades × 100%. Target: >55% với R:R 1:2. Ví dụ: 29 wins / 50 trades = 58%.</p>
+                <p><strong>2. Profit Factor:</strong> Tổng profit của winning trades ÷ Tổng loss của losing trades. Target: >1.5. Ví dụ: $2,400 profit / $1,300 loss = 1.85.</p>
+                <p><strong>3. Average R:R Achieved:</strong> Trung bình R:R thực tế đạt được trên winning trades. Target: >2:1. Đây khác với planned R:R vì đôi khi bạn close sớm hoặc giá vượt TP.</p>
+                <p><strong>4. Max Drawdown:</strong> % giảm lớn nhất từ đỉnh balance xuống đáy. Target: <20%. Ví dụ: Balance cao nhất $12,000, thấp nhất sau đó $10,200 → Drawdown 15%.</p>
+                <p><strong>5. Expectancy:</strong> (Win% × Avg Win) - (Loss% × Avg Loss). Target: >0. Đây là số tiền trung bình bạn kỳ vọng kiếm được trên mỗi trade.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title">📊 Pattern Analysis Metrics (Nâng Cao)</div>
+                <p><strong>Best Pattern:</strong> Pattern nào có win rate cao nhất? Track riêng win rate cho UPU, DPU, Flag, Triangle... để biết pattern nào phù hợp với bạn.</p>
+                <p><strong>Best Timeframe:</strong> Timeframe nào cho kết quả tốt nhất? Một số trader trade 4H giỏi hơn 1H, một số ngược lại.</p>
+                <p><strong>Best Time of Day:</strong> Giờ nào trong ngày bạn trade tốt nhất? Session châu Âu? Session Mỹ? Đây là insight quý giá.</p>
+                <p><strong>Worst Recurring Mistakes:</strong> Sai lầm nào lặp lại nhiều nhất? FOMO? Không đợi confirmation? Close sớm? Identify và fix từng cái một.</p>
+            </div>
+
+            <p>Tôi khuyên bạn nên tính các metrics này hàng tuần (Sunday Review) và hàng tháng (Monthly Summary). Điều này giúp bạn theo dõi xu hướng và phát hiện vấn đề sớm trước khi nó trở nên nghiêm trọng.</p>
+
+            <!-- HÌNH 7.3.3 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch7/7.3/7-3-3.webp" alt="Dashboard các chỉ số Performance">
+                <div class="image-caption">Hình 7.3.3: Dashboard theo dõi 5 Core Metrics - Win Rate, Profit Factor, Avg R:R, Max Drawdown và Expectancy</div>
+            </div>
+        </section>
+
+        <!-- WEEKLY REVIEW PROCESS -->
+        <section class="section">
+            <h2 class="section-title">📆 Quy Trình Weekly Review (Chủ Nhật)</h2>
+            <p>Weekly Review là buổi tự đánh giá hàng tuần mà mọi trader nghiêm túc đều thực hiện. Đây là lúc bạn dừng lại, nhìn lại tuần vừa qua, và rút ra bài học trước khi bước vào tuần mới. Tôi thường dành 30-45 phút vào Chủ nhật tối cho việc này.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📋 Sunday Review Checklist - 6 Bước</div>
+                <p><strong>Bước 1 - Tổng hợp trades:</strong> Đếm số trades tuần này: Wins, Losses, Break-even. Tính Win Rate tuần.</p>
+                <p><strong>Bước 2 - Tính metrics:</strong> Profit Factor tuần, Total P&L, Drawdown tuần (nếu có).</p>
+                <p><strong>Bước 3 - Phân tích Losing Trades (QUAN TRỌNG NHẤT):</strong> Mở từng trade thua ra xem lại. Tại sao thua? Entry sai vùng? SL quá tight? FOMO? Không có confirmation? Ghi ra patterns lặp lại.</p>
+                <p><strong>Bước 4 - Pattern Analysis:</strong> Pattern nào win tuần này? Pattern nào loss? Timeframe nào tốt nhất?</p>
+                <p><strong>Bước 5 - Emotional Check:</strong> Có trade nào do FOMO, Revenge, hoặc Fear không? Đánh dấu những trades này và học cách avoid trigger.</p>
+                <p><strong>Bước 6 - Action Items:</strong> Viết ra 1-3 điều CỤ THỂ cần cải thiện tuần tới. Không chung chung như "trade tốt hơn" mà phải cụ thể như "Chỉ trade sau khi có volume confirmation ≥1.5x".</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title">💡 Tại Sao Phải Focus Vào Losing Trades?</div>
+                <p>Nhiều trader có xu hướng bỏ qua trades thua vì không muốn nhớ lại cảm giác khó chịu. Đây là sai lầm lớn!</p>
+                <p>Winning trades thường không dạy bạn nhiều vì mọi thứ đã đúng. Losing trades mới là nơi chứa đựng bài học quý giá nhất.</p>
+                <p>Hãy coi mỗi trade thua như một "học phí" - bạn đã trả tiền, vậy ít nhất hãy học được điều gì đó từ nó.</p>
+                <p>Mục tiêu không phải để tự trách mình, mà để understand WHY và prevent sai lầm tương tự trong tương lai.</p>
+            </div>
+
+            <!-- HÌNH 7.3.4 -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch7/7.3/7-3-4.webp" alt="Checklist Weekly Review 6 bước">
+                <div class="image-caption">Hình 7.3.4: Checklist 6 bước Weekly Review mỗi Chủ nhật - từ tổng hợp trades đến Action Items</div>
+            </div>
+        </section>
+
+        <!-- Q&A SECTION -->
+        <section class="section">
+            <h2 class="section-title">❓ Câu Hỏi Thường Gặp</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">Q1: Tôi nên ghi journal ở đâu? App nào tốt nhất?</div>
+                <p>Có nhiều lựa chọn tùy thuộc vào preference của bạn. <strong>Google Sheets</strong> là lựa chọn miễn phí và dễ dùng nhất, cho phép bạn tạo bảng và tính toán metrics tự động bằng formulas.</p>
+                <p><strong>Notion</strong> phù hợp nếu bạn muốn có giao diện đẹp hơn và có thể attach screenshots chart. <strong>Tradervue</strong> hoặc <strong>Edgewonk</strong> là các tool chuyên dụng có phân tích sâu hơn nhưng mất phí.</p>
+                <p>Quan trọng nhất là chọn tool bạn THỰC SỰ SẼ SỬ DỤNG. Journal tốt nhất là journal bạn điền mỗi ngày, không phải tool fancy nhất.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">Q2: Tôi cần ghi chép bao lâu mới thấy kết quả?</div>
+                <p>Tối thiểu 30-50 trades để có enough data cho phân tích có ý nghĩa. Với 2-3 trades/tuần, điều này mất khoảng 3-4 tháng.</p>
+                <p>Tuy nhiên, insight có thể xuất hiện sớm hơn. Sau 10-15 trades, bạn có thể bắt đầu thấy patterns trong hành vi của mình, đặc biệt là những sai lầm lặp lại.</p>
+                <p>Đừng kỳ vọng kết quả ngay lập tức - journal là long-term investment vào sự phát triển của bạn như một trader.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">Q3: Tôi không có thời gian ghi journal mỗi ngày, làm sao?</div>
+                <p>Mỗi trade chỉ cần 2-3 phút để ghi chép nếu bạn có sẵn template. Nếu bạn trade 1-2 trades/ngày, tổng cộng chỉ mất 5-10 phút.</p>
+                <p>Nếu vẫn cảm thấy nhiều, hãy ghi chép ngắn gọn trong ngày và dành 15 phút cuối tuần để bổ sung chi tiết. Điều quan trọng là CONSISTENCY - làm ít nhưng đều đặn tốt hơn làm nhiều rồi bỏ.</p>
+                <p>Nếu bạn không có 2-3 phút để ghi journal, có lẽ bạn đang trade quá nhiều và cần slow down.</p>
+            </div>
+        </section>
+
+        <!-- PRACTICAL ACTION -->
+        <section class="section">
+            <h2 class="section-title">🎯 Thực Hành Ngay</h2>
+
+            <div class="definition-box">
+                <div class="definition-box-title">📌 Làm Ngay Hôm Nay (20 phút):</div>
+                <p><strong>Bước 1:</strong> Tạo một Google Sheet mới hoặc Notion page với tên "My Trading Journal 2024".</p>
+                <p><strong>Bước 2:</strong> Copy template 10 trường thông tin từ bài học vào làm header columns.</p>
+                <p><strong>Bước 3:</strong> Nếu bạn đã có paper trades trước đó, hãy ghi lại ít nhất 3 trades gần nhất theo template (dù không nhớ hết chi tiết, ghi những gì bạn nhớ).</p>
+                <p><strong>Bước 4:</strong> Bookmark link journal ở nơi dễ truy cập trên điện thoại/máy tính.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📋 Tuần Này - Thói Quen Mới:</div>
+                <p>Cam kết ghi chép NGAY SAU khi đặt mỗi paper trade. Không đợi cuối ngày vì bạn sẽ quên chi tiết và cảm xúc tại thời điểm entry.</p>
+                <p>Cuối tuần (Chủ nhật), dành 30 phút làm Weekly Review đầu tiên. Dù chỉ có 3-5 trades, hãy thực hiện đầy đủ 6 bước.</p>
+                <p>Viết ra ít nhất 1 Action Item cho tuần tới - điều CỤ THỂ bạn sẽ làm khác đi dựa trên phân tích tuần này.</p>
+            </div>
+        </section>
+
+        <!-- SUMMARY BOX -->
+        <div class="summary-box">
+            <div class="summary-title">📝 Tóm Tắt Bài Học</div>
+            <ul>
+                <li><strong>Trading Journal</strong> là công cụ quan trọng nhất để cải thiện performance - traders có journal có win rate cao hơn 15-20%.</li>
+                <li><strong>Template 10 trường:</strong> Trade ID, Symbol, Timeframe, Pattern, Entry Reason, Entry/SL/TP, R:R, Emotional State, Result, Lessons.</li>
+                <li><strong>5 Core Metrics:</strong> Win Rate (>55%), Profit Factor (>1.5), Avg R:R (>2:1), Max Drawdown (<20%), Expectancy (>0).</li>
+                <li><strong>Weekly Review:</strong> 6 bước mỗi Chủ nhật - focus vào losing trades để học từ sai lầm.</li>
+                <li><strong>Action Items:</strong> Mỗi tuần viết 1-3 điều CỤ THỂ cần cải thiện, không chung chung.</li>
+            </ul>
+            <p style="margin-top: var(--space-md); color: var(--gold); font-weight: 600;">🎯 Bài học lớn: Journal không phải để ghi nhớ - đó là hệ thống cải tiến liên tục giúp bạn trở thành trader giỏi hơn mỗi tuần.</p>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <p style="color: var(--gold); font-weight: 600;">✅ Hoàn thành Bài 7.3 - Trading Journal & Ghi Chép Giao Dịch</p>
+            <p>Tiếp theo: <strong style="color: var(--text-primary);">Bài 7.4 - Backtesting Cơ Bản</strong></p>
+        </div>
+
+        <!-- QUIZ SECTION -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">🎯 Kiểm Tra Hiểu Biết</h2>
+                <p class="quiz-subtitle">Trả lời 3 câu hỏi để củng cố kiến thức</p>
+            </div>
+
+            <div class="quiz-question" data-question="1">
+                <div class="question-number">1</div>
+                <p class="question-text">Profit Factor target nên đạt ít nhất bao nhiêu để chiến lược được coi là có edge?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">> 0.5</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">> 1.0</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">> 1.5</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">> 3.0</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2">
+                <div class="question-number">2</div>
+                <p class="question-text">Khi làm Weekly Review, bạn nên focus nhiều nhất vào loại trades nào?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Losing trades - để học từ sai lầm</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Winning trades - để lặp lại thành công</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Trades có profit cao nhất</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Không cần review vì đã có app track</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="3">
+                <div class="question-number">3</div>
+                <p class="question-text">Max Drawdown target nên giữ dưới bao nhiêu % để được coi là kiểm soát rủi ro tốt?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">< 50%</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">< 20%</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">< 5%</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">0% - không bao giờ được drawdown</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score"><span id="score">0</span>/3</div>
+                <p id="result-message" style="color: var(--text-secondary); margin-bottom: var(--space-lg);"></p>
+                <button onclick="resetQuiz()" style="background: var(--gold); color: var(--navy-dark); border: none; padding: 12px 24px; border-radius: var(--radius-md); font-weight: 700; cursor: pointer;">Làm Lại Quiz</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const correctAnswers = { 1: 'C', 2: 'A', 3: 'B' };
+        const explanations = {
+            1: {
+                correct: 'Chính xác! Profit Factor > 1.5 là target vì nó có nghĩa là với mỗi $1 bạn thua, bạn kiếm được $1.50. Điều này cho thấy chiến lược có edge rõ ràng và bền vững.',
+                incorrect: 'Chưa đúng. Profit Factor target nên > 1.5. PF = 1.0 nghĩa là hòa vốn, PF < 1.0 nghĩa là thua. PF > 1.5 cho thấy chiến lược có edge - với mỗi $1 thua, bạn kiếm được $1.50.'
+            },
+            2: {
+                correct: 'Hoàn toàn đúng! Losing trades chứa bài học quý giá nhất vì chúng cho thấy những gì bạn làm sai. Winning trades ít dạy bạn hơn vì mọi thứ đã đúng. Mỗi trade thua là một cơ hội học hỏi - hãy tận dụng!',
+                incorrect: 'Không phải. Bạn nên focus vào LOSING trades trong Weekly Review. Winning trades thường không dạy nhiều vì mọi thứ đã đúng. Losing trades mới chứa bài học quý giá - why did it fail? What can I do different?'
+            },
+            3: {
+                correct: 'Tuyệt vời! Max Drawdown < 20% được coi là kiểm soát rủi ro tốt. Drawdown 20% đòi hỏi +25% để hòa vốn, vẫn trong tầm kiểm soát. Drawdown > 30% bắt đầu nguy hiểm vì cần +43% để recover.',
+                incorrect: 'Chưa chính xác. Max Drawdown target là < 20%. Không ai có thể tránh drawdown hoàn toàn (0% là không thực tế), nhưng 50% quá cao và nguy hiểm. 20% là mức cho phép bạn hồi phục hợp lý (+25% để break-even).'
+            }
+        };
+        let answered = {};
+        let score = 0;
+
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const question = this.closest('.quiz-question');
+                const questionNum = question.dataset.question;
+                if (answered[questionNum]) return;
+
+                answered[questionNum] = true;
+                const selectedAnswer = this.dataset.option;
+                const isCorrect = selectedAnswer === correctAnswers[questionNum];
+
+                question.querySelectorAll('.quiz-option').forEach(opt => opt.classList.add('disabled'));
+
+                if (isCorrect) {
+                    this.classList.add('correct');
+                    score++;
+                } else {
+                    this.classList.add('incorrect');
+                    question.querySelectorAll('.quiz-option').forEach(opt => {
+                        if (opt.dataset.option === correctAnswers[questionNum]) {
+                            opt.classList.add('correct');
+                        }
+                    });
+                }
+
+                const feedback = question.querySelector('.question-feedback');
+                feedback.classList.add('show', isCorrect ? 'correct' : 'incorrect');
+                feedback.querySelector('.feedback-title').textContent = isCorrect ? '✓ Chính xác!' : '✗ Chưa đúng';
+                feedback.querySelector('.feedback-text').textContent = isCorrect ? explanations[questionNum].correct : explanations[questionNum].incorrect;
+
+                if (Object.keys(answered).length === 3) {
+                    setTimeout(() => {
+                        document.getElementById('score').textContent = score;
+                        let msg = score === 3 ? 'Xuất sắc! Bạn đã hiểu rõ về Trading Journal!' : score === 2 ? 'Tốt lắm! Xem lại phần bạn trả lời sai để nắm vững hơn.' : 'Hãy đọc lại bài học và thử lại quiz nhé!';
+                        document.getElementById('result-message').textContent = msg;
+                        document.querySelector('.quiz-result').classList.add('show');
+                    }, 1000);
+                }
+            });
+        });
+
+        function resetQuiz() {
+            answered = {};
+            score = 0;
+            document.querySelectorAll('.quiz-question').forEach(q => {
+                q.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect', 'disabled');
+                });
+                q.querySelector('.question-feedback').classList.remove('show', 'correct', 'incorrect');
+            });
+            document.querySelector('.quiz-result').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 7.5: Descending Triangle - Tam Giác Giảm | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-navy: #112250;
+            --accent-gold: #FFBD59;
+            --accent-cyan: #00F0FF;
+            --accent-purple: #6A5BFF;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0AEC0;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --bg-card-hover: rgba(255, 255, 255, 0.08);
+            --border-subtle: rgba(255, 255, 255, 0.1);
+            --gradient-gold: linear-gradient(135deg, #FFBD59 0%, #FFCF87 100%);
+            --gradient-red: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--primary-navy);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--primary-navy);
+        }
+
+        /* HEADER */
+        .lesson-header {
+            padding: 2rem 1.5rem;
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.15) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border-subtle);
+            text-align: center;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--gradient-red);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .lesson-chapter {
+            font-size: 0.875rem;
+            color: var(--error-red);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .lesson-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* CONTENT */
+        .content-section {
+            padding: 0;
+        }
+
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            margin: 1rem;
+            padding: 1.5rem;
+            border-left: 4px solid var(--error-red);
+        }
+
+        .content-card h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--error-red);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .content-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.25rem 0 0.75rem 0;
+            color: var(--text-primary);
+        }
+
+        .content-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9375rem;
+        }
+
+        .content-card ul, .content-card ol {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .content-card li {
+            margin-bottom: 0.5rem;
+            font-size: 0.9375rem;
+        }
+
+        /* IMAGE PLACEHOLDER */
+        .image-placeholder {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%);
+            border: 2px dashed var(--error-red);
+            border-radius: 0.75rem;
+            padding: 3rem 1.5rem;
+            text-align: center;
+            margin: 1.25rem 0;
+        }
+
+        .image-placeholder .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .image-placeholder .label {
+            font-size: 0.875rem;
+            color: var(--error-red);
+            font-weight: 600;
+        }
+
+        .image-placeholder .dimensions {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* PATTERN VISUAL */
+        .pattern-visual {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .pattern-diagram {
+            font-size: 0.75rem;
+            color: var(--error-red);
+            line-height: 1.4;
+            white-space: pre;
+        }
+
+        /* STAT GRID */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--error-red);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* INFO BOX */
+        .info-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .info-box.gold {
+            background: rgba(255, 189, 89, 0.1);
+            border-color: rgba(255, 189, 89, 0.3);
+        }
+        
+        .info-box.gold .info-box-title {
+            color: var(--accent-gold);
+        }
+
+        .info-box-title {
+            font-weight: 600;
+            color: var(--error-red);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-box p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* HIGHLIGHT BOXES - NEW STANDARD */
+        .highlight-box {
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid;
+        }
+
+        .highlight-box.important {
+            background: rgba(255, 189, 89, 0.1);
+            border-left-color: var(--accent-gold);
+        }
+        
+        .highlight-box.important .highlight-title {
+            color: var(--accent-gold);
+        }
+
+        .highlight-box.warning {
+            background: rgba(239, 68, 68, 0.1);
+            border-left-color: var(--error-red);
+        }
+
+        .highlight-box.warning .highlight-title {
+            color: var(--error-red);
+        }
+
+        .highlight-box.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-left-color: var(--success-green);
+        }
+
+        .highlight-box.success .highlight-title {
+            color: var(--success-green);
+        }
+
+        .highlight-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* COMPARISON */
+        .compare-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .compare-item {
+            background: var(--bg-card);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .compare-item.asc {
+            border-color: var(--success-green);
+        }
+
+        .compare-item.desc {
+            border-color: var(--error-red);
+        }
+
+        .compare-title {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .compare-item.asc .compare-title {
+            color: var(--success-green);
+        }
+
+        .compare-item.desc .compare-title {
+            color: var(--error-red);
+        }
+
+        .compare-item ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .compare-item li {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            padding: 0.25rem 0;
+        }
+
+        /* SUMMARY BOX */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.05) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 1rem;
+        }
+
+        .summary-box h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--error-red);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .summary-box li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.625rem;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        }
+
+        .summary-box li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--error-red);
+            font-weight: bold;
+        }
+
+        /* QUIZ SECTION */
+        .quiz-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            margin: 1.5rem 1rem;
+            padding: 1.5rem;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 0.25rem;
+        }
+
+        .quiz-header p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .quiz-question {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .quiz-option {
+            padding: 0.875rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+        }
+
+        .quiz-option:hover:not(.correct):not(.incorrect) {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-gold);
+        }
+
+        .quiz-option.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--success-green);
+            color: var(--success-green);
+        }
+
+        .quiz-option.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--error-red);
+            color: var(--error-red);
+        }
+
+        .quiz-result {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .quiz-result.show {
+            display: block;
+        }
+
+        .quiz-result.correct {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+        }
+
+        .quiz-result.incorrect {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-red);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .quiz-score.show {
+            display: block;
+        }
+
+        .score-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .retake-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-gold);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #000;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .retake-btn:hover {
+            transform: scale(1.02);
+        }
+
+        /* FOOTER */
+        .lesson-footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-logo .gem {
+            color: var(--accent-gold);
+        }
+
+        .footer-text {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 600px) {
+            .content-card {
+                margin: 0.75rem 0;
+                border-radius: 0;
+                border-left: 4px solid var(--error-red);
+                border-right: none;
+                border-top: none;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+
+            .summary-box,
+            .quiz-section {
+                margin: 1rem 0;
+                border-radius: 0;
+            }
+
+            .stat-grid,
+            .compare-box {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="header-badge">
+                <span>📉</span>
+                <span>Tier 2 - Nâng Cao</span>
+            </div>
+            <div class="lesson-chapter">Chapter 7 - Triangle Patterns</div>
+            <h1 class="lesson-title">Bài 7.5: Descending Triangle - Tam Giác Giảm</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 7.5</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- CONTENT -->
+        <main class="content-section">
+            
+            <!-- Section 1: Opening Hook -->
+            <div class="content-card">
+                <h2>1. Mở Đầu: Cạm Bẫy Của "Support Cứng"</h2>
+                
+                <p>Bạn đã bao giờ nhìn thấy một biểu đồ mà giá liên tục chạm vào một mức hỗ trợ (support) ngang và bật lên, khiến bạn nghĩ rằng: <em>"Chà, mức giá này cứng thật, phe mua đang bảo vệ rất tốt. Đây chắc chắn là đáy rồi, mình nên mua vào ngay!"</em>?</p>
+                
+                <p>Nếu bạn đã từng nghĩ như vậy và rồi sau đó bàng hoàng nhìn tài khoản "bốc hơi" khi giá bất ngờ sập mạnh qua mức hỗ trợ đó, thì bạn không cô đơn đâu. Đó là một kịch bản kinh điển mà Market Maker dùng để bẫy những trader thiếu kinh nghiệm.</p>
+                
+                <p>Trong bài học này, chúng ta sẽ mổ xẻ "kẻ thủ ác" đứng sau những cú sập đó: <strong>Descending Triangle (Tam Giác Giảm)</strong>. Đây không phải là dấu hiệu của sức mạnh phe mua, mà ngược lại, là một "quả bom nổ chậm" báo hiệu phe bán đang dần bóp nghẹt thị trường. Đến cuối bài, bạn sẽ hiểu chính xác tại sao nó hình thành, làm thế nào để nhận diện nó sớm, và quan trọng nhất: cách biến "cạm bẫy" này thành cơ hội lợi nhuận với tỷ lệ thắng lên tới 64% theo phương pháp GEM Frequency.</p>
+            </div>
+
+            <!-- Section 2: Định nghĩa & Concept -->
+            <div class="content-card">
+                <h2>2. Descending Triangle Là Gì?</h2>
+
+                <h3>A. Định Nghĩa</h3>
+                <p><strong>Descending Triangle</strong> (Tam Giác Giảm) là một mô hình tiếp diễn xu hướng giảm (Bearish Continuation), được hình thành khi giá bị kẹp giữa hai đường xu hướng hội tụ:</p>
+                <ul>
+                    <li><strong>Đường Hỗ Trợ Ngang (Flat Support):</strong> Nối các đáy bằng nhau, nơi phe mua cố gắng giữ giá.</li>
+                    <li><strong>Đường Kháng Cự Nghiêng Xuống (Falling Resistance):</strong> Nối các đỉnh thấp dần (Lower Highs), cho thấy phe bán đang ngày càng hung hãn.</li>
+                </ul>
+
+                <div class="pattern-visual">
+                    <div class="pattern-diagram">
+        ╲─────────────────────── Resistance (Falling - Lower Highs)
+         ╲   ╱╲    ╱╲    ╱╲
+          ╲ ╱  ╲  ╱  ╲  ╱  ╲  ← Sellers đẩy giá xuống thấp hơn mỗi lần
+           ╲    ╲╱    ╲╱    ╲
+            ╲                 ╲────▶ Breakdown! (Cú Sập)
+         └─────────────────────── Support (Flat)
+                    </div>
+                </div>
+
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">64%</div>
+                        <div class="stat-label">Win Rate</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">1:2.2</div>
+                        <div class="stat-label">Avg R:R</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">Bearish</div>
+                        <div class="stat-label">Signal</div>
+                    </div>
+                </div>
+
+                <h3>B. Tại Sao Quan Trọng?</h3>
+                <p>Nhiều trader nhầm lẫn vùng Support ngang là dấu hiệu tích cực. Tuy nhiên, trong Descending Triangle, sự xuất hiện của các đỉnh thấp dần (Lower Highs) là chìa khóa. Nó cho thấy:</p>
+                <ul>
+                    <li>Phe bán sẵn sàng bán ở mức giá thấp hơn trong mỗi đợt hồi phục.</li>
+                    <li>Phe mua chỉ đang phòng thủ thụ động tại một mức giá cố định.</li>
+                    <li>Sớm muộn gì "kho đạn" của phe mua cũng cạn kiệt, và khi Support vỡ, giá sẽ rơi tự do tìm thanh khoản mới.</li>
+                </ul>
+
+                <div class="image-placeholder">
+                    <div class="icon">📐</div>
+                    <div class="label">Hình 7.5.1: Cấu Trúc Descending Triangle</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+            </div>
+
+            <!-- Section 3: Phân Tích Chuyên Sâu (Deep Dive) -->
+            <div class="content-card">
+                <h2>3. Phân Tích Chuyên Sâu: Giải Mã Tâm Lý</h2>
+
+                <h3>A. Cuộc Chiến Tâm Lý (The Why)</h3>
+                <p>Hãy tưởng tượng Descending Triangle như một lò xo đang bị nén chặt. Ở bên dưới (Support), bạn có những người mua đang đặt lệnh Limit Order vì họ tin giá rẻ. Ở bên trên (Resistance), bạn có Smart Money đang xả hàng.</p>
+                
+                <p>Mỗi lần giá chạm Support và bật lên, nó lại bật lên yếu hơn lần trước (tạo Lower High). Tại sao? Vì phe mua đang yếu dần. Họ đã dùng hết tiền để đỡ giá ở các lần chạm trước. Trong khi đó, phe bán ngày càng sốt ruột và chấp nhận bán giá thấp hơn để khớp lệnh. Khi người mua cuối cùng rút lui, không còn ai đỡ giá nữa → <strong>CRASH!</strong></p>
+
+                <h3>B. Volume: Manh Mối Của Smart Money</h3>
+                <p>Trong quá trình hình thành tam giác, bạn sẽ thường thấy <strong>Volume giảm dần</strong>. Đây là dấu hiệu của sự "nén" (Compression). Thị trường đang chờ đợi một cú bùng nổ. </p>
+                <p>Khi giá phá vỡ (Breakdown) qua đường Support, Volume thường sẽ <strong>tăng đột biến (Spike)</strong>. Đây là lúc Smart Money thực sự ra tay, quét sạch Stop Loss của những người bắt đáy và đẩy giá xuống vùng giá trị mới.</p>
+
+                <div class="highlight-box important">
+                    <div class="highlight-title">💡 Góc Nhìn GEM Frequency</div>
+                    <p>Đừng chỉ nhìn Descending Triangle như một hình vẽ. Hãy nhìn nó như một quá trình tạo ra <strong>HFZ (High Frequency Zone)</strong> tiềm năng.</p>
+                    <p>Khi giá breakdown khỏi đường Support, cú sập đó thường là một pha <strong>Down</strong> mạnh mẽ. Vùng giá ngay trước khi sập (hoặc vùng retest sau đó) chính là nơi Smart Money để lại dấu chân. Nhiệm vụ của chúng ta là đợi giá quay lại vùng này để Short.</p>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">🔍</div>
+                    <div class="label">Hình 7.5.2: Lower Highs Tạo Falling Resistance & Volume Profile</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+            </div>
+
+            <!-- Section 4: So sánh -->
+            <div class="content-card">
+                <h2>4. So Sánh: Ascending vs Descending</h2>
+
+                <p>Để tránh nhầm lẫn, hãy đặt hai mô hình này cạnh nhau. Chúng là hình ảnh phản chiếu của nhau qua gương.</p>
+
+                <div class="compare-box">
+                    <div class="compare-item asc">
+                        <div class="compare-title">📈 Ascending Triangle (Tăng)</div>
+                        <ul>
+                            <li><strong>Resistance:</strong> Ngang (Flat) - Phe bán phòng thủ.</li>
+                            <li><strong>Support:</strong> Tăng dần (Rising) - Phe mua hung hãn.</li>
+                            <li><strong>Tâm lý:</strong> Buyers sẵn sàng mua giá cao hơn.</li>
+                            <li><strong>Kết quả:</strong> Thường Breakout LÊN.</li>
+                        </ul>
+                    </div>
+                    <div class="compare-item desc">
+                        <div class="compare-title">📉 Descending Triangle (Giảm)</div>
+                        <ul>
+                            <li><strong>Resistance:</strong> Giảm dần (Falling) - Phe bán hung hãn.</li>
+                            <li><strong>Support:</strong> Ngang (Flat) - Phe mua phòng thủ.</li>
+                            <li><strong>Tâm lý:</strong> Sellers sẵn sàng bán giá thấp hơn.</li>
+                            <li><strong>Kết quả:</strong> Thường Breakdown XUỐNG.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">⚖️</div>
+                    <div class="label">Hình 7.5.3: So Sánh Ascending vs Descending Triangle</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+            </div>
+
+            <!-- Section 5: Chiến Lược Giao Dịch (The How) -->
+            <div class="content-card">
+                <h2>5. Chiến Lược Trade Chuẩn GEM</h2>
+
+                <p>Chúng ta sẽ không trade theo kiểu "thấy mô hình là vào lệnh". Chúng ta sẽ áp dụng quy tắc <strong>Retest & Confirmation</strong> để tối ưu hóa tỷ lệ thắng.</p>
+
+                <h3>Bước 1: Nhận Diện & Kiên Nhẫn</h3>
+                <p>Xác định rõ đường Flat Support (ít nhất 2 điểm chạm) và Falling Resistance (ít nhất 2 đỉnh thấp dần). Đừng làm gì cả. Hãy để thị trường tự quyết định hướng đi.</p>
+
+                <h3>Bước 2: Chờ Breakdown (Tạo Zone)</h3>
+                <p>Đợi một nến đóng cửa dứt khoát DƯỚI đường Support. Volume lúc này nên tăng cao. Cú breakdown này thường sẽ tạo ra một cấu trúc <strong>HFZ (Vùng Bán)</strong> hoặc một <strong>DPD (Down-Pause-Down)</strong> nhỏ.</p>
+
+                <h3>Bước 3: Entry Tại Retest (Cơ Hội Vàng)</h3>
+                <p>Đây là lúc "bẫy" sập xuống nhưng chúng ta chưa vội. Hãy đợi giá hồi (pullback) lại kiểm tra đường Support cũ (giờ đã thành Resistance) hoặc vùng HFZ vừa tạo ra. </p>
+                <ul>
+                    <li><strong>Entry:</strong> Khi có nến tín hiệu đảo chiều (Bearish Engulfing, Shooting Star) tại vùng Retest.</li>
+                    <li><strong>Stop Loss:</strong> Đặt trên đường kháng cự nghiêng hoặc trên đỉnh gần nhất của vùng HFZ.</li>
+                    <li><strong>Take Profit:</strong> Đo chiều cao lớn nhất của tam giác và chiếu xuống từ điểm breakdown (Measured Move).</li>
+                </ul>
+
+                <div class="info-box gold">
+                    <div class="info-box-title">🎯 Ví Dụ Tính Target</div>
+                    <p>Giả sử đỉnh đầu tiên của tam giác ở $30,000 và đáy Support ở $28,000. Chiều cao là $2,000.<br>
+                    Khi giá breakdown qua $28,000, Target lý thuyết sẽ là: $28,000 - $2,000 = <strong>$26,000</strong>.</p>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">🎯</div>
+                    <div class="label">Hình 7.5.4: Entry Points, Stop Loss và Target Calculation</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+
+            <!-- Section 6: Các Lỗi Thường Gặp & Lưu Ý -->
+            <div class="content-card">
+                <h2>6. Cạm Bẫy & Lưu Ý Quan Trọng</h2>
+
+                <div class="highlight-box warning">
+                    <div class="highlight-title">⚠️ Lỗi Chết Người: Bắt Đáy Tại Support</div>
+                    <p>Rất nhiều trader thấy giá chạm Support lần thứ 3, thứ 4 và nghĩ "Support này cứng quá, mua thôi". <strong>SAI LẦM!</strong> Trong Descending Triangle, Support càng bị test nhiều lần thì càng yếu (theo nguyên lý Order Absorption). Đừng bao giờ Buy tại Support khi bạn thấy các đỉnh đang thấp dần!</p>
+                </div>
+
+                <h3>Các Lưu Ý Khác:</h3>
+                <ul>
+                    <li><strong>False Breakdown:</strong> Khoảng 28% trường hợp giá breakdown giả rồi quay đầu tăng. Đó là lý do tại sao chúng ta <strong>phải đợi Retest</strong> và Confirmation Candle. Đừng FOMO đuổi theo nến đỏ đầu tiên.</li>
+                    <li><strong>Bối cảnh (Context):</strong> Descending Triangle xuất hiện trong Downtrend sẽ mạnh hơn rất nhiều so với khi nó xuất hiện trong Uptrend (nơi nó có thể đóng vai trò là mô hình đảo chiều, nhưng rủi ro cao hơn).</li>
+                    <li><strong>Volume Confirmation:</strong> Nếu giá breakdown mà Volume thấp lè tè, hãy cẩn thận. Đó có thể là một cái bẫy Bear Trap.</li>
+                </ul>
+
+                <div class="image-placeholder">
+                    <div class="icon">⚠️</div>
+                    <div class="label">Hình 7.5.5: False Breakdown và Bear Trap</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+            </div>
+            
+            <!-- Section 7: Actionable Plan -->
+            <div class="content-card">
+                <h2>7. Kế Hoạch Hành Động</h2>
+                <p>Để biến kiến thức này thành tiền, đây là bài tập cho bạn trong tuần này:</p>
+                
+                <p><strong>🎯 NHIỆM VỤ:</strong></p>
+                <ol>
+                    <li>Mở chart khung thời gian 4H hoặc 1D (Daily) của các cặp tiền chính hoặc coin top.</li>
+                    <li>Tìm kiếm các cấu trúc giá có đáy bằng phẳng và đỉnh thấp dần.</li>
+                    <li>Vẽ hai đường trendline để định hình tam giác.</li>
+                    <li><strong>KHÔNG TRADE NGAY.</strong> Hãy đặt cảnh báo (Alert) khi giá phá vỡ Support.</li>
+                    <li>Khi Alert kêu, hãy quan sát: Có Volume Spike không? Giá có tạo HFZ không?</li>
+                    <li>Chờ giá hồi lại test vùng vừa phá vỡ. Nếu có nến đảo chiều → Vào lệnh Paper Trading để kiểm chứng.</li>
+                </ol>
+            </div>
+
+        </main>
+
+        <!-- SUMMARY -->
+        <div class="summary-box">
+            <h3>📋 Tổng Kết Bài Học</h3>
+            <ul>
+                <li><strong>Descending Triangle</strong> là mô hình tiếp diễn giảm giá (Bearish), đặc trưng bởi Support ngang và Resistance nghiêng xuống.</li>
+                <li><strong>Tâm lý:</strong> Phe bán hung hãn (Lower Highs) trong khi phe mua thụ động phòng thủ (Flat Support).</li>
+                <li><strong>Volume:</strong> Giảm dần trong quá trình nén, tăng mạnh khi Breakdown.</li>
+                <li><strong>Chiến lược GEM:</strong> Không bắt đáy tại Support. Không FOMO khi Breakdown. Đợi Retest vùng HFZ/Resistance cũ để Short.</li>
+                <li><strong>Mục tiêu giá:</strong> Bằng chiều cao lớn nhất của tam giác chiếu xuống từ điểm phá vỡ.</li>
+            </ul>
+        </div>
+
+        <!-- QUIZ -->
+        <div class="quiz-section">
+            <div class="quiz-header">
+                <h3>🎯 Kiểm Tra Kiến Thức</h3>
+                <p>Trả lời các câu hỏi để củng cố bài học</p>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <div class="question-text">Câu 1: Đặc điểm cấu trúc chính của Descending Triangle là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Đường Resistance nghiêng xuống (Lower Highs) + Đường Support ngang</div>
+                    <div class="quiz-option" data-index="1">Đường Resistance ngang + Đường Support nghiêng lên</div>
+                    <div class="quiz-option" data-index="2">Cả hai đường đều nghiêng xuống song song với nhau</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <div class="question-text">Câu 2: Tại sao việc bắt đáy (Long) tại vùng Support của Descending Triangle là nguy hiểm?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Vì Support là vùng giá rất cứng và khó phá vỡ.</div>
+                    <div class="quiz-option" data-index="1">Vì phe bán đã hết lực và giá sắp đảo chiều tăng.</div>
+                    <div class="quiz-option" data-index="2">Vì các đỉnh thấp dần cho thấy phe bán đang hung hãn hơn và Support có nguy cơ cao bị phá vỡ (Order Absorption).</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <div class="question-text">Câu 3: Chiến lược Entry an toàn nhất theo phương pháp GEM là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Short ngay lập tức khi giá chạm đường Resistance lần thứ 2.</div>
+                    <div class="quiz-option" data-index="1">Đợi giá Breakdown qua Support, sau đó Short khi giá hồi lại (Retest) vùng vừa phá vỡ (HFZ).</div>
+                    <div class="quiz-option" data-index="2">Long ngay khi giá chạm Support vì nghĩ đây là đáy.</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-text">🎉 Bạn trả lời đúng <span id="correct-count">0</span>/3 câu!</div>
+                <button class="retake-btn" onclick="resetQuiz()">Làm Lại Quiz</button>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <div class="footer-logo">
+                <span class="gem">GEM</span> Trading Academy
+            </div>
+            <div class="footer-text">© 2024 GEM Trading Academy. All rights reserved.</div>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Xem đáp án đúng ở trên.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function resetQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                question.querySelector('.quiz-result').className = 'quiz-result';
+            });
+
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 7.6: Symmetrical Triangle - Tam Giác Cân | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-navy: #112250;
+            --accent-gold: #FFBD59;
+            --accent-cyan: #00F0FF;
+            --accent-purple: #6A5BFF;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0AEC0;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --bg-card-hover: rgba(255, 255, 255, 0.08);
+            --border-subtle: rgba(255, 255, 255, 0.1);
+            --gradient-gold: linear-gradient(135deg, #FFBD59 0%, #FFCF87 100%);
+            --gradient-purple: linear-gradient(135deg, #6A5BFF 0%, #8B7FFF 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--primary-navy);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--primary-navy);
+        }
+
+        /* HEADER */
+        .lesson-header {
+            padding: 2rem 1.5rem;
+            background: linear-gradient(180deg, rgba(106, 91, 255, 0.15) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border-subtle);
+            text-align: center;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--gradient-purple);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .lesson-chapter {
+            font-size: 0.875rem;
+            color: var(--accent-purple);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .lesson-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* CONTENT */
+        .content-section {
+            padding: 0;
+        }
+
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            margin: 1rem 0;
+            padding: 1.5rem;
+            border-left: 4px solid var(--accent-purple);
+        }
+
+        .content-card h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--accent-purple);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .content-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.25rem 0 0.75rem 0;
+            color: var(--text-primary);
+        }
+
+        .content-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9375rem;
+            text-align: justify;
+        }
+
+        .content-card ul, .content-card ol {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .content-card li {
+            margin-bottom: 0.5rem;
+            font-size: 0.9375rem;
+        }
+
+        /* IMAGE PLACEHOLDER */
+        .image-placeholder {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.2) 0%, rgba(106, 91, 255, 0.1) 100%);
+            border: 2px dashed var(--accent-purple);
+            border-radius: 0.75rem;
+            padding: 3rem 1.5rem;
+            text-align: center;
+            margin: 1.25rem 0;
+        }
+
+        .image-placeholder .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .image-placeholder .label {
+            font-size: 0.875rem;
+            color: var(--accent-purple);
+            font-weight: 600;
+        }
+
+        .image-placeholder .dimensions {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* PATTERN VISUAL */
+        .pattern-visual {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .pattern-diagram {
+            font-size: 0.75rem;
+            color: var(--accent-purple);
+            line-height: 1.4;
+            white-space: pre;
+        }
+
+        /* STAT GRID */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-purple);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* INFO BOX */
+        .info-box {
+            background: rgba(106, 91, 255, 0.1);
+            border: 1px solid rgba(106, 91, 255, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .info-box.gold {
+            background: rgba(255, 189, 89, 0.1);
+            border-color: rgba(255, 189, 89, 0.3);
+        }
+
+        .info-box.gold .info-box-title {
+            color: var(--accent-gold);
+        }
+        
+        .info-box.warning {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .info-box.warning .info-box-title {
+            color: var(--error-red);
+        }
+
+        .info-box-title {
+            font-weight: 600;
+            color: var(--accent-purple);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-box p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        
+        .info-box strong {
+            color: var(--text-primary);
+        }
+
+        /* DECISION FLOW */
+        .decision-flow {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin: 1rem 0;
+        }
+
+        .decision-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .decision-step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .decision-icon {
+            font-size: 1.5rem;
+        }
+
+        .decision-content {
+            flex: 1;
+        }
+
+        .decision-content h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .decision-content p {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .decision-arrow {
+            text-align: center;
+            color: var(--accent-purple);
+            font-size: 1.25rem;
+        }
+
+        /* SUMMARY BOX */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.2) 0%, rgba(106, 91, 255, 0.05) 100%);
+            border: 1px solid rgba(106, 91, 255, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 1rem;
+        }
+
+        .summary-box h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--accent-purple);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .summary-box li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.625rem;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        }
+
+        .summary-box li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent-purple);
+            font-weight: bold;
+        }
+
+        /* QUIZ SECTION */
+        .quiz-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            margin: 1.5rem 1rem;
+            padding: 1.5rem;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 0.25rem;
+        }
+
+        .quiz-header p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .quiz-question {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .quiz-option {
+            padding: 0.875rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+        }
+
+        .quiz-option:hover:not(.correct):not(.incorrect) {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-gold);
+        }
+
+        .quiz-option.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--success-green);
+            color: var(--success-green);
+        }
+
+        .quiz-option.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--error-red);
+            color: var(--error-red);
+        }
+
+        .quiz-result {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .quiz-result.show {
+            display: block;
+        }
+
+        .quiz-result.correct {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+        }
+
+        .quiz-result.incorrect {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-red);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .quiz-score.show {
+            display: block;
+        }
+
+        .score-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .retake-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-gold);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #000;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .retake-btn:hover {
+            transform: scale(1.02);
+        }
+
+        /* FOOTER */
+        .lesson-footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-logo .gem {
+            color: var(--accent-gold);
+        }
+
+        .footer-text {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 600px) {
+            .content-card {
+                margin: 0.75rem 0;
+                border-radius: 0;
+                border-left: 4px solid var(--accent-purple);
+                border-right: none;
+                border-top: none;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+
+            .summary-box,
+            .quiz-section {
+                margin: 1rem 0;
+                border-radius: 0;
+            }
+
+            .stat-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="header-badge">
+                <span>⚡</span>
+                <span>Tier 2 - Nâng Cao</span>
+            </div>
+            <div class="lesson-chapter">Chapter 7 - Chart Patterns</div>
+            <h1 class="lesson-title">Bài 7.6: Symmetrical Triangle - Tam Giác Cân</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 7.6</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- CONTENT -->
+        <main class="content-section">
+            <!-- Section 1: Opening -->
+            <div class="content-card">
+                <h2>📐 Lò Xo Đang Bị Nén - Sức Mạnh Của Sự Chờ Đợi</h2>
+                
+                <p>Bạn đã bao giờ thấy một thị trường dường như "ngủ quên" sau một đợt biến động mạnh? Giá cứ co cụm lại, biên độ dao động ngày càng nhỏ dần, và volume giao dịch cạn kiệt. Nhiều trader non kinh nghiệm sẽ bỏ qua những giai đoạn này vì thấy nó "nhàm chán".</p>
+
+                <p>Nhưng với Smart Money và những trader lão luyện, đây là thời điểm của sự tập trung cao độ. Họ biết rằng thị trường đang giống như một <strong>chiếc lò xo bị nén chặt</strong>. Càng nén lâu, càng nén chặt, thì khi bung ra, lực bật sẽ càng khủng khiếp.</p>
+
+                <p>Chào mừng bạn đến với <strong>Symmetrical Triangle (Tam Giác Cân)</strong> - pattern đại diện cho sự lưỡng lự nhưng đầy tiềm năng của thị trường. Trong bài học này, tôi sẽ không chỉ chỉ cho bạn cách nhận diện nó, mà còn giải mã tâm lý đằng sau "sự im lặng trước cơn bão" này, và quan trọng nhất: làm sao để bạn không bị cuốn vào những pha "fakeout" (phá vỡ giả) mà đám đông thường mắc phải.</p>
+            </div>
+
+            <!-- Section 2: Concept -->
+            <div class="content-card">
+                <h2>🔍 Symmetrical Triangle Là Gì?</h2>
+
+                <h3>Định Nghĩa Chuẩn GEM</h3>
+                <p><strong>Symmetrical Triangle</strong> là một mô hình tích lũy (consolidation pattern) được hình thành bởi hai đường xu hướng hội tụ về một điểm:</p>
+                <ul>
+                    <li><strong>Đường kháng cự (Resistance):</strong> Dốc xuống, được tạo bởi các đỉnh thấp dần (Lower Highs).</li>
+                    <li><strong>Đường hỗ trợ (Support):</strong> Dốc lên, được tạo bởi các đáy cao dần (Higher Lows).</li>
+                </ul>
+                <p>Khác với Ascending Triangle (phe mua thắng thế) hay Descending Triangle (phe bán thắng thế), Symmetrical Triangle thể hiện một <strong>cuộc chiến cân sức</strong>. Cả phe mua và phe bán đều đang cố gắng đẩy giá theo ý mình nhưng chưa bên nào thực sự kiểm soát được tình hình.</p>
+
+                <div class="pattern-visual">
+                    <div class="pattern-diagram">
+        ╲         /  Descending Resistance
+         ╲       /   (Lower Highs)
+          ╲     /    
+           ╲   /     
+            ╲ /      
+             X       ← Apex (Điểm hội tụ)
+            / \      
+           /   \     Ascending Support
+          /     \    (Higher Lows)
+                    </div>
+                </div>
+
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">62%</div>
+                        <div class="stat-label">Win Rate</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">1:2.0</div>
+                        <div class="stat-label">Avg R:R</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">Neutral</div>
+                        <div class="stat-label">Signal</div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">📐</div>
+                    <div class="label">Hình 7.6.1: Cấu Trúc Symmetrical Triangle Hoàn Chỉnh</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+
+                <h3>Tâm Lý Thị Trường (The "Why")</h3>
+                <p>Tại sao mô hình này lại hình thành? Hãy tưởng tượng:</p>
+                <p>Phe Bán đang trở nên hung hăng hơn, họ sẵn sàng bán ở các mức giá thấp hơn trước đó (tạo Lower Highs). Ngược lại, Phe Mua cũng đang quyết liệt hơn, họ sẵn sàng mua ở các mức giá cao hơn trước đó (tạo Higher Lows).</p>
+                <p>Hai phe đang ép giá vào một góc tường. Không gian giao dịch ngày càng hẹp lại. Đến một lúc nào đó, một phe sẽ kiệt sức hoặc một phe sẽ tung đòn quyết định. Khi đó, sự cân bằng bị phá vỡ, và giá sẽ bùng nổ theo hướng của phe chiến thắng.</p>
+            </div>
+
+            <!-- Section 3: Deep Dive -->
+            <div class="content-card">
+                <h2>💎 Phân Tích Chuyên Sâu: Giải Mã "Vùng Nén"</h2>
+
+                <p>Để trade thành công Symmetrical Triangle, bạn không thể chỉ nhìn vào hình dáng tam giác. Bạn cần hiểu sâu hơn về 3 yếu tố cốt lõi sau:</p>
+
+                <h3>1. Context Is King (Bối Cảnh Là Vua)</h3>
+                <p>Mặc dù Symmetrical Triangle được coi là pattern trung lập, nhưng trong hệ thống GEM Frequency, chúng tôi coi nó là một <strong>Continuation Pattern (Mô hình tiếp diễn)</strong> nhiều hơn là đảo chiều. Thống kê cho thấy khoảng 60% trường hợp giá sẽ breakout theo hướng của xu hướng trước đó (Prior Trend).</p>
+                <ul>
+                    <li>Nếu trước đó là <strong>Uptrend</strong> → Ưu tiên chờ Breakout LÊN.</li>
+                    <li>Nếu trước đó là <strong>Downtrend</strong> → Ưu tiên chờ Breakout XUỐNG.</li>
+                </ul>
+                <p>Đừng cố đoán đỉnh đoán đáy trong tam giác này. Hãy để xu hướng lớn (Big Picture) dẫn đường cho bạn.</p>
+
+                <div class="image-placeholder">
+                    <div class="icon">🧭</div>
+                    <div class="label">Hình 7.6.3: Symmetrical Triangle Trong Uptrend vs Downtrend</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+
+                <h3>2. Volume: "Hơi Thở" Của Pattern</h3>
+                <p>Đây là bí mật để lọc bỏ các setup rác. Trong quá trình hình thành tam giác, volume <strong>BẮT BUỘC phải giảm dần</strong>. Điều này cho thấy sự cạn kiệt của lực cung cầu hiện tại và sự "nín thở" chờ đợi của đám đông.</p>
+                <p>Nếu bạn thấy volume tăng cao bất thường khi giá đang đi vào cuối tam giác mà chưa breakout, hãy cẩn thận. Đó thường là dấu hiệu của sự hỗn loạn, không phải tích lũy.</p>
+                <p>Ngược lại, tại thời điểm Breakout, volume phải <strong>tăng đột biến (Spike)</strong>. Đây là dấu hiệu Smart Money đã tham gia và xác nhận hướng đi mới.</p>
+
+                <h3>3. Thời Điểm Breakout (Timing)</h3>
+                <p>Không phải điểm breakout nào cũng giống nhau. Vị trí breakout quyết định sức mạnh của cú trade.</p>
+                <ul>
+                    <li><strong>Quá sớm (Trước 1/2 tam giác):</strong> Thường là false break hoặc mô hình chưa đủ chín muồi.</li>
+                    <li><strong>Quá muộn (Sát Apex):</strong> Khi giá đi quá gần đến đỉnh tam giác (Apex), lực nén đã bị triệt tiêu. Breakout lúc này thường yếu ớt và dễ biến thành sideway.</li>
+                    <li><strong>Điểm Vàng (Sweet Spot):</strong> Breakout xảy ra ở khoảng <strong>2/3 đến 3/4</strong> chiều dài tam giác. Đây là lúc lực nén đủ mạnh và phe chiến thắng đủ quyết tâm.</li>
+                </ul>
+
+                <div class="image-placeholder">
+                    <div class="icon">🔍</div>
+                    <div class="label">Hình 7.6.2: Breakout Zone - Vùng "Sweet Spot" 2/3 đến 3/4</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+            </div>
+
+            <!-- Section 4: Chiến lược Trade -->
+            <div class="content-card">
+                <h2>🎯 Chiến Lược Giao Dịch Chuẩn GEM</h2>
+
+                <p>Chúng ta không đoán hướng. Chúng ta phản ứng với những gì thị trường xác nhận. Dưới đây là quy trình trade Symmetrical Triangle an toàn và hiệu quả nhất.</p>
+
+                <div class="decision-flow">
+                    <div class="decision-title">📊 Quy Trình Ra Quyết Định</div>
+
+                    <div class="decision-step">
+                        <div class="decision-icon">1️⃣</div>
+                        <div class="decision-content">
+                            <h4>Xác Định Xu Hướng (Trend)</h4>
+                            <p>Kiểm tra HTF. Nếu là Uptrend, bias Long. Nếu là Downtrend, bias Short.</p>
+                        </div>
+                    </div>
+
+                    <div class="decision-arrow">↓</div>
+
+                    <div class="decision-step">
+                        <div class="decision-icon">2️⃣</div>
+                        <div class="decision-content">
+                            <h4>Kiểm Tra Volume & Thời Gian</h4>
+                            <p>Volume giảm dần? Giá đã đi được 2/3 quãng đường chưa?</p>
+                        </div>
+                    </div>
+
+                    <div class="decision-arrow">↓</div>
+
+                    <div class="decision-step">
+                        <div class="decision-icon">3️⃣</div>
+                        <div class="decision-content">
+                            <h4>WAIT FOR CONFIRMATION</h4>
+                            <p>Chờ nến đóng cửa hẳn bên ngoài tam giác kèm Volume Spike.</p>
+                        </div>
+                    </div>
+
+                    <div class="decision-arrow">↓</div>
+
+                    <div class="decision-step">
+                        <div class="decision-icon">4️⃣</div>
+                        <div class="decision-content">
+                            <h4>ENTRY (Theo Retest)</h4>
+                            <p>Ưu tiên đợi giá retest cạnh tam giác vừa phá vỡ hoặc zone gần nhất.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Setup Chi Tiết</h3>
+                <ul>
+                    <li><strong>Entry:</strong>
+                        <ul>
+                            <li><em>Aggressive:</em> Ngay khi nến breakout đóng cửa (Rủi ro false break cao).</li>
+                            <li><em>Conservative (Khuyên dùng):</em> Đợi giá quay lại Retest cạnh tam giác hoặc vùng supply/demand vừa tạo. Tìm tín hiệu nến đảo chiều (Pinbar, Engulfing) tại đó.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Stop Loss:</strong>
+                        <ul>
+                            <li>Đặt ở phía bên kia của cạnh tam giác đối diện (nếu tam giác nhỏ).</li>
+                            <li>Hoặc đặt dưới đáy gần nhất (swing low) trước khi breakout (nếu tam giác lớn).</li>
+                        </ul>
+                    </li>
+                    <li><strong>Take Profit (Measured Move):</strong>
+                        <ul>
+                            <li>Đo chiều cao lớn nhất của tam giác (đáy).</li>
+                            <li>Cộng (hoặc trừ) khoảng cách đó vào điểm breakout để tìm Target.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="info-box gold">
+                    <div class="info-box-title">🎯 Ví Dụ Tính Target</div>
+                    <p>Giả sử chiều cao đáy tam giác là <strong>$200</strong>.<br>
+                    Điểm Breakout xảy ra tại mức giá <strong>$1,500</strong>.<br>
+                    <strong>Target = $1,500 + $200 = $1,700.</strong><br>
+                    Đây là mục tiêu tối thiểu theo lý thuyết. Bạn nên kết hợp với các key level (HFZ/LFZ) bên trái để chốt lời hợp lý.</p>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">🎯</div>
+                    <div class="label">Hình 7.6.4: Entry, SL, Target và Measured Move</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+
+            <!-- Section 5: Mistakes -->
+            <div class="content-card">
+                <h2>⚠️ 3 Sai Lầm "Chết Người" Cần Tránh</h2>
+
+                <div class="info-box warning">
+                    <div class="info-box-title">🛑 1. Trade Trong "Máy Giặt" (Chop)</div>
+                    <p>Rất nhiều trader cố gắng trade các nhịp sóng nhỏ BÊN TRONG tam giác. Trừ khi tam giác cực lớn trên khung Weekly/Monthly, còn lại việc trade trong vùng biên độ hẹp này là cách nhanh nhất để tài khoản của bạn bị "bào mòn" bởi spread và choppy price action. <strong>Hãy kiên nhẫn đợi Breakout.</strong></p>
+                </div>
+
+                <div class="info-box warning">
+                    <div class="info-box-title">🛑 2. Bỏ Qua False Breakout</div>
+                    <p>Symmetrical Triangle nổi tiếng với các cú "Bull Trap" hoặc "Bear Trap". Giá chọc thủng cạnh tam giác nhưng rút râu ngay lập tức và quay ngược vào trong. Nếu bạn đặt lệnh Buy Stop/Sell Stop ngay sát cạnh tam giác, bạn sẽ dính bẫy. <strong>Luôn đợi nến ĐÓNG CỬA rõ ràng.</strong></p>
+                </div>
+
+                <div class="info-box warning">
+                    <div class="info-box-title">🛑 3. Vào Lệnh Ở Apex (Mũi Tam Giác)</div>
+                    <p>Khi giá đi đến tận cùng mũi tam giác mà vẫn chưa break, nhiều bạn vẫn cố trade. Lúc này market đã mất động lực (momentum). Breakout ở đây thường không đi xa và dễ đảo chiều ngẫu nhiên. Nếu giá đã đi quá 3/4 tam giác, hãy bỏ qua setup này.</p>
+                </div>
+            </div>
+
+            <!-- Section 6: Application -->
+            <div class="content-card">
+                <h2>🚀 Áp Dụng Thực Chiến</h2>
+
+                <p>Bây giờ đến lượt bạn. Đừng chỉ đọc, hãy mở chart lên và thực hành ngay. Đây là bài tập cho bạn trong tuần này:</p>
+
+                <p><strong>Bước 1: Scan</strong><br>
+                Mở chart H4 hoặc D1 của các cặp tiền chính hoặc Top Crypto. Tìm kiếm các vùng giá đang co cụm lại (consolidation) sau một xu hướng rõ ràng.</p>
+
+                <p><strong>Bước 2: Vẽ</strong><br>
+                Nối các đỉnh thấp dần và đáy cao dần. Chúng có hội tụ lại không? Volume có giảm dần không? Nếu có, bạn đã tìm thấy Symmetrical Triangle.</p>
+
+                <p><strong>Bước 3: Alert</strong><br>
+                Đừng ngồi canh màn hình. Hãy đặt Cảnh Báo Giá (Price Alert) ở gần các cạnh tam giác. Đi làm việc khác và đợi điện thoại rung.</p>
+
+                <p><strong>Bước 4: Execute</strong><br>
+                Khi có alert, mở chart kiểm tra: Nến đóng cửa chưa? Volume có spike không? Nếu thỏa mãn, hãy lên kế hoạch entry (tốt nhất là đợi Retest).</p>
+            </div>
+        </main>
+
+        <!-- SUMMARY -->
+        <div class="summary-box">
+            <h3>📋 Tóm Tắt Bài Học</h3>
+            <ul>
+                <li><strong>Symmetrical Triangle</strong> là mô hình "Lò xo nén" trung lập, nhưng 60% sẽ tiếp diễn xu hướng cũ.</li>
+                <li>Đặc điểm nhận dạng: Resistance dốc xuống + Support dốc lên + Volume giảm dần.</li>
+                <li><strong>Thời điểm vàng:</strong> Breakout nên xảy ra ở 2/3 đến 3/4 chiều dài tam giác.</li>
+                <li><strong>Quy tắc GEM:</strong> Không đoán hướng. Đợi Breakout + Volume Spike + Nến đóng cửa. Ưu tiên Retest.</li>
+                <li>Tránh trade bên trong tam giác hoặc khi giá đã đi đến tận Apex.</li>
+            </ul>
+        </div>
+
+        <!-- QUIZ -->
+        <div class="quiz-section">
+            <div class="quiz-header">
+                <h3>🎯 Kiểm Tra Kiến Thức</h3>
+                <p>Trả lời các câu hỏi để củng cố bài học</p>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <div class="question-text">Câu 1: Theo thống kê, Symmetrical Triangle thường breakout theo hướng nào?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Luôn luôn đảo chiều xu hướng cũ</div>
+                    <div class="quiz-option" data-index="1">60% tiếp diễn xu hướng cũ (Continuation)</div>
+                    <div class="quiz-option" data-index="2">50/50 hoàn toàn ngẫu nhiên</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <div class="question-text">Câu 2: Tại sao chúng ta nên tránh vào lệnh khi giá đi đến sát đỉnh (Apex) của tam giác?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Vì lúc đó volume quá cao</div>
+                    <div class="quiz-option" data-index="1">Vì spread lúc đó rất lớn</div>
+                    <div class="quiz-option" data-index="2">Vì động lực (momentum) đã giảm, breakout thường yếu và không đi xa</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <div class="question-text">Câu 3: Đặc điểm Volume chuẩn mực trong quá trình hình thành Symmetrical Triangle là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Volume tăng dần đều</div>
+                    <div class="quiz-option" data-index="1">Volume giảm dần (cạn kiệt) và tăng đột biến khi breakout</div>
+                    <div class="quiz-option" data-index="2">Volume giữ nguyên không đổi</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-text">🎉 Bạn trả lời đúng <span id="correct-count">0</span>/3 câu!</div>
+                <button class="retake-btn" onclick="resetQuiz()">Làm Lại Quiz</button>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <div class="footer-logo">
+                <span class="gem">GEM</span> Trading Academy
+            </div>
+            <div class="footer-text">© 2025 GEM Trading Academy. All rights reserved.</div>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Xem đáp án đúng ở trên.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function resetQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                question.querySelector('.quiz-result').className = 'quiz-result';
+            });
+
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

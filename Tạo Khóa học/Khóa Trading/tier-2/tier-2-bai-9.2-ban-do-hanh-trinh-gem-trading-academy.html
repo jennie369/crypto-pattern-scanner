@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 9.2: Bản Đồ Hành Trình Trader | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section, .content-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section, .content-card {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title, .content-card h2, .content-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p, .content-card p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul, .content-card ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li, .content-card li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-container, .image-placeholder {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+            overflow: hidden;
+            background: var(--bg-primary);
+        }
+        .image-container img { width: 100%; height: auto; display: block; }
+        .image-caption {
+            padding: var(--space-sm);
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--glass-border);
+            background: rgba(0,0,0,0.2);
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .highlight-box h4 { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .warning-box h4 { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .success-box h4 { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+        .success-box p { color: var(--text-secondary); margin: 0; }
+
+        .quote-box {
+            background: rgba(106, 91, 255, 0.1);
+            border-left: 4px solid var(--purple);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        }
+        .quote-text {
+            font-size: 1.1rem;
+            font-style: italic;
+            color: var(--text-primary);
+            margin-bottom: var(--space-sm);
+        }
+        .quote-author {
+            font-size: 0.9rem;
+            color: var(--gold);
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .journey-map {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        .journey-stage {
+            background: var(--bg-primary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .journey-stage:hover {
+            transform: translateX(5px);
+            border-color: var(--gold);
+        }
+        .stage-header {
+            display: flex;
+            align-items: center;
+            padding: var(--space-md);
+            background: rgba(255,255,255,0.05);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .stage-number {
+            background: var(--gold);
+            color: var(--navy-dark);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            margin-right: var(--space-md);
+        }
+        .stage-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            flex-grow: 1;
+        }
+        .stage-duration {
+            font-size: 0.85rem;
+            color: var(--cyan);
+            background: rgba(0, 240, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .stage-content {
+            padding: var(--space-md);
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .milestone-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        .milestone-card {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            text-align: center;
+        }
+        .milestone-icon {
+            font-size: 2rem;
+            margin-bottom: var(--space-sm);
+        }
+        .milestone-title {
+            color: var(--gold);
+            font-weight: 700;
+            margin-bottom: var(--space-xs);
+        }
+        .milestone-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        .summary-box h3 { color: var(--success); margin-bottom: var(--space-lg); }
+        .summary-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        .quiz-question {
+            background: var(--bg-card);
+            padding: var(--space-lg);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-lg);
+        }
+        .quiz-question p { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-md); }
+        .quiz-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: var(--space-md);
+            margin-bottom: var(--space-sm);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .quiz-option:hover { background: rgba(255,255,255,0.1); border-color: var(--gold); }
+        .quiz-option.correct { background: rgba(0, 200, 83, 0.2); border-color: var(--success); color: var(--success); }
+        .quiz-option.incorrect { background: rgba(255, 82, 82, 0.2); border-color: var(--error); color: var(--error); }
+        .quiz-result { display: none; margin-top: var(--space-sm); font-weight: 600; }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct { color: var(--success); }
+        .quiz-result.incorrect { color: var(--error); }
+        
+        .retake-btn {
+            background: var(--gold);
+            color: var(--navy-dark);
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: var(--space-md);
+        }
+
+        .lesson-footer {
+            text-align: center;
+            margin-top: var(--space-xl);
+            padding: var(--space-lg);
+            border-top: 1px solid var(--glass-border);
+            color: var(--text-muted);
+        }
+
+        .styled-list li { margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="lesson-header">
+            <span class="lesson-badge">🗺️ Tier 2 - Bài 9.2</span>
+            <h1 class="lesson-title">Bản Đồ Hành Trình Trader</h1>
+            <p class="lesson-subtitle">Định vị bản thân và lộ trình đi đến tự do tài chính</p>
+        </header>
+
+        <!-- 1. OPENING HOOK -->
+        <article class="content-card">
+            <div class="card-header">
+                <h2>1. Lời Mở Đầu: Bạn Đang Lạc Trong Rừng Rậm?</h2>
+            </div>
+            <div class="card-body">
+                <p>Hãy tưởng tượng bạn đang bị thả vào giữa một khu rừng rậm nhiệt đới Amazon. Không la bàn. Không bản đồ. Không chỉ dẫn. Xung quanh chỉ toàn cây cối rậm rạp và những tiếng động lạ. Bạn sẽ cảm thấy thế nào? Hoang mang? Sợ hãi? Và điều gì sẽ xảy ra nếu bạn cứ cắm đầu chạy mà không biết hướng?</p>
+                <p>Rất có thể bạn sẽ chạy vòng tròn cho đến khi kiệt sức. Đó chính xác là hình ảnh của 95% trader ngoài kia. Họ lao vào thị trường với hy vọng kiếm tiền nhanh, nhưng không hề biết mình đang ở đâu, cần phải đi qua những trạm kiểm soát nào, và đích đến thực sự trông như thế nào. Họ nghĩ trading là một đường thẳng đi lên, nhưng thực tế nó là một mê cung đầy rẫy những "bẫy tâm lý".</p>
+                <p>Nếu bạn đang cảm thấy bế tắc, lúc thắng lúc thua, tài khoản cứ trồi sụt mãi không tăng trưởng, thì tin tốt là: Bạn không cô đơn. Đó là một giai đoạn bắt buộc. Trong bài học này, tôi sẽ trao cho bạn tấm <strong>Bản Đồ Hành Trình (Journey Map)</strong>. Khi cầm nó trong tay, bạn sẽ biết chính xác mình đang đứng ở đâu, cần làm gì tiếp theo để thoát khỏi khu rừng "thua lỗ" và bước sang vùng đất "lợi nhuận".</p>
+
+                <div class="quote-box">
+                    <div class="quote-text">"Nếu bạn không biết mình đang đi đâu, mọi con đường đều sẽ dẫn bạn đến hư vô."</div>
+                    <div class="quote-author">— Lewis Carroll</div>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x350/112250/8B5CF6?text=Trader+Journey+Roadmap" alt="Journey Map">
+                    <p class="image-caption">Hình 9.2.1: Bản đồ hành trình từ beginner đến profitable</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 2. CONCEPT INTRODUCTION -->
+        <article class="content-card">
+            <div class="card-header">
+                <h2>2. Khái Niệm: Trading Không Phải Là Đường Thẳng</h2>
+            </div>
+            <div class="card-body">
+                <p>Nhiều người lầm tưởng hành trình trở thành trader thành công là một đường thẳng tuyến tính: Học -> Biết Trade -> Kiếm Tiền. Nhưng thực tế nó giống một <strong>đường xoắn ốc đi lên</strong>. Bạn sẽ gặp lại những sai lầm cũ ở cấp độ cao hơn cho đến khi thực sự học được bài học.</p>
+                
+                <div class="highlight-box">
+                    <h4>💡 Bản Đồ 5 Giai Đoạn</h4>
+                    <p>Hành trình của một trader chuyên nghiệp được chia làm 5 giai đoạn rõ rệt:</p>
+                    <ul class="styled-list">
+                        <li><strong>Giai đoạn 1: Newbie (Mộng Mơ)</strong> - Chưa biết mình chưa biết gì.</li>
+                        <li><strong>Giai đoạn 2: Student (Thức Tỉnh)</strong> - Biết mình chưa biết gì (Bạn đang ở đây hoặc vừa qua).</li>
+                        <li><strong>Giai đoạn 3: Practitioner (Thử Thách)</strong> - Biết cách làm nhưng chưa nhất quán.</li>
+                        <li><strong>Giai đoạn 4: Profitable (Thành Thạo)</strong> - Làm đúng một cách vô thức.</li>
+                        <li><strong>Giai đoạn 5: Master (Bậc Thầy)</strong> - Sáng tạo và truyền đạt.</li>
+                    </ul>
+                </div>
+                
+                <p>Tại sao bạn cần biết điều này? Vì mỗi giai đoạn đòi hỏi một <strong>tâm thế</strong> và <strong>kỹ năng</strong> hoàn toàn khác nhau. Nếu bạn đang ở Giai đoạn 2 mà cố gắng kiếm tiền như Giai đoạn 4, bạn sẽ thất bại thảm hại.</p>
+            </div>
+        </article>
+
+        <!-- 3. DEEP DIVE -->
+        <article class="content-card">
+            <div class="card-header">
+                <h2>3. Phân Tích Sâu: 5 Trạm Kiểm Soát Cuộc Đời Trader</h2>
+            </div>
+            <div class="card-body">
+                <p>Hãy đi sâu vào từng giai đoạn để xem "nội tâm" của bạn sẽ trải qua những gì.</p>
+
+                <div class="journey-map">
+                    <!-- Stage 1 -->
+                    <div class="journey-stage">
+                        <div class="stage-header">
+                            <span class="stage-number">1</span>
+                            <span class="stage-title">Unconscious Incompetence (Không Biết Mình Dốt)</span>
+                            <span class="stage-duration">0-3 tháng</span>
+                        </div>
+                        <div class="stage-content">
+                            <p><strong>Đặc điểm:</strong> Bạn nhìn vào chart và nghĩ "Cái này dễ ợt, mua thấp bán cao thôi mà". Bạn vào lệnh bằng cảm tính, hoặc nghe theo các "kèo" trên mạng. Có thể bạn thắng vài lệnh đầu (beginner's luck) và nghĩ mình là thiên tài.</p>
+                            <p><strong>Cạm bẫy:</strong> Tự tin thái quá. Rủi ro quá lớn. Không có Stop Loss.</p>
+                            <p><strong>Cách vượt qua:</strong> Cháy tài khoản lần đầu tiên. Nỗi đau mất tiền sẽ đánh thức bạn dậy.</p>
+                        </div>
+                    </div>
+
+                    <!-- Stage 2 -->
+                    <div class="journey-stage">
+                        <div class="stage-header">
+                            <span class="stage-number">2</span>
+                            <span class="stage-title">Conscious Incompetence (Biết Mình Dốt)</span>
+                            <span class="stage-duration">3-6 tháng</span>
+                        </div>
+                        <div class="stage-content">
+                            <p><strong>Đặc điểm:</strong> Bạn nhận ra trading không dễ. Bạn bắt đầu đi học "điên cuồng". Bạn mua sách, xem Youtube, học đủ thứ chỉ báo (RSI, MACD, Bollinger Bands...). Bạn tìm kiếm "Chén Thánh" - một hệ thống bất bại. Nhưng càng học, bạn càng thua. Bạn bị loạn chưởng.</p>
+                            <p><strong>Tại sao giai đoạn này quan trọng?</strong> Đây là lúc bạn tìm thấy GEM Frequency Method. Bạn nhận ra Patterns và Supply/Demand mới là chân ái. Bạn bắt đầu lọc bỏ những thứ rác rưởi.</p>
+                        </div>
+                    </div>
+
+                    <!-- Stage 3 -->
+                    <div class="journey-stage" style="border-color: var(--gold); background: rgba(255, 189, 89, 0.05);">
+                        <div class="stage-header">
+                            <span class="stage-number">3</span>
+                            <span class="stage-title">Conscious Competence (Hiểu Nhưng Chưa Nhuyễn)</span>
+                            <span class="stage-duration">6-18 tháng</span>
+                        </div>
+                        <div class="stage-content">
+                            <p><strong>Đặc điểm:</strong> <span style="color: var(--gold); font-weight: bold;">Đây là nơi bạn đang đứng sau khi học xong Tier 2.</span> Bạn biết chính xác HFZ là gì, LFZ là gì. Bạn phân tích chart rất hay... vào cuối tuần. Nhưng khi vào lệnh thực tế (Live), tim bạn vẫn đập thình thịch. Bạn vẫn hay chốt non, dời SL lung tung. Bạn hòa vốn hoặc lỗ nhẹ.</p>
+                            <p><strong>Thử thách:</strong> Sự kỷ luật. Bạn có kiến thức, nhưng chưa biến nó thành phản xạ.</p>
+                            <p><strong>Chìa khóa:</strong> PAPER TRADING và JOURNAL. Bạn cần lặp lại hành động đúng đủ nhiều để não bộ ghi nhớ.</p>
+                        </div>
+                    </div>
+
+                    <!-- Stage 4 -->
+                    <div class="journey-stage">
+                        <div class="stage-header">
+                            <span class="stage-number">4</span>
+                            <span class="stage-title">Unconscious Competence (Thành Thạo Trong Vô Thức)</span>
+                            <span class="stage-duration">18-36 tháng</span>
+                        </div>
+                        <div class="stage-content">
+                            <p><strong>Đặc điểm:</strong> Bạn nhìn chart và thấy ngay setup chỉ trong 10 giây. Bạn vào lệnh lạnh lùng như một cái máy. Thua lỗ không còn làm bạn đau đớn, thắng lợi không làm bạn quá phấn khích. Tài khoản tăng trưởng đều đặn theo đường cong lãi kép.</p>
+                            <p><strong>Cảm giác:</strong> Trading trở nên... nhàm chán. Nhưng đó là sự nhàm chán kiếm ra tiền.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="success-box">
+                    <h4>✅ Sự Thật Về "Thành Công Sau Một Đêm"</h4>
+                    <p>Không có ai nhảy cóc từ Giai đoạn 1 lên Giai đoạn 4 cả. Nếu ai đó khoe lãi khủng mà không có kiến thức nền tảng, họ chỉ đang gặp may ở Giai đoạn 1 và sớm muộn sẽ trả lại hết cho thị trường. Hãy kiên nhẫn đi từng bước.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 4. EXAMPLES -->
+        <article class="content-card">
+            <div class="card-header">
+                <h2>4. Ví Dụ: Câu Chuyện Của Tuấn</h2>
+            </div>
+            <div class="card-body">
+                <p>Hãy xem hành trình của Tuấn - một học viên tiêu biểu của GEM Academy để thấy mình trong đó.</p>
+                
+                <div class="milestone-grid">
+                    <div class="milestone-card">
+                        <div class="milestone-icon">💥</div>
+                        <div class="milestone-title">Tháng 1-3</div>
+                        <div class="milestone-desc">Tuấn nạp $1000, đánh Full Margin theo tin tức. Tài khoản x2 rồi cháy sạch trong 1 đêm. (Giai đoạn 1)</div>
+                    </div>
+                    <div class="milestone-card">
+                        <div class="milestone-icon">📚</div>
+                        <div class="milestone-title">Tháng 4-6</div>
+                        <div class="milestone-desc">Tuấn học GEM Method. Cậu ấy nhận ra sai lầm cũ. Cậu ấy paper trade và thấy thắng, nhưng khi nạp tiền thật lại thua vì tâm lý. (Giai đoạn 2->3)</div>
+                    </div>
+                    <div class="milestone-card">
+                        <div class="milestone-icon">📝</div>
+                        <div class="milestone-title">Tháng 7-12</div>
+                        <div class="milestone-desc">Tuấn ngừng nạp tiền. Quay lại Paper Trade 100 lệnh nghiêm túc. Viết nhật ký từng lệnh. Cậu ấy bắt đầu hòa vốn và có lãi nhẹ. (Giai đoạn 3)</div>
+                    </div>
+                    <div class="milestone-card">
+                        <div class="milestone-icon">🚀</div>
+                        <div class="milestone-title">Năm thứ 2</div>
+                        <div class="milestone-desc">Tuấn trade quỹ (Prop Firm). Cậu ấy tuân thủ tuyệt đối quy tắc quản lý vốn. Thu nhập trading vượt lương văn phòng. (Giai đoạn 4)</div>
+                    </div>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x300/112250/10B981?text=Trading+Milestones+Timeline" alt="Milestones">
+                    <p class="image-caption">Hình 9.2.2: Các cột mốc quan trọng bạn sẽ đi qua</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 5. MISTAKES -->
+        <article class="content-card">
+            <div class="card-header">
+                <h2>5. Sai Lầm Khiến Bạn Mắc Kẹt Mãi Ở Giai Đoạn 2</h2>
+            </div>
+            <div class="card-body">
+                <p>Tại sao nhiều người trade 3-5 năm vẫn thua lỗ? Họ bị kẹt trong cái gọi là "Vòng Lặp Doom Loop".</p>
+
+                <div class="warning-box">
+                    <h4>🚨 Nhảy Hệ Thống (System Hopping)</h4>
+                    <p>Khi gặp chuỗi thua lỗ (điều bình thường), thay vì xem lại nhật ký và sửa sai, họ lại nghĩ "Hệ thống này dởm rồi". Họ bỏ GEM Method để đi tìm một indicator mới, một group tín hiệu mới. Và họ lại bắt đầu lại từ Giai đoạn 1. Cứ thế, họ mãi mãi là người mới.</p>
+                </div>
+                
+                <div class="warning-box">
+                    <h4>🚨 Coi Thường Paper Trading</h4>
+                    <p>"Trade demo chán lắm, tiền ảo không có cảm xúc". Đúng, nhưng phi công phải lái giả lập hàng ngàn giờ trước khi được chở khách thật. Nếu bạn không thắng được trên Demo, bạn KHÔNG CÓ CỬA thắng trên Real. Đừng đốt tiền để mua cảm xúc.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 6. APPLICATION -->
+        <article class="content-card">
+            <div class="card-header">
+                <h2>6. Ứng Dụng: Định Vị Và Hành Động</h2>
+            </div>
+            <div class="card-body">
+                <p>Bạn đã hoàn thành Tier 2. Chúc mừng bạn! Bạn đang đứng trước ngưỡng cửa chuyển từ <strong>Student</strong> sang <strong>Practitioner</strong>. Đây là lúc lý thuyết cần chuyển hóa thành kỹ năng.</p>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x350/112250/00F0FF?text=Your+Current+Position" alt="Current Position">
+                    <p class="image-caption">Hình 9.2.3: Vị trí của bạn hiện tại - Cần sự kiên trì nhất</p>
+                </div>
+
+                <h3>Checklist Hành Động Ngay:</h3>
+                <ul class="styled-list gold">
+                    <li><strong>Ngừng nạp tiền lớn:</strong> Nếu đang thua, hãy rút hết tiền về, chỉ để lại một khoản nhỏ (ví dụ $100) để giữ cảm giác, hoặc quay lại Paper Trade.</li>
+                    <li><strong>Thử thách 100 Lệnh:</strong> Cam kết thực hiện 100 lệnh Paper Trade liên tiếp chỉ sử dụng setup GEM Tier 2 (Pattern + Zone). Không quan tâm lời lỗ, chỉ quan tâm làm đúng quy tắc.</li>
+                    <li><strong>Xây dựng Trading Journal:</strong> Bắt đầu ghi chép lại mọi lệnh trade (Tại sao vào? Cảm xúc lúc đó? Kết quả?). Đây là người thầy tốt nhất của bạn.</li>
+                    <li><strong>Tìm Mentor/Cộng Đồng:</strong> Đừng đi một mình. Hãy tham gia cộng đồng GEM để thấy những người khác cũng đang chiến đấu giống bạn.</li>
+                </ul>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x300/112250/8B5CF6?text=Accelerate+Your+Journey" alt="Accelerate">
+                    <p class="image-caption">Hình 9.2.4: Yếu tố giúp bạn tăng tốc (Journaling, Deliberate Practice)</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 7. SUMMARY -->
+        <div class="summary-box">
+            <h3>📝 Tóm Tắt Bài Học</h3>
+            <ul class="summary-list">
+                <li>Hành trình trading có 5 giai đoạn: Newbie -> Student -> Practitioner -> Profitable -> Master.</li>
+                <li>Bạn đang ở giai đoạn chuyển giao quan trọng nhất: Từ Hiểu Biết sang Thực Hành.</li>
+                <li>Đừng cố đốt cháy giai đoạn. Không có đường tắt. Paper Trading là cây cầu bắt buộc phải đi qua.</li>
+                <li>Tránh xa bẫy "Nhảy hệ thống". Hãy đào sâu một phương pháp cho đến khi thành thạo.</li>
+                <li>Kỷ luật và Nhật ký giao dịch là hai công cụ giúp bạn đi hết bản đồ này.</li>
+            </ul>
+        </div>
+
+        <!-- 8. QUIZ -->
+        <section class="quiz-section">
+            <h3>🎯 Kiểm Tra Kiến Thức</h3>
+
+            <div class="quiz-question" data-correct="2">
+                <p><strong>Câu 1:</strong> Sau khi học xong Tier 2, bạn đang ở giai đoạn nào và thử thách lớn nhất là gì?</p>
+                <button class="quiz-option" data-index="0">Giai đoạn Newbie - Thử thách là thiếu kiến thức.</button>
+                <button class="quiz-option" data-index="1">Giai đoạn Profitable - Thử thách là làm sao tiêu hết tiền.</button>
+                <button class="quiz-option" data-index="2">Giai đoạn Practitioner - Thử thách là kỷ luật và sự nhất quán (làm đúng những gì đã học).</button>
+                <button class="quiz-option" data-index="3">Giai đoạn Master - Thử thách là dạy người khác.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <p><strong>Câu 2:</strong> Tại sao Paper Trading (Giao dịch giả lập) lại cực kỳ quan trọng ở giai đoạn này?</p>
+                <button class="quiz-option" data-index="0">Vì nó vui.</button>
+                <button class="quiz-option" data-index="1">Vì nó giúp rèn luyện kỹ năng và kiểm chứng hệ thống mà không phải trả giá bằng tiền thật, giúp xây dựng niềm tin.</button>
+                <button class="quiz-option" data-index="2">Vì sàn bắt buộc.</button>
+                <button class="quiz-option" data-index="3">Nó không quan trọng, nên trade thật luôn mới có cảm xúc.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <p><strong>Câu 3:</strong> "System Hopping" (Nhảy hệ thống) dẫn đến hậu quả gì?</p>
+                <button class="quiz-option" data-index="0">Bạn bị kẹt mãi ở vòng lặp người mới, không bao giờ đạt đến sự thành thạo (Mastery).</button>
+                <button class="quiz-option" data-index="1">Bạn sẽ tìm ra Chén Thánh nhanh hơn.</button>
+                <button class="quiz-option" data-index="2">Giúp bạn biết nhiều kiến thức hơn và trade giỏi hơn.</button>
+                <button class="quiz-option" data-index="3">Không có hậu quả gì.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-text"><span id="correct-count">0</span>/3</div>
+                <div class="score-label">Câu trả lời đúng</div>
+                <button class="retake-btn" onclick="location.reload()">Làm lại Quiz</button>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <div class="footer-logo">GEM Trading Academy</div>
+            <p class="footer-text">Module A - Hành Trình Chuyển Hóa • Bài 9.2</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác! Bạn đã hiểu đúng vị trí của mình.';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy nhớ lại 5 giai đoạn phát triển.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

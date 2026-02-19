@@ -1,0 +1,47 @@
+  🧠 HÌNH 1.7.4.1: ĐA DẠNG PHONG CÁCH TRADER
+  Tên file: 1.7.4.1-trading-personalities.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Minh họa các kiểu tính cách trader khác nhau và thế mạnh của họ.
+  NỘI DUNG HÌNH:
+   - Ba hình tượng trader đại diện:
+     1. Sniper (Người bắn tỉa): Kiên nhẫn, chờ đợi setup hoàn hảo (Swing Trader).
+     2. Kiến trúc sư (Architect): Tỉ mỉ, logic, xây dựng hệ thống (System Trader).
+     3. Nghệ sĩ (Artist): Trực giác, linh hoạt, cảm nhận dòng chảy (Scalper/Day Trader).
+   - Text nổi bật: "PHONG CÁCH CỦA BẠN LÀ GÌ?"
+   - Ghi chú: Mỗi phong cách đều có con đường thành công riêng.
+
+  ---
+
+  🔄 HÌNH 1.7.4.2: CHUYỂN HÓA TÂM LÝ
+  Tên file: 1.7.4.2-mindset-transformation.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Minh họa cách biến điểm yếu thành điểm mạnh.
+  NỘI DUNG HÌNH:
+   - Sơ đồ chuyển hóa (Transformation Diagram):
+     - Bên trái (Điểm yếu): "Nỗi sợ thua lỗ" -> Mũi tên chuyển hóa -> Bên phải (Điểm mạnh): "Kỷ luật quản lý vốn".
+     - Bên trái: "Sự nóng vội (FOMO)" -> Mũi tên chuyển hóa -> Bên phải: "Năng lượng tìm kiếm cơ hội".
+   - Hình ảnh ẩn dụ: Một viên than đá (áp lực) chuyển hóa thành kim cương (giá trị).
+   - Subtitle: "Biến áp lực thành động lực."
+
+  ---
+
+  ⚙️ HÌNH 1.7.4.3: CÁ NHÂN HÓA HỆ THỐNG
+  Tên file: 1.7.4.3-system-customization.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Các yếu tố cần điều chỉnh để phù hợp với cá nhân.
+  NỘI DUNG HÌNH:
+   - Hình ảnh một bảng điều khiển (Dashboard) với các nút vặn tùy chỉnh:
+     1. Timeframe (Khung thời gian): M15 / H1 / H4 / D1.
+     2. Risk Appetite (Mức độ rủi ro): Low / Medium / High.
+     3. Frequency (Tần suất lệnh): Scalping / Day / Swing.
+   - Bàn tay người đang điều chỉnh các nút vặn này cho phù hợp với mình.
+   - Text: "YOUR SYSTEM, YOUR RULES" (Hệ thống của bạn, luật chơi của bạn).
+
+  ---
+
+  🤝 HÌNH 1.7.4.4: SỨC MẠNH CỘNG ĐỒNG
+  Tên file: 1.7.4.4-community-power.png | Tỷ lệ: 16:9 (Horizontal)
+  Bối cảnh: Sự hỗ trợ của cộng đồng GEM.
+  NỘI DUNG HÌNH:
+   - Hình ảnh mạng lưới kết nối các trader:
+     - Trung tâm: Trader cá nhân.
+     - Xung quanh: Các vòng tròn hỗ trợ (Mentor, Bạn đồng hành, Tài liệu, Công cụ AI).
+   - Các đường kết nối phát sáng, thể hiện sự chia sẻ kiến thức và động viên.
+   - Subtitle: "Bạn không đơn độc trên hành trình này."

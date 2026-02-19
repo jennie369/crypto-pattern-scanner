@@ -1,0 +1,73 @@
+  📐 HÌNH 1.1.1: TỔNG QUAN VỀ VÙNG HFZ
+  Tên file: 1.1.1-hfz-overview.png | Tỷ lệ: 3:4 (Vertical)
+  Bối cảnh: Section 2 - Định Nghĩa HFZ. Minh họa trực quan khái niệm HFZ là "bức tường" lệnh bán ở
+  phía trên.
+  NỘI DUNG HÌNH:
+    - Biểu đồ: Một xu hướng tăng đang tiến gần đến một vùng hình chữ nhật màu đỏ rực rỡ (glow).
+    - Visual: Hình ảnh mô phỏng một "bức tường" hoặc "đập ngăn nước" bằng tia laser đỏ ngay tại vùng
+      zone.
+    - Text nổi bật: "HFZ - VÙNG TẦN SUẤT BÁN CAO"
+    - Tagline: "Nằm TRÊN giá hiện tại - Nơi Smart Money đặt lệnh SHORT."
+    - Nhân vật: Nam trader (30 tuổi) đang đứng quan sát biểu đồ, tay chỉ vào vùng đỏ với vẻ mặt thận
+      trọng.
+
+  ---
+
+
+  📐 HÌNH 1.1.2: PATTERN DPD TẠO RA HFZ
+  Tên file: 1.1.2-dpd-hfz.png | Tỷ lệ: 3:4 (Vertical)
+  Bối cảnh: Section 3 - Nguồn Gốc Của HFZ. Giải thích cách một xu hướng giảm tiếp diễn tạo ra vùng
+  HFZ.
+  NỘI DUNG HÌNH:
+    - Biểu đồ: Minh họa 3 giai đoạn: Giảm mạnh (Phase 1) → Đi ngang tích lũy (Phase 2 - Pause) → Giảm
+      tiếp (Phase 3).
+    - Đánh dấu: Số 1, 2, 3 tương ứng với 3 giai đoạn.
+    - Vùng Zone: Một hình chữ nhật màu đỏ bao phủ Phase 2.
+    - Text: "DPD PATTERN: CONTINUATION"
+    - Ghi chú: "Vùng Pause trở thành HFZ - Kho đạn của phe Gấu."
+
+  ---
+
+
+  📐 HÌNH 1.1.3: PATTERN UPD TẠO RA HFZ (ĐẢO CHIỀU)
+  Tên file: 1.1.3-upd-hfz.png | Tỷ lệ: 3:4 (Vertical)
+  Vị trí trong bài: Section 2 - HFZ Xuất Hiện Ở Đâu
+  Mô tả: Biểu đồ minh họa quá trình hình thành HFZ: xu hướng tăng → vùng tích lũy → phá vỡ xuống.
+  Đánh dấu 3 giai đoạn bằng số 1, 2, 3.
+  NỘI DUNG HÌNH:
+    - Biểu đồ: Giá đi lên mạnh mẽ (1) → Chững lại đi ngang tạo đỉnh (2) → Sập mạnh đảo chiều (3).
+    - Đánh dấu: Số 1, 2, 3 tại từng giai đoạn rõ ràng.
+    - Vùng Zone: Hình chữ nhật đỏ tại đỉnh (Phase 2).
+    - Text nổi bật: "UPD PATTERN: REVERSAL"
+    - Ghi chú: "Đỉnh Pause = HFZ cực mạnh. Nơi Smart Money thoát hàng Long và vào lệnh Short."
+
+  ---
+
+
+  📐 HÌNH 1.1.4: QUY TRÌNH ENTRY 5 BƯỚC TẠI HFZ
+  Tên file: 1.1.4-hfz-entry-process.png | Tỷ lệ: 3:4 (Vertical)
+  Bối cảnh: Section 4 - Chiến Lược Giao Dịch. Hướng dẫn các bước từ quan sát đến bóp cò.
+  NỘI DUNG HÌNH:
+    - Visual: Một lộ trình (roadmap) 5 bước uốn lượn trên nền chart.
+    - Các bước:
+      1. Xác định Zone.
+      2. Chờ Retest.
+      3. Quan sát phản ứng.
+      4. Tìm nến xác nhận (Pin Bar/Engulfing).
+      5. Vào lệnh & Đặt SL.
+    - Text: "SĂN MỒI TẠI HFZ - ĐỪNG CHẶN ĐẦU XE LỬA!"
+    - Nhân vật: Nam trader đang cầm súng bắn tỉa (biểu tượng cho sự kiên nhẫn) ngắm vào vùng đỏ trên
+      biểu đồ.
+
+  ---
+
+
+  📐 HÌNH 1.1.5: CASE STUDY BTC/USDT THỰC TẾ
+  Tên file: 1.1.5-btc-hfz-case-study.png | Tỷ lệ: 3:4 (Vertical)
+  Bối cảnh: Section 6 - Ví Dụ Thực Tế. Phân tích một lệnh thắng dựa trên HFZ.
+  NỘI DUNG HÌNH:
+    - Biểu đồ: Chart BTC thực tế với các nến xanh đỏ rõ ràng.
+    - Kỹ thuật: Vẽ vùng HFZ đỏ tại mức giá 43k5-44k. Mũi tên chỉ vào nến Bearish Engulfing tại zone.
+    - Text: "REAL CASE STUDY: BTC/USDT 4H"
+    - Thông số: "Entry: 43,550 | SL: 44,200 | TP: 41,000 | R:R = 1:3"
+    - Ghi chú: "Lệnh thắng 2,500 giá nhờ kiên nhẫn đợi Retest HFZ."

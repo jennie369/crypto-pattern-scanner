@@ -210,7 +210,20 @@
       "Bash(fi)",
       "Bash(/mnt/c/Program Files/Git/cmd/git.exe -C \"C:/Users/Jennie Chu/Desktop/Projects/crypto-pattern-scanner\" push origin main)",
       "Bash(\"/mnt/c/Program Files/Git/cmd/git.exe\" -C \"C:/Users/Jennie Chu/Desktop/Projects/crypto-pattern-scanner\" push origin main)",
-      "Bash(\"/mnt/c/Program Files/Git/cmd/git.exe\" push origin main)"
+      "Bash(\"/mnt/c/Program Files/Git/cmd/git.exe\" push origin main)",
+      "mcp__claude_ai_Vercel__list_deployments",
+      "Bash(powershell.exe -Command \"Set-Location ''C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner''; git push origin main\")",
+      "Bash(cmd.exe /c \"git push origin main\")",
+      "mcp__claude_ai_Vercel__deploy_to_vercel",
+      "Bash(cmd.exe /c \"cd frontend && vercel --prod --yes\")",
+      "Bash(cmd.exe /c \"vercel --prod --yes\")",
+      "Bash(cmd.exe /c \"del \"\"C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner\\\\.git\\\\index.lock\"\"\")",
+      "Bash(cmd.exe /c \"del /f \"\"C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner\\\\.git\\\\index.lock\"\"\")",
+      "Bash(cmd.exe /c \"del /f .git\\\\index.lock\")",
+      "Bash(GIT_OPTIONAL_LOCKS=0 git diff:*)",
+      "Bash(sync:*)",
+      "Bash(cmd.exe /c \"cd /d C:\\\\Users\\\\Jennie Chu\\\\Desktop\\\\Projects\\\\crypto-pattern-scanner && git push origin main\")",
+      "mcp__supabase__list_migrations"
     ],
     "deny": [],
     "ask": []

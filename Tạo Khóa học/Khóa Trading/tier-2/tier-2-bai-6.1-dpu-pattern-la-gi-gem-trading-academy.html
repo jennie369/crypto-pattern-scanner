@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 6.1: DPU Pattern Là Gì? | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250; --navy-dark: #0a1628; --gold: #FFBD59; --gold-dark: #E5A73D;
+            --cyan: #00F0FF; --purple: #6A5BFF; --burgundy: #9C0612; --burgundy-light: #C41E2A;
+            --success: #00C853; --error: #FF5252; --bg-primary: #0a1628; --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF; --text-secondary: rgba(255, 255, 255, 0.85); --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4); --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px;
+            --radius-md: 12px; --radius-lg: 16px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); }
+        .lesson-badge { display: inline-block; padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--success), var(--cyan)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.4rem, 5vw, 2.2rem); font-weight: 800; background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: var(--space-md); }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 16px; border-radius: 0; border: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.4rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); border-bottom: 1px solid var(--glass-border); padding-bottom: var(--space-sm); }
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border-left: 4px solid var(--gold); padding: var(--space-lg); margin: var(--space-lg) 0; border-radius: 4px; }
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border-left: 4px solid var(--cyan); padding: var(--space-lg); margin: var(--space-lg) 0; border-radius: 4px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--success); }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .pattern-flow { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        .flow-phase { display: flex; gap: var(--space-md); padding: var(--space-md); background: var(--bg-card); border-left: 4px solid var(--gold); border-radius: 4px; }
+        .phase-icon { font-size: 2rem; min-width: 50px; text-align: center; }
+        .phase-content { flex: 1; }
+        .phase-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .phase-desc { font-size: 0.9rem; color: var(--text-muted); }
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        .summary-box { background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02)); border: 2px solid var(--success); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--success); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--success); font-weight: 700; }
+        .quiz-section { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option { padding: var(--space-md); background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; margin-bottom: var(--space-sm); transition: 0.3s; display: flex; gap: 12px; align-items: center; }
+        .quiz-option:hover { border-color: var(--gold); }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        .option-marker { min-width: 28px; height: 28px; background: var(--navy); border: 1px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
+        .question-feedback { margin-top: 12px; padding: 12px; border-radius: 4px; display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.1); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.1); border-left: 4px solid var(--error); }
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container"><div class="bg-layer-base"></div><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge"><span>📈</span><span>Reversal Pattern</span></div>
+            <div class="lesson-chapter">Chapter 6 - DPU Pattern Mastery</div>
+            <h1 class="lesson-title">Bài 6.1: DPU Pattern Là Gì?</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 6.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>15 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- 1. OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Mở Đầu: Sự Thật Về Việc "Bắt Đáy"</h2>
+            <p>Trong thế giới trading, cụm từ "bắt đáy" thường đi kèm với hình ảnh của một bàn tay đẫm máu khi cố gắng đỡ lấy con dao đang rơi. Đa số trader nghiệp dư cháy tài khoản vì cố gắng đoán đâu là đáy của một xu hướng giảm mạnh. Họ mua vào khi giá giảm 10%, rồi giá giảm tiếp 20%, họ lại mua bình quân giá... cho đến khi tài khoản bốc hơi.</p>
+            
+            <p>Nhưng bạn có biết, có một cách để bắt đáy an toàn và khoa học không? Đó không phải là đoán mò, mà là chờ đợi một tín hiệu xác nhận từ chính dòng tiền thông minh (Smart Money). Tín hiệu đó mang tên <strong>DPU Pattern (Down-Pause-Up)</strong>. Đây là bản đồ kho báu giúp bạn nhận diện chính xác thời điểm cá mập ngừng bán và bắt đầu gom hàng.</p>
+
+            <p>Trong bài học này, tôi sẽ không dạy bạn cách chặn đầu xe tải. Tôi sẽ dạy bạn cách nhận biết khi nào chiếc xe tải đó đã dừng lại, quay đầu, và sẵn sàng cho bạn quá giang một chuyến đi lên đỉnh vinh quang. Hãy cùng tôi đi sâu vào giải mã DPU Pattern.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Điều Bạn Sẽ Nhận Được</div>
+                <p>Kết thúc bài học này, bạn sẽ sở hữu tư duy của Top 5% trader: Không mua khi giá giảm, mà mua khi giá <strong>TÍCH LŨY</strong>. Bạn sẽ hiểu tại sao DPU lại có tỷ lệ thắng lên tới 69% và làm thế nào để biến nó thành vũ khí chủ lực trong kho vũ khí trading của mình.</p>
+            </div>
+        </section>
+
+        <!-- 2. CONCEPT INTRODUCTION -->
+        <section class="section">
+            <h2 class="section-title"><span>📚</span> Khái Niệm: DPU - Dấu Hiệu Đảo Chiều Vua</h2>
+            <p><strong>DPU</strong> là viết tắt của <strong>Down - Pause - Up</strong>. Nghe có vẻ đơn giản, nhưng ẩn chứa bên trong là cả một nghệ thuật thao túng và gom hàng của thị trường. Đây là một trong 4 mô hình nền tảng của phương pháp GEM Frequency, chuyên dùng để xác định sự đảo chiều từ Giảm sang Tăng.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">69%</div>
+                    <div class="stat-label">Win Rate Trung Bình</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">1:2.6</div>
+                    <div class="stat-label">Risk:Reward</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">LFZ</div>
+                    <div class="stat-label">Tạo Vùng Mua</div>
+                </div>
+            </div>
+
+            <p>Khác với các mô hình nến đơn lẻ như Hammer hay Engulfing chỉ cho tín hiệu ngắn hạn, DPU là một <strong>cấu trúc giá hoàn chỉnh</strong>. Nó kể cho chúng ta nghe một câu chuyện gồm 3 phần về cuộc chiến giữa phe Mua và phe Bán:</p>
+            <ul>
+                <li><strong>Down (Giảm):</strong> Phe Bán áp đảo, đẩy giá xuống vực sâu.</li>
+                <li><strong>Pause (Nghỉ/Tích lũy):</strong> Phe Bán kiệt sức, Smart Money âm thầm đỡ giá và gom hàng.</li>
+                <li><strong>Up (Tăng):</strong> Phe Mua phản công, giá bứt phá và bắt đầu xu hướng mới.</li>
+            </ul>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Định Nghĩa Chính Thức</div>
+                <p><strong>DPU Pattern (Down-Pause-Up)</strong> là mô hình giá đảo chiều (Reversal Pattern) xuất hiện cuối xu hướng giảm. Nó tạo ra một vùng <strong>LFZ (Low Frequency Zone)</strong> - vùng có áp lực mua mạnh từ Smart Money. Khi giá quay lại kiểm tra LFZ trong tương lai, đó là điểm entry LONG với xác suất thành công cao.</p>
+            </div>
+        </section>
+
+        <!-- 3. DEEP DIVE: CƠ CHẾ HOẠT ĐỘNG -->
+        <section class="section">
+            <h2 class="section-title"><span>🔍</span> Phân Tích Sâu: Tại Sao DPU Hoạt Động?</h2>
+            <p>Để thực sự làm chủ DPU, bạn đừng học vẹt hình dáng của nó. Hãy hiểu <strong>TẠI SAO</strong> nó lại hình thành. Chúng ta hãy đi sâu vào tâm lý đám đông và hành vi của Smart Money trong từng giai đoạn.</p>
+
+            <div class="pattern-flow">
+                <div class="flow-phase" style="border-left-color: var(--error);">
+                    <div class="phase-icon">📉</div>
+                    <div class="phase-content">
+                        <div class="phase-title">PHASE 1: DOWN - Sự Hoảng Loạn (Panic)</div>
+                        <div class="phase-desc">
+                            <strong>Đây là giai đoạn mà đa số trader hoảng loạn bán tháo.</strong> Giá giảm mạnh với volume cao, tin tức tiêu cực tràn lan, và tâm lý thị trường cực kỳ bi quan. Tuy nhiên, điều mà ít người biết là: trong khi retail traders đang bán tháo vì sợ hãi, Smart Money đang âm thầm quan sát và chuẩn bị tích lũy. Giai đoạn này thường kéo dài nhiều ngày đến nhiều tuần, với biên độ giảm từ 15-40% tùy thuộc vào loại tài sản.
+                        </div>
+                    </div>
+                </div>
+                <div class="flow-phase" style="border-left-color: var(--gold);">
+                    <div class="phase-icon">⏸️</div>
+                    <div class="phase-content">
+                        <div class="phase-title">PHASE 2: PAUSE - Sự Hấp Thụ (Absorption)</div>
+                        <div class="phase-desc">
+                            <strong>Đây là giai đoạn quan trọng nhất - nơi Smart Money âm thầm mua vào.</strong> Giá đi ngang trong biên độ hẹp, volume giảm mạnh (thường chỉ còn 30-50% so với Phase 1). Lúc này, những người muốn bán đã bán hết, không còn áp lực bán nữa. Smart Money bắt đầu tích lũy từ từ để không đẩy giá lên quá nhanh. Vùng giá này chính là <strong>LFZ (Low Frequency Zone)</strong> - vùng mà bạn sẽ chờ đợi để entry khi giá quay lại.
+                        </div>
+                    </div>
+                </div>
+                <div class="flow-phase" style="border-left-color: var(--success);">
+                    <div class="phase-icon">📈</div>
+                    <div class="phase-content">
+                        <div class="phase-title">PHASE 3: UP - Sự Khởi Đầu Mới (Reversal)</div>
+                        <div class="phase-desc">
+                            <strong>Đây là giai đoạn xác nhận pattern hoàn chỉnh.</strong> Giá phá vỡ vùng Pause và bắt đầu xu hướng tăng mới với volume tăng đột biến. Smart Money đã tích lũy xong và bắt đầu đẩy giá lên. Retail traders lúc này mới nhận ra xu hướng đã đổi chiều và bắt đầu FOMO mua vào. Tuy nhiên, bạn KHÔNG entry tại Phase 3 - giá đã cao. Thay vào đó, bạn đánh dấu LFZ và chờ giá quay lại.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⭐</span> Chìa Khóa Của DPU: Vùng "Pause"</div>
+                <p>Sức mạnh của DPU nằm trọn vẹn ở Phase 2 (Pause). Đây là nơi Smart Money để lại "dấu chân" của họ là các lệnh chờ mua chưa khớp hết (Unfilled Orders). Khi giá quay lại vùng này (Retest), các lệnh đó sẽ kích hoạt và tạo thành một tấm đệm lò xo đẩy giá bật lên. Đó chính là lý do tại sao chúng ta chỉ canh mua tại LFZ!</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.1/5-1-1-png.webp" alt="DPU Pattern Structure">
+                <p class="image-caption">Hình 1: Cấu trúc 3 phases của DPU Pattern - DOWN (giảm) → PAUSE (tích lũy) → UP (đảo chiều)</p>
+            </div>
+        </section>
+
+        <!-- 4. REAL-WORLD EXAMPLES -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Ví Dụ Thực Tế Từ Thị Trường</h2>
+
+            <p>Để hiểu rõ hơn về cách DPU Pattern hoạt động trong thực tế, hãy xem qua hai ví dụ điển hình từ thị trường crypto trong năm 2023-2024.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Ví Dụ 1: ETH/USDT - Đáy Tháng 6/2023</div>
+                <p>
+                    <strong>Bối cảnh:</strong> ETH giảm từ $2,150 xuống $1,620 trong 3 tuần do tin tức tiêu cực về quy định.<br><br>
+                    <strong>Phase 1 (DOWN):</strong> Giá giảm 24.6% trong 15 nến 1D, volume trung bình tăng 2.3x so với bình thường. Tin tức tiêu cực về SEC khiến retail hoảng loạn bán tháo.<br><br>
+                    <strong>Phase 2 (PAUSE):</strong> Giá đi ngang 5 nến tại vùng $1,620-$1,680 (range 3.7%). Volume giảm còn 35% so với Phase 1. Smart Money đang tích lũy tại đây.<br><br>
+                    <strong>Phase 3 (UP):</strong> Giá phá vỡ $1,680 và tăng lên $1,920 (+14%) trong 8 nến. Volume tăng 1.8x xác nhận breakout.<br><br>
+                    <strong>LFZ Entry:</strong> Khi giá retest vùng $1,620-$1,680 vào ngày 15/7, entry tại $1,650, SL $1,590 (dưới LFZ), TP $1,850. Kết quả: +12.1% lợi nhuận, R:R 1:3.3.
+                </p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Ví Dụ 2: BTC/USDT - Đáy Tháng 9/2024</div>
+                <p>
+                    <strong>Bối cảnh:</strong> BTC giảm từ $65,000 xuống $52,500 trong mùa hè sau khi đợt tăng đầu năm kết thúc.<br><br>
+                    <strong>Phase 1 (DOWN):</strong> Giá giảm 19.2% trong 12 nến 4H, volume cao do retail panic sell. Fear &amp; Greed Index xuống 22 (Extreme Fear).<br><br>
+                    <strong>Phase 2 (PAUSE):</strong> Giá consolidate 4 nến tại $52,500-$54,200 (range 3.2%). Volume cạn kiệt, thị trường "chết". Smart Money tích lũy âm thầm.<br><br>
+                    <strong>Phase 3 (UP):</strong> Giá breakout $54,200 và tăng lên $58,500 (+7.9%). Volume tăng 2.1x, xác nhận Smart Money đã tích lũy xong.<br><br>
+                    <strong>LFZ Entry:</strong> Giá retest $53,000-$54,200 vào tuần sau, entry $53,500, SL $51,800, TP $60,000. Kết quả: +12.1% trong 5 ngày, R:R 1:3.8.
+                </p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.1/5-1-2-png.webp" alt="DPU Real Example">
+                <p class="image-caption">Hình 2: Ví dụ thực tế DPU Pattern trên ETH/USDT với điểm entry tại LFZ</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <p>Dưới đây là những câu hỏi mà học viên thường đặt ra khi bắt đầu học về DPU Pattern.</p>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-tier-1-ch5-l1/1768377500782_fgwodw_gemral_20260114_145746_01.webp" alt="FAQ Image">
+                <p class="image-caption">Hình 3: Các lưu ý quan trọng khi nhận diện DPU</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> Câu hỏi 1: DPU khác gì so với UPU?</div>
+                <p>Đây là câu hỏi rất hay. Hãy nhớ quy tắc này: <strong>UPU là Tiếp Diễn (Continuation)</strong>, dùng để mua thêm khi giá đang tăng. Còn <strong>DPU là Đảo Chiều (Reversal)</strong>, dùng để bắt đáy khi giá đang giảm. Nếu bạn thấy giá đang trong downtrend rõ ràng, hãy tìm DPU. Nếu giá đang trong uptrend và pullback, hãy tìm UPU.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🤔</span> Câu hỏi 2: Làm sao biết Phase 2 (Pause) đã kết thúc?</div>
+                <p>Bạn cần nhìn thấy một sự <strong>Bứt Phá (Breakout)</strong>. Phase 2 chỉ thực sự kết thúc khi có một cây nến thân lớn đóng cửa dứt khoát phía trên vùng tích lũy, kèm theo Volume tăng vọt (ít nhất 1.5 lần trung bình). Nếu không có cú breakout này, vùng đi ngang đó có thể chỉ là trạm dừng chân trước khi giá... giảm tiếp (mô hình DPD).</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>🤔</span> Câu hỏi 3: Timeframe nào trade DPU tốt nhất?</div>
+                <p>Kinh nghiệm thực chiến cho thấy: <strong>4H và 1D (Daily)</strong> là "chân ái". Ở các khung thời gian này, các tín hiệu nhiễu bị loại bỏ, và hành động của Smart Money trở nên rõ ràng nhất. Trade DPU ở khung 5 phút hay 15 phút rất dễ bị "quét" bởi các thuật toán HFT (High Frequency Trading).</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Hành Động Thực Tế</h2>
+
+            <p>Kiến thức chỉ có giá trị khi bạn áp dụng vào thực tế. Dưới đây là những bước cụ thể bạn có thể làm ngay sau khi hoàn thành bài học này.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🎯</span> Hành Động Ngay Bây Giờ</div>
+                <p>
+                    <strong>1. Mở TradingView</strong> và chọn biểu đồ BTC/USDT hoặc ETH/USDT khung 4H.<br><br>
+                    <strong>2. Cuộn về quá khứ</strong> 3-6 tháng và tìm kiếm các đợt giảm mạnh (Phase 1) kết thúc bằng vùng tích lũy (Phase 2) rồi đảo chiều tăng (Phase 3).<br><br>
+                    <strong>3. Đánh dấu ít nhất 2 ví dụ</strong> DPU pattern bạn tìm được. Ghi chú lại: Giá giảm bao nhiêu %? Vùng Pause kéo dài bao nhiêu nến? Giá tăng bao nhiêu % sau breakout?
+                </p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📋</span> Bài Tập Trong Tuần Này</div>
+                <p>
+                    <strong>1. Tìm 5 ví dụ DPU</strong> trên các đồng coin khác nhau (BTC, ETH, SOL, BNB, XRP) trong 6 tháng gần đây.<br><br>
+                    <strong>2. Ghi chép vào sổ nhật ký:</strong> Ngày/giờ, coin, % giảm Phase 1, số nến Phase 2, % tăng Phase 3.<br><br>
+                    <strong>3. Xác định vùng LFZ</strong> của mỗi ví dụ và kiểm tra xem giá có retest không, kết quả ra sao.<br><br>
+                    <strong>4. Đặt câu hỏi:</strong> Nếu bạn gặp khó khăn trong việc nhận diện, hãy note lại và hỏi trong cộng đồng GEM hoặc bài học tiếp theo.
+                </p>
+            </div>
+        </section>
+
+        <div class="summary-box">
+            <div class="summary-title"><span>📝</span> Tóm Tắt Bài Học - Key Takeaways</div>
+            <ul class="summary-list">
+                <li><strong>DPU = Down-Pause-Up:</strong> Pattern đảo chiều từ xu hướng giảm sang xu hướng tăng, cho tín hiệu LONG (mua). Đây là cách "bắt đáy" có hệ thống thay vì đoán mò.</li>
+                <li><strong>Tỷ lệ thắng 69%, R:R 1:2.6:</strong> DPU là một trong những pattern đáng tin cậy nhất trong hệ thống GEM Frequency Method.</li>
+                <li><strong>Phase 2 là vùng vàng:</strong> Đây là nơi Smart Money tích lũy và tạo ra LFZ. Volume giảm mạnh trong phase này là dấu hiệu quan trọng.</li>
+                <li><strong>Không entry tại Phase 3:</strong> Giá đã cao. Thay vào đó, đánh dấu LFZ và chờ giá quay lại để entry với R:R tối ưu.</li>
+                <li><strong>Timeframe tốt nhất: 4H và 1D:</strong> Đây là nơi Smart Money hoạt động thực sự, giúp pattern đáng tin cậy hơn.</li>
+            </ul>
+        </div>
+
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Chọn đáp án để nhận phản hồi ngay lập tức</p>
+            </div>
+
+            <div class="quiz-question" data-question="1" data-correct="B">
+                <div class="question-number">1</div>
+                <div class="question-text">DPU Pattern cho tín hiệu giao dịch gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">SHORT (Bán khống)</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">LONG (Mua)</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Hold (Giữ nguyên)</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Không giao dịch</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="C">
+                <div class="question-number">2</div>
+                <div class="question-text">Trong Phase 2 (Pause) của DPU, điều gì xảy ra với volume?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Volume tăng mạnh</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Volume không thay đổi</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Volume giảm mạnh (cạn kiệt)</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Volume biến động ngẫu nhiên</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="3" data-correct="A">
+                <div class="question-number">3</div>
+                <div class="question-text">Vùng LFZ trong DPU được tạo ra tại phase nào?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Phase 2 (Pause - Tích lũy)</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Phase 1 (Down - Giảm)</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Phase 3 (Up - Đảo chiều)</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Tất cả các phase</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score">0/3</div>
+                <div class="result-text">Hoàn thành!</div>
+                <div class="result-message"></div>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button>
+            </div>
+        </section>
+
+        <footer class="lesson-footer" style="text-align: center; padding: 40px 0; border-top: 1px solid var(--glass-border); margin-top: 40px;">
+            <div class="footer-brand" style="font-weight: 800; color: var(--gold); margin-bottom: 10px;">GEM Trading Academy</div>
+            <div class="footer-text" style="color: var(--text-muted); font-size: 0.8rem;">© 2024 GEM Academy. Nền tảng đào tạo phân tích tần số dòng tiền chuyên nghiệp.</div>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+
+            let answeredCount = 0;
+            let correctCount = 0;
+            const totalQuestions = 3;
+
+            const explanations = {
+                1: {
+                    correct: '✓ Chính xác! DPU là pattern Đảo Chiều (Reversal) từ xu hướng giảm sang tăng, do đó chúng ta sẽ tìm kiếm cơ hội MUA (Long).',
+                    incorrect: '✗ Sai rồi! Mặc dù Phase 1 là giảm, nhưng DPU là mẫu hình báo hiệu sự kết thúc của đà giảm và bắt đầu đà tăng.'
+                },
+                2: {
+                    correct: '✓ Xuất sắc! Volume cạn kiệt ở Phase 2 là tín hiệu vàng. Nó cho thấy không còn ai muốn bán nữa, tạo điều kiện cho Smart Money gom hàng giá rẻ.',
+                    incorrect: '✗ Chưa đúng. Nếu Volume tăng mạnh ở Phase 2, đó có thể là dấu hiệu của sự phân phối tiếp diễn chứ không phải tích lũy.'
+                },
+                3: {
+                    correct: '✓ Chính xác! Vùng Pause (Phase 2) chính là nơi Smart Money để lại các lệnh chờ mua (Limit Buy Orders), tạo thành vùng hỗ trợ mạnh LFZ.',
+                    incorrect: '✗ Sai rồi! LFZ chỉ được hình thành tại vùng giá đi ngang tích lũy (Pause), không phải lúc giá đang chạy mạnh ở Phase 1 hay 3.'
+                }
+            };
+
+            questions.forEach(question => {
+                const options = question.querySelectorAll('.quiz-option');
+                const correctAnswer = question.dataset.correct;
+                const questionNum = question.dataset.question;
+                const feedbackDiv = question.querySelector('.question-feedback');
+                const feedbackTitle = feedbackDiv.querySelector('.feedback-title');
+                const feedbackText = feedbackDiv.querySelector('.feedback-text');
+
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        if (question.classList.contains('answered')) return;
+
+                        question.classList.add('answered');
+                        answeredCount++;
+
+                        const selectedOption = this.dataset.option;
+                        const isCorrect = selectedOption === correctAnswer;
+
+                        options.forEach(opt => opt.classList.add('disabled'));
+
+                        if (isCorrect) {
+                            this.classList.add('correct');
+                            correctCount++;
+                            feedbackDiv.classList.add('correct');
+                            feedbackTitle.textContent = '✓ Chính xác!';
+                            feedbackText.textContent = explanations[questionNum].correct;
+                        } else {
+                            this.classList.add('incorrect');
+                            feedbackDiv.classList.add('incorrect');
+                            feedbackTitle.textContent = '✗ Sai rồi!';
+                            feedbackText.textContent = explanations[questionNum].incorrect;
+                            options.forEach(opt => {
+                                if (opt.dataset.option === correctAnswer) {
+                                    opt.classList.add('correct');
+                                }
+                            });
+                        }
+
+                        feedbackDiv.classList.add('show');
+
+                        if (answeredCount === totalQuestions) {
+                            const scoreDiv = resultDiv.querySelector('.result-score');
+                            const messageDiv = resultDiv.querySelector('.result-message');
+                            scoreDiv.textContent = correctCount + '/' + totalQuestions;
+
+                            if (correctCount === totalQuestions) {
+                                messageDiv.textContent = '🎉 Xuất sắc! Bạn đã nắm vững khái niệm DPU Pattern!';
+                            } else if (correctCount >= 2) {
+                                messageDiv.textContent = '👍 Tốt lắm! Hãy xem lại các câu sai nhé!';
+                            } else {
+                                messageDiv.textContent = '📚 Hãy đọc lại bài học và thử lại!';
+                            }
+
+                            resultDiv.classList.add('show');
+                            retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0;
+                correctCount = 0;
+
+                questions.forEach(question => {
+                    question.classList.remove('answered');
+                    const options = question.querySelectorAll('.quiz-option');
+                    const feedbackDiv = question.querySelector('.question-feedback');
+
+                    options.forEach(opt => {
+                        opt.classList.remove('correct', 'incorrect', 'disabled');
+                    });
+                    feedbackDiv.classList.remove('show', 'correct', 'incorrect');
+                });
+
+                resultDiv.classList.remove('show');
+                retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

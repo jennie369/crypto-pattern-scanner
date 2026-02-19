@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 9.1: Con Người Cũ và Con Người Mới | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section, .content-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section, .content-card {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title, .card-header h2, .card-meta h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, .styled-list, ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, .styled-list li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box, .info-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box, .info-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4, .info-box-title, .highlight-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p, .info-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--error);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box h4 { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        .quote-box {
+            border-left: 4px solid var(--purple);
+            padding-left: var(--space-lg);
+            margin: var(--space-lg) 0;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+        .quote-author {
+            display: block;
+            margin-top: var(--space-sm);
+            font-weight: 600;
+            color: var(--purple);
+            font-style: normal;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-lg);
+            margin-top: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .comparison-grid { grid-template-columns: 1fr; }
+        }
+        .comparison-card {
+            background: var(--bg-primary);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--glass-border);
+        }
+        .comparison-card.old { border-color: var(--error); }
+        .comparison-card.new { border-color: var(--success); }
+        .comparison-title { font-weight: 700; margin-bottom: var(--space-sm); text-align: center; }
+        .old .comparison-title { color: var(--error); }
+        .new .comparison-title { color: var(--success); }
+        .comparison-list { padding-left: 1.2em; }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-list li { margin-bottom: var(--space-sm); }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--bg-primary);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            width: 100%;
+            text-align: left;
+            margin-bottom: var(--space-sm);
+        }
+        .quiz-option:hover { border-color: var(--gold); background: var(--bg-card); }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; color: var(--success); }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; color: var(--error); }
+        .quiz-result { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--radius-md); display: none; }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); color: var(--success); }
+        .quiz-result.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); color: var(--error); }
+        .quiz-score { text-align: center; padding: var(--space-xl); background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent); border: 1px solid var(--purple); border-radius: var(--radius-lg); margin-top: var(--space-lg); display: none; }
+        .quiz-score.show { display: block; }
+        .retake-btn { margin-top: var(--space-md); padding: var(--space-md) var(--space-xl); background: linear-gradient(135deg, var(--purple), var(--cyan)); color: var(--navy-dark); border: none; border-radius: var(--radius-md); font-weight: 700; cursor: pointer; }
+        
+        .lesson-footer { text-align: center; padding: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); margin-top: var(--space-xl); }
+        .lesson-footer p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        
+        .timeline { position: relative; padding-left: 20px; border-left: 2px solid var(--purple); margin: var(--space-lg) 0; }
+        .timeline-item { position: relative; margin-bottom: var(--space-lg); padding-left: var(--space-md); }
+        .timeline-marker { position: absolute; left: -29px; top: 0; width: 16px; height: 16px; border-radius: 50%; background: var(--purple); border: 2px solid var(--bg-primary); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="lesson-header">
+            <span class="lesson-badge">🧠 Tier 2 - Tâm Lý Giao Dịch</span>
+            <h1 class="lesson-title">Bài 9.1: Con Người Cũ và Con Người Mới</h1>
+            <p class="lesson-subtitle">Cuộc Cách Mạng Tư Duy: Chìa Khóa Để Trở Thành Top 5%</p>
+        </header>
+
+        <!-- 1. Opening Hook -->
+        <article class="content-card">
+            <div class="card-header">
+                <h2>1. Mở Đầu: Kẻ Thù Lớn Nhất Đang Ở Trong Gương</h2>
+            </div>
+            <div class="card-body">
+                <p>Bạn đã bao giờ tự hỏi tại sao dù sở hữu cùng một phương pháp GEM Frequency mạnh mẽ, cùng một bộ quy tắc quản lý vốn, nhưng kết quả của bạn lại khác xa so với những trader chuyên nghiệp? Tại sao bạn biết rõ không nên vào lệnh khi chưa có tín hiệu, nhưng ngón tay bạn vẫn bấm chuột?</p>
+                
+                <p>Câu trả lời không nằm ở biểu đồ. Nó nằm ở trong chính bạn. Có một cuộc chiến âm thầm nhưng khốc liệt đang diễn ra bên trong tâm trí bạn mỗi ngày: cuộc chiến giữa <strong>"Con Người Cũ"</strong> (bản năng, cảm xúc) và <strong>"Con Người Mới"</strong> (kỷ luật, chuyên nghiệp).</p>
+                
+                <div class="quote-box">
+                    <div class="quote-text">"Thị trường là một tấm gương phản chiếu đắt giá. Nó sẽ cho bạn thấy tất cả những điểm yếu sâu kín nhất trong tính cách của bạn, và bắt bạn phải trả giá bằng tiền mặt."</div>
+                    <div class="quote-author">— Mark Douglas</div>
+                </div>
+
+                <p>Trong bài học quan trọng này, chúng ta sẽ không nói về nến hay xu hướng. Chúng ta sẽ nói về việc <strong>tái lập trình bộ não</strong> của bạn. Nếu không chiến thắng được "Con Người Cũ", mọi kỹ thuật bạn học được ở Tier 2 sẽ trở nên vô nghĩa.</p>
+            </div>
+        </article>
+
+        <!-- 2. Concept Definition -->
+        <article class="content-card">
+            <div class="card-header">
+                <h2>2. Định Nghĩa: Hai Phiên Bản Của Một Trader</h2>
+            </div>
+            <div class="card-body">
+                <h3>Con Người Cũ (The Amateur)</h3>
+                <p>Đây là phiên bản mặc định của chúng ta khi bước vào thị trường. Nó được điều khiển bởi <strong>Hạch hạnh nhân (Amygdala)</strong> - phần não bộ chịu trách nhiệm cho phản ứng "chiến hoặc biến".</p>
+                <p>Đặc điểm nhận dạng:</p>
+                <ul class="styled-list">
+                    <li><strong>Phản ứng theo cảm xúc:</strong> Vui sướng tột độ khi thắng, đau khổ tột cùng khi thua.</li>
+                    <li><strong>Tư duy ngắn hạn:</strong> Muốn làm giàu nhanh, coi mỗi lệnh thua là một thảm họa cá nhân.</li>
+                    <li><strong>Nạn nhân hóa:</strong> Đổ lỗi cho thị trường, cho cá mập, cho tin tức khi thua lỗ.</li>
+                </ul>
+
+                <h3>Con Người Mới (The Professional)</h3>
+                <p>Đây là phiên bản bạn cần xây dựng. Nó được điều khiển bởi <strong>Vỏ não trước trán (Prefrontal Cortex)</strong> - trung tâm của logic, lập kế hoạch và kiểm soát xung động.</p>
+                <p>Đặc điểm nhận dạng:</p>
+                <ul class="styled-list">
+                    <li><strong>Hành động theo quy trình:</strong> Vào lệnh vì setup đúng, không phải vì "cảm thấy" giá sẽ tăng.</li>
+                    <li><strong>Tư duy xác suất:</strong> Hiểu rằng trading là trò chơi của các con số lớn, một lệnh thua không nói lên điều gì.</li>
+                    <li><strong>Chịu trách nhiệm:</strong> Nhận ra kết quả là do hành động của chính mình, và tập trung cải thiện kỹ năng.</li>
+                </ul>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x350/112250/8B5CF6?text=Old+Self+vs+New+Self+Brain" alt="Transformation">
+                    <p class="image-caption">Hình 9.1.1: Sự chuyển dịch từ não bộ cảm xúc sang não bộ tư duy</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 3. Deep Dive -->
+        <article class="content-card">
+            <div class="card-header">
+                <h2>3. Phân Tích Sâu: Lộ Trình Chuyển Hóa</h2>
+            </div>
+            <div class="card-body">
+                <p>Sự chuyển đổi từ Con Người Cũ sang Con Người Mới không diễn ra sau một đêm. Đó là một quá trình đau đớn gọi là <strong>"Identity Shift" (Thay đổi nhân dạng)</strong>. Bạn phải "giết chết" cái tôi cũ để tái sinh.</p>
+                
+                <p>Quá trình này thường đi qua 4 giai đoạn tâm lý:</p>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker">1</div>
+                        <div class="timeline-content">
+                            <h4>Giai đoạn 1: Unconscious Incompetence (Không biết mình không biết)</h4>
+                            <p>Bạn là Con Người Cũ hoàn toàn. Bạn trade bằng trực giác, thắng nhờ may mắn và nghĩ mình là thiên tài. Đây là giai đoạn nguy hiểm nhất vì sự tự tin ảo tưởng.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker">2</div>
+                        <div class="timeline-content">
+                            <h4>Giai đoạn 2: Conscious Incompetence (Biết mình không biết)</h4>
+                            <p>Bạn bắt đầu thua lỗ và nhận ra mình thiếu kiến thức. Bạn điên cuồng học nến, indicators, patterns. Bạn nhận ra sự tồn tại của Con Người Cũ nhưng chưa kiểm soát được nó.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker">3</div>
+                        <div class="timeline-content">
+                            <h4>Giai đoạn 3: Conscious Competence (Biết làm nhưng cần nỗ lực)</h4>
+                            <p>Đây là giai đoạn chuyển giao. Bạn bắt đầu có Con Người Mới. Bạn biết cách trade đúng, nhưng phải dùng ý chí cực mạnh để kiềm chế cảm xúc. Mỗi lần vào lệnh là một cuộc đấu tranh nội tâm.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker">4</div>
+                        <div class="timeline-content">
+                            <h4>Giai đoạn 4: Unconscious Competence (Thành thục trong vô thức)</h4>
+                            <p>Con Người Mới đã nắm quyền kiểm soát. Kỷ luật trở thành thói quen. Bạn nhìn chart, thấy setup, vào lệnh, đặt SL/TP mà không hề dao động tâm lý. Trading trở nên nhàm chán nhưng lợi nhuận ổn định.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight-box important">
+                    <div class="highlight-title">💡 Insight Quan Trọng</div>
+                    <p>Mục tiêu của khóa học Tier 2 này là đưa bạn từ Giai đoạn 2 lên Giai đoạn 3. Để đạt được Giai đoạn 4, bạn cần <strong>thời gian và sự lặp lại</strong> (repetition) của những hành động đúng đắn.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 4. Comparison Examples -->
+        <article class="content-card">
+            <div class="card-header">
+                <h2>4. Ví Dụ Thực Tế: Phản Ứng Trước Thị Trường</h2>
+            </div>
+            <div class="card-body">
+                <p>Hãy xem cách hai phiên bản của bạn xử lý cùng một tình huống thị trường:</p>
+
+                <div class="comparison-grid">
+                    <div class="comparison-card old">
+                        <div class="comparison-title">❌ Con Người Cũ (Cảm Xúc)</div>
+                        <ul class="comparison-list">
+                            <li><strong>Tình huống:</strong> Giá tăng mạnh, xanh rực rỡ.</li>
+                            <li><strong>Suy nghĩ:</strong> "Trời ơi nó bay mất rồi! Mình lỡ tàu rồi! Phải vào ngay không thì mất cơ hội!"</li>
+                            <li><strong>Hành động:</strong> Mua đuổi (FOMO) ngay đỉnh, không cần SL.</li>
+                            <li><strong>Kết quả:</strong> Đu đỉnh, giá quay đầu, hoảng sợ cắt lỗ ngay đáy.</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-card new">
+                        <div class="comparison-title">✅ Con Người Mới (Kỷ Luật)</div>
+                        <ul class="comparison-list">
+                            <li><strong>Tình huống:</strong> Giá tăng mạnh, xanh rực rỡ.</li>
+                            <li><strong>Suy nghĩ:</strong> "Giá đã đi xa khỏi vùng mua (LFZ). Risk/Reward lúc này quá tệ. Mình sẽ đợi giá hồi về Zone."</li>
+                            <li><strong>Hành động:</strong> Đặt cảnh báo tại LFZ và tắt máy đi làm việc khác.</li>
+                            <li><strong>Kết quả:</strong> Hoặc vào được lệnh giá tốt, hoặc bỏ qua trade rủi ro cao. Tâm lý bình thản.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x350/112250/10B981?text=Emotional+Cycle+vs+Disciplined+Execution" alt="Reaction Comparison">
+                    <p class="image-caption">Hình 9.1.2: So sánh chu kỳ cảm xúc và quy trình kỷ luật</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 5. Mistakes -->
+        <article class="content-card">
+            <div class="card-header">
+                <h2>5. Sai Lầm Khi Cố Gắng Thay Đổi</h2>
+            </div>
+            <div class="card-body">
+                <p>Nhiều trader cố gắng trở thành "Con Người Mới" nhưng thất bại vì những hiểu lầm tai hại sau:</p>
+
+                <div class="warning-box">
+                    <h4>⚠️ Sai lầm 1: Cố gắng triệt tiêu cảm xúc</h4>
+                    <p>Bạn không phải là robot. Cố gắng kìm nén nỗi sợ hay lòng tham chỉ khiến chúng bùng nổ mạnh hơn (như lò xo nén). Thay vào đó, hãy <strong>quan sát và quản lý</strong> chúng. Hãy nói: "Tôi đang cảm thấy sợ hãi, nhưng tôi vẫn sẽ tuân thủ kế hoạch vì tôi là một professional."</p>
+                </div>
+
+                <div class="warning-box">
+                    <h4>⚠️ Sai lầm 2: Nghĩ rằng chỉ cần có Strategy giỏi là đủ</h4>
+                    <p>Bạn có thể đưa cho một người nghiệp dư một hệ thống trade thắng 80%, họ vẫn sẽ đốt cháy tài khoản vì không tuân thủ quy tắc quản lý vốn hoặc can thiệp vào lệnh đang chạy. Mindset là nền móng, Strategy chỉ là công cụ.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 6. Application -->
+        <article class="content-card">
+            <div class="card-header">
+                <h2>6. Ứng Dụng: Bài Tập "Identity Shift"</h2>
+            </div>
+            <div class="card-body">
+                <p>Để kích hoạt quá trình chuyển hóa, hãy thực hiện bài tập này mỗi ngày trước khi ngồi vào bàn trade:</p>
+
+                <h3>Quy Trình 3 Bước:</h3>
+                <ol class="styled-list">
+                    <li><strong>Bước 1: Tuyên bố (Affirmation):</strong> Đọc to câu thần chú: <em>"Tôi là một nhà giao dịch kỷ luật. Mục tiêu của tôi không phải là kiếm tiền trong hôm nay, mà là tuân thủ quy trình 100%."</em></li>
+                    <li><strong>Bước 2: Hình dung (Visualization):</strong> Nhắm mắt lại và tưởng tượng bạn đang thấy một setup đẹp nhưng bị Stop Loss. Hãy hình dung bạn chấp nhận nó một cách bình thản, ghi nhật ký và mỉm cười. Đó là phản ứng của Con Người Mới.</li>
+                    <li><strong>Bước 3: Nhật ký tâm lý (Psycho-Journaling):</strong> Khi đang trade, nếu cảm thấy tim đập nhanh hay muốn fomo, hãy viết ngay xuống giấy: <em>"Con Người Cũ đang muốn mua đuổi. Con Người Mới sẽ làm gì lúc này?"</em></li>
+                </ol>
+
+                <div class="success-box">
+                    <h4>🚀 Thử Thách 7 Ngày</h4>
+                    <p>Trong 7 ngày tới, hãy tập trung hoàn toàn vào việc <strong>thực hiện đúng quy trình</strong>. Đừng quan tâm đến P&L (lời/lỗ). Nếu bạn tuân thủ đúng plan 100% (dù lệnh đó thua), hãy tự thưởng cho mình. Đó là cách bạn nuôi dưỡng Con Người Mới.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 7. Summary -->
+        <div class="summary-box">
+            <h3>📝 Tóm Tắt Bài Học</h3>
+            <ul class="summary-list">
+                <li>Thành công trong trading đến từ 20% kỹ thuật và 80% tâm lý/tư duy.</li>
+                <li>Con Người Cũ bị điều khiển bởi nỗi sợ và lòng tham (Amygdala).</li>
+                <li>Con Người Mới được dẫn dắt bởi kỷ luật và tư duy xác suất (Prefrontal Cortex).</li>
+                <li>Quá trình chuyển hóa đi qua 4 giai đoạn, từ "Không biết gì" đến "Thành thục vô thức".</li>
+                <li>Đừng cố gắng giết chết cảm xúc, hãy học cách hành động đúng đắn BẤT CHẤP cảm xúc.</li>
+            </ul>
+        </div>
+
+        <!-- 8. Quiz -->
+        <section class="quiz-section">
+            <h3>🎯 Kiểm Tra Kiến Thức</h3>
+
+            <div class="quiz-question" data-correct="2">
+                <p><strong>Câu 1:</strong> Đặc điểm cốt lõi nhất phân biệt "Con Người Mới" với "Con Người Cũ" là gì?</p>
+                <button class="quiz-option" data-index="0">Sở hữu phương pháp giao dịch chén thánh không bao giờ thua.</button>
+                <button class="quiz-option" data-index="1">Có số vốn cực lớn để gồng lỗ.</button>
+                <button class="quiz-option" data-index="2">Khả năng hành động theo quy trình và kỷ luật bất chấp cảm xúc hiện tại.</button>
+                <button class="quiz-option" data-index="3">Luôn vào lệnh với khối lượng lớn để tối ưu lợi nhuận.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="3">
+                <p><strong>Câu 2:</strong> Giai đoạn nào trong lộ trình phát triển được coi là đích đến cuối cùng của một trader?</p>
+                <button class="quiz-option" data-index="0">Unconscious Incompetence (Không biết mình không biết).</button>
+                <button class="quiz-option" data-index="1">Conscious Incompetence (Biết mình không biết).</button>
+                <button class="quiz-option" data-index="2">Conscious Competence (Biết làm nhưng cần nỗ lực).</button>
+                <button class="quiz-option" data-index="3">Unconscious Competence (Thành thục trong vô thức).</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <p><strong>Câu 3:</strong> Khi gặp một chuỗi thua lỗ liên tiếp, "Con Người Mới" sẽ phản ứng như thế nào?</p>
+                <button class="quiz-option" data-index="0">Tăng khối lượng lệnh để gỡ lại nhanh chóng (Revenge Trading).</button>
+                <button class="quiz-option" data-index="1">Dừng lại, xem xét nhật ký giao dịch, kiểm tra xem mình có tuân thủ quy trình hay không.</button>
+                <button class="quiz-option" data-index="2">Thay đổi ngay sang một phương pháp giao dịch mới vì phương pháp cũ "hết linh".</button>
+                <button class="quiz-option" data-index="3">Đổ lỗi cho thị trường đang bị thao túng.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-text">Kết quả: <span id="correct-count">0</span>/3</div>
+                <div class="score-label">Bạn đã sẵn sàng cho sự chuyển hóa!</div>
+                <button class="retake-btn" onclick="location.reload()">Làm lại Quiz</button>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <div class="footer-logo">GEM Trading Academy</div>
+            <p class="footer-text">Module A - Hành Trình Chuyển Hóa • Bài 9.1</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác! Tư duy của bạn đang đi đúng hướng.';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy nhớ lại sự khác biệt về tư duy giữa hai phiên bản.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

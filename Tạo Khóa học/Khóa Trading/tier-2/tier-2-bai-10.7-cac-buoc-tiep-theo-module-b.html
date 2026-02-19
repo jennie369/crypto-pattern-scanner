@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 10.7: Các Bước Tiếp Theo - Module B | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section, .content-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section, .content-card {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: var(--space-md);
+        }
+        .card-icon { font-size: 2rem; }
+        .card-meta h3 { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin: 0; }
+        .card-meta span { font-size: 0.9rem; color: var(--text-muted); }
+
+        .card-body p { margin-bottom: var(--space-md); text-align: justify; }
+
+        .image-container { margin: var(--space-lg) 0; text-align: center; }
+        .image-container img { border-radius: var(--radius-md); border: 1px solid var(--glass-border); width: 100%; height: auto; }
+        .image-caption { font-size: 0.85rem; color: var(--text-muted); margin-top: var(--space-sm); font-style: italic; }
+
+        .styled-list { list-style: none; padding: 0; }
+        .styled-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: var(--space-sm);
+            color: var(--text-secondary);
+        }
+        .styled-list li::before { content: "•"; color: var(--cyan); font-weight: bold; position: absolute; left: 0; }
+        .styled-list.green li::before { content: "✓"; color: var(--success); }
+        .styled-list.purple li::before { content: "⚡"; color: var(--purple); }
+        .styled-list.gold li::before { content: "★"; color: var(--gold); }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .highlight-box h4 { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .congrats-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid var(--cyan);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+        .congrats-box h2 { font-size: 2rem; color: var(--cyan); margin-bottom: var(--space-md); }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .grid-item {
+            background: var(--bg-primary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        .grid-item.gold { border-top: 3px solid var(--gold); }
+        .grid-item.cyan { border-top: 3px solid var(--cyan); }
+        .grid-item.purple { border-top: 3px solid var(--purple); }
+
+        .step-card {
+            display: flex;
+            gap: var(--space-md);
+            background: var(--bg-primary);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+            border-left: 4px solid var(--gold);
+        }
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--navy-dark);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .step-content h4 { font-size: 1.1rem; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .step-content p { font-size: 0.9rem; color: var(--text-muted); margin: 0; }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        .summary-box h3 { font-size: 1.25rem; font-weight: 700; color: var(--success); margin-bottom: var(--space-lg); }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--success); font-weight: 700; }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        .quiz-question p { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); }
+        .quiz-option {
+            display: flex; align-items: center; gap: var(--space-md); width: 100%; text-align: left; padding: var(--space-md);
+            background: var(--glass-bg); border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease;
+            color: var(--text-secondary); margin-bottom: var(--space-sm);
+        }
+        .quiz-option:hover { border-color: var(--gold); background: var(--bg-card); }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; color: var(--success); }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; color: var(--error); }
+        .option-letter { font-weight: 700; color: var(--gold); }
+        .quiz-result { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--radius-md); display: none; }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); color: var(--success); }
+        .quiz-result.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); color: var(--error); }
+        .quiz-score { text-align: center; padding: var(--space-xl); background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent); border: 1px solid var(--purple); border-radius: var(--radius-lg); margin-top: var(--space-lg); display: none; }
+        .quiz-score.show { display: block; }
+        .score-text { color: var(--gold); font-size: 1.5rem; font-weight: 700; margin-bottom: var(--space-sm); }
+        .retake-btn { padding: var(--space-md) var(--space-xl); background: linear-gradient(135deg, var(--purple), var(--cyan)); color: var(--navy-dark); border: none; border-radius: var(--radius-md); font-weight: 700; cursor: pointer; }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); margin-top: var(--space-xl); }
+        .footer-text { color: var(--text-muted); }
+
+        .contact-card { display: flex; gap: var(--space-md); align-items: center; background: var(--bg-primary); border: 1px solid var(--glass-border); padding: var(--space-md); border-radius: var(--radius-md); margin-bottom: var(--space-md); }
+        .contact-icon { font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="lesson-header">
+            <span class="lesson-badge">🏆 Tier 2 - Module B - Final</span>
+            <h1 class="lesson-title">Bài 10.7: Các Bước Tiếp Theo</h1>
+            <p class="lesson-subtitle">Lộ trình hành động cụ thể để chuyển hóa kiến thức thành lợi nhuận</p>
+        </header>
+
+        <!-- Section 1: Opening Hook -->
+        <div class="congrats-box">
+            <h2>🎉 CHÚC MỪNG BẠN!</h2>
+            <p style="font-size: 1.1rem; margin-bottom: 1rem; color: #fff;">Bạn đã chính thức hoàn thành Tier 2 - GEM Advanced Trading</p>
+            <p style="color: #a1a1aa;">Đây là một cột mốc quan trọng. Bạn đã vượt qua 90% những người bỏ cuộc giữa chừng. Bạn đã sở hữu trong tay bộ công cụ mạnh mẽ nhất: Zone Hierarchy, Multi-timeframe Analysis, và Look Right Rule. Nhưng câu hỏi quan trọng nhất bây giờ là: <strong>"WHAT'S NEXT?"</strong></p>
+        </div>
+
+        <!-- Section 2: Review Achievement -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon gold">📊</div>
+                <div class="card-meta">
+                    <h3>Hành Trang Bạn Đang Có</h3>
+                    <span>Những vũ khí bạn đã thu thập được trong Tier 2</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Trước khi bước tiếp, hãy cùng nhìn lại những gì bạn đã đạt được. Đây không chỉ là lý thuyết, đây là những kỹ năng sinh tồn:</p>
+
+                <div class="grid-3">
+                    <div class="grid-item gold">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📈</div>
+                        <h4 style="color: #FFBD59; margin-bottom: 0.25rem;">12 Advanced Patterns</h4>
+                        <p style="font-size: 0.85rem; color: #a1a1aa;">Nhận diện chính xác Reversal & Continuation</p>
+                    </div>
+                    <div class="grid-item cyan">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎯</div>
+                        <h4 style="color: #00F0FF; margin-bottom: 0.25rem;">Zone Mastery</h4>
+                        <p style="font-size: 0.85rem; color: #a1a1aa;">Phân cấp Zone, Odds Enhancers, Scoring</p>
+                    </div>
+                    <div class="grid-item purple">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🧠</div>
+                        <h4 style="color: #8B5CF6; margin-bottom: 0.25rem;">Pro Mindset</h4>
+                        <p style="font-size: 0.85rem; color: #a1a1aa;">Tư duy xác suất & Quản lý rủi ro</p>
+                    </div>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/700x350/112250/10B981?text=Tier+2+Completion+-+Skill+Set" alt="Tier 2 Skills">
+                    <p class="image-caption">Hình 8.7.1: Bộ kỹ năng hoàn chỉnh của GEM Advanced Trader</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Section 3: The 3 Paths Forward -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon cyan">🚀</div>
+                <div class="card-meta">
+                    <h3>3 Lựa Chọn Chiến Lược</h3>
+                    <span>Đâu là con đường phù hợp nhất với bạn?</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Tại thời điểm này, bạn có 3 lựa chọn để tiến về phía trước. Hãy cân nhắc kỹ dựa trên nguồn lực và mục tiêu của bạn:</p>
+
+                <div class="step-card">
+                    <div class="step-number">A</div>
+                    <div class="step-content">
+                        <h4>Con Đường A: Tự Thực Hành (Self-Practice)</h4>
+                        <p><strong>Dành cho ai:</strong> Người muốn tự do, có nhiều thời gian và vốn ít.</p>
+                        <p><strong>Hành động:</strong> Áp dụng kiến thức Tier 2 vào Paper Trading trong 3-6 tháng. Tự ghi nhật ký và sửa lỗi. Đây là con đường chậm nhưng chắc chắn.</p>
+                    </div>
+                </div>
+
+                <div class="step-card" style="border-left-color: #00F0FF;">
+                    <div class="step-number" style="background: linear-gradient(135deg, #00F0FF, #0ea5e9);">B</div>
+                    <div class="step-content">
+                        <h4>Con Đường B: Nâng Cấp Tier 3 (Elite Mastery)</h4>
+                        <p><strong>Dành cho ai:</strong> Người muốn trở thành Pro Trader toàn thời gian, muốn học Institutional Trading (cách các quỹ lớn giao dịch).</p>
+                        <p><strong>Hành động:</strong> Đăng ký Tier 3 để học về Whale Tracking, Order Flow và Advanced Confluence.</p>
+                    </div>
+                </div>
+
+                <div class="step-card" style="border-left-color: #8B5CF6;">
+                    <div class="step-number" style="background: linear-gradient(135deg, #8B5CF6, #7c3aed);">C</div>
+                    <div class="step-content">
+                        <h4>Con Đường C: Đối Tác Kinh Doanh (Partnership)</h4>
+                        <p><strong>Dành cho ai:</strong> Người muốn đa dạng nguồn thu nhập, vừa trade vừa xây dựng cộng đồng.</p>
+                        <p><strong>Hành động:</strong> Tham gia Partner Program để nhận Mentorship 1-1, Signal Group riêng và hoa hồng thụ động.</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- Section 4: Action Plan -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon purple">📋</div>
+                <div class="card-meta">
+                    <h3>Kế Hoạch Hành Động 30 Ngày</h3>
+                    <span>Biến kiến thức thành thói quen</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Dù bạn chọn con đường nào, đây là những việc bạn cần làm NGAY LẬP TỨC trong 30 ngày tới để không bị "rơi rụng" kiến thức:</p>
+
+                <div class="step-card" style="border-left-color: #10B981;">
+                    <div class="step-number" style="background: linear-gradient(135deg, #10B981, #059669);">1</div>
+                    <div class="step-content">
+                        <h4>Tuần 1: Review & Systemize</h4>
+                        <p>Xem lại toàn bộ ghi chú Tier 2. Tổng hợp thành một bộ quy tắc giao dịch (Trading Plan) cá nhân trên 1 trang giấy A4.</p>
+                    </div>
+                </div>
+
+                <div class="step-card" style="border-left-color: #10B981;">
+                    <div class="step-number" style="background: linear-gradient(135deg, #10B981, #059669);">2</div>
+                    <div class="step-content">
+                        <h4>Tuần 2: Backtest Cường Độ Cao</h4>
+                        <p>Chọn 1 pattern yêu thích nhất (ví dụ DPU). Backtest ít nhất 50 lệnh trên chart quá khứ để cảm nhận nhịp điệu thị trường.</p>
+                    </div>
+                </div>
+
+                <div class="step-card" style="border-left-color: #10B981;">
+                    <div class="step-number" style="background: linear-gradient(135deg, #10B981, #059669);">3</div>
+                    <div class="step-content">
+                        <h4>Tuần 3 & 4: Forward Test (Demo)</h4>
+                        <p>Giao dịch trên tài khoản Demo (Paper Trading) như thật. Tuân thủ tuyệt đối Risk Management. Mục tiêu không phải là lãi bao nhiêu, mà là sai bao nhiêu lỗi.</p>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://via.placeholder.com/700x350/112250/FFBD59?text=30-Day+Action+Plan" alt="Action Plan">
+                    <p class="image-caption">Hình 8.7.2: Kế hoạch 30 ngày để master Tier 2</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Section 5: Support Channels -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon green">📞</div>
+                <div class="card-meta">
+                    <h3>Bạn Không Cô Đơn</h3>
+                    <span>Chúng tôi luôn ở đây hỗ trợ bạn</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="contact-card">
+                    <div class="contact-icon">🤖</div>
+                    <div>
+                        <strong>GEM Master AI Chatbot</strong>
+                        <p style="font-size: 0.9rem; color: #a1a1aa;">Trợ lý ảo trả lời mọi thắc mắc kỹ thuật 24/7 ngay trong App.</p>
+                    </div>
+                </div>
+
+                <div class="contact-card">
+                    <div class="contact-icon">👥</div>
+                    <div>
+                        <strong>Cộng Đồng GEM Elite</strong>
+                        <p style="font-size: 0.9rem; color: #a1a1aa;">Nơi giao lưu, chia sẻ kèo và học hỏi từ các trader đi trước.</p>
+                    </div>
+                </div>
+
+                <div class="contact-card">
+                    <div class="contact-icon">📧</div>
+                    <div>
+                        <strong>Support Team</strong>
+                        <p style="font-size: 0.9rem; color: #a1a1aa;">Email: support@gemtrading.academy - Giải quyết vấn đề tài khoản/kỹ thuật.</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <!-- Summary Box -->
+        <div class="summary-box">
+            <h3>📝 Tổng Kết Hành Trình</h3>
+            <ul class="summary-list">
+                <li>Tier 2 đã trang bị cho bạn tư duy và công cụ của một Advanced Trader.</li>
+                <li>Thành công không đến từ việc biết nhiều, mà từ việc làm đúng những điều cơ bản một cách kỷ luật.</li>
+                <li>Hãy chọn con đường phù hợp (Self-Practice, Tier 3, Partner) và cam kết với nó.</li>
+                <li>Thực hiện Kế hoạch 30 ngày để biến kiến thức thành kỹ năng.</li>
+                <li>GEM Academy luôn đồng hành cùng bạn trên mọi bước đường.</li>
+            </ul>
+        </div>
+
+        <!-- Quiz Section -->
+        <section class="quiz-section">
+            <h2 class="section-title">🎯 Quiz Cuối Tier 2</h2>
+
+            <div class="quiz-question" data-correct="2">
+                <p class="question-text">1. Điều quan trọng nhất cần làm ngay sau khi học xong Tier 2 là gì?</p>
+                <div class="quiz-option" data-index="0">
+                    <span class="option-letter">A</span>
+                    <span>Nạp tiền thật vào trade ngay để gỡ vốn.</span>
+                </div>
+                <div class="quiz-option" data-index="1">
+                    <span class="option-letter">B</span>
+                    <span>Nghỉ ngơi 1 tháng rồi tính tiếp.</span>
+                </div>
+                <div class="quiz-option" data-index="2">
+                    <span class="option-letter">C</span>
+                    <span>Lập kế hoạch giao dịch (Trading Plan), Backtest và Paper Trade.</span>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <p class="question-text">2. Ai là đối tượng phù hợp nhất cho Con đường B (Nâng cấp Tier 3)?</p>
+                <div class="quiz-option" data-index="0">
+                    <span class="option-letter">A</span>
+                    <span>Người chỉ muốn trade cho vui, kiếm tiền cafe.</span>
+                </div>
+                <div class="quiz-option" data-index="1">
+                    <span class="option-letter">B</span>
+                    <span>Người muốn trở thành Pro Trader toàn thời gian và học Institutional Trading.</span>
+                </div>
+                <div class="quiz-option" data-index="2">
+                    <span class="option-letter">C</span>
+                    <span>Người không có thời gian học, muốn copy lệnh.</span>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <p class="score-text">Kết quả: <span id="correct-count">0</span>/2</p>
+                <p style="margin-top: 0.5rem;">🎉 Chúc mừng bạn đã hoàn thành xuất sắc Tier 2!</p>
+                <button class="retake-btn" onclick="location.reload()">Làm Lại Quiz</button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="lesson-footer">
+            <div class="footer-logo">GEM Trading Academy</div>
+            <p class="footer-text">Tier 2 Complete - See You At The Top! 🚀</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 2;
+        let answeredCount = 0;
+        let correctCount = 0;
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy xem lại phần Lựa chọn chiến lược.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

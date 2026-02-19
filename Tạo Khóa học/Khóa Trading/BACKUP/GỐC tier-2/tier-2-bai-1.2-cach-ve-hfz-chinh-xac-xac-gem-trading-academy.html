@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bai 1.2: Cach Ve HFZ Chinh Xac - GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header h1 {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .section, .content-section, .content-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section, .content-card {
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title, .content-card h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .content-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: var(--space-lg) 0 var(--space-md) 0;
+            color: var(--cyan);
+        }
+        .content-card p, .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+        .content-card ul, .content-card ol, .section > ul, .section > ol {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .content-card li, .section li { margin-bottom: var(--space-sm); }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .highlight-box.cyan {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border-color: rgba(0, 240, 255, 0.2);
+        }
+        .highlight-box.green {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border-color: rgba(0, 200, 83, 0.2);
+        }
+        .highlight-box.gold {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border-color: rgba(255, 189, 89, 0.3);
+        }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .image-placeholder, .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+            padding: var(--space-md);
+        }
+        .image-placeholder img { max-width: 100%; border-radius: 8px; margin-bottom: 0.75rem; }
+        .image-placeholder p, .image-caption {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin: 0;
+        }
+
+        .step-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-md) 0;
+            border-left: 4px solid var(--gold);
+        }
+        .step-card .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--navy-dark);
+            border-radius: 50%;
+            font-weight: 700;
+            margin-right: 0.75rem;
+        }
+        .step-card h4 { display: inline; color: var(--text-primary); font-size: 1.1rem; }
+        .step-card p { margin-top: 0.75rem; color: var(--text-secondary); font-size: 0.95rem; }
+
+        .zone-anatomy {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+            text-align: center;
+        }
+        .zone-anatomy .zone-visual {
+            background: linear-gradient(180deg, rgba(255, 82, 82, 0.3) 0%, rgba(255, 82, 82, 0.1) 100%);
+            border: 2px solid var(--error);
+            border-radius: 8px;
+            padding: 2rem 1rem;
+            margin: 1rem 0;
+            position: relative;
+        }
+        .zone-anatomy .zone-label {
+            position: absolute;
+            right: 1rem;
+            background: var(--error);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .zone-anatomy .zone-label.top { top: 0.5rem; }
+        .zone-anatomy .zone-label.bottom { bottom: 0.5rem; }
+
+        .rule-box {
+            background: var(--glass-bg);
+            border: 2px solid var(--error);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .rule-box h4 { color: var(--error); margin-bottom: var(--space-md); }
+        .rule-box ul { list-style: none; padding: 0; }
+        .rule-box li { padding: 0.5rem 0; padding-left: 1.5rem; position: relative; color: var(--text-secondary); }
+        .rule-box li::before { content: '✓'; position: absolute; left: 0; color: var(--error); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        .summary-box h3 { color: var(--success); font-size: 1.25rem; margin-bottom: var(--space-lg); }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li { padding: 0.5rem 0; padding-left: 1.75rem; position: relative; color: var(--text-secondary); }
+        .summary-box li::before { content: '✓'; position: absolute; left: 0; color: var(--success); font-weight: 700; }
+
+        .quiz-section, .quiz-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section, .quiz-container {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-md) 16px;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-container h2 { color: var(--gold); font-size: 1.5rem; margin-bottom: var(--space-lg); }
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        .quiz-question p { font-weight: 600; margin-bottom: var(--space-md); color: var(--text-primary); }
+        .quiz-option {
+            display: block;
+            width: 100%;
+            padding: var(--space-md);
+            margin-bottom: var(--space-sm);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+        .quiz-option:hover { border-color: var(--gold); background: var(--bg-card); }
+        .quiz-option.correct { background: rgba(0, 200, 83, 0.15); border-color: var(--success); color: var(--success); }
+        .quiz-option.incorrect { background: rgba(255, 82, 82, 0.15); border-color: var(--error); color: var(--error); }
+        .quiz-result { padding: var(--space-md); border-radius: var(--space-sm); margin-top: var(--space-md); font-weight: 600; display: none; }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); color: var(--success); }
+        .quiz-result.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); color: var(--error); }
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02));
+            border-radius: var(--radius-md);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .quiz-score h3 { color: var(--gold); margin-bottom: var(--space-sm); }
+        .retake-btn {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .retake-btn:hover { border-color: var(--gold); }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl) 16px; color: var(--text-muted); }
+        .lesson-footer .brand { color: var(--gold); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="header-badge">🥈 TIER 2 - Chapter 1</div>
+            <h1>Cách Vẽ HFZ Chính Xác</h1>
+            <p>Xác định Entry, Stop Loss và độ dày zone chuẩn xác</p>
+        </header>
+
+        <section class="content-section">
+            <div class="content-card">
+                <h2><span class="icon">📐</span> Cấu Trúc HFZ Zone</h2>
+
+                <p>Một HFZ zone được xác định bởi <strong>2 đường ngang</strong>: đường Entry và đường Stop Loss.</p>
+
+                <div class="zone-anatomy">
+                    <h4 style="color: var(--error-red); margin-bottom: 1rem;">Cấu Trúc HFZ Zone</h4>
+                    <div class="zone-visual">
+                        <span class="zone-label top">STOP LOSS (Đỉnh Pause)</span>
+                        <p style="color: var(--error-red); font-weight: 700; font-size: 1.25rem;">HFZ ZONE</p>
+                        <span class="zone-label bottom">ENTRY (Đáy Pause)</span>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 1rem;">
+                        ↑ Giá hiện tại nằm DƯỚI zone này
+                    </p>
+                </div>
+
+                <div class="highlight-box">
+                    <p><strong>💡 Quy tắc vàng:</strong></p>
+                    <ul style="margin-top: 0.5rem; padding-left: 1.25rem;">
+                        <li><strong>Entry:</strong> Đáy của vùng Pause (gần giá hiện tại nhất)</li>
+                        <li><strong>Stop Loss:</strong> Đỉnh của vùng Pause (xa giá hiện tại nhất)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2><span class="icon">📝</span> 4 Bước Vẽ HFZ</h2>
+
+                <div class="step-card">
+                    <span class="step-number">1</span>
+                    <h4>Xác định Pattern DPD hoặc UPD</h4>
+                    <p>Tìm pattern có 3 phases: Phase 1 (di chuyển) → Phase 2 (Pause) → Phase 3 (Down)</p>
+                </div>
+
+                <div class="step-card">
+                    <span class="step-number">2</span>
+                    <h4>Xác định vùng Pause</h4>
+                    <p>Đây là vùng consolidation/tích lũy giữa Phase 1 và Phase 3. Vùng này chứa nhiều nến đi ngang.</p>
+                </div>
+
+                <div class="step-card">
+                    <span class="step-number">3</span>
+                    <h4>Vẽ đường Entry (đáy Pause)</h4>
+                    <p>Đường ngang đi qua điểm THẤP NHẤT của vùng Pause. Đây là nơi giá sẽ chạm đầu tiên khi quay lại.</p>
+                </div>
+
+                <div class="step-card">
+                    <span class="step-number">4</span>
+                    <h4>Vẽ đường Stop Loss (đỉnh Pause)</h4>
+                    <p>Đường ngang đi qua điểm CAO NHẤT của vùng Pause. Stop Loss sẽ đặt ngay trên đường này.</p>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x450/112250/EF4444?text=4+Steps+Draw+HFZ" alt="4 Steps to Draw HFZ">
+                    <p>📸 4 bước vẽ HFZ trên chart thực tế</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2><span class="icon">📏</span> Quy Tắc Độ Dày Zone</h2>
+
+                <p>Độ dày của HFZ zone ảnh hưởng đến <strong>Risk:Reward</strong> và tính khả thi của trade.</p>
+
+                <div class="rule-box">
+                    <h4>📐 Quy Tắc Độ Dày Tối Ưu</h4>
+                    <ul>
+                        <li>Zone quá mỏng (&lt;0.5% giá): R:R tốt nhưng dễ bị stop out sớm</li>
+                        <li>Zone vừa phải (0.5-2% giá): Lý tưởng cho hầu hết trades</li>
+                        <li>Zone quá dày (&gt;3% giá): R:R kém, cân nhắc bỏ qua</li>
+                        <li>Nên target R:R tối thiểu 1:2 sau khi tính zone thickness</li>
+                    </ul>
+                </div>
+
+                <h3>Công thức tính độ dày:</h3>
+                <div class="highlight-box cyan">
+                    <p><strong>Độ dày (%) = (Đỉnh Pause - Đáy Pause) / Đáy Pause × 100</strong></p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">Ví dụ: Đỉnh = $105, Đáy = $100 → Độ dày = 5%</p>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x350/0A0E17/00F0FF?text=Zone+Thickness+Examples" alt="Zone Thickness Examples">
+                    <p>📸 So sánh zone mỏng, vừa và dày</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2><span class="icon">⚠️</span> Lỗi Thường Gặp Khi Vẽ HFZ</h2>
+
+                <h3>❌ Lỗi 1: Vẽ zone quá rộng</h3>
+                <p>Bao gồm cả những nến không thuộc vùng Pause, làm zone quá dày và R:R kém.</p>
+
+                <h3>❌ Lỗi 2: Vẽ zone quá hẹp</h3>
+                <p>Chỉ vẽ theo thân nến, bỏ qua wicks. Zone quá mỏng dễ bị false breakout.</p>
+
+                <h3>❌ Lỗi 3: Nhầm lẫn Entry và Stop</h3>
+                <p>Nhớ: Entry = GẦN giá hiện tại, Stop = XA giá hiện tại. Với HFZ, Entry ở đáy, Stop ở đỉnh.</p>
+
+                <div class="highlight-box gold">
+                    <p><strong>✅ Cách đúng:</strong> Bao gồm cả thân nến VÀ wicks của các nến trong vùng Pause. Zone nên chứa 70-90% các price action trong vùng consolidation.</p>
+                </div>
+
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x400/112250/FFBD59?text=Common+Mistakes" alt="Common Mistakes">
+                    <p>📸 So sánh vẽ zone sai và đúng</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2><span class="icon">🎯</span> Thực Hành: 3 Ví Dụ</h2>
+
+                <h3>Ví dụ 1: ETH/USDT - 4H</h3>
+                <p>Pattern UPD với vùng Pause rõ ràng. Zone thickness khoảng 1.5% - lý tưởng.</p>
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x350/0A0E17/EF4444?text=Example+1+ETH" alt="Example 1 ETH">
+                    <p>📸 Ví dụ 1: ETH/USDT HFZ zone</p>
+                </div>
+
+                <h3>Ví dụ 2: BTC/USDT - 1D</h3>
+                <p>Pattern DPD trên daily. Zone dày hơn (~2.5%) nhưng vẫn tradeable với R:R 1:2.</p>
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x350/0A0E17/EF4444?text=Example+2+BTC" alt="Example 2 BTC">
+                    <p>📸 Ví dụ 2: BTC/USDT HFZ zone</p>
+                </div>
+
+                <h3>Ví dụ 3: SOL/USDT - 1H</h3>
+                <p>Zone mỏng (~0.8%) - R:R tuyệt vời nhưng cần tight stop management.</p>
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x350/0A0E17/EF4444?text=Example+3+SOL" alt="Example 3 SOL">
+                    <p>📸 Ví dụ 3: SOL/USDT HFZ zone</p>
+                </div>
+            </div>
+
+            <div class="summary-box">
+                <h3>📝 Tóm Tắt Bài Học</h3>
+                <ul>
+                    <li>HFZ có 2 đường: Entry (đáy Pause) và Stop Loss (đỉnh Pause)</li>
+                    <li>4 bước vẽ: Xác định pattern → Tìm Pause → Vẽ Entry → Vẽ Stop</li>
+                    <li>Độ dày zone lý tưởng: 0.5-2% giá để có R:R tốt</li>
+                    <li>Bao gồm cả wicks, không chỉ thân nến</li>
+                    <li>Tránh zone quá dày (&gt;3%) vì R:R kém</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="quiz-section">
+            <div class="quiz-container">
+                <h2>❓ Kiểm Tra Kiến Thức</h2>
+
+                <div class="quiz-question" data-correct="1">
+                    <p>1. Với HFZ, đường Entry được vẽ ở đâu?</p>
+                    <button class="quiz-option" data-index="0">A. Đỉnh của vùng Pause</button>
+                    <button class="quiz-option" data-index="1">B. Đáy của vùng Pause (gần giá hiện tại)</button>
+                    <button class="quiz-option" data-index="2">C. Giữa vùng Pause</button>
+                    <button class="quiz-option" data-index="3">D. Bên dưới vùng Pause</button>
+                    <div class="quiz-result"></div>
+                </div>
+
+                <div class="quiz-question" data-correct="2">
+                    <p>2. Độ dày zone lý tưởng cho HFZ là bao nhiêu?</p>
+                    <button class="quiz-option" data-index="0">A. Dưới 0.1%</button>
+                    <button class="quiz-option" data-index="1">B. Trên 5%</button>
+                    <button class="quiz-option" data-index="2">C. 0.5-2% giá</button>
+                    <button class="quiz-option" data-index="3">D. Càng dày càng tốt</button>
+                    <div class="quiz-result"></div>
+                </div>
+
+                <div class="quiz-question" data-correct="0">
+                    <p>3. Khi vẽ HFZ zone, bạn nên làm gì với wicks của nến?</p>
+                    <button class="quiz-option" data-index="0">A. Bao gồm cả wicks trong zone</button>
+                    <button class="quiz-option" data-index="1">B. Chỉ vẽ theo thân nến</button>
+                    <button class="quiz-option" data-index="2">C. Bỏ qua hoàn toàn wicks</button>
+                    <button class="quiz-option" data-index="3">D. Chỉ tính wicks dài hơn 1%</button>
+                    <div class="quiz-result"></div>
+                </div>
+
+                <div class="quiz-score">
+                    <h3>🎉 Hoàn thành!</h3>
+                    <p>Bạn trả lời đúng <span id="correct-count">0</span>/3 câu hỏi</p>
+                    <button class="retake-btn" onclick="location.reload()">Làm lại Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <p>Bài học thuộc <span class="brand">GEM Trading Academy - TIER 2</span></p>
+            <p>© 2024 - Nền tảng đào tạo trading chuyên nghiệp</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.2: Cấu Trúc 3 Phases Của DPU - GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--success), var(--cyan)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); color: var(--navy-dark); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .pattern-flow { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .pattern-flow { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-phase { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-phase { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        .flow-phase.up { border-left-color: var(--success); }
+        .flow-phase.pause { border-left-color: var(--gold); }
+        .phase-icon { font-size: 2rem; min-width: 50px; text-align: center; }
+        .phase-content { flex: 1; }
+        .phase-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-phase.up .phase-title { color: var(--success); }
+        .flow-phase.pause .phase-title { color: var(--gold); }
+        .phase-desc { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .stats-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        @media (max-width: 600px) { .stat-card { border: none; border-radius: 0; padding: var(--space-md); } }
+        .stat-value { font-size: 1.75rem; font-weight: 800; background: linear-gradient(135deg, var(--cyan), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        @media (max-width: 600px) { .stat-value { font-size: 1.25rem; } }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .stat-card.green .stat-value { background: linear-gradient(135deg, var(--success), var(--success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-card.gold .stat-value { background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .summary-box { background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02)); border: 2px solid var(--success); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--success); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--success); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--success); font-weight: 700; }
+
+        .quiz-section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; padding: 0; margin-top: 0; border-top: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: var(--space-lg) 16px var(--space-md); margin-bottom: 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-question { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin-bottom: 0; border-bottom: 1px solid var(--glass-border); } }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; font-weight: 700; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); line-height: 1.6; }
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        @media (max-width: 600px) { .quiz-options { gap: 1px; background: var(--glass-border); margin-left: calc(-16px - 4px); margin-right: -16px; } }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .quiz-option { border: none; border-radius: 0; border-left: 4px solid transparent; padding: var(--space-md) 16px; } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); background: var(--bg-card); }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        .quiz-option.disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-marker { width: 28px; height: 28px; min-width: 28px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; }
+        .quiz-option.incorrect .option-marker { background: var(--error); border-color: var(--error); color: white; }
+        .option-text { flex: 1; color: var(--text-secondary); }
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--space-sm); display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-buttons { padding: var(--space-lg) 16px; } }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>📈</span>
+                <span>Reversal Pattern</span>
+            </div>
+            <div class="lesson-chapter">Chapter 5 - DPU Pattern Mastery</div>
+            <h1 class="lesson-title">Bài 5.2: Cấu Trúc 3 Phases Của DPU</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 5.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>15 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- PHẦN 1: OPENING -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Mở Đầu: Bản Đồ Của Sự Đảo Chiều</h2>
+            <p>Hãy tưởng tượng bạn đang lái xe xuống một con dốc dài. Đột nhiên, bạn thấy một biển báo "Trạm Dừng Chân" (Pause). Bạn tấp vào lề, nghỉ ngơi một chút, và sau đó quyết định... quay đầu xe chạy ngược lên dốc (Up). Nghe có vẻ điên rồ phải không? Nhưng đó chính xác là cách mà thị trường vận hành khi tạo đáy.</p>
+            <p>Trong bài học trước, bạn đã biết DPU là gì. Nhưng để thực sự kiếm được tiền từ nó, bạn không thể chỉ nhìn thấy hình dáng bên ngoài. Bạn cần phải "mổ xẻ" nó ra, nhìn thấu vào tận xương tủy của từng giai đoạn. Tại sao giá lại giảm? Tại sao nó lại dừng? Và điều gì kích hoạt cú bật tăng khủng khiếp sau đó?</p>
+            <p>Hôm nay, tôi sẽ đưa cho bạn tấm bản đồ chi tiết nhất về cấu trúc 3 phases của DPU. Chúng ta sẽ không nói chuyện lý thuyết suông. Tôi sẽ chỉ cho bạn cách đọc vị từng cây nến, từng cột volume để bạn biết chính xác khi nào Smart Money đang âm thầm gom hàng ngay dưới mũi của đám đông hoảng loạn.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Tư Duy Của Cá Mập</div>
+                <p>Hãy nhớ rằng: Smart Money không bao giờ mua khi giá đang rơi tự do. Họ đợi một vùng cân bằng, một vùng "Pause" để hấp thụ hết sự sợ hãi của nhỏ lẻ. Hiểu được điều này, bạn sẽ không bao giờ bắt dao rơi nữa.</p>
+            </div>
+        </section>
+
+        <!-- PHẦN 2: CONCEPT - TỔNG QUAN -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Tổng Quan 3 Phases: Kịch Bản Của Một Cú "Big Long"</h2>
+            <p>Mọi DPU pattern thành công đều phải trải qua một quy trình 3 bước nghiêm ngặt. Nếu thiếu bất kỳ bước nào, đó không phải là DPU, đó là một cái bẫy.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #EF4444;">DOWN</div>
+                    <div class="stat-label">Phase 1: Sợ Hãi</div>
+                </div>
+                <div class="stat-card gold">
+                    <div class="stat-value">PAUSE</div>
+                    <div class="stat-label">Phase 2: Tích Lũy</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-value">UP</div>
+                    <div class="stat-label">Phase 3: Hy Vọng</div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.2/5-2-1.webp" alt="DPU 3 Phases Structure">
+            </div>
+            <div class="image-caption">Hình 1: Cấu trúc 3 giai đoạn của DPU Pattern - Từ hoảng loạn đến bùng nổ</div>
+        </section>
+
+        <!-- PHẦN 3: DEEP DIVE - PHASE 1 -->
+        <section class="section">
+            <h2 class="section-title"><span>📉</span> Phase 1: DOWN - Cú Rũ Bỏ (The Shakeout)</h2>
+            <p>Phase đầu tiên luôn bắt đầu bằng nỗi đau. Giá giảm mạnh, liên tục tạo đáy mới thấp hơn đáy cũ. Đây là giai đoạn mà các trader non tay sẽ hoảng loạn bán tháo (Panic Sell) hoặc bị dính Stop Loss hàng loạt.</p>
+            <p><strong>Tại sao Smart Money cần Phase này?</strong> Họ cần thanh khoản. Để mua được một lượng lớn tài sản giá rẻ, họ cần ai đó bán ra. Và không có gì kích thích người ta bán ra nhanh hơn là nỗi sợ hãi.</p>
+
+            <div class="pattern-flow">
+                <div class="flow-phase">
+                    <div class="phase-icon">📉</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Tiêu Chí Nhận Diện Phase DOWN</div>
+                        <div class="phase-desc">
+                            • <strong>Biên độ giá:</strong> Giảm ít nhất 15-25% từ đỉnh gần nhất. Cú giảm phải dứt khoát, nến đỏ thân dài.<br>
+                            • <strong>Volume:</strong> Tăng vọt (1.5x - 3x trung bình). Đây là dấu hiệu của "Climax Sell" - sự bán tháo cực độ.<br>
+                            • <strong>Thời gian:</strong> Kéo dài tối thiểu 5-7 cây nến trên khung thời gian bạn đang trade (4H hoặc D1).
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📌</span> Ví Dụ Thực Tế</div>
+                <p>Nhìn vào đợt sập của SOL tháng 8/2024. Giá rơi từ $185 về $128 chỉ trong 2 ngày. Volume đỏ cao chót vót. Mạng xã hội tràn ngập tin xấu. Đó chính là Phase 1 hoàn hảo. Nếu bạn thấy giá giảm từ từ, volume thấp, đó chỉ là điều chỉnh (correction), không phải Phase 1 của DPU.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.2/5-2-2.webp" alt="Phase 1 DOWN Detail">
+            </div>
+            <div class="image-caption">Hình 2: Phase 1 với Volume Climax - Dấu hiệu của sự bán tháo</div>
+        </section>
+
+        <!-- PHẦN 4: DEEP DIVE - PHASE 2 -->
+        <section class="section">
+            <h2 class="section-title"><span>⏸️</span> Phase 2: PAUSE - Vùng Gom Hàng (The Accumulation)</h2>
+            <p>Đây là trái tim của DPU. Sau cơn bão bán tháo, thị trường bỗng nhiên... im lặng. Giá ngừng rơi và bắt đầu đi ngang trong một biên độ hẹp. Tại sao? Vì Smart Money đã bắt đầu "đặt tay" vào bên dưới để đỡ giá.</p>
+            <p>Họ không mua ồ ạt để đẩy giá lên ngay. Họ mua từ từ, hấp thụ hết những lệnh bán còn sót lại của đám đông. Họ muốn mua được càng nhiều càng tốt ở mức giá rẻ mạt này.</p>
+
+            <div class="pattern-flow">
+                <div class="flow-phase pause">
+                    <div class="phase-icon">⏸️</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Tiêu Chí Nhận Diện Phase PAUSE</div>
+                        <div class="phase-desc">
+                            • <strong>Biến động giá:</strong> Sideway cực hẹp (3-8%). Không tạo đáy mới thấp hơn.<br>
+                            • <strong>Volume:</strong> Giảm sâu (cạn kiệt), chỉ còn 40-70% so với Phase 1. Đây là chìa khóa! Nó cho thấy không còn ai muốn bán nữa.<br>
+                            • <strong>Hình thái nến:</strong> Xuất hiện nhiều nến Doji, Spinning Top, thể hiện sự lưỡng lự.<br>
+                            • <strong>Tạo LFZ:</strong> Chính vùng đi ngang này tạo nên <strong>LFZ (Low Frequency Zone)</strong> - vùng hỗ trợ cứng cho tương lai.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⭐</span> Bí Mật Của Volume Cạn Kiệt</div>
+                <p>Hãy tưởng tượng bạn vắt một chiếc khăn. Phase 1 là lúc nước chảy ra ồ ạt. Phase 2 là lúc bạn vắt kiệt những giọt cuối cùng. Khi volume cạn kiệt, nghĩa là lực cung đã hết. Chỉ cần một lực cầu nhẹ cũng đủ để đẩy giá bay lên. Đó là lúc Smart Money chuẩn bị hành động.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.2/5-2-3.webp" alt="Phase 2 PAUSE LFZ">
+            </div>
+            <div class="image-caption">Hình 3: Phase 2 hình thành LFZ - Nơi Smart Money âm thầm gom hàng</div>
+        </section>
+
+        <!-- PHẦN 5: DEEP DIVE - PHASE 3 -->
+        <section class="section">
+            <h2 class="section-title"><span>📈</span> Phase 3: UP - Sự Khởi Đầu Mới (The Breakout)</h2>
+            <p>Khi kho hàng đã đầy, Smart Money không còn lý do gì để giữ giá thấp nữa. Họ bắt đầu đẩy giá lên mạnh mẽ, phá vỡ vùng tích lũy. Đây là phát súng hiệu lệnh cho một xu hướng tăng mới.</p>
+
+            <div class="pattern-flow">
+                <div class="flow-phase up">
+                    <div class="phase-icon">📈</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Tiêu Chí Nhận Diện Phase UP</div>
+                        <div class="phase-desc">
+                            • <strong>Hành động giá:</strong> Một cây nến xanh thân dài (Marubozu) phá vỡ dứt khoát cạnh trên của vùng Pause.<br>
+                            • <strong>Volume:</strong> Tăng đột biến trở lại (1.5x - 2.5x). Đây là sự xác nhận của dòng tiền lớn.<br>
+                            • <strong>Follow-through:</strong> Giá tiếp tục tăng ít nhất 10-15% sau cây nến breakout, không quay đầu giảm ngay lập tức.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⚠️</span> Cảnh Báo "False Breakout"</div>
+                <p>Rất nhiều trader chết ở đây vì FOMO mua đuổi. Nếu bạn thấy giá phá lên nhưng Volume thấp, hoặc để lại râu nến trên dài ngoằng, hãy cẩn thận! Đó có thể là bẫy Bull Trap. Một Phase 3 chuẩn phải đi kèm với sự đồng thuận của Volume.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch5/5.2/5-2-4.webp" alt="Phase 3 UP Breakout">
+            </div>
+            <div class="image-caption">Hình 4: Phase 3 bùng nổ với Volume xác nhận - Pattern hoàn tất</div>
+        </section>
+
+        <!-- PHẦN 6: TIMELINE -->
+        <section class="section">
+            <h2 class="section-title"><span>⏱️</span> Quy Luật Thời Gian: Kiên Nhẫn Là Vàng</h2>
+            <p>Một sai lầm phổ biến là mong chờ giá đảo chiều ngay lập tức (mô hình chữ V). DPU cần thời gian để "chín".</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" style="color: #EF4444;">20%</div>
+                    <div class="stat-label">Thời gian Giảm</div>
+                </div>
+                <div class="stat-card gold">
+                    <div class="stat-value">60%</div>
+                    <div class="stat-label">Thời gian Tích Lũy</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-value">20%</div>
+                    <div class="stat-label">Thời gian Tăng</div>
+                </div>
+            </div>
+
+            <p>Phase PAUSE thường chiếm tới 60% tổng thời gian hình thành pattern. Nếu bạn thấy giá vừa giảm xong đã bật tăng ngay, đó thường không phải là DPU bền vững. Hãy kiên nhẫn chờ đợi vùng tích lũy đủ lâu (tối thiểu 5-10 nến) để nền móng được xây dựng chắc chắn.</p>
+        </section>
+
+        <!-- PHẦN 7: ACTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Bài Tập Thực Chiến</h2>
+            <p>Đừng để kiến thức này nằm yên trong đầu bạn. Hãy mở biểu đồ ra và thực hành ngay:</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🚀</span> Nhiệm Vụ Của Bạn</div>
+                <p>
+                    1. Mở chart BTC/USDT khung 4H.<br>
+                    2. Tìm lại 3 lần giá tạo đáy gần nhất.<br>
+                    3. Kiểm tra xem có cấu trúc DPU không? Đo xem Phase 2 kéo dài bao lâu?<br>
+                    4. Quan sát Volume: Có sự cạn kiệt ở Phase 2 và bùng nổ ở Phase 3 không?<br>
+                    5. Ghi lại vào nhật ký giao dịch của bạn.
+                </p>
+            </div>
+        </section>
+
+        <!-- PHẦN 8: TỔNG KẾT & QUIZ -->
+        <div class="summary-box">
+            <div class="summary-title"><span>📝</span> Tóm Tắt Cốt Lõi</div>
+            <ul class="summary-list">
+                <li><strong>Phase 1 (DOWN):</strong> Panic Sell, Volume cao. Mục tiêu: Rũ bỏ tay yếu.</li>
+                <li><strong>Phase 2 (PAUSE):</strong> Sideway, Volume thấp. Mục tiêu: Smart Money gom hàng. Đây là nơi tạo ra LFZ.</li>
+                <li><strong>Phase 3 (UP):</strong> Breakout, Volume cao. Mục tiêu: Xác nhận xu hướng tăng mới.</li>
+                <li><strong>Chiến lược:</strong> Không mua ở Phase 3. Đợi giá hồi về LFZ (Phase 2) để có Entry tốt nhất.</li>
+            </ul>
+        </div>
+
+        <section class="quiz-section">
+            <h2 class="quiz-title">Kiểm Tra Hiểu Biết</h2>
+            <div class="quiz-content">
+                <div class="quiz-question" data-correct="1">
+                    <div class="question-text">Câu 1: Phase nào chiếm nhiều thời gian nhất và quan trọng nhất trong cấu trúc DPU?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-index="0">A. Phase 1 (DOWN)</div>
+                        <div class="quiz-option" data-index="1">B. Phase 2 (PAUSE)</div>
+                        <div class="quiz-option" data-index="2">C. Phase 3 (UP)</div>
+                        <div class="quiz-option" data-index="3">D. Tất cả bằng nhau</div>
+                    </div>
+                    <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+                </div>
+
+                <div class="quiz-question" data-correct="2">
+                    <div class="question-text">Câu 2: Dấu hiệu nhận biết quan trọng nhất của Phase 2 (PAUSE) là gì?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-index="0">A. Giá tăng mạnh</div>
+                        <div class="quiz-option" data-index="1">B. Volume tăng đột biến</div>
+                        <div class="quiz-option" data-index="2">C. Giá đi ngang và Volume cạn kiệt</div>
+                        <div class="quiz-option" data-index="3">D. Tin tức tốt xuất hiện liên tục</div>
+                    </div>
+                    <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+                </div>
+
+                <div class="quiz-question" data-correct="0">
+                    <div class="question-text">Câu 3: Chúng ta nên làm gì khi thấy Phase 3 (UP) vừa xảy ra?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-index="0">A. Đánh dấu vùng LFZ tại Phase 2 và kiên nhẫn chờ giá quay lại (Retest)</div>
+                        <div class="quiz-option" data-index="1">B. Mua ngay lập tức (FOMO) vì giá sắp bay</div>
+                        <div class="quiz-option" data-index="2">C. Bán khống (Short) vì nghĩ giá đã tăng quá cao</div>
+                        <div class="quiz-option" data-index="3">D. Tắt máy đi ngủ</div>
+                    </div>
+                    <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+                </div>
+
+                <div class="quiz-result">
+                    <div class="result-score">0/3</div>
+                    <div class="result-text">Hoàn thành!</div>
+                </div>
+                <div class="quiz-buttons">
+                    <button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <p>Hoàn thành <span class="highlight">Bài 5.2</span></p>
+            <p>Tiếp theo: <strong>Bài 5.3 - Cách Vẽ LFZ Chính Xác Trong DPU</strong></p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const resultDiv = document.querySelector('.quiz-result');
+            const retakeBtn = document.getElementById('retakeQuiz');
+
+            const explanations = {
+                0: "Chính xác! Phase PAUSE là nơi tích lũy, cần thời gian lâu nhất để Smart Money gom đủ hàng.",
+                1: "Sai rồi. Phase PAUSE mới là giai đoạn dài nhất.",
+                2: "Sai rồi. Phase UP thường diễn ra nhanh và mạnh.",
+                3: "Sai rồi.",
+                
+                4: "Sai rồi. Giá tăng mạnh là Phase 3.",
+                5: "Sai rồi. Volume tăng đột biến thường ở Phase 1 hoặc 3.",
+                6: "Chính xác! Volume cạn kiệt cho thấy lực cung đã hết, là điều kiện tiên quyết để tạo đáy.",
+                7: "Sai rồi.",
+
+                8: "Chính xác! Đừng bao giờ mua đuổi. Hãy đợi giá về vùng 'trạm dừng' (LFZ) để có vị thế an toàn nhất.",
+                9: "Sai rồi. Mua đuổi (FOMO) ở Phase 3 rất dễ dính đỉnh ngắn hạn.",
+                10: "Sai rồi. Đừng Short khi xu hướng tăng vừa được xác nhận.",
+                11: "Sai rồi."
+            };
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    const feedbackDiv = question.querySelector('.question-feedback');
+                    const feedbackTitle = feedbackDiv.querySelector('.feedback-title');
+                    const feedbackText = feedbackDiv.querySelector('.feedback-text');
+
+                    // Tính toán index toàn cục cho explanation
+                    // Câu 1: 0-3, Câu 2: 4-7, Câu 3: 8-11
+                    // Logic đơn giản hơn: Dùng mảng explanations riêng cho từng câu hỏi
+                    // Nhưng ở đây dùng chung object nên cần mapping index.
+                    // Sửa lại logic explanation trực tiếp cho đơn giản:
+                    
+                    let explanationText = "";
+                    if (options[0].textContent.includes("Phase 2")) { // Câu 1
+                         explanationText = selectedIndex === correctIndex ? "Chính xác! Phase PAUSE cần thời gian lâu nhất để Smart Money gom đủ hàng mà không làm giá tăng." : "Sai rồi. Phase PAUSE (Tích lũy) mới chiếm nhiều thời gian nhất (khoảng 60%).";
+                    } else if (options[0].textContent.includes("Giá tăng mạnh")) { // Câu 2
+                         explanationText = selectedIndex === correctIndex ? "Chính xác! Volume cạn kiệt chứng tỏ không còn ai bán nữa, thị trường sẵn sàng đảo chiều." : "Sai rồi. Đặc điểm cốt lõi là giá đi ngang (sideway) và volume giảm dần (cạn kiệt).";
+                    } else { // Câu 3
+                         explanationText = selectedIndex === correctIndex ? "Chính xác! Nguyên tắc của GEM là 'No Retest, No Entry'. Hãy kiên nhẫn đợi giá về LFZ." : "Sai rồi. Hành động đúng đắn là đánh dấu vùng LFZ và chờ đợi cú Retest để có R:R tốt nhất.";
+                    }
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        feedbackDiv.classList.add('correct');
+                        feedbackTitle.textContent = '✓ Chính xác!';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        feedbackDiv.classList.add('incorrect');
+                        feedbackTitle.textContent = '✗ Chưa đúng.';
+                    }
+                    feedbackText.textContent = explanationText;
+                    feedbackDiv.classList.add('show');
+
+                    if (answeredCount === totalQuestions) {
+                        resultDiv.querySelector('.result-score').textContent = `${correctCount}/${totalQuestions}`;
+                        resultDiv.querySelector('.result-text').textContent = correctCount === totalQuestions ? '🎉 Xuất sắc!' : '📚 Hãy ôn lại bài nhé!';
+                        resultDiv.classList.add('show');
+                        retakeBtn.style.display = 'inline-block';
+                    }
+                });
+            });
+        });
+
+        function retakeQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+            document.querySelectorAll('.quiz-question').forEach(q => {
+                q.classList.remove('answered');
+                q.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('correct', 'incorrect'));
+                q.querySelector('.question-feedback').classList.remove('show', 'correct', 'incorrect');
+            });
+            document.querySelector('.quiz-result').classList.remove('show');
+            document.getElementById('retakeQuiz').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

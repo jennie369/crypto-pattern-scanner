@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 8.8: Chiến Lược Take Profit - GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section, .content-card, .tp-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section, .content-card, .tp-card {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title, .card-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p, .card-content p, .card-body p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul, .styled-list {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box, .info-box, .tip-box, .formula-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .info-box.success {
+             background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+             border-color: var(--success);
+        }
+        .info-box.warning, .tip-box.warning {
+             background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+             border-color: var(--error);
+        }
+        
+        @media (max-width: 600px) {
+            .highlight-box, .info-box, .tip-box, .formula-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+             .info-box.success { border-left-color: var(--success); }
+             .info-box.warning, .tip-box.warning { border-left-color: var(--error); }
+        }
+        .highlight-box h4, .info-box-title, .tip-header { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .info-box.success .info-box-title { color: var(--success); }
+        .info-box.warning .info-box-title, .tip-box.warning .tip-header { color: var(--error); }
+        
+        .highlight-box p, .info-box p, .tip-box p, .formula-box p { color: var(--text-secondary); margin: 0; }
+
+        .tp-strategy-grid {
+             display: grid;
+             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+             gap: var(--space-md);
+             margin: var(--space-md) 0;
+        }
+        .tp-card {
+            background: var(--bg-primary);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+        }
+        .tp-card.gold { border-color: var(--gold); }
+        .tp-card.purple { border-color: var(--purple); }
+
+        .tp-badge {
+            background: var(--glass-border);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--cyan);
+            margin-right: 8px;
+        }
+        .tp-title { font-weight: 700; color: var(--text-primary); }
+        .tp-content { margin-top: var(--space-md); flex-grow: 1; }
+        .tp-ratio { 
+            display: block; 
+            margin-top: var(--space-md); 
+            font-weight: 700; 
+            color: var(--success); 
+            text-align: right;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-box li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-lg) 16px;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .quiz-question h4, .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            width: 100%;
+            text-align: left;
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+            color: var(--error);
+        }
+
+        .quiz-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .quiz-result.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent);
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .quiz-score h3, .quiz-score-text { color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-score p { color: var(--text-secondary); }
+
+        .retake-btn {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border: none;
+                border-radius: 0;
+                margin-top: 0;
+                padding: var(--space-lg) 16px;
+            }
+        }
+        .lesson-footer p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .lesson-footer .highlight { color: var(--gold); font-weight: 600; }
+
+        strong { color: var(--gold); }
+        
+        .card-header { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md); }
+        .card-icon { font-size: 2rem; }
+        .card-meta h3 { margin: 0; color: var(--text-primary); font-size: 1.25rem; }
+        .card-meta span { font-size: 0.9rem; color: var(--text-muted); }
+        .formula { font-family: monospace; font-size: 1.1rem; color: var(--cyan); margin-bottom: var(--space-xs); font-weight: 700; }
+        .comparison-table { width: 100%; border-collapse: collapse; margin: var(--space-md) 0; }
+        .comparison-table th, .comparison-table td { padding: var(--space-sm); border: 1px solid var(--glass-border); text-align: left; color: var(--text-secondary); }
+        .comparison-table th { color: var(--gold); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="lesson-header">
+            <span class="lesson-badge">📊 Tier 2 - Bài 8.8</span>
+            <h1 class="lesson-title">Chiến Lược Take Profit (TP)</h1>
+            <p class="lesson-subtitle">Nghệ Thuật Chốt Lời: Không Bỏ Lại Tiền Trên Bàn</p>
+        </header>
+
+        <!-- Section 1: Opening Hook -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon green">💰</div>
+                <div class="card-meta">
+                    <h3>Tiền Trong Lệnh Chưa Phải Là Tiền Của Bạn</h3>
+                    <span>Tại sao việc chốt lời lại khó hơn vào lệnh?</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Bạn đã bao giờ trải qua cảm giác này chưa? Bạn vào một lệnh Buy tuyệt đẹp, giá tăng vọt, tài khoản xanh mướt. Bạn cảm thấy như mình là vua của thị trường. "Nó sẽ còn lên nữa!", bạn tự nhủ.</p>
+                <p>Nhưng rồi, thị trường đảo chiều. Lợi nhuận bốc hơi. Từ lãi thành hòa, rồi từ hòa thành lỗ. Bạn hoảng loạn cắt lỗ ở đáy. Cảm giác đó thật tồi tệ, phải không?</p>
+                <p>Trong trading, có một câu nói kinh điển: <em>"Entry is for vanity, Exit is for sanity"</em> (Vào lệnh là để khoe mẽ, Thoát lệnh mới là sự tỉnh táo). Kỹ năng Take Profit (Chốt lời) chính là thứ phân biệt giữa một con bạc và một trader chuyên nghiệp. Trong bài học này, GEM sẽ trang bị cho bạn một chiến lược chốt lời đa lớp, giúp bạn vừa bảo vệ được lợi nhuận, vừa không bị tiếc nuối khi giá tiếp tục chạy.</p>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x400/112250/10B981?text=Multi-TP+Strategy+Diagram" alt="Multi-TP Strategy">
+                    <p class="image-caption">Hình 8.8.1: Chiến lược chia nhỏ TP để tối ưu hóa tâm lý và lợi nhuận</p>
+                </div>
+
+                <div class="formula-box">
+                    <div class="formula">Triết Lý: "Pay Yourself First"</div>
+                    <div class="formula-desc">Hãy trả lương cho chính mình trước khi thị trường đòi lại. Đừng để lòng tham biến lệnh thắng thành lệnh thua.</div>
+                </div>
+            </div>
+        </article>
+
+        <!-- Section 2: Deep Dive - 3 TP Levels -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon gold">🎯</div>
+                <div class="card-meta">
+                    <h3>Chiến Lược "Tam Tầng" (The 3-Tier Exit)</h3>
+                    <span>Bảo vệ - Mục tiêu - Thả trôi</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Thay vì đặt cược "được ăn cả, ngã về không" (All or Nothing) với một điểm TP duy nhất, chúng ta sẽ chia lệnh làm 3 phần. Mỗi phần có một sứ mệnh riêng biệt:</p>
+
+                <div class="tp-strategy-grid">
+                    <div class="tp-card">
+                        <div class="tp-card-header">
+                            <span class="tp-badge">TP1</span>
+                            <span class="tp-title">The Defender (Người Bảo Vệ)</span>
+                        </div>
+                        <div class="tp-content">
+                            <p><strong>Nhiệm vụ:</strong> Xóa bỏ rủi ro ngay lập tức.</p>
+                            <p><strong>Vị trí:</strong> R:R 1:1 hoặc 1:1.5</p>
+                            <p><strong>Khối lượng:</strong> 50% Position</p>
+                            <p><strong>Hành động:</strong> Chốt 50%, dời SL về Entry (Breakeven).</p>
+                            <span class="tp-ratio">Mục tiêu: An toàn</span>
+                        </div>
+                    </div>
+
+                    <div class="tp-card gold">
+                        <div class="tp-card-header">
+                            <span class="tp-badge">TP2</span>
+                            <span class="tp-title">The Earner (Người Kiếm Tiền)</span>
+                        </div>
+                        <div class="tp-content">
+                            <p><strong>Nhiệm vụ:</strong> Hiện thực hóa lợi nhuận chính.</p>
+                            <p><strong>Vị trí:</strong> Zone đối diện hoặc Measured Move</p>
+                            <p><strong>Khối lượng:</strong> 30% Position</p>
+                            <p><strong>Hành động:</strong> Chốt tiếp 30%, tiếp tục giữ 20% còn lại.</p>
+                            <span class="tp-ratio">Mục tiêu: Lợi nhuận</span>
+                        </div>
+                    </div>
+
+                    <div class="tp-card purple">
+                        <div class="tp-card-header">
+                            <span class="tp-badge">TP3</span>
+                            <span class="tp-title">The Runner (Kẻ Chạy Đua)</span>
+                        </div>
+                        <div class="tp-content">
+                            <p><strong>Nhiệm vụ:</strong> Săn những con sóng thần (Moonbag).</p>
+                            <p><strong>Vị trí:</strong> Không có TP cố định (Open Target)</p>
+                            <p><strong>Khối lượng:</strong> 20% Position</p>
+                            <p><strong>Hành động:</strong> Trailing Stop (Dời SL theo giá).</p>
+                            <span class="tp-ratio">Mục tiêu: Maximize</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x400/112250/FFBD59?text=TP1+TP2+TP3+Visualization" alt="3 TP Levels">
+                    <p class="image-caption">Hình 8.8.2: Minh họa trực quan 3 điểm chốt lời trên biểu đồ</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Section 3: Detailed Execution -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon green">🔒</div>
+                <div class="card-meta">
+                    <h3>Triển Khai Chi Tiết: Từng Bước Một</h3>
+                    <span>Làm thế nào để thực hiện không sai sót?</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <h4>Bước 1: TP1 - An Toàn Là Trên Hết</h4>
+                <p>Ngay khi giá chạy được một khoảng bằng khoảng cách Stop Loss (R:R 1:1) hoặc chạm kháng cự nhỏ đầu tiên, hãy chốt 50% lệnh. Tại sao? Vì lúc này tâm lý bạn sẽ cực kỳ thoải mái. Dù thị trường có sập ngay sau đó, bạn vẫn hòa vốn hoặc lãi nhẹ. Bạn đã chiến thắng nỗi sợ hãi.</p>
+
+                <div class="tip-box">
+                    <div class="tip-header">💡 Free Trade (Lệnh Miễn Phí)</div>
+                    <p>Sau khi chốt TP1, <strong>BẮT BUỘC</strong> phải dời Stop Loss về điểm vào lệnh (Entry). Từ giây phút này, bạn đang chơi bằng tiền của thị trường, không phải tiền của bạn. Rủi ro bằng 0.</p>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x350/112250/10B981?text=TP1+Hit+Move+SL+to+BE" alt="TP1 và Move SL to BE">
+                    <p class="image-caption">Hình 8.8.3: Quy trình chuẩn: Hit TP1 -> Move SL về Entry</p>
+                </div>
+
+                <h4>Bước 2: TP2 - Zone to Zone</h4>
+                <p>Với 30% tiếp theo, chúng ta nhắm đến các vùng cản cứng (Opposing Zone). Nếu bạn Buy tại LFZ, thì TP2 nằm ở mép dưới của HFZ đối diện. Tại sao không đặt TP ở giữa HFZ? Vì chúng ta không tham lam bắt đỉnh. Chúng ta muốn chắc chắn lệnh được khớp trước khi giá đảo chiều.</p>
+                
+                <div class="formula-box gold">
+                    <div class="formula">Kỹ thuật Measured Move (AB=CD)</div>
+                    <div class="formula-desc">Nếu không có Zone rõ ràng, hãy đo chiều dài sóng tăng trước đó và tịnh tiến lên. Lịch sử thường lặp lại độ dài của các con sóng.</div>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x400/112250/FFBD59?text=TP2+Measured+Move+ABCD" alt="Measured Move TP2">
+                    <p class="image-caption">Hình 8.8.4: Sử dụng Measured Move để xác định TP2 khi không có Zone cản</p>
+                </div>
+
+                <h4>Bước 3: TP3 - Nghệ Thuật Trailing Stop</h4>
+                <p>Với 20% cuối cùng ("The Runner"), đừng đặt TP. Hãy để thị trường quyết định bạn kiếm được bao nhiêu. Sử dụng kỹ thuật <strong>Trailing Stop</strong>:</p>
+                <ul class="styled-list purple">
+                    <li><strong>Market Structure Trailing:</strong> Dời SL xuống dưới đáy cao hơn gần nhất (Higher Low) trong Uptrend.</li>
+                    <li><strong>Moving Average Trailing:</strong> Dời SL bám theo đường EMA 34 hoặc EMA 89. Khi giá đóng nến dưới EMA, thoát lệnh.</li>
+                    <li><strong>ATR Trailing:</strong> Dời SL cách giá hiện tại một khoảng 2x ATR.</li>
+                </ul>
+
+                <div class="tip-box warning">
+                    <div class="tip-header">⚠️ Quy Tắc Một Chiều</div>
+                    <p>Trailing Stop giống như cái nẫy một chiều. Bạn chỉ được phép dời SL <strong>theo hướng có lợi nhuận</strong>. TUYỆT ĐỐI KHÔNG BAO GIỜ dời SL ngược lại để nới rộng khoảng lỗ.</p>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x400/112250/8B5CF6?text=Trailing+Stop+ATR+Based" alt="Trailing Stop">
+                    <p class="image-caption">Hình 8.8.5: Cách dời Trailing Stop theo cấu trúc thị trường</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Section 4: Mistakes -->
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon cyan">🚨</div>
+                <div class="card-meta">
+                    <h3>Những Sai Lầm Thường Gặp Khi Chốt Lời</h3>
+                    <span>Tránh xa những tư duy này nếu muốn tồn tại</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="warning-box">
+                    <h4>1. Chốt Lời Quá Sớm (Premature Ejaculation)</h4>
+                    <p>Vừa thấy xanh là cắt vì sợ giá quay đầu. Đây là bệnh của người mới. Nó khiến R:R của bạn cực thấp (thắng thì ăn bạc lẻ, thua thì mất bạc chẵn). <br><strong>Giải pháp:</strong> Tin tưởng vào kế hoạch TP1, TP2, TP3. Đừng can thiệp tay.</p>
+                </div>
+                <div class="warning-box">
+                    <h4>2. Tham Lam Vô Độ (Greed)</h4>
+                    <p>Giá đã chạm kháng cự mạnh nhưng bạn vẫn không chốt vì nghĩ "nó sẽ phá cản". Kết quả là giá sập mạnh. <br><strong>Giải pháp:</strong> Luôn chốt ít nhất 50% tại cản.</p>
+                </div>
+                <div class="warning-box">
+                    <h4>3. Dời Trailing Stop Quá Chặt</h4>
+                    <p>Bạn sợ mất lãi nên dời SL sát sàn sạt giá hiện tại. Một nhịp rung lắc nhẹ (noise) cũng khiến bạn văng khỏi tàu trước khi nó bay. <br><strong>Giải pháp:</strong> Hãy cho giá không gian để "thở". Dùng ATR hoặc cấu trúc rõ ràng.</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- Summary Box -->
+        <div class="summary-box">
+            <h3>📝 Tổng Kết Bài Học</h3>
+            <ul class="summary-list">
+                <li><strong>Không bao giờ All-in, All-out:</strong> Hãy chia lệnh ra để quản trị tâm lý và tối ưu lợi nhuận.</li>
+                <li><strong>TP1 (The Defender):</strong> Giúp bạn có tâm lý "bất bại" (Risk-free).</li>
+                <li><strong>TP2 (The Earner):</strong> Giúp bạn kiếm tiền đều đặn từ các setup chuẩn.</li>
+                <li><strong>TP3 (The Runner):</strong> Giúp bạn đổi đời nhờ những con sóng lớn (Black Swan dương).</li>
+                <li><strong>Kỷ luật:</strong> Một khi đã set kế hoạch, hãy để thị trường làm việc. Đừng táy máy vào lệnh.</li>
+            </ul>
+        </div>
+
+        <!-- Quiz Section -->
+        <section class="quiz-section">
+            <h3 class="quiz-title">🎯 Kiểm Tra Kiến Thức</h3>
+
+            <div class="quiz-question" data-correct="1">
+                <p class="question-text"><strong>Câu 1:</strong> Hành động quan trọng nhất ngay sau khi giá chạm TP1 là gì?</p>
+                <button class="quiz-option" data-index="0">Mở thêm một lệnh bồi (Pyramiding).</button>
+                <button class="quiz-option" data-index="1">Dời Stop Loss về điểm vào lệnh (Breakeven) để bảo toàn vốn.</button>
+                <button class="quiz-option" data-index="2">Dời TP2 ra xa hơn để ăn dày hơn.</button>
+                <button class="quiz-option" data-index="3">Đóng toàn bộ lệnh đi ngủ.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <p class="question-text"><strong>Câu 2:</strong> Tại sao chúng ta nên chốt TP2 tại "Mép Zone" thay vì "Giữa Zone"?</p>
+                <button class="quiz-option" data-index="0">Vì mép zone có giá đẹp hơn.</button>
+                <button class="quiz-option" data-index="1">Vì giữa zone là nơi Smart Money xả hàng.</button>
+                <button class="quiz-option" data-index="2">Để tăng xác suất khớp lệnh, tránh trường hợp giá chỉ chạm mép rồi đảo chiều mà không đi sâu vào trong.</button>
+                <button class="quiz-option" data-index="3">Không có lý do gì đặc biệt.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <p class="question-text"><strong>Câu 3:</strong> Mục đích chính của phần lệnh TP3 ("The Runner") là gì?</p>
+                <button class="quiz-option" data-index="0">Để tận dụng tối đa những xu hướng mạnh (Trend Following) mà không bị giới hạn lợi nhuận.</button>
+                <button class="quiz-option" data-index="1">Để gỡ lại những lệnh thua trước đó.</button>
+                <button class="quiz-option" data-index="2">Để khoe với bạn bè là mình giữ lệnh lâu.</button>
+                <button class="quiz-option" data-index="3">Để đảm bảo tài khoản không bị lỗ.</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-text"><span id="correct-count">0</span>/3</div>
+                <div class="score-label">Câu trả lời đúng</div>
+                <button class="retake-btn" onclick="location.reload()">Làm lại Quiz</button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="lesson-footer">
+            <div class="footer-logo">GEM Trading Academy</div>
+            <p class="footer-text">Tier 2 - Advanced Trading • Bài 8.8</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác! Bảo vệ vốn luôn là ưu tiên số 1.';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Hãy nhớ quy tắc "Free Trade".';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

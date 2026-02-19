@@ -58,6 +58,7 @@ export default function AffiliateSection({ user, navigation }) {
   const [loading, setLoading] = useState(true);
   const [partnershipStatus, setPartnershipStatus] = useState(null);
   const [commissionStats, setCommissionStats] = useState(null);
+  const [centralReferralCode, setCentralReferralCode] = useState(null);
 
   useEffect(() => {
     if (user?.id) {
@@ -68,8 +69,15 @@ export default function AffiliateSection({ user, navigation }) {
   const loadPartnershipData = async () => {
     setLoading(true);
     try {
-      // Get partnership status
-      const statusResult = await partnershipService.getPartnershipStatus(user.id);
+      // Get partnership status + centralized referral code in parallel (Rule 20 fix)
+      const { affiliateService } = require('../../../services/affiliateService');
+      const [statusResult, code] = await Promise.all([
+        partnershipService.getPartnershipStatus(user.id),
+        affiliateService.getReferralCode(user.id).catch(() => null),
+      ]);
+
+      if (code) setCentralReferralCode(code);
+
       if (statusResult.success) {
         setPartnershipStatus(statusResult.data);
 
@@ -158,9 +166,9 @@ export default function AffiliateSection({ user, navigation }) {
     const tierName = isKol ? 'KOL' : `${tierConfig.icon} ${tierConfig.name}`;
     const tierColor = isKol ? '#9C27B0' : tierConfig.color;
 
-    // Use affiliate code from partnership status; centralized getReferralCode
-    // is used for copy/share actions, this is just for display
-    const affiliateCode = partnershipStatus.affiliate_code ||
+    // Use centralized getReferralCode() for display — same source as copy/share (Rule 20 fix)
+    const affiliateCode = centralReferralCode ||
+                          partnershipStatus.affiliate_code ||
                           `GEM${user?.id?.slice(0, 6)?.toUpperCase() || 'USER'}`;
 
     // Check if user has pending CTV upgrade application

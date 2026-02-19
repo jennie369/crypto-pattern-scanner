@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 1.5: Kết Hợp HFZ Với Đa Khung Thời Gian - GEM Trading Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary-navy: #112250; --primary-gold: #FFBD59; --accent-cyan: #00F0FF; --accent-purple: #6A5BFF; --success-green: #10B981; --error-red: #EF4444; --bg-dark: #0A0E17; --bg-card: #1A1F2E; --bg-card-hover: #252B3D; --text-primary: #FFFFFF; --text-secondary: #A0A9C0; --border-color: rgba(255, 189, 89, 0.2); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-primary); line-height: 1.7; font-size: 16px; }
+        .lesson-container { max-width: 800px; margin: 0 auto; }
+        @media (min-width: 600px) { body { padding: 2rem; background: linear-gradient(135deg, #0A0E17 0%, #112250 100%); } .lesson-container { background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border-color); overflow: hidden; } }
+        .lesson-header { background: linear-gradient(135deg, var(--primary-navy) 0%, #1a3a7a 100%); padding: 2rem 1rem; text-align: center; border-bottom: 3px solid var(--error-red); }
+        .header-badge { display: inline-block; background: linear-gradient(135deg, var(--error-red) 0%, #DC2626 100%); color: white; padding: 0.5rem 1.25rem; border-radius: 25px; font-size: 0.85rem; font-weight: 700; margin-bottom: 1rem; }
+        .lesson-header h1 { font-size: clamp(1.5rem, 5vw, 2rem); font-weight: 700; margin-bottom: 0.5rem; }
+        .lesson-header p { color: var(--text-secondary); }
+        .content-section { padding: 0; }
+        @media (min-width: 600px) { .content-section { padding: 1.5rem; } }
+        .content-card { background: var(--bg-card); padding: 1.5rem 1rem; margin-bottom: 1px; border-left: 4px solid var(--error-red); }
+        @media (min-width: 600px) { .content-card { border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color); border-left: 4px solid var(--error-red); } }
+        .content-card h2 { font-size: 1.35rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--error-red); display: flex; align-items: center; gap: 0.75rem; }
+        .content-card h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 1rem 0; color: var(--accent-cyan); }
+        .content-card p { margin-bottom: 1rem; color: var(--text-secondary); line-height: 1.8; }
+        .content-card ul, .content-card ol { margin: 1rem 0; padding-left: 1.5rem; color: var(--text-secondary); }
+        .content-card li { margin-bottom: 0.75rem; }
+        .highlight-box { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 1.25rem; margin: 1.25rem 0; }
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0, 240, 255, 0.05) 100%); border-color: rgba(0, 240, 255, 0.3); }
+        .highlight-box.green { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%); border-color: rgba(16, 185, 129, 0.3); }
+        .highlight-box.gold { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, rgba(255, 189, 89, 0.05) 100%); border-color: rgba(255, 189, 89, 0.3); }
+        .highlight-box p { margin: 0; color: var(--text-primary); }
+        .image-placeholder { background: linear-gradient(145deg, #1a2235 0%, #0d1321 100%); border: 2px dashed rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 1rem; margin: 1.5rem 0; text-align: center; }
+        .image-placeholder img { max-width: 100%; border-radius: 8px; margin-bottom: 0.75rem; }
+        .image-placeholder p { font-size: 0.85rem; color: var(--error-red); margin: 0; font-style: italic; }
+        .tf-hierarchy { display: grid; grid-template-columns: 1fr; gap: 1rem; margin: 1.5rem 0; }
+        .tf-card { background: var(--bg-card-hover); border-radius: 12px; padding: 1.25rem; border-left: 4px solid var(--primary-gold); }
+        .tf-card.htf { border-left-color: var(--error-red); }
+        .tf-card.itf { border-left-color: var(--accent-cyan); }
+        .tf-card.ltf { border-left-color: var(--success-green); }
+        .tf-card h4 { color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .tf-card h4 span { font-size: 1.25rem; }
+        .tf-card p { color: var(--text-secondary); font-size: 0.9rem; margin: 0; }
+        .confluence-box { background: linear-gradient(135deg, var(--primary-navy) 0%, #1a3a7a 100%); border: 2px solid var(--primary-gold); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; text-align: center; }
+        .confluence-box h4 { color: var(--primary-gold); margin-bottom: 1rem; }
+        .confluence-box .formula { font-size: 1.1rem; color: var(--text-primary); }
+        .summary-box { background: linear-gradient(135deg, var(--primary-navy) 0%, #1a3a7a 100%); border: 2px solid var(--error-red); padding: 1.5rem 1rem; margin: 0; }
+        @media (min-width: 600px) { .summary-box { border-radius: 16px; padding: 2rem; margin: 1.5rem; } }
+        .summary-box h3 { color: var(--error-red); font-size: 1.25rem; margin-bottom: 1rem; }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li { padding: 0.5rem 0; padding-left: 1.75rem; position: relative; color: var(--text-primary); }
+        .summary-box li::before { content: '✓'; position: absolute; left: 0; color: var(--error-red); font-weight: 700; }
+        .quiz-section { padding: 0; }
+        @media (min-width: 600px) { .quiz-section { padding: 1.5rem; } }
+        .quiz-container { background: var(--bg-card); padding: 1.5rem 1rem; border-left: 4px solid var(--accent-purple); }
+        @media (min-width: 600px) { .quiz-container { border-radius: 16px; padding: 2rem; border: 1px solid var(--border-color); border-left: 4px solid var(--accent-purple); } }
+        .quiz-container h2 { color: var(--accent-purple); font-size: 1.35rem; margin-bottom: 1.5rem; }
+        .quiz-question { background: var(--bg-card-hover); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem; border: 1px solid var(--border-color); }
+        .quiz-question p { font-weight: 600; margin-bottom: 1rem; color: var(--text-primary); }
+        .quiz-option { display: block; width: 100%; padding: 0.875rem 1rem; margin-bottom: 0.5rem; background: var(--bg-card); border: 2px solid var(--border-color); border-radius: 8px; color: var(--text-primary); cursor: pointer; text-align: left; transition: all 0.3s; }
+        .quiz-option:hover { border-color: var(--accent-purple); }
+        .quiz-option.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--success-green); color: var(--success-green); }
+        .quiz-option.incorrect { background: rgba(239, 68, 68, 0.2); border-color: var(--error-red); color: var(--error-red); }
+        .quiz-result { padding: 0.75rem; border-radius: 8px; margin-top: 0.75rem; font-weight: 600; display: none; }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct { background: rgba(16, 185, 129, 0.2); color: var(--success-green); }
+        .quiz-result.incorrect { background: rgba(239, 68, 68, 0.2); color: var(--error-red); }
+        .quiz-score { text-align: center; padding: 1.5rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.05) 100%); border-radius: 12px; margin-top: 1.5rem; display: none; }
+        .quiz-score.show { display: block; }
+        .quiz-score h3 { color: var(--error-red); margin-bottom: 0.5rem; }
+        .retake-btn { margin-top: 1rem; padding: 0.75rem 2rem; background: linear-gradient(135deg, var(--accent-purple) 0%, #5346E0 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .lesson-footer { text-align: center; padding: 2rem 1rem; background: var(--bg-card); border-top: 1px solid var(--border-color); }
+        .lesson-footer p { color: var(--text-secondary); font-size: 0.9rem; }
+        .lesson-footer .brand { color: var(--primary-gold); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="header-badge">🥈 TIER 2 - Chapter 1</div>
+            <h1>Kết Hợp HFZ Với Đa Khung Thời Gian</h1>
+            <p>Multi-Timeframe Analysis để tăng xác suất thành công</p>
+        </header>
+
+        <section class="content-section">
+            <!-- 📌 1. OPENING HOOK -->
+            <div class="content-card">
+                <h2><span class="icon">🎯</span> Tại sao 90% Trader thất bại khi chỉ nhìn một khung thời gian?</h2>
+                <p>Bạn đã bao giờ rơi vào tình huống này chưa: Bạn thấy một vùng HFZ cực đẹp trên khung 15 phút, giá chạm vùng đó và xuất hiện nến Rejection hoàn hảo. Bạn tự tin vào lệnh SHORT, nhưng chỉ 5 phút sau, một cây nến xanh khổng lồ quét sạch lệnh của bạn và tiếp tục bay cao. Bạn kiểm tra lại và bàng hoàng nhận ra mình vừa cố gắng "chặn đầu xe tải" – một xu hướng tăng mạnh mẽ trên khung Daily mà bạn hoàn toàn bỏ lỡ.</p>
+                <p>Đó chính là cái bẫy của việc trading đơn khung thời gian. Trong bài học này, tôi sẽ chỉ cho bạn cách thoát khỏi "tầm nhìn hạn hẹp" đó. Chúng ta sẽ cùng khám phá nghệ thuật <strong>Multi-Timeframe Analysis (Phân tích đa khung thời gian)</strong> – chìa khóa để biến bạn từ một người "đánh cược" thành một "sát thủ" thực thụ, người luôn có cả một đoàn quân xu hướng lớn đứng sau lưng ủng hộ.</p>
+                <div class="highlight-box important">
+                    <div class="highlight-title">💡 Insight Nâng Cao</div>
+                    <p>Hãy tưởng tượng bạn đang lái xe. Khung thời gian nhỏ (LTF) giống như kính chiếu hậu – cho bạn biết chi tiết những gì đang diễn ra ngay sát nút. Nhưng khung thời gian lớn (HTF) mới là bản đồ vệ tinh – cho bạn biết con đường phía trước đang lên dốc hay xuống dốc. Nếu không nhìn bản đồ, bạn sẽ sớm đâm sầm vào một bức tường xu hướng mà bạn không hề hay biết.</p>
+                </div>
+            </div>
+
+            <!-- 📌 2. CONCEPT - TẠI SAO CẦN ĐA KHUNG THỜI GIAN (ORIGINAL + EXPANDED) -->
+            <div class="content-card">
+                <h2><span class="icon">📊</span> Tại Sao Cần Đa Khung Thời Gian?</h2>
+                <p>HFZ trên khung thời gian lớn (HTF) luôn <strong>mạnh hơn</strong> HFZ trên khung thời gian nhỏ (LTF). Đây không chỉ là một lời khuyên, đó là một định luật về dòng tiền. Smart Money (các tổ chức tài chính lớn) không giao dịch trên khung 1 phút hay 5 phút. Họ ra quyết định trên khung Daily và Weekly. Vì vậy, vùng giá mà họ quan tâm chắc chắn sẽ có sức mạnh khủng khiếp hơn những vùng nhiễu trên khung nhỏ.</p>
+                
+                <p>Bằng cách kết hợp nhiều khung thời gian, bạn có thể:</p>
+                <ul>
+                    <li><strong>Xác định trend lớn để trade cùng chiều:</strong> Không bao giờ SHORT khi khung Daily đang trong một Uptrend mạnh mẽ trừ khi có tín hiệu đảo chiều cực lớn.</li>
+                    <li><strong>Tìm zones mạnh hơn trên HTF:</strong> Những vùng HFZ được xác nhận trên khung Daily là những "bức tường thép" mà giá khó lòng xuyên phá trong lần đầu tiên chạm tới.</li>
+                    <li><strong>Entry chính xác hơn trên LTF:</strong> Khi giá chạm zone HTF, chúng ta dùng LTF để tìm điểm vào lệnh "bắn tỉa" với tỷ lệ R:R cực tốt.</li>
+                    <li><strong>Tăng Win Rate lên 10-15%:</strong> Chỉ riêng việc loại bỏ các lệnh counter-trend (ngược xu hướng lớn) đã giúp tài khoản của bạn tăng trưởng ổn định hơn rất nhiều.</li>
+                </ul>
+                <div class="highlight-box gold">
+                    <div class="highlight-title">🎯 Quy tắc vàng: Sức mạnh phân cấp</div>
+                    <p>HFZ trên Daily mạnh gấp 3-5 lần HFZ trên 1H. Luôn ưu tiên zones từ khung thời gian lớn! Một vùng Supply trên khung Daily có thể "nuốt chửng" hàng chục vùng Demand trên khung 15 phút mà không gặp chút khó khăn nào.</p>
+                </div>
+            </div>
+
+            <!-- 📌 3. DEEP DIVE - HỆ THỐNG 3 KHUNG THỜI GIAN (ORIGINAL + EXPANDED) -->
+            <div class="content-card">
+                <h2><span class="icon">🏗️</span> Hệ Thống 3 Khung Thời Gian</h2>
+                <div class="tf-hierarchy">
+                    <div class="tf-card htf">
+                        <h4><span>🔴</span> HTF (Higher Timeframe)</h4>
+                        <p><strong>Mục đích:</strong> Xác định xu hướng lớn và tìm HFZ chính. Đây là "Vị Tổng Tư Lệnh" cho bạn biết chiến trường hôm nay phe nào đang thắng.<br><strong>Ví dụ:</strong> Daily (1D), Weekly (1W)</p>
+                    </div>
+                    <div class="tf-card itf">
+                        <h4><span>🔵</span> ITF (Intermediate Timeframe)</h4>
+                        <p><strong>Mục đích:</strong> Xác định zone và cấu trúc pattern. Đây là "Người Chỉ Huy Chiến Trường" giúp bạn vẽ ra các khu vực giao chiến thực tế.<br><strong>Ví dụ:</strong> 4H, 1H</p>
+                    </div>
+                    <div class="tf-card ltf">
+                        <h4><span>🟢</span> LTF (Lower Timeframe)</h4>
+                        <p><strong>Mục đích:</strong> Entry chính xác và quản lý lệnh. Đây là "Người Lính Bắn Tỉa" giúp bạn bóp cò tại thời điểm hoàn hảo nhất.<br><strong>Ví dụ:</strong> 15M, 5M</p>
+                    </div>
+                </div>
+                <h3>Các combo khung thời gian phổ biến:</h3>
+                <ul>
+                    <li><strong>Swing Trading:</strong> 1D (Trend) → 4H (Zone) → 1H (Entry). Dành cho những ai bận rộn.</li>
+                    <li><strong>Day Trading:</strong> 4H (Trend) → 1H (Zone) → 15M (Entry). Dành cho các trader chuyên nghiệp.</li>
+                    <li><strong>Scalping:</strong> 1H (Trend) → 15M (Zone) → 5M (Entry). Dành cho các "tay chơi" tốc độ cao.</li>
+                </ul>
+            </div>
+
+            <!-- 📌 4. CONCEPT - CONFLUENCE (ORIGINAL + EXPANDED) -->
+            <div class="content-card">
+                <h2><span class="icon">🎯</span> Confluence = Xác Suất Cao</h2>
+                <p>Trong tiếng Anh, <strong>Confluence</strong> có nghĩa là "Sự hội tụ". Khi HFZ trên nhiều khung thời gian <strong>trùng nhau hoặc nằm chồng lên nhau</strong>, đó là tín hiệu cực mạnh! Nó giống như việc nhiều con sông cùng đổ về một dòng, tạo ra sức mạnh không thể ngăn cản.</p>
+                <div class="confluence-box">
+                    <h4>🔥 CONFLUENCE ZONE</h4>
+                    <div class="formula">HFZ trên 1D + HFZ trên 4H + HFZ trên 1H<br>= <strong>Super High Probability Trade (Grade A+)</strong></div>
+                </div>
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x400/112250/FFBD59?text=MTF+Confluence" alt="MTF Confluence">
+                    <p>📸 Ví dụ confluence: HFZ trùng trên 3 khung thời gian</p>
+                </div>
+                <div class="highlight-box green">
+                    <div class="highlight-title">📈 Thống kê sức mạnh</div>
+                    <p><strong>Thống kê:</strong> Trades có confluence 2+ TF có Win Rate trung bình 70-75%, so với 55-60% khi chỉ dùng 1 TF. Đây là con số tạo nên sự khác biệt giữa người giàu và người nghèo trong giới trading.</p>
+                </div>
+            </div>
+
+            <!-- 📌 5. PRACTICE - QUY TRÌNH 4 BƯỚC (ORIGINAL + EXPANDED) -->
+            <div class="content-card">
+                <h2><span class="icon">📝</span> Quy Trình Thực Thi 4 Bước</h2>
+                <p>Đừng để sự phức tạp của các khung thời gian làm bạn rối. Hãy tuân thủ đúng lộ trình sau:</p>
+                <ol>
+                    <li><strong>Bước 1: Xác định trend trên HTF (Daily).</strong> Mở chart Daily ra trước. Nếu đang downtrend → Bạn chỉ được phép tìm kiếm HFZ để SHORT. Đừng bao giờ cãi lại xu hướng của Tổng tư lệnh.</li>
+                    <li><strong>Bước 2: Tìm HFZ trên ITF (4H).</strong> Đây là zone chính bạn sẽ trade. Hãy vẽ nó thật cẩn thận dựa trên pattern DPD/UPD mà bạn đã học.</li>
+                    <li><strong>Bước 3: Kiểm tra sự hội tụ (Confluence).</strong> Nhìn lại xem HFZ này có trùng với zone nào trên HTF (Daily) không? Nếu có, hãy đánh dấu nó bằng màu sắc nổi bật – đó là cơ hội vàng!</li>
+                    <li><strong>Bước 4: Bắn tỉa trên LTF (15M-1H).</strong> Khi giá bắt đầu tiến vào zone, hãy zoom xuống khung nhỏ hơn và nín thở chờ đợi một nến xác nhận Rejection.</li>
+                </ol>
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x450/0A0E17/00F0FF?text=4+Step+MTF+Process" alt="4 Step MTF Process">
+                    <p>📸 Quy trình 4 bước phân tích đa khung thời gian chuẩn GEM</p>
+                </div>
+            </div>
+
+            <!-- 📌 6. EXAMPLES - VÍ DỤ THỰC TẾ (ORIGINAL + EXPANDED) -->
+            <div class="content-card">
+                <h2><span class="icon">💡</span> Ví Dụ Thực Tế: Săn Cá Mập BTC</h2>
+                <p>Hãy cùng nhìn lại một setup SHORT kinh điển trên cặp BTC/USDT mà chúng tôi đã chia sẻ cho cộng đồng GEM:</p>
+                <p><strong>Setup:</strong> BTC/USDT Short tại HFZ confluence</p>
+                <ul>
+                    <li><strong>Daily:</strong> Downtrend rõ ràng sau khi phá vỡ ngưỡng $50k. Chúng tôi phát hiện một HFZ cực lớn tại $45,000-$46,000.</li>
+                    <li><strong>4H:</strong> Giá hồi phục (Retrace). Ngay tại vùng giá đó, một pattern DPD hình thành tạo ra HFZ tại $45,200-$45,800. <strong>(Confluence hoàn hảo!)</strong></li>
+                    <li><strong>1H:</strong> Giá pump mạnh lên $45,300 và ngay lập tức bị "đập" xuống bởi một nến Bearish Engulfing khổng lồ.</li>
+                    <li><strong>Entry:</strong> Lệnh SHORT được thực thi tại $45,250 ngay khi nến 1H đóng cửa.</li>
+                    <li><strong>Result:</strong> BTC đảo chiều lao dốc, TP hit tại $43,000 chỉ sau 24 giờ. Tỷ lệ R:R đạt mức 1:2.5 tuyệt đẹp.</li>
+                </ul>
+                <div class="image-placeholder">
+                    <img src="https://placehold.co/700x400/112250/10B981?text=BTC+Confluence+Trade" alt="BTC Confluence Trade">
+                    <p>📸 Trade thực tế với confluence HFZ trên Daily + 4H</p>
+                </div>
+            </div>
+
+            <!-- 📌 7. MISTAKES & TIPS (NEW) -->
+            <div class="content-card">
+                <h2><span class="icon">🚨</span> Những sai lầm "đốt tiền" thường gặp</h2>
+                <p>Tôi đã thấy hàng ngàn trader mất tiền vì những lỗi ngớ ngẩn sau, tôi không muốn bạn là người tiếp theo:</p>
+                <ul>
+                    <li><strong>Lỗi "Mất phương hướng":</strong> Nhìn quá nhiều khung thời gian (từ 1m đến Monthly) khiến bạn bị rối loạn. Hãy trung thành với bộ 3 khung đã chọn.</li>
+                    <li><strong>Lỗi "Chặn đầu xe tải":</strong> Thấy một zone LTF đẹp nhưng lại cố tình lờ đi trend lớn của Daily đang đối nghịch. Luôn nhớ: Trend lớn là bạn, đừng bao giờ chống lại nó.</li>
+                    <li><strong>Lỗi "Quá trễ":</strong> Đợi xác nhận trên khung quá lớn khiến Stop Loss quá xa. Hãy dùng LTF để tinh chỉnh entry.</li>
+                </ul>
+                <div class="highlight-box warning">
+                    <div class="highlight-title">🚨 Lời cảnh báo</div>
+                    <p>Đa khung thời gian không phải là để tìm kiếm sự hoàn hảo 100%. Nó là để bạn chọn lọc những trận đánh mà ở đó xác suất thắng nghiêng hẳn về phía bạn. Nếu các khung thời gian xung đột quá mạnh, trade tốt nhất là KHÔNG VÀO LỆNH.</p>
+                </div>
+            </div>
+
+            <!-- 📌 8. SUMMARY (ORIGINAL + EXPANDED) -->
+            <div class="summary-box">
+                <h3>📝 Tóm Tắt Bài Học</h3>
+                <p>Trước khi kết thúc, hãy cùng tôi điểm lại những quân bài tẩy mà bạn vừa nắm giữ:</p>
+                <ul>
+                    <li>✓ <strong>HFZ trên HTF mạnh hơn HFZ trên LTF:</strong> Luôn bắt đầu từ khung lớn.</li>
+                    <li>✓ <strong>Sử dụng hệ thống 3 khung:</strong> HTF (Tổng tư lệnh) → ITF (Chỉ huy) → LTF (Bắn tỉa).</li>
+                    <li>✓ <strong>Confluence là vũ khí tối thượng:</strong> Zones trùng nhau = Cơ hội vàng để gia tăng xác suất thắng.</li>
+                    <li>✓ <strong>Win Rate vượt trội:</strong> Phân tích đa khung giúp bạn đạt tỷ lệ thắng 70-75% nếu tuân thủ kỷ luật.</li>
+                    <li>✓ <strong>Quy trình thực thi:</strong> Luôn kiểm tra Trend HTF → Tìm Zone ITF → Xác nhận Confluence → Thực thi Entry LTF.</li>
+                </ul>
+                <p><strong>Lời nhắn nhủ:</strong> "Thị trường là nơi chuyển tiền từ người thiếu kiên nhẫn sang người kiên nhẫn". Việc nhìn đa khung thời gian chính là sự thể hiện cao nhất của sự kiên nhẫn chuyên nghiệp.</p>
+                <p>Bây giờ bạn đã nắm vững cách kết hợp các khung thời gian, bài học tiếp theo sẽ vô cùng quan trọng: <strong>Cách quản lý lệnh và dời Stop Loss để bảo toàn lợi nhuận</strong>. Chúng ta sẽ gặp lại nhau ở đó!</p>
+            </div>
+        </section>
+
+        <section class="quiz-section">
+            <div class="quiz-container">
+                <h2>❓ Kiểm Tra Kiến Thức</h2>
+                <div class="quiz-question" data-correct="0">
+                    <p>1. Tại sao chúng ta nên ưu tiên vùng HFZ trên khung Daily (HTF) hơn khung 5 phút?</p>
+                    <button class="quiz-option" data-index="0">A. Vì đó là nơi Smart Money (các tổ chức lớn) tập trung lệnh, sức mạnh dòng tiền lớn hơn và ít bị nhiễu hơn.</button>
+                    <button class="quiz-option" data-index="1">B. Vì nến khung Daily nhìn đẹp hơn nến khung 5 phút.</button>
+                    <button class="quiz-option" data-index="2">C. Vì giao dịch trên khung Daily không mất phí giao dịch.</button>
+                    <button class="quiz-option" data-index="3">D. Vì khung 5 phút không bao giờ có pattern chính xác.</button>
+                    <div class="quiz-result"></div>
+                </div>
+                <div class="quiz-question" data-correct="2">
+                    <p>2. Trong phân tích đa khung thời gian (MTF), "Confluence" có ý nghĩa quan trọng nhất là gì?</p>
+                    <button class="quiz-option" data-index="0">A. Là việc sử dụng duy nhất một khung thời gian để tối ưu tốc độ.</button>
+                    <button class="quiz-option" data-index="1">B. Là sự trùng lặp của các chỉ báo RSI và MACD.</button>
+                    <button class="quiz-option" data-index="2">C. Là khi các vùng zone trên nhiều khung thời gian (ví dụ Daily và 4H) trùng nhau, tạo ra vùng có xác suất đảo chiều cực cao.</button>
+                    <button class="quiz-option" data-index="3">D. Là cách đặt Stop Loss xa nhất có thể.</button>
+                    <div class="quiz-result"></div>
+                </div>
+                <div class="quiz-question" data-correct="1">
+                    <p>3. Nếu xu hướng khung HTF (Daily) đang là Uptrend mạnh, bạn nên làm gì trên khung ITF (4H)?</p>
+                    <button class="quiz-option" data-index="0">A. Cố gắng tìm mọi vùng HFZ để SHORT bắt đỉnh.</button>
+                    <button class="quiz-option" data-index="1">B. Chỉ ưu tiên tìm kiếm các vùng LFZ để LONG thuận theo xu hướng lớn.</button>
+                    <button class="quiz-option" data-index="2">C. Đóng máy tính và không giao dịch.</button>
+                    <button class="quiz-option" data-index="3">D. Vào lệnh ngẫu nhiên vì kiểu gì giá cũng tăng.</button>
+                    <div class="quiz-result"></div>
+                </div>
+                <div class="quiz-score">
+                    <h3>🎉 Chúc mừng bạn đã hoàn thành!</h3>
+                    <p>Bạn trả lời đúng <span id="correct-count">0</span>/3 câu hỏi. Bạn đã nắm vững tư duy đa khung thời gian!</p>
+                    <button class="retake-btn" onclick="location.reload()">Làm lại Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <p>Bài học thuộc <span class="brand">GEM Trading Academy - TIER 2</span></p>
+            <p>© 2024 - Nền tảng đào tạo trading chuyên nghiệp</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0, correctCount = 0;
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

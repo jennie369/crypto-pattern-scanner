@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 8.1: Ngã Ba Đường - Bạn Đang Đứng Ở Đâu?</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --color-navy: #112250;
+      --color-navy-dark: #0A0F1A;
+      --color-gold: #FFBD59;
+      --color-gold-dark: #E5A84D;
+      --color-burgundy: #9C0612;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-warning: #F59E0B;
+      --color-white: #FFFFFF;
+      --color-text: #E8E8E8;
+      --color-text-secondary: rgba(255, 255, 255, 0.7);
+      --color-text-muted: rgba(255, 255, 255, 0.5);
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.08);
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(255, 189, 89, 0.3);
+      --text-padding: 16px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 20px;
+      --radius-sm: 0;
+      --radius-md: 0;
+      --radius-lg: 0;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --glass-blur: blur(40px);
+    }
+
+    @media (min-width: 600px) {
+      :root {
+        --text-padding: 24px;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      font-size: 15px;
+      color: var(--color-text);
+      background: linear-gradient(180deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-dark) 100%);
+      min-height: 100vh;
+    }
+
+    @media (min-width: 600px) { body { font-size: 16px; line-height: 1.7; } }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(106, 91, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .lesson-container { max-width: 900px; margin: 0 auto; padding: 0; }
+    @media (min-width: 600px) { .lesson-container { padding: 16px; } }
+
+    .lesson-header {
+      text-align: center;
+      padding: var(--space-lg) var(--text-padding);
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: var(--space-md);
+    }
+
+    @media (min-width: 600px) {
+      .lesson-header {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        margin-bottom: var(--space-xl);
+      }
+    }
+
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-gold), var(--color-cyan), var(--color-gold));
+    }
+
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: linear-gradient(135deg, var(--color-burgundy), #c41e2a);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+    }
+
+    @media (min-width: 600px) { .lesson-badge { font-size: 13px; padding: 6px 16px; } }
+
+    .lesson-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.5rem, 6vw, 2.5rem);
+      font-weight: 800;
+      color: var(--color-gold);
+      margin-bottom: var(--space-sm);
+      line-height: 1.2;
+      text-shadow: 0 0 30px rgba(255, 189, 89, 0.3);
+    }
+
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    .lesson-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--color-text-muted);
+      font-size: 12px;
+    }
+
+    @media (min-width: 600px) { .lesson-meta-item { font-size: 14px; } }
+    .lesson-meta-icon { color: var(--color-cyan); }
+
+    .lesson-content { background: transparent; border-radius: 0; padding: 0; backdrop-filter: none; border: none; }
+
+    @media (min-width: 600px) {
+      .lesson-content {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        padding: var(--text-padding);
+        backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--border-subtle);
+      }
+    }
+
+    .section { margin-bottom: var(--space-xl); }
+
+    h2, h3, p, ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      h2, h3, p, ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+
+    h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.25rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid rgba(255, 189, 89, 0.3);
+    }
+
+    @media (min-width: 600px) { h2 { font-size: 1.75rem; } }
+
+    h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-cyan);
+      margin-top: var(--space-lg);
+      margin-bottom: var(--space-sm);
+    }
+
+    @media (min-width: 600px) { h3 { font-size: 1.25rem; } }
+
+    p { margin-bottom: var(--space-md); }
+    strong { color: var(--color-gold); font-weight: 600; }
+
+    ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) {
+      margin-bottom: var(--space-md);
+      padding-left: calc(var(--text-padding) + 20px);
+    }
+
+    @media (min-width: 600px) {
+      ul:not(.roadmap-list):not(.key-concept-list):not(.quiz-options) { padding-left: 24px; }
+    }
+
+    ul li { margin-bottom: var(--space-xs); }
+
+    .opening-hook {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(17, 34, 80, 0.4));
+      border-left: 4px solid var(--color-burgundy);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin-bottom: var(--space-lg);
+      font-size: 15px;
+      font-style: italic;
+    }
+
+    @media (min-width: 600px) { .opening-hook { border-radius: var(--radius-md); font-size: 17px; } }
+    .opening-hook p { padding-left: 0; padding-right: 0; }
+    .opening-hook p:last-child { margin-bottom: 0; }
+
+    .highlight-box {
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-md) 0;
+      border-left: 4px solid;
+    }
+
+    @media (min-width: 600px) { .highlight-box { border-radius: var(--radius-md); } }
+    .highlight-box p, .highlight-box ul { padding-left: 0 !important; padding-right: 0 !important; }
+
+    .highlight-box.important { background: rgba(255, 189, 89, 0.1); border-color: var(--color-gold); }
+    .highlight-box.tip { background: rgba(0, 240, 255, 0.1); border-color: var(--color-cyan); }
+    .highlight-box.warning { background: rgba(245, 158, 11, 0.1); border-color: var(--color-warning); }
+    .highlight-box.success { background: rgba(16, 185, 129, 0.1); border-color: var(--color-green); }
+    .highlight-box.definition { background: rgba(106, 91, 255, 0.1); border-color: var(--color-purple); }
+    .highlight-box.opportunity { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(156, 6, 18, 0.1)); border-color: var(--color-gold); }
+    .highlight-box.cta { background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(0, 240, 255, 0.1)); border-color: var(--color-green); }
+
+    .highlight-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (min-width: 600px) { .highlight-title { font-size: 17px; } }
+
+    .highlight-box.important .highlight-title { color: var(--color-gold); }
+    .highlight-box.tip .highlight-title { color: var(--color-cyan); }
+    .highlight-box.warning .highlight-title { color: var(--color-warning); }
+    .highlight-box.success .highlight-title { color: var(--color-green); }
+    .highlight-box.definition .highlight-title { color: var(--color-purple); }
+    .highlight-box.opportunity .highlight-title { color: var(--color-gold); }
+    .highlight-box.cta .highlight-title { color: var(--color-green); }
+
+    .key-concept-box {
+      background: linear-gradient(135deg, rgba(156, 6, 18, 0.15), rgba(17, 34, 80, 0.3));
+      border: none;
+      border-left: 4px solid var(--color-burgundy);
+      border-radius: 0;
+      padding: var(--space-lg) var(--text-padding);
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .key-concept-box {
+        border: 2px solid var(--color-burgundy);
+        border-radius: var(--radius-lg);
+        padding: var(--space-xl);
+      }
+    }
+
+    .key-concept-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (min-width: 600px) { .key-concept-title { font-size: 1.25rem; } }
+
+    .key-concept-list { list-style: none; padding: 0; margin: 0; }
+
+    .key-concept-list li {
+      padding: 6px 0;
+      padding-left: 24px;
+      position: relative;
+      color: var(--color-text);
+      font-size: 14px;
+    }
+
+    @media (min-width: 600px) { .key-concept-list li { font-size: 16px; padding: 8px 0; padding-left: 28px; } }
+    .key-concept-list li::before { content: "✓"; position: absolute; left: 0; color: var(--color-green); font-weight: bold; }
+
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-xl) var(--text-padding);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: var(--space-lg);
+      background: var(--bg-card);
+    }
+
+    @media (min-width: 600px) { .lesson-footer { background: transparent; padding: var(--space-xl) 0; } }
+
+    .footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--color-gold);
+      margin-bottom: 4px;
+    }
+
+    .footer-link { color: var(--color-text-muted); font-size: 13px; }
+    .footer-link a { color: var(--color-cyan); text-decoration: none; }
+    .footer-link a:hover { text-decoration: underline; }
+
+    .profile-card {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      margin: var(--space-md) 0;
+    }
+
+    .profile-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--color-cyan);
+      margin-bottom: var(--space-sm);
+    }
+
+    .profile-list { list-style: none; padding: 0; margin: 0; }
+    .profile-list li { padding: 4px 0; padding-left: 20px; position: relative; }
+    .profile-list li::before { content: "->"; position: absolute; left: 0; color: var(--color-gold); }
+
+    /* IMAGE PLACEHOLDER STYLES */
+    .image-placeholder {
+      background: linear-gradient(135deg, rgba(17, 34, 80, 0.4), rgba(10, 15, 26, 0.6));
+      border: 1px dashed var(--border-gold);
+      border-radius: var(--radius-md);
+      padding: var(--space-xl);
+      margin: var(--space-lg) 0;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 200px;
+    }
+
+    .image-placeholder-icon {
+      font-size: 40px;
+      margin-bottom: var(--space-md);
+      opacity: 0.7;
+    }
+
+    .image-placeholder-text {
+      font-family: 'Montserrat', sans-serif;
+      color: var(--color-gold);
+      font-weight: 600;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="lesson-container">
+
+    <!-- HEADER -->
+    <header class="lesson-header">
+      <span class="lesson-badge">📚 TIER 1 • Chương 8 • Bài 8.1</span>
+      <h1 class="lesson-title">Ngã Ba Đường - Bạn Đang Đứng Ở Đâu?</h1>
+      <div class="lesson-meta">
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">⏱️</span>
+          8 phút đọc
+        </span>
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">📚</span>
+          ~1200 từ
+        </span>
+        <span class="lesson-meta-item">
+          <span class="lesson-meta-icon">🎯</span>
+          Định hướng
+        </span>
+      </div>
+    </header>
+
+    <!-- LESSON CONTENT -->
+    <div class="lesson-content">
+
+      <div class="opening-hook">
+        <p>Chúc mừng bạn đã hoàn thành toàn bộ kiến thức nền tảng của TIER 1! Bạn giờ đây đã hiểu được những khái niệm quan trọng nhất về phương pháp GEM Frequency. Nhưng câu hỏi lớn nhất bây giờ là: Bạn sẽ làm gì tiếp theo?</p>
+        <p>Đây chính là ngã ba đường mà mỗi trader đều phải đối mặt. Lựa chọn của bạn hôm nay sẽ quyết định bạn trở thành ai trong 6 tháng tới.</p>
+      </div>
+
+      <!-- IMAGE PLACEHOLDER 8.1.1 -->
+      <div class="image-placeholder">
+        <div class="image-placeholder-icon">📐</div>
+        <div class="image-placeholder-text">HÌNH 8.1.1: NGÃ BA ĐƯỜNG TRADING</div>
+      </div>
+
+      <section class="section">
+        <h2>Bạn Đang Ở Đâu Trên Hành Trình?</h2>
+
+        <p>Sau khi học xong TIER 1, bạn đã có được nền tảng vững chắc về tư duy trading. Bạn hiểu được Smart Money là ai và họ hoạt động như thế nào. Bạn biết được sự khác biệt giữa HFZ và LFZ. Bạn cũng nắm được các khái niệm cơ bản về quản lý rủi ro.</p>
+
+        <p>Tuy nhiên, kiến thức nền tảng chỉ là điểm khởi đầu. Nó giống như việc bạn đã học xong bảng chữ cái nhưng chưa biết ghép vần thành từ. Bạn biết các khái niệm nhưng chưa có <strong>kỹ năng thực chiến</strong> để áp dụng vào giao dịch thật.</p>
+
+        <!-- IMAGE PLACEHOLDER 8.1.2 -->
+        <div class="image-placeholder">
+          <div class="image-placeholder-icon">📐</div>
+          <div class="image-placeholder-text">HÌNH 8.1.2: TẢNG BĂNG TRÔI KIẾN THỨC</div>
+        </div>
+
+        <div class="highlight-box warning">
+          <div class="highlight-title">⚠️ Sự Thật Phũ Phàng</div>
+          <p>90% người học trading dừng lại sau khi nắm được kiến thức cơ bản. Họ nghĩ rằng họ đã đủ để giao dịch có lợi nhuận. Kết quả? Họ mất tiền và đổ lỗi cho phương pháp không hiệu quả. Sự thật là họ chưa bao giờ thực sự học hết phương pháp đó.</p>
+        </div>
+
+        <h3>Ba Loại Trader Sau TIER 1</h3>
+
+        <div class="profile-card">
+          <div class="profile-title">Loại 1: Người Dừng Lại</div>
+          <ul class="profile-list">
+            <li>Nghĩ rằng kiến thức cơ bản là đủ</li>
+            <li>Bắt đầu giao dịch ngay với kiến thức chưa hoàn chỉnh</li>
+            <li>Thua lỗ và từ bỏ trading sau vài tháng</li>
+            <li>Đổ lỗi cho thị trường, cho phương pháp, cho mọi thứ ngoại trừ bản thân</li>
+          </ul>
+        </div>
+
+        <div class="profile-card">
+          <div class="profile-title">Loại 2: Người Tự Mò</div>
+          <ul class="profile-list">
+            <li>Cố gắng tự tìm hiểu thêm từ nhiều nguồn khác nhau</li>
+            <li>Trộn lẫn nhiều phương pháp khiến chiến lược không nhất quán</li>
+            <li>Mất 1-2 năm để tự đúc kết kinh nghiệm</li>
+            <li>Có thể thành công nhưng mất nhiều thời gian và tiền bạc</li>
+          </ul>
+        </div>
+
+        <div class="profile-card">
+          <div class="profile-title">Loại 3: Người Đi Đường Tắt Thông Minh</div>
+          <ul class="profile-list">
+            <li>Tiếp tục học hệ thống bài bản từ người đã thành công</li>
+            <li>Đầu tư vào kiến thức nâng cao để rút ngắn thời gian học</li>
+            <li>Có mentor hướng dẫn để tránh những sai lầm phổ biến</li>
+            <li>Đạt được lợi nhuận ổn định trong thời gian ngắn nhất</li>
+          </ul>
+        </div>
+
+        <!-- IMAGE PLACEHOLDER 8.1.3 -->
+        <div class="image-placeholder">
+          <div class="image-placeholder-icon">📐</div>
+          <div class="image-placeholder-text">HÌNH 8.1.3: 3 LOẠI TRADER (TIMELINE)</div>
+        </div>
+
+      </section>
+
+      <section class="section">
+        <h2>Khoảng Cách Giữa Biết Và Làm Được</h2>
+
+        <p>Có một sự thật mà ít người nói ra: Biết một điều gì đó và làm được điều đó là hai chuyện hoàn toàn khác nhau. Trong trading, khoảng cách này còn lớn hơn bất kỳ lĩnh vực nào khác.</p>
+
+        <p>Bạn có thể biết rằng HFZ là vùng bán. Nhưng bạn có biết chính xác đâu là điểm entry tốt nhất không? Bạn có biết cách đặt Stop Loss để không bị quét không? Bạn có biết khi nào nên chốt lời và khi nào nên để profit chạy không?</p>
+
+        <!-- IMAGE PLACEHOLDER 8.1.4 -->
+        <div class="image-placeholder">
+          <div class="image-placeholder-icon">📐</div>
+          <div class="image-placeholder-text">HÌNH 8.1.4: CÂY CẦU KHOẢNG CÁCH</div>
+        </div>
+
+        <div class="highlight-box important">
+          <div class="highlight-title">⭐ Những Gì TIER 1 Chưa Dạy Bạn</div>
+          <p>TIER 1 cung cấp nền tảng tư duy nhưng chưa đi sâu vào kỹ năng thực chiến. Bạn chưa được học cách vẽ HFZ và LFZ chính xác, chiến lược entry với Risk:Reward tối ưu, cách quản lý lệnh khi thị trường biến động, và sử dụng Scanner để phát hiện setup tự động.</p>
+        </div>
+
+        <p>Những kỹ năng này đòi hỏi sự hướng dẫn chi tiết và thực hành có giám sát. Bạn không thể tự mình đoán ra được. Và nếu bạn cố gắng tự mò, bạn sẽ mất rất nhiều thời gian và tiền bạc trước khi tìm ra câu trả lời.</p>
+      </section>
+
+      <section class="section">
+        <h2>Con Đường Phía Trước</h2>
+
+        <p>Giờ đây bạn đang đứng tại ngã ba đường. Mỗi con đường đều có hệ quả riêng của nó. Không có con đường nào sai, nhưng có con đường nhanh hơn và hiệu quả hơn.</p>
+
+        <div class="highlight-box opportunity">
+          <div class="highlight-title">🚀 Con Đường Được Khuyến Nghị</div>
+          <p>Nếu bạn thực sự nghiêm túc với trading, bước tiếp theo là nâng cấp lên <strong>TIER 2</strong> hoặc <strong>TIER 3</strong>. Đây là nơi bạn sẽ học được kỹ năng thực chiến, có quyền truy cập Scanner tự động, và được hỗ trợ từ cộng đồng trader chuyên nghiệp.</p>
+        </div>
+
+        <p>Trong các bài tiếp theo của Module này, bạn sẽ được giới thiệu chi tiết về các công cụ và cơ hội dành cho bạn. Bạn sẽ hiểu được sự khác biệt giữa TIER 2 và TIER 3. Bạn cũng sẽ biết được các chương trình đối tác nếu bạn muốn đi xa hơn việc chỉ là một trader.</p>
+
+        <div class="key-concept-box">
+          <div class="key-concept-title">🎯 Câu Hỏi Cho Bạn</div>
+          <ul class="key-concept-list">
+            <li>Bạn muốn trở thành loại trader nào trong 3 loại trên?</li>
+            <li>Bạn sẵn sàng đầu tư bao nhiêu thời gian và tiền bạc để học?</li>
+            <li>Bạn có mentor hoặc cộng đồng hỗ trợ không?</li>
+            <li>Mục tiêu tài chính của bạn trong 12 tháng tới là gì?</li>
+          </ul>
+        </div>
+
+        <p>Hãy dành vài phút để suy nghĩ về những câu hỏi này. Câu trả lời của bạn sẽ giúp bạn đưa ra quyết định đúng đắn trong các bài tiếp theo.</p>
+      </section>
+
+      <!-- NEXT LESSON -->
+      <div class="highlight-box tip">
+        <div class="highlight-title">📚 Bài Tiếp Theo</div>
+        <p>Trong <strong>Bài 8.2: Công Cụ Tăng Tốc - TIER 2 & TIER 3</strong>, bạn sẽ được giới thiệu chi tiết về những gì bạn sẽ nhận được khi nâng cấp tài khoản. Đây là bài quan trọng nhất nếu bạn muốn đi đường tắt thông minh.</p>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="lesson-footer">
+      <div class="footer-logo">GEM Trading Academy</div>
+      <div class="footer-link">
+        <a href="https://gemral.com" target="_blank">gemral.com</a>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

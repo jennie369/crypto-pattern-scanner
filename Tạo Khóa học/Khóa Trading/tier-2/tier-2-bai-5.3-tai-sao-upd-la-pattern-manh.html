@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.3: Tại Sao UPD Là Pattern Mạnh? | GEM Trading Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --navy: #112250; --navy-dark: #0a1628; --gold: #FFBD59; --gold-dark: #E5A73D; --cyan: #00F0FF; --purple: #6A5BFF; --burgundy: #9C0612; --burgundy-light: #C41E2A; --success: #00C853; --error: #FF5252; --bg-primary: #0a1628; --bg-card: rgba(17, 34, 80, 0.6); --text-primary: #FFFFFF; --text-secondary: rgba(255, 255, 255, 0.85); --text-muted: rgba(255, 255, 255, 0.6); --glass-bg: rgba(17, 34, 80, 0.4); --glass-border: rgba(255, 189, 89, 0.2); --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px; --radius-md: 12px; --radius-lg: 16px; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.8; font-size: 16px; }
+        img { max-width: 100%; height: auto; display: block; }
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); text-align: justify; }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .warning-box { background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05)); border: 1px solid rgba(156, 6, 18, 0.4); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .warning-box { border: none; border-radius: 0; border-left: 4px solid var(--burgundy); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .warning-box-title { font-weight: 700; color: var(--burgundy-light); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+        .quiz-section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; padding: 0; margin-top: 0; border-top: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: var(--space-lg) 16px var(--space-md); margin-bottom: 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-question { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin-bottom: 0; border-bottom: 1px solid var(--glass-border); } }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; font-weight: 700; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); line-height: 1.6; }
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        @media (max-width: 600px) { .quiz-options { gap: 1px; background: var(--glass-border); margin-left: calc(-16px - 4px); margin-right: -16px; } }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .quiz-option { border: none; border-radius: 0; border-left: 4px solid transparent; padding: var(--space-md) 16px; } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.correct { border-left-color: var(--success) !important; } }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.incorrect { border-left-color: var(--error) !important; } }
+        .quiz-option.disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-marker { width: 28px; height: 28px; min-width: 28px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; }
+        .quiz-option.incorrect .option-marker { background: var(--error); border-color: var(--error); color: white; }
+        .option-text { flex: 1; color: var(--text-secondary); }
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--space-sm); display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-buttons { padding: var(--space-lg) 16px; } }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge"><span>📉</span><span>Reversal Pattern</span></div>
+            <div class="lesson-chapter">Chapter 5 - UPD Pattern</div>
+            <h1 class="lesson-title">Tại Sao UPD Là Pattern Mạnh?</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 5.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>15 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🔥</span> Câu Chuyện Mở Đầu</h2>
+            <p>Hãy tưởng tượng bạn đang xem một trận đấu quyền anh. Một võ sĩ tung ra cú đấm cực mạnh (Phase 1: UP), nhưng ngay sau đó anh ta dừng lại, thở dốc (Phase 2: PAUSE). Đột nhiên, đối thủ phản công bằng một cú knock-out trời giáng (Phase 3: DOWN). Cú đấm đó không chỉ kết thúc trận đấu mà còn là khởi đầu cho sự sụp đổ của võ sĩ đầu tiên.</p>
+            <p>UPD (Up-Pause-Down) cũng giống như cú knock-out đó. Trong thế giới trading, không phải pattern nào cũng "bình đẳng". Có những pattern chỉ cho bạn 50% win rate - tương đương với tung đồng xu. Nhưng có những pattern cho bạn edge thực sự, với win rate 65-70% và R:R cao. UPD thuộc nhóm thứ hai - nhóm những mẫu hình quyền lực nhất.</p>
+            <p>Bạn đã từng thắc mắc tại sao sau một đợt tăng giá mạnh mẽ, giá lại đột ngột dừng lại rồi lao dốc không phanh? Đó không phải là ngẫu nhiên. Đó là dấu hiệu của Smart Money đang "thoát hàng" trong khi đám đông nhỏ lẻ vẫn đang say sưa mua vào. Trong bài học này, chúng ta sẽ giải mã cơ chế tâm lý đằng sau UPD và <strong>tại sao</strong> nó lại là vũ khí tối thượng của phe Gấu.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Bí Mật Sức Mạnh UPD</div>
+                <p>UPD không mạnh vì "ma thuật" hay vì nó đẹp trên chart. UPD mạnh vì nó đại diện cho <strong>quy luật vật lý của thị trường</strong>: Khi Smart Money bán mà không thể bán hết trong một lần, họ PHẢI quay lại bán tiếp khi giá retest. Đây là "dòng tiền chưa hoàn tất" - và bạn đang học cách đọc nó!</p>
+            </div>
+        </section>
+
+        <!-- MỤC TIÊU BÀI HỌC -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Mục Tiêu Bài Học</h2>
+            <p>Bài học này sẽ trang bị cho bạn tư duy của một nhà giao dịch chuyên nghiệp, người không chỉ nhìn thấy hình vẽ mà còn hiểu câu chuyện đằng sau nó.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📋</span> Bạn Sẽ Học Được</div>
+                <p>• Logic Smart Money: Tại sao họ phải tạo ra vùng Pause trước khi bán tháo?<br>
+                • Cơ chế "Retail bị bẫy": Tại sao đỉnh là nơi đau thương nhất?<br>
+                • So sánh sức mạnh: Tại sao UPD (Đảo chiều) lại uy lực hơn DPD (Tiếp diễn)?<br>
+                • Cách nhận diện một UPD "hạng nặng" để tăng xác suất thắng.</p>
+            </div>
+        </section>
+
+        <!-- PHẦN CHÍNH: LOGIC SMART MONEY -->
+        <section class="section">
+            <h2 class="section-title"><span>💰</span> Logic Smart Money Phía Sau UPD</h2>
+            <p>Để hiểu tại sao UPD mạnh, chúng ta cần nhìn vào sổ lệnh của Smart Money. Họ không giao dịch 1-2 lot như chúng ta. Họ giao dịch hàng triệu đô la.</p>
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Phase 1: Mồi Nhử (The Trap)</div>
+                        <div class="flow-step-desc">Smart Money đẩy giá tăng mạnh (UP). Mục đích không phải để mua thêm, mà để thu hút thanh khoản. Họ cần một đám đông hưng phấn sẵn sàng mua vào để họ có thể... bán ra.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Phase 2: Trao Tay (Distribution)</div>
+                        <div class="flow-step-desc">Tại vùng PAUSE, Smart Money bắt đầu bán dần. Họ không bán ồ ạt để tránh giá sập ngay. Họ bán từ từ cho những trader FOMO đang nhảy vào mua. Đây là quá trình chuyển giao rủi ro từ "tay to" sang "tay nhỏ".</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Phase 3: Sập Bẫy (The Crash)</div>
+                        <div class="flow-step-desc">Khi đã bán xong phần lớn, họ rút lệnh hỗ trợ. Giá rơi tự do (DOWN). Những người mua ở đỉnh (Retail) giờ đây bị mắc kẹt. Sự hoảng loạn bắt đầu.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch4/4.3/4-3-1-png.webp" alt="Smart Money Cycle">
+            </div>
+            <div class="image-caption">Hình 1: Chu kỳ phân phối của Smart Money: Từ Mồi nhử đến Sập bẫy</div>
+        </section>
+
+        <!-- TẠI SAO HFZ MẠNH -->
+        <section class="section">
+            <h2 class="section-title"><span>🔥</span> Tại Sao HFZ Từ UPD Mạnh?</h2>
+            <p>Bạn có thể tự hỏi: "Tại sao khi giá quay lại vùng đỉnh cũ (HFZ), nó lại giảm tiếp?". Câu trả lời nằm ở hai lực lượng bán khổng lồ hợp sức lại:</p>
+            
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💡</span> Lý Do 1: Lệnh Bán Chưa Khớp (Unfilled Orders)</div>
+                <p>Dù đã bán ở Phase 2, Smart Money thường vẫn còn dư một lượng lệnh bán chưa khớp (do giá sập quá nhanh). Họ để yên các lệnh Limit Sell đó tại vùng HFZ. Khi giá hồi lên, các lệnh này tự động kích hoạt, tạo thành bức tường cản giá.</p>
+            </div>
+            
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💡</span> Lý Do 2: Nỗi Đau Của Retail (Trapped Traders)</div>
+                <p>Hãy nghĩ về những người đã lỡ mua ở vùng đỉnh (Phase 1 và 2). Họ đang lỗ nặng. Tâm lý duy nhất của họ lúc này là: "Chỉ cần giá hồi về hòa vốn, tôi sẽ bán ngay lập tức để thoát thân". Khi giá quay lại HFZ, hàng loạt lệnh bán cắt lỗ hòa vốn (Break-even) được tung ra từ chính những người này.</p>
+            </div>
+            
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⭐</span> Công Thức Sức Mạnh</div>
+                <p><strong>Lực bán của Smart Money + Lực bán thoát hàng của Retail = Cú sập giá mạnh mẽ tại HFZ.</strong></p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch4/4.3/4-3-2-png.webp" alt="Trapped Retail">
+            </div>
+            <div class="image-caption">Hình 2: Retail bị bẫy tại HFZ - Tạo áp lực bán khi retest</div>
+        </section>
+
+        <!-- SO SÁNH UPD VS DPD -->
+        <section class="section">
+            <h2 class="section-title"><span>⚡</span> So Sánh Sức Mạnh: UPD vs DPD</h2>
+            <p>Cả hai đều tạo ra HFZ (Vùng bán), nhưng tại sao tôi lại nói UPD "uy lực" hơn DPD? Hãy xem bảng so sánh này:</p>
+            
+            <div class="warning-box">
+                <div class="warning-box-title"><span>📊</span> DPD (Tiếp Diễn Giảm)</div>
+                <p>Xuất hiện KHI xu hướng giảm đã rõ ràng. Lúc này, phần lớn đám đông đã nhận ra thị trường xấu và bán theo. Lực bán tuy mạnh nhưng không còn yếu tố "bất ngờ" hay "hoảng loạn" cực độ. Nó giống như việc đẩy một hòn đá đang lăn xuống dốc.</p>
+            </div>
+            
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⭐</span> UPD (Đảo Chiều Đỉnh)</div>
+                <p>Xuất hiện TẠI ĐỈNH của xu hướng tăng. Đây là nơi sự lạc quan (Optimism) cao nhất. Sự đảo chiều từ UPD giống như một gáo nước lạnh tát vào mặt đám đông đang say sưa. Sự chuyển biến đột ngột từ "Tham lam" sang "Sợ hãi" tạo ra một động năng (Momentum) bán tháo khủng khiếp hơn nhiều.</p>
+            </div>
+            
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lessons/tier1-ch4/4.3/4-3-3-png.webp" alt="UPD vs DPD">
+            </div>
+            <div class="image-caption">Hình 3: Vị trí xuất hiện quyết định sức mạnh: Đỉnh (UPD) vs Giữa xu hướng (DPD)</div>
+        </section>
+
+        <!-- VÍ DỤ MINH HỌA SỨC MẠNH (RESTORED) -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Ví Dụ Minh Họa Sức Mạnh UPD</h2>
+            <p>Hãy xem xét 2 ví dụ thực tế để thấy rõ sự khác biệt:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📊</span> Ví Dụ 1: UPD Mạnh - BTC/USDT 12/2024</div>
+                <p><strong>Bối cảnh:</strong> BTC đỉnh $108,000 sau rally từ $67,000 (+61%). FOMO cực độ.</p>
+                <p><strong>Yếu tố tạo sức mạnh:</strong></p>
+                <ul>
+                    <li>Uptrend kéo dài 6 tuần, Retail đã "all-in" ở đỉnh</li>
+                    <li>Funding rate 0.15%/8h - quá cao, cho thấy quá nhiều LONG</li>
+                    <li>Phase 2 chỉ 4 nến với volume giảm 52%</li>
+                    <li>Long liquidations $1.2 tỷ USD trong Phase 3</li>
+                </ul>
+                <p><strong>Kết quả:</strong> HFZ được retest 2 lần, cả 2 lần đều reject mạnh. Win rate 100% cho SHORT tại vùng này.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📊</span> So Sánh: DPD Trong Cùng Giai Đoạn</div>
+                <p><strong>Bối cảnh:</strong> DPD xuất hiện giữa downtrend khi BTC giảm từ $91,000 về $85,000.</p>
+                <p><strong>Sức mạnh yếu hơn vì:</strong></p>
+                <ul>
+                    <li>Xu hướng giảm đã rõ ràng, nhiều trader đã SHORT</li>
+                    <li>Không có "bẫy Retail" vì Retail đã sợ, không dám mua</li>
+                    <li>Volume Phase 3 chỉ tăng 80% (vs 180% của UPD)</li>
+                </ul>
+                <p><strong>Kết quả:</strong> HFZ chỉ được retest 1 lần, sau đó giá bounce và break qua zone. Win rate 50%.</p>
+            </div>
+        </section>
+
+        <!-- CÂU HỎI THƯỜNG GẶP (RESTORED) -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+            <p>Dưới đây là những câu hỏi phổ biến mà tôi thường nhận được về UPD:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>❓</span> Làm sao biết UPD này "mạnh" hay "yếu"?</div>
+                <p>UPD MẠNH khi: (1) Phase 1 tăng >20% với FOMO rõ ràng, (2) Funding rate cao >0.05%/8h, (3) Phase 2 ngắn 2-5 nến, (4) Volume Phase 3 tăng >150%. UPD YẾU khi: Phase 1 tăng <10%, Phase 2 kéo dài >10 nến, hoặc thị trường chung đang sideway không có trend rõ ràng.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>❓</span> UPD có hoạt động trên altcoins không?</div>
+                <p>UPD hoạt động RẤT TỐT trên altcoins vì altcoins có volatility cao hơn BTC. Tuy nhiên, chỉ trade UPD trên altcoins có volume >$100 triệu/ngày (ETH, SOL, BNB, XRP, DOGE). Các coin nhỏ có thể bị manipulate dễ dàng, khiến pattern không reliable.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>❓</span> UPD có thất bại không?</div>
+                <p>Có! UPD thất bại khoảng 35% trường hợp. Thất bại thường xảy ra khi: (1) Tin tức đột ngột positive (ETF approval, partnership lớn), (2) BTC bất ngờ pump khi altcoin đang trong UPD, (3) Phase 2 quá dài (>10 nến) khiến pattern "hết hiệu lực". Luôn đặt Stop Loss và quản lý risk!</p>
+            </div>
+        </section>
+
+        <!-- HÀNH ĐỘNG THỰC HÀNH (RESTORED & EXPANDED) -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Hành Động Thực Hành</h2>
+            <p>Để hiểu sâu sức mạnh của UPD, hãy thực hành so sánh ngay hôm nay:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Làm Ngay Hôm Nay</div>
+                <p>1. Mở TradingView → BTC/USDT khung D1<br>
+                2. Tìm 1 UPD và 1 DPD trong 3 tháng gần nhất<br>
+                3. So sánh: Phase 3 của cái nào có volume lớn hơn?<br>
+                4. Khi giá retest HFZ, cái nào reject mạnh hơn?<br>
+                5. Ghi kết luận vào trading journal</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📋</span> Bài Tập Tuần Này</div>
+                <p>1. Tìm 3 UPD trên ETH, SOL, BNB<br>
+                2. Đánh giá "sức mạnh" của mỗi UPD dựa trên tiêu chí đã học<br>
+                3. Tính toán: Nếu bạn SHORT tại retest HFZ, kết quả sẽ như thế nào?<br>
+                4. Xác định: UPD nào mạnh nhất và tại sao?</p>
+            </div>
+        </section>
+
+        <!-- TỔNG KẾT -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Tổng Kết Bài Học</h2>
+            <div class="summary-box">
+                <div class="summary-title"><span>🎯</span> Bài Học Lớn Nhất</div>
+                <p>Sức mạnh của UPD không đến từ hình dạng trên chart - nó đến từ dòng tiền chưa hoàn tất của Smart Money và nỗi đau của Retail bị bẫy. Khi bạn hiểu hai yếu tố này, bạn sẽ hiểu tại sao HFZ từ UPD reject giá mạnh đến vậy. Trading không phải về việc đoán hướng đi - mà là về việc hiểu ai đang mua, ai đang bán, và tại sao.</p>
+                <ul class="summary-list">
+                    <li>UPD là mẫu hình đảo chiều mạnh nhất tại đỉnh.</li>
+                    <li>Sức mạnh đến từ 2 nguồn: Lệnh bán tồn dư và Áp lực cắt lỗ.</li>
+                    <li>HFZ từ UPD mạnh hơn DPD vì momentum tươi mới.</li>
+                    <li>Luôn ưu tiên các UPD có Phase 1 tăng mạnh và Phase 2 ngắn.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- QUIZ -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Chọn đáp án đúng nhất để xác nhận bạn đã hiểu bài</p>
+            </div>
+            
+            <div class="quiz-question" data-question="1" data-correct="C">
+                <div class="question-number">1</div>
+                <div class="question-text">Tại sao HFZ được tạo ra từ mô hình UPD lại có áp lực bán mạnh mẽ khi giá quay lại test?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Vì đó là vùng giá tròn (Round number).</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Vì chỉ báo RSI đang ở vùng quá mua.</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Vì sự kết hợp giữa lệnh bán chưa khớp của Smart Money và áp lực cắt lỗ của Retail bị kẹp hàng.</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Vì khối lượng giao dịch ở vùng đó rất thấp.</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="B">
+                <div class="question-number">2</div>
+                <div class="question-text">So với DPD (Tiếp diễn giảm), tại sao UPD (Đảo chiều giảm) thường được coi là mạnh hơn?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Vì UPD xuất hiện ở giữa xu hướng nên an toàn hơn.</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Vì UPD xuất hiện tại đỉnh, nơi tâm lý đám đông chuyển biến mạnh nhất và lượng người bị kẹp hàng là lớn nhất.</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Vì UPD có 4 giai đoạn thay vì 3.</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Vì DPD chỉ hoạt động trên khung thời gian nhỏ.</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+
+            <div class="quiz-question" data-question="3" data-correct="A">
+                <div class="question-number">3</div>
+                <div class="question-text">Đặc điểm nào sau đây cho thấy một mô hình UPD có chất lượng cao (Mạnh)?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Phase 1 tăng mạnh >20% (Crypto), Phase 2 ngắn gọn (2-5 nến), và Phase 3 sập mạnh với volume lớn.</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Phase 1 tăng nhẹ từ từ, Phase 2 kéo dài hơn 20 nến đi ngang.</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Phase 3 giảm yếu ớt và volume thấp hơn Phase 1.</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Giá không bao giờ quay lại test vùng HFZ.</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+
+            <div class="quiz-result"><div class="result-score">0/3</div><div class="result-text">Hoàn thành!</div><div class="result-message"></div></div>
+            <div class="quiz-buttons"><button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button></div>
+        </section>
+
+        <footer class="section" style="text-align: center; padding: var(--space-xl);">
+            <p style="color: var(--gold); font-weight: 600;">GEM Trading Academy</p>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Chúc mừng bạn đã hoàn thành bài 5.3! Hãy tiếp tục với bài học chiến lược Entry.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+            let answeredCount = 0, correctCount = 0;
+            const totalQuestions = 3;
+            const explanations = {
+                1: { correct: '✓ Chính xác! Sức mạnh của HFZ (UPD) đến từ sự cộng hưởng: Smart Money cần bán nốt hàng tồn, và Retail cần cắt lỗ để thoát hàng. Hai lực cung này hợp lại tạo thành bức tường lửa.', incorrect: '✗ Sai rồi! Hãy nhớ lại bài học: Vùng giá tròn hay RSI chỉ là yếu tố phụ. Yếu tố chính là CUNG CẦU thực tế từ các lệnh chưa khớp và vị thế bị kẹt.' },
+                2: { correct: '✓ Chính xác! Đỉnh xu hướng là nơi "đau thương" nhất. Sự thay đổi đột ngột từ hưng phấn sang sợ hãi tạo ra động lực giá mạnh mẽ hơn nhiều so với việc tiếp diễn một xu hướng đã cũ.', incorrect: '✗ Sai! DPD là tiếp diễn, UPD là đảo chiều tại đỉnh. Đảo chiều tại đỉnh luôn chứa đựng nhiều cảm xúc và thanh khoản bị kẹp hơn.' },
+                3: { correct: '✓ Chính xác! Một UPD mạnh cần sự FOMO tột độ ở đầu (Phase 1), sự phân phối dứt khoát (Phase 2 ngắn) và sự sụp đổ xác nhận (Phase 3 mạnh).', incorrect: '✗ Sai! Phase 2 quá dài cho thấy thị trường lưỡng lự, không phải phân phối dứt khoát. Tăng nhẹ cũng không tạo đủ thanh khoản để "nhốt" đám đông.' }
+            };
+            questions.forEach(q => {
+                const opts = q.querySelectorAll('.quiz-option');
+                opts.forEach(o => {
+                    o.addEventListener('click', function() {
+                        if (q.classList.contains('answered')) return;
+                        q.classList.add('answered'); answeredCount++;
+                        const sel = this.dataset.option, corr = q.dataset.correct, isCor = sel === corr;
+                        opts.forEach(op => op.classList.add('disabled'));
+                        if (isCor) { this.classList.add('correct'); correctCount++; q.querySelector('.question-feedback').classList.add('correct'); }
+                        else { this.classList.add('incorrect'); q.querySelector('.question-feedback').classList.add('incorrect'); opts.forEach(op => { if(op.dataset.option === corr) op.classList.add('correct'); }); }
+                        q.querySelector('.feedback-title').textContent = isCor ? '✓ Chính xác!' : '✗ Sai rồi!';
+                        q.querySelector('.feedback-text').textContent = explanations[q.dataset.question][isCor ? 'correct' : 'incorrect'];
+                        q.querySelector('.question-feedback').classList.add('show');
+                        if (answeredCount === totalQuestions) {
+                            resultDiv.querySelector('.result-score').textContent = `${correctCount}/${totalQuestions}`;
+                            resultDiv.querySelector('.result-message').textContent = correctCount === totalQuestions ? '🎉 Xuất sắc! Bạn đã hiểu rõ bản chất của UPD.' : '📚 Hãy đọc lại bài học để nắm vững tâm lý thị trường nhé!';
+                            resultDiv.classList.add('show'); retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0; correctCount = 0;
+                questions.forEach(q => { q.classList.remove('answered'); q.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('correct', 'incorrect', 'disabled')); q.querySelector('.question-feedback').classList.remove('show', 'correct', 'incorrect'); });
+                resultDiv.classList.remove('show'); retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
