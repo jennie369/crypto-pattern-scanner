@@ -1402,6 +1402,7 @@ test('binanceService throws on HTTP 200 with error code', async () => {
 | 40 | Same Fix Must Apply to ALL Code Paths | F: Architecture | 11 |
 | 57 | FORCE_REFRESH Handler Must Break React 18 Batch | A: State | 14 |
 | 58 | Sequential Supabase Queries Must Run in Parallel | C: Concurrency | 14 |
+| 59 | JWT Must Be Validated Before Every Supabase Request | D: Security | 14 |
 
 ---
 
@@ -3364,3 +3365,56 @@ const [affiliate, apps, profile, course] = await Promise.allSettled([
 2. **Check data dependencies**: Does query 2 need query 1's result?
 3. If independent → use `Promise.allSettled()` for parallel execution
 4. Use `Promise.allSettled` (not `Promise.all`) so one failure doesn't abort others
+
+---
+
+# RULE 59: JWT Must Be Validated Before Every Supabase Request
+**Source:** Phase 14 — ALL screens fail simultaneously after app idle 1+ hour in foreground
+
+## What Failed
+After leaving the app idle for 1+ hour (even in foreground with screen off), ALL screens break at once:
+- Scanner: stuck in "Đang quét pattern..." infinite loading
+- AffiliateSection: shows registration form instead of admin's existing data
+- Vision Board: all zeros (Level 1, 0/100 XP, 0/0 goals)
+- Notifications: empty spinner + "Chưa có thông báo"
+
+## Why It Failed
+Three-link failure chain:
+
+1. **`autoRefreshToken` timer is unreliable on mobile**: Supabase JS client uses `setTimeout` to refresh the JWT ~30s before expiry. On mobile, JS timers don't fire when the device screen is off. After 1 hour, the access token expires silently.
+
+2. **No mechanism detects expired JWT in foreground**: `AppResumeManager` only handles `background → active` transitions. If the app stays in `active` AppState (foreground with screen off or just idle), the resume handler never fires. The 60s health check tested connectivity but NOT token validity.
+
+3. **RLS silently returns empty data with expired JWT**: PostgREST doesn't error on expired tokens — `auth.uid()` resolves to `null`, and RLS policies like `USING (user_id = auth.uid())` match zero rows. Every query "succeeds" with empty results.
+
+## The Fix (Two Layers)
+
+### Layer 1: Global fetch wrapper pre-request check (supabase.js)
+Before every `/rest/v1/` or `/functions/v1/` request, decode the JWT `exp` claim. If expired or expiring within 60s, call `refreshSession()` first. Uses cached `exp` for sub-ms fast path and singleton promise to dedup concurrent refreshes.
+
+```javascript
+// In global fetch wrapper:
+fetch: async (url, options = {}) => {
+  // Not for /auth/v1/ (avoids recursion), /storage/v1/, /realtime/
+  if (!url.includes('/auth/v1/')) {
+    await _ensureSessionFresh(); // checks JWT exp, refreshes if needed
+  }
+  // ... existing timeout logic
+}
+```
+
+### Layer 2: Health check proactive refresh (AppResumeManager.js)
+The 60s health check now also checks JWT `expires_at`. If the token expires within 120s, proactively refreshes before the user taps anything. Also, `_triggerFullRecovery` now refreshes the session BEFORE emitting FORCE_REFRESH_EVENT.
+
+## Key Design Decisions
+- **Skip /auth/v1/ calls**: Prevents infinite recursion (`refreshSession()` → POST /auth/v1/token → fetch wrapper → `_ensureSessionFresh()` → `refreshSession()` → ...)
+- **Cached `exp`**: First request reads from storage + decodes JWT. Subsequent requests compare a cached number (sub-ms). Only re-reads when token is about to expire.
+- **Singleton `_refreshPromise`**: If 5 requests detect expired JWT simultaneously, only 1 refresh call is made. Others await the same promise.
+- **`getSession()` not `getUser()`**: `getSession()` reads from local storage (instant). `getUser()` makes an API call that would go through the fetch wrapper → recursion.
+
+## How to Detect
+1. **ALL screens fail simultaneously** (not just one) → global auth issue, not screen-specific
+2. **Data loads as empty/default** (not errors) → RLS returning zero rows
+3. **Happens after long idle** (1+ hour) → JWT expiration
+4. **App was never backgrounded** (or resume handler didn't fire) → foreground idle scenario
+5. Check console for `[Supabase] JWT expired/expiring` — if absent, the guard isn't running

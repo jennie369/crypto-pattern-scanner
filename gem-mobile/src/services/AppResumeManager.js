@@ -372,9 +372,30 @@ class AppResumeManager {
 
   /**
    * Health check — replaces connectionHealthMonitor's runHealthCheck
+   * Rule 59: Also checks JWT freshness (covers foreground idle where autoRefreshToken timer failed)
    */
   async _runHealthCheck() {
     if (!this._isRunning) return;
+
+    // JWT freshness check — proactively refresh before user taps anything
+    try {
+      const { data } = await supabase.auth.getSession();
+      if (data?.session) {
+        const expiresAt = data.session.expires_at;
+        const nowSec = Math.floor(Date.now() / 1000);
+        if (expiresAt && expiresAt < nowSec + 120) {
+          console.log('[AppResumeManager] Health check: JWT expiring in <120s, refreshing...');
+          const { error } = await supabase.auth.refreshSession();
+          if (error) {
+            console.warn('[AppResumeManager] Health check JWT refresh error:', error.message);
+          } else {
+            console.log('[AppResumeManager] Health check: JWT refreshed proactively');
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[AppResumeManager] Health check JWT check error:', e?.message);
+    }
 
     let healthy = true;
 
@@ -423,8 +444,15 @@ class AppResumeManager {
    * Instead we emit FORCE_REFRESH_EVENT which lets each screen
    * properly reset its own loading + reload data in one atomic operation.
    */
-  _triggerFullRecovery() {
+  async _triggerFullRecovery() {
     console.log('[AppResumeManager] === FULL RECOVERY ===');
+
+    // Rule 59: Refresh session FIRST — without valid JWT, all queries return empty (RLS)
+    try {
+      await this._refreshSession();
+    } catch (e) {
+      console.warn('[AppResumeManager] Recovery session refresh error:', e?.message);
+    }
 
     this._clearCaches();
     this._reconnectWebSockets();

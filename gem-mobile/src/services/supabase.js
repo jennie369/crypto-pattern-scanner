@@ -112,6 +112,79 @@ class SecureStorageAdapter {
 
 const secureStorage = new SecureStorageAdapter();
 
+// --- JWT Freshness Guard (Rule 59) ---
+// On mobile, autoRefreshToken relies on JS timers that don't fire when screen is off.
+// When the JWT expires, ALL Supabase queries return empty data (RLS sees auth.uid()=null).
+// This guard checks JWT expiry before every data/function request and auto-refreshes.
+let _refreshPromise = null;
+let _cachedExp = 0;
+let _supabaseInstance = null;
+
+/**
+ * Decode JWT exp claim without external library.
+ * JWT uses base64url encoding (- and _ instead of + and /).
+ */
+function _decodeJwtExp(token) {
+  try {
+    const payload = token.split('.')[1];
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(base64)).exp || 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Pre-request interceptor: if current JWT is expired or expiring within 60s,
+ * refresh the session before the request proceeds.
+ * Uses singleton promise to dedup concurrent refresh calls.
+ */
+async function _ensureSessionFresh() {
+  if (!_supabaseInstance) return;
+
+  const nowSec = Math.floor(Date.now() / 1000);
+
+  // Fast path: cached exp is still valid (sub-ms check)
+  if (_cachedExp > 0 && _cachedExp > nowSec + 60) return;
+
+  // Another refresh is already in progress — wait for it
+  if (_refreshPromise) {
+    try { await _refreshPromise; } catch {}
+    return;
+  }
+
+  try {
+    // getSession() reads from local storage — no network call, no circular dependency
+    const { data } = await _supabaseInstance.auth.getSession();
+    if (!data?.session?.access_token) {
+      _cachedExp = 0;
+      return;
+    }
+
+    const exp = _decodeJwtExp(data.session.access_token);
+    _cachedExp = exp;
+
+    if (exp > 0 && exp < nowSec + 60) {
+      console.log('[Supabase] JWT expired/expiring (<60s), auto-refreshing...');
+      _refreshPromise = _supabaseInstance.auth.refreshSession()
+        .then(({ data: refreshData, error }) => {
+          if (error) {
+            console.warn('[Supabase] JWT auto-refresh error:', error.message);
+          } else if (refreshData?.session?.access_token) {
+            _cachedExp = _decodeJwtExp(refreshData.session.access_token);
+            console.log('[Supabase] JWT auto-refresh complete');
+          }
+        })
+        .catch(e => console.warn('[Supabase] JWT auto-refresh failed:', e?.message))
+        .finally(() => { _refreshPromise = null; });
+      await _refreshPromise;
+    }
+  } catch (e) {
+    console.warn('[Supabase] JWT freshness check error:', e?.message);
+    _refreshPromise = null;
+  }
+}
+
 // Per-request timeout for Supabase API calls.
 // Prevents HTTP requests from hanging indefinitely on stalled mobile connections.
 // Phase 9 Fix: Extended to cover edge functions (28 call sites were unprotected).
@@ -128,7 +201,12 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     detectSessionInUrl: Platform.OS === 'web',
   },
   global: {
-    fetch: (url, options = {}) => {
+    fetch: async (url, options = {}) => {
+      // Rule 59: Pre-request JWT freshness check (not for auth/storage/realtime — avoids recursion)
+      if (typeof url === 'string' && !url.includes('/auth/v1/') && !url.includes('/storage/v1/') && !url.includes('/realtime/')) {
+        try { await _ensureSessionFresh(); } catch {}
+      }
+
       // Skip if caller already set their own AbortController signal
       if (options.signal) {
         return fetch(url, options);
@@ -159,6 +237,9 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     },
   },
 });
+
+// Set instance reference for JWT freshness guard (must be after createClient)
+_supabaseInstance = supabase;
 
 // Auth helpers
 export const signUp = async (email, password, metadata = {}) => {
