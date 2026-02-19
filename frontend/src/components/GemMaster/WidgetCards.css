@@ -1,0 +1,564 @@
+/* ===== Shared Widget Card Base ===== */
+.widget-card {
+  background: rgba(255, 189, 89, 0.05);
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  margin-bottom: 12px;
+}
+
+.widget-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.widget-card__header--center {
+  justify-content: center;
+  gap: 8px;
+}
+
+.widget-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.widget-card__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #E2E8F0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.widget-card__menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+/* ===== GoalTrackingCard ===== */
+.widget-card__timeline-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.widget-card__timeline {
+  font-size: 13px;
+  color: #718096;
+}
+
+.widget-card__progress-container {
+  margin-bottom: 12px;
+}
+
+.widget-card__progress-bar {
+  height: 28px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.widget-card__progress-fill {
+  height: 100%;
+  background: #FFBD59;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  transition: width 0.3s ease;
+}
+
+.widget-card__progress-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0A0F1C;
+}
+
+.widget-card__progress-amount {
+  font-size: 13px;
+  color: #718096;
+  text-align: center;
+}
+
+.widget-card__edit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.widget-card__edit-input {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #E2E8F0;
+  font-size: 14px;
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  outline: none;
+  font-family: inherit;
+}
+
+.widget-card__edit-input:focus {
+  border-color: #FFBD59;
+}
+
+.widget-card__edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.widget-card__save-btn {
+  flex: 1;
+  background: #FFBD59;
+  border: none;
+  border-radius: 10px;
+  padding: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0A0F1C;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.widget-card__save-btn:hover {
+  background: #FFD080;
+}
+
+.widget-card__cancel-btn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 10px;
+  padding: 8px;
+  font-size: 14px;
+  color: #718096;
+  cursor: pointer;
+}
+
+.widget-card__actions-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.widget-card__update-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #FFBD59;
+  border: none;
+  border-radius: 10px;
+  padding: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0A0F1C;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.widget-card__update-btn:hover {
+  background: #FFD080;
+}
+
+.widget-card__details-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(255, 189, 89, 0.2);
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #FFBD59;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.widget-card__details-btn:hover {
+  background: rgba(255, 189, 89, 0.3);
+}
+
+.widget-card__details-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.widget-card__detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.widget-card__detail-label {
+  font-size: 13px;
+  color: #718096;
+}
+
+.widget-card__detail-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #E2E8F0;
+}
+
+.widget-card__affirmations-preview {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.widget-card__affirmation-item {
+  font-size: 12px;
+  color: #A0AEC0;
+  margin-top: 4px;
+  padding-left: 8px;
+}
+
+.widget-card__reminder-info {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.widget-card__reminder-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.widget-card__reminder-text {
+  font-size: 13px;
+  color: #718096;
+}
+
+.widget-card__reminder-status {
+  color: #10B981;
+  font-weight: 700;
+}
+
+.widget-card__reminder-next {
+  font-size: 13px;
+  color: #718096;
+}
+
+/* ===== AffirmationCard ===== */
+.widget-card--affirmation {
+  background: rgba(156, 6, 18, 0.15);
+}
+
+.affirmation-card__text-container {
+  padding: 20px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+.affirmation-card__text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #E2E8F0;
+  text-align: center;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.affirmation-card__actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.affirmation-card__read-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255, 189, 89, 0.2);
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.affirmation-card__read-btn:hover {
+  background: rgba(255, 189, 89, 0.3);
+}
+
+.affirmation-card__done-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 10px;
+  background: #FFBD59;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0A0F1C;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.affirmation-card__done-btn:hover {
+  background: #FFD080;
+}
+
+.affirmation-card__navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.affirmation-card__nav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.2s;
+}
+
+.affirmation-card__nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.affirmation-card__nav-text {
+  font-size: 14px;
+  color: #718096;
+  font-weight: 600;
+}
+
+.affirmation-card__stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.affirmation-card__stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #718096;
+}
+
+.affirmation-card__stat--streak {
+  font-weight: 700;
+  color: #EF4444;
+}
+
+/* ===== ActionChecklistCard ===== */
+.checklist-card__tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.checklist-card__task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.checklist-card__task-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.checklist-card__task-text {
+  flex: 1;
+  font-size: 14px;
+  color: #E2E8F0;
+  line-height: 1.4;
+}
+
+.checklist-card__task-text--completed {
+  color: #4A5568;
+  text-decoration: line-through;
+}
+
+.checklist-card__progress {
+  margin-bottom: 12px;
+}
+
+.checklist-card__progress-text {
+  font-size: 13px;
+  color: #718096;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.checklist-card__progress-count {
+  font-weight: 700;
+  color: #FFBD59;
+}
+
+.checklist-card__progress-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.checklist-card__progress-fill {
+  height: 100%;
+  background: #10B981;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.checklist-card__add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255, 189, 89, 0.1);
+  border: 1px dashed rgba(255, 189, 89, 0.3);
+  color: #FFBD59;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.checklist-card__add-btn:hover {
+  background: rgba(255, 189, 89, 0.15);
+}
+
+.checklist-card__add-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checklist-card__add-input {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #E2E8F0;
+  font-size: 14px;
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  outline: none;
+  font-family: inherit;
+}
+
+.checklist-card__add-input:focus {
+  border-color: #FFBD59;
+}
+
+.checklist-card__add-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.checklist-card__save-btn {
+  flex: 1;
+  background: #FFBD59;
+  border: none;
+  border-radius: 10px;
+  padding: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0A0F1C;
+  cursor: pointer;
+}
+
+.checklist-card__cancel-btn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 10px;
+  padding: 8px;
+  font-size: 14px;
+  color: #718096;
+  cursor: pointer;
+}
+
+/* ===== StatsWidget ===== */
+.stats-widget__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.stats-widget__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.stats-widget__number {
+  font-size: 28px;
+  font-weight: 700;
+  color: #E2E8F0;
+  margin-top: 6px;
+}
+
+.stats-widget__label {
+  font-size: 12px;
+  color: #718096;
+  margin-top: 4px;
+  text-align: center;
+}
+
+.stats-widget__details-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  padding: 10px;
+  background: none;
+  border: none;
+  color: #FFBD59;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.stats-widget__details-btn:hover {
+  opacity: 0.8;
+}

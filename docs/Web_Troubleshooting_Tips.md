@@ -1491,6 +1491,110 @@ useEffect(() => {
 
 ---
 
+---
+
+# SECTION H: GEMMASTER FULL PORT (2026-02-19)
+
+---
+
+## Rule 24: Quota Daily Reset Timezone Mismatch (UTC vs UTC+7)
+**Source:** GemMaster Full Port — quotaService daily reset must be Vietnam timezone (UTC+7)
+
+### Khi nao ap dung (When to apply)
+Khi implement daily quota/limit reset cho users o timezone khac UTC.
+
+### Trieu chung (Symptoms)
+- User o Vietnam bao "quota reset luc 7h sang thay vi 12h dem"
+- Quota counts khong khop giua web va mobile (1 dung UTC, 1 dung UTC+7)
+- Tests pass luc ban ngay nhung fail luc ban dem (timezone boundary)
+
+### Nguyen nhan goc (Root cause pattern)
+```javascript
+// SAI: UTC midnight reset — Vietnam user mat quota luc 7h sang
+const today = new Date().toISOString().split('T')[0]; // UTC date
+
+// DUNG: Vietnam timezone reset — midnight ICT (UTC+7)
+const vnDate = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
+```
+
+### Bien phap phong ngua (Preventive measures)
+- Document timezone trong service: `// Daily reset at midnight Vietnam time (UTC+7)`
+- Test voi dates xung quanh midnight UTC+7 (5pm UTC = midnight ICT)
+- Dung `Intl.DateTimeFormat` hoac `toLocaleDateString` voi `timeZone` option
+
+---
+
+## Rule 25: Web Speech API Browser Compatibility (Feature Detection Required)
+**Source:** GemMaster Full Port — voiceService fails silently on Firefox/non-Chromium browsers
+
+### Khi nao ap dung (When to apply)
+Khi dung Web Speech API (`SpeechRecognition`, `webkitSpeechRecognition`) cho voice input.
+
+### Trieu chung (Symptoms)
+- Voice button click → nothing happens (no recording, no error)
+- Chi hoat dong tren Chrome/Edge, fail tren Firefox/Safari
+- `window.SpeechRecognition` la `undefined` tren mot so browsers
+
+### Nguyen nhan goc (Root cause pattern)
+```javascript
+// SAI: Gia su API ton tai
+const recognition = new SpeechRecognition();
+
+// DUNG: Feature detection + fallback
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (!SpeechRecognition) {
+  // Show "Voice not supported in this browser" message
+  return;
+}
+```
+
+### Bien phap phong ngua (Preventive measures)
+- LUON feature-detect truoc khi dung: `window.SpeechRecognition || window.webkitSpeechRecognition`
+- Disable voice button + show tooltip khi API khong available
+- Document browser support: Chrome 33+, Edge 79+, Safari 14.1+ (partial), Firefox: NOT SUPPORTED
+
+---
+
+## Rule 26: Multi-Modal z-index Stacking (Modal-on-Modal Collision)
+**Source:** GemMaster Full Port — CrisisAlertModal needs to appear ABOVE ChatbotPricingModal
+
+### Khi nao ap dung (When to apply)
+Khi page co nhieu modals/panels co the hien thi dong thoi (FAQ panel + pricing modal + crisis alert).
+
+### Trieu chung (Symptoms)
+- Modal A hien thi phia SAU modal B (bi che)
+- Click outside modal A dismiss modal B (wrong modal receives click)
+- Crisis alert (critical) bi che boi pricing modal (non-critical)
+
+### Nguyen nhan goc (Root cause pattern)
+```css
+/* Khong co he thong z-index — moi modal tu chon */
+.pricing-modal { z-index: 1000; }
+.faq-panel { z-index: 1000; }     /* TRUNG — rendering order quyet dinh */
+.crisis-alert { z-index: 1000; }  /* TRUNG — co the bi che */
+
+/* DUNG: He thong z-index co phan cap */
+/* Layer 1: Panels (slide-in, non-blocking) */
+.faq-panel { z-index: 1000; }
+.history-overlay { z-index: 1000; }
+
+/* Layer 2: Modals (blocking, backdrop) */
+.pricing-modal { z-index: 1500; }
+.quick-buy-modal { z-index: 1500; }
+.upsell-modal { z-index: 1500; }
+
+/* Layer 3: Critical alerts (always on top) */
+.crisis-alert { z-index: 2000; }
+```
+
+### Bien phap phong ngua (Preventive measures)
+- Document z-index layers: panels (1000), modals (1500), critical (2000)
+- Moi modal moi phai chon layer phu hop
+- Crisis/safety modals LUON o layer cao nhat
+- Test case: trigger crisis keywords while pricing modal is open
+
+---
+
 ## Grep Commands for Common Web Issues
 
 ```bash
@@ -1605,3 +1709,6 @@ grep -rn 'zoneCanvasRef\|drawZones\|requestAnimationFrame' frontend/src/ --inclu
 | 21 | Architecture | Monolithic Single-File Component with Inline Tab Switching | UX dead zone |
 | 22 | Architecture | Prop Drilling Scanner State Instead of Centralized Store | Maintenance/perf |
 | 23 | UI | Price Lines Only — Missing Canvas Overlay for Zone Drawing | Visual gap vs mobile |
+| 24 | Platform | Quota Daily Reset Timezone Mismatch (UTC vs UTC+7) | Silent data |
+| 25 | Platform | Web Speech API Browser Compatibility | Silent failure |
+| 26 | UI | Multi-Modal z-index Stacking (Modal-on-Modal Collision) | Visual overlap |

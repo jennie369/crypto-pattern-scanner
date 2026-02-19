@@ -31,6 +31,24 @@ import { ErrorMessage } from '../components/Chatbot/ErrorMessage';
 import { ImageUpload } from '../components/Chatbot/ImageUpload';
 import QuickActionBar from '../components/GemMaster/QuickActionBar';
 import SmartSuggestionBanner from '../components/GemMaster/SmartSuggestionBanner';
+import { detectIntent, INTENT_CATEGORIES } from '../services/intentDetectionService';
+import { proactiveAIService } from '../services/proactiveAIService';
+import ChatbotPricingModal from '../components/GemMaster/ChatbotPricingModal';
+import FAQPanel from '../components/GemMaster/FAQPanel';
+import QuickBuyModal from '../components/GemMaster/QuickBuyModal';
+import UpsellModal from '../components/GemMaster/UpsellModal';
+import CrystalRecommendation from '../components/GemMaster/CrystalRecommendation';
+import ProductRecommendations from '../components/GemMaster/ProductRecommendations';
+import CrisisAlertModal from '../components/GemMaster/CrisisAlertModal';
+import SmartFormCard from '../components/GemMaster/SmartFormCard';
+import GoalSettingForm from '../components/GemMaster/GoalSettingForm';
+import InlineChatForm from '../components/GemMaster/InlineChatForm';
+import WidgetSuggestionCard from '../components/GemMaster/WidgetSuggestionCard';
+import ExportButton from '../components/GemMaster/ExportButton';
+import ExportTemplateSelector from '../components/GemMaster/ExportTemplateSelector';
+import ExportPreview from '../components/GemMaster/ExportPreview';
+import RecordingIndicator from '../components/GemMaster/RecordingIndicator';
+import VoiceQuotaDisplay from '../components/GemMaster/VoiceQuotaDisplay';
 import './Chatbot.css';
 import '../styles/widgetPrompt.css';
 
@@ -65,12 +83,45 @@ export default function Chatbot() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
 
+  // Stream E: Modal & feature states
+  const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showFAQPanel, setShowFAQPanel] = useState(false);
+  const [showQuickBuy, setShowQuickBuy] = useState(null);
+  const [showUpsell, setShowUpsell] = useState(null);
+  const [showCrisisAlert, setShowCrisisAlert] = useState(false);
+  const [showGoalForm, setShowGoalForm] = useState(false);
+  const [showInlineForm, setShowInlineForm] = useState(null);
+  const [showExportSelector, setShowExportSelector] = useState(false);
+  const [showExportPreview, setShowExportPreview] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [smartSuggestions, setSmartSuggestions] = useState([]);
+
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const exportMenuRef = useRef(null);
 
   // Initialize response detector
   const responseDetector = new ResponseDetector();
+
+  // Tier access control
+  const currentTier = (profile?.scanner_tier || 'FREE').toUpperCase();
+  const TIER_FEATURES = {
+    FREE:  { questions: 5,  pdfExport: false, voice: false, widgets: 3 },
+    TIER1: { questions: 20, pdfExport: false, voice: false, widgets: 5 },
+    TIER2: { questions: 50, pdfExport: false, voice: false, widgets: 10 },
+    TIER3: { questions: -1, pdfExport: true,  voice: true,  widgets: -1 },
+    ADMIN: { questions: -1, pdfExport: true,  voice: true,  widgets: -1 },
+  };
+  const tierFeatures = TIER_FEATURES[currentTier] || TIER_FEATURES.FREE;
+
+  // Crisis keyword detection for emotional support
+  const CRISIS_KEYWORDS = ['tu tu', 'suicide', 'muon chet', 'khong muon song', 'ket thuc', 'tu hai', 'self harm'];
+  const checkCrisis = (text) => {
+    if (!text) return false;
+    const normalized = text.toLowerCase();
+    return CRISIS_KEYWORDS.some(kw => normalized.includes(kw));
+  };
 
   const handleToggleTheme = () => {
     const newTheme = themeService.toggle();
@@ -85,6 +136,25 @@ export default function Chatbot() {
   const handleToggleSound = () => {
     const newState = soundService.toggle();
     setSoundEnabled(newState);
+  };
+
+  // Export flow: selector -> preview -> download
+  const handleExportSelect = (formatId) => {
+    setShowExportSelector(false);
+    setShowExportPreview({ format: formatId, content: '' });
+  };
+
+  const handleExportConfirm = (content) => {
+    const format = showExportPreview?.format || 'text';
+    const ext = { text: 'txt', markdown: 'md', json: 'json', pdf: 'pdf' }[format] || 'txt';
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `gem-master-chat.${ext}`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setShowExportPreview(null);
   };
 
   const handleExportText = () => {
@@ -172,6 +242,17 @@ export default function Chatbot() {
       loadHistory();
       loadWidgetCount();
       loadConversationHistory();
+
+      // Load proactive suggestions
+      proactiveAIService.getPendingMessages(user.id).then(pending => {
+        if (pending?.length > 0) {
+          setSmartSuggestions(pending.slice(0, 3).map(m => ({
+            id: m.id,
+            text: m.message || m.title || '',
+            action: m.cta_action || 'chat',
+          })));
+        }
+      }).catch(() => {});
     }
 
     const savedChat = chatStorage.load();
@@ -616,6 +697,17 @@ export default function Chatbot() {
 
       soundService.play('receive');
 
+      // Crisis detection on user input
+      if (checkCrisis(currentInput)) {
+        setShowCrisisAlert(true);
+      }
+
+      // Intent-based triggers
+      const intentResult = detectIntent(currentInput);
+      if (intentResult?.primaryIntent?.name === 'EMOTIONAL' && intentResult.sentiment === 'negative') {
+        // Emotional support - could trigger goal form or inline form
+      }
+
       if (!localResponse && activeMode === 'chat') {
         setConversationHistory(prev => [
           ...prev.slice(-9),
@@ -750,10 +842,13 @@ export default function Chatbot() {
 
         {/* ===== SMART SUGGESTION BANNER (placeholder) ===== */}
         <SmartSuggestionBanner
-          suggestions={[]}
-          onAction={() => {}}
-          onDismiss={() => {}}
-          visible={false}
+          suggestions={smartSuggestions}
+          onAction={(suggestion) => {
+            handleQuickSelect(suggestion.text || suggestion);
+            setSmartSuggestions([]);
+          }}
+          onDismiss={() => setSmartSuggestions([])}
+          visible={smartSuggestions.length > 0}
         />
 
         {/* ===== CHAT MESSAGES ===== */}
@@ -844,7 +939,7 @@ export default function Chatbot() {
             setActiveMode('iching');
             handleQuickSelect('Gieo que Kinh Dich cho toi');
           }}
-          onFAQ={() => handleQuickSelect('Cac cau hoi thuong gap')}
+          onFAQ={() => setShowFAQPanel(true)}
           onHistory={() => setShowHistory(true)}
           disabled={loading || !usageInfo?.allowed}
         />
@@ -909,6 +1004,9 @@ export default function Chatbot() {
           </p>
         </div>
 
+        {/* ===== RECORDING INDICATOR ===== */}
+        <RecordingIndicator isRecording={isRecording} duration={recordingDuration} />
+
         {/* ===== UPGRADE BANNER (when quota exhausted) ===== */}
         {usageInfo && !usageInfo.allowed && (
           <div className="upgrade-banner">
@@ -917,7 +1015,7 @@ export default function Chatbot() {
             </span>
             <button
               className="upgrade-banner__btn"
-              onClick={() => window.location.href = '/pricing'}
+              onClick={() => setShowPricingModal(true)}
             >
               <Unlock size={14} />
               Nang Cap
@@ -1050,6 +1148,88 @@ export default function Chatbot() {
           setExportCardData(null);
         }}
       />
+
+      {/* ===== STREAM E MODALS ===== */}
+
+      {showPricingModal && (
+        <ChatbotPricingModal
+          isOpen
+          onClose={() => setShowPricingModal(false)}
+          currentTier={currentTier}
+          onUpgrade={(tier) => {
+            setShowPricingModal(false);
+            window.location.href = '/pricing';
+          }}
+        />
+      )}
+
+      {showFAQPanel && (
+        <FAQPanel
+          isOpen
+          onClose={() => setShowFAQPanel(false)}
+          onSelectQuestion={(question) => {
+            setShowFAQPanel(false);
+            handleQuickSelect(question);
+          }}
+        />
+      )}
+
+      {showQuickBuy && (
+        <QuickBuyModal
+          isOpen
+          onClose={() => setShowQuickBuy(null)}
+          product={showQuickBuy}
+          userTier={currentTier}
+        />
+      )}
+
+      {showUpsell && (
+        <UpsellModal
+          isOpen
+          onClose={() => setShowUpsell(null)}
+          products={showUpsell}
+          currentTier={currentTier}
+        />
+      )}
+
+      {showCrisisAlert && (
+        <CrisisAlertModal
+          isOpen
+          onClose={() => setShowCrisisAlert(false)}
+        />
+      )}
+
+      {showGoalForm && (
+        <GoalSettingForm
+          isOpen
+          onClose={() => setShowGoalForm(false)}
+          onSubmit={(goal) => {
+            setShowGoalForm(false);
+            handleQuickSelect(`Toi muon dat muc tieu: ${goal.title || goal}`);
+          }}
+        />
+      )}
+
+      {showExportSelector && (
+        <ExportTemplateSelector
+          isOpen
+          onClose={() => setShowExportSelector(false)}
+          onSelect={handleExportSelect}
+          currentTier={currentTier}
+          messages={messages}
+        />
+      )}
+
+      {showExportPreview && (
+        <ExportPreview
+          isOpen
+          onClose={() => setShowExportPreview(null)}
+          onConfirm={handleExportConfirm}
+          format={showExportPreview.format}
+          content={showExportPreview.content}
+          messages={messages}
+        />
+      )}
     </div>
   );
 }

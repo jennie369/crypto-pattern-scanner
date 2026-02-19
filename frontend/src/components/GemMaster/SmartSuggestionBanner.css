@@ -1,0 +1,88 @@
+/* SmartSuggestionBanner - proactive AI suggestions */
+
+.smart-suggestion-banner {
+  padding: 10px 16px;
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.08), rgba(139, 92, 246, 0.08));
+  border-bottom: 1px solid rgba(255, 189, 89, 0.15);
+  animation: bannerSlideDown 0.3s ease;
+}
+
+@keyframes bannerSlideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.smart-suggestion-banner__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.smart-suggestion-banner__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 189, 89, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  flex: 1;
+}
+
+.smart-suggestion-banner__dismiss {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.smart-suggestion-banner__dismiss:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.smart-suggestion-banner__items {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 2px;
+}
+
+.smart-suggestion-banner__items::-webkit-scrollbar {
+  display: none;
+}
+
+.smart-suggestion-banner__chip {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  background: rgba(255, 189, 89, 0.1);
+  border: 1px solid rgba(255, 189, 89, 0.25);
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.smart-suggestion-banner__chip:hover {
+  background: rgba(255, 189, 89, 0.2);
+  border-color: rgba(255, 189, 89, 0.4);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 480px) {
+  .smart-suggestion-banner {
+    padding: 8px 12px;
+  }
+
+  .smart-suggestion-banner__chip {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+}

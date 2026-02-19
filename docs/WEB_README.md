@@ -23,7 +23,7 @@ React 19 + Vite SPA cho GEM Trading & Spiritual Ecosystem. Dark theme, Framer Mo
 
 **Dac diem chinh:**
 - Dark theme nhat quan voi design tokens (CSS variables + JS exports)
-- 82+ routes, 140+ components, 75+ services
+- 82+ routes, 170+ components, 85+ services
 - 4-tier subscription model (FREE / TIER1 / TIER2 / TIER3)
 - Lazy loading cho cac page nang (GemMaster, Dashboard, Forum sub-pages)
 - Mobile-first responsive: base = mobile, `@media 768px` = tablet, `1024px` = desktop
@@ -37,7 +37,7 @@ React 19 + Vite SPA cho GEM Trading & Spiritual Ecosystem. Dark theme, Framer Mo
 frontend/src/
 ├── assets/                  # Hinh anh, fonts, static assets
 ├── components/              # 100+ reusable components
-│   ├── GemMaster/           # 12 components (Phase B - 2026-02-19)
+│   ├── GemMaster/           # 38 components (Phase B + Full Port - 2026-02-19)
 │   │   ├── CardFlipAnimation.jsx    # Lat bai Tarot (327 lines)
 │   │   ├── CoinCastAnimation.jsx    # I-Ching coin animation (456 lines)
 │   │   ├── ConnectionStatus.jsx     # Trang thai ket noi (513 lines)
@@ -49,7 +49,33 @@ frontend/src/
 │   │   ├── SpreadLayout.jsx         # Layout trai bai (228 lines)
 │   │   ├── StreakDisplay.jsx         # Hien thi streak (601 lines)
 │   │   ├── TierBadge.jsx            # Badge tier nguoi dung (88 lines)
-│   │   └── UpgradeModal.jsx         # Modal nang cap tier (322 lines)
+│   │   ├── UpgradeModal.jsx         # Modal nang cap tier (322 lines)
+│   │   ├── QuickActionBar.jsx       # Tarot/I-Ching/FAQ/History action buttons
+│   │   ├── ClearChatButton.jsx      # Confirm-before-clear button
+│   │   ├── SmartSuggestionBanner.jsx # Proactive AI suggestion chips
+│   │   ├── ChatbotPricingModal.jsx  # Tier comparison + upgrade CTAs
+│   │   ├── FAQPanel.jsx             # 10-topic searchable FAQ slide-up panel
+│   │   ├── FAQPanelData.js          # FAQ topics & questions data
+│   │   ├── QuickBuyModal.jsx        # Crystal/product quick-buy modal
+│   │   ├── UpsellModal.jsx          # Complementary product suggestions
+│   │   ├── CrystalRecommendation.jsx # Crystal cards with quick-buy
+│   │   ├── ProductRecommendations.jsx # Course/scanner/affiliate cards
+│   │   ├── CrisisAlertModal.jsx     # Hotline 1800 599 920 + focus trap
+│   │   ├── SmartFormCard.jsx        # Auto-detected widget creation form
+│   │   ├── GoalSettingForm.jsx      # 4-step goal creation modal
+│   │   ├── InlineChatForm.jsx       # Compact in-chat goal/affirmation form
+│   │   ├── TemplateInlineForm.jsx   # 7 template types (fear, gratitude, journal...)
+│   │   ├── WidgetSuggestionCard.jsx # "Add to Dashboard" suggestion card
+│   │   ├── GoalTrackingCard.jsx     # Goal progress bar + milestones
+│   │   ├── AffirmationCard.jsx      # Text + read-aloud via Speech API
+│   │   ├── ActionChecklistCard.jsx  # Toggleable checklist card
+│   │   ├── StatsWidget.jsx          # Goals/streak/affirmations/widgets stats
+│   │   ├── ExportButton.jsx         # Download trigger with message count
+│   │   ├── ExportTemplateSelector.jsx # Text/MD/JSON/PDF format picker
+│   │   ├── ExportPreview.jsx        # Preview before download
+│   │   ├── RecordingIndicator.jsx   # Pulsing dot + waveform + timer
+│   │   ├── VoiceQuotaDisplay.jsx    # Progress bar for voice quota
+│   │   └── index.js                 # Barrel export (all 38 components)
 │   ├── VisionBoard/         # 9 components (Vision Board UI)
 │   ├── Rituals/cosmic/      # 4 components (Breathing, Background, GlassCard, GlowButton)
 │   ├── Scanner/             # Pattern scanner components
@@ -358,7 +384,9 @@ All admin sub-routes duoc protected boi `ProtectedAdminRoute` va rendered inside
 
 ## 5. GemMaster Module (Moi - 2026-02-19)
 
-Module GemMaster tren web duoc sync tu mobile app, bao gom 9 services, 12 components, 6 pages, va 3 hooks.
+Module GemMaster tren web duoc sync tu mobile app, bao gom 18 services, 38 components, 6 pages, va 3 hooks.
+
+> **Full Port (2026-02-19)**: 9 services goc (Phase B) + 9 services moi (Full Port) = 18 services. 12 components goc + 26 components moi = 38 components. Layout Chatbot.jsx rewritten tu 3-column sang single-column mobile-first.
 
 ### 5.1 Services (9 file moi)
 
@@ -374,9 +402,23 @@ Module GemMaster tren web duoc sync tu mobile app, bao gom 9 services, 12 compon
 | `ritualTrackingService.js` | 840 | `user_rituals`, `ritual_completions` | Custom ritual CRUD, completion tracking, streak integration, coaching messages |
 | `userContextService.js` | 696 | `user_context_cache`, `profiles` | AI personalization context, 1h server cache, localStorage client cache |
 
-**Tong cong**: 5,182 dong code moi cho services.
+**Tong cong**: 5,182 dong code moi cho services goc (Phase B).
 
-### 5.2 Components (12 file moi)
+### 5.1b Services Moi (9 file — Full Port 2026-02-19)
+
+| Service | Mo ta | Storage | Chuc nang chinh |
+|---------|-------|---------|-----------------|
+| `gemMasterService.js` | Core AI orchestrator (~700 lines) | Supabase `chatbot-gemini` edge fn | callGeminiAPI, questionnaire flow, karma detection, premium gating, local knowledge base, enrichWithRichResponse, processMessage |
+| `quotaService.js` | Tier-based daily limits | Supabase RPCs `check_all_quotas`, `increment_chatbot_quota` | checkQuota, decrementQuota, getQuotaStatus, canQuery. Daily reset UTC+7 (Vietnam). FREE=5, TIER1=20, TIER2=50, TIER3=unlimited |
+| `intentDetectionService.js` | Keyword-based intent/emotion detection | In-memory | INTENT_TYPES, detectIntent, detectEmotion, detectLifeArea. Pure keyword matching |
+| `userMemoryService.js` | User context persistence | Supabase + inline Map cache | getUserMemory, updateMemory, getPersonalizationContext |
+| `proactiveAIService.js` | Smart suggestion templates | Inline Map cache | Message templates for daily insights, streak alerts, ritual reminders |
+| `recommendationEngine.js` | Context-aware recommendations | Supabase | Strategies: tier upgrade, course, crystal, affiliate. Uses shopifyService |
+| `widgetDetectionService.js` | Widget trigger keyword patterns | In-memory | WIDGET_TYPES, detectWidgetTrigger, detectAllWidgetTriggers |
+| `crystalTagMappingService.js` | Crystal-to-tag static mapping | In-memory | Maps emotion/intent to crystal products. Uses web ShopifyService |
+| `voiceService.js` | Web Speech API voice input | Supabase `voice_usage` | startRecording, stopRecording, getVoiceQuota. Uses SpeechRecognition API |
+
+### 5.2 Components (12 file goc + 26 file moi = 38 total)
 
 | Component | Dong | Mo ta | Animation |
 |-----------|------|-------|-----------|
@@ -393,7 +435,41 @@ Module GemMaster tren web duoc sync tu mobile app, bao gom 9 services, 12 compon
 | `TierBadge.jsx` | 88 | Badge hien thi tier nguoi dung | Color-coded glow |
 | `UpgradeModal.jsx` | 322 | Modal nang cap khi dat gioi han tier | Slide up + backdrop |
 
-**Tong cong**: 3,800 dong code moi cho components.
+**Tong cong**: 3,800 dong code cho 12 components goc.
+
+### 5.2b Components Moi (26 file — Full Port 2026-02-19)
+
+| Component | Mo ta | Trigger/Integration |
+|-----------|-------|---------------------|
+| **Layout & Core UI** | | |
+| `QuickActionBar.jsx` | 4 buttons: Tarot, Kinh Dich, FAQ, Lich Su | Bottom of chat, above input |
+| `ClearChatButton.jsx` | Confirm dialog before clearing chat | Header actions |
+| `SmartSuggestionBanner.jsx` | Proactive AI suggestion chips below header | proactiveAIService |
+| **Modals & Commerce** | | |
+| `ChatbotPricingModal.jsx` | Tier comparison (PRO/PREMIUM/VIP) + upgrade CTAs | Quota exhausted, upgrade button |
+| `FAQPanel.jsx` | 10-topic searchable FAQ slide-up panel | QuickActionBar FAQ button |
+| `FAQPanelData.js` | FAQ_TOPICS, FAQ_QUESTIONS data | FAQPanel data source |
+| `QuickBuyModal.jsx` | Product display, variant selection, add-to-cart | Crystal recommendation click |
+| `UpsellModal.jsx` | Checkbox-selectable upsell products, dynamic discount | After QuickBuyModal add-to-cart |
+| `CrystalRecommendation.jsx` | Horizontal scrollable crystal cards, HOT badge | AI response with crystal context |
+| `ProductRecommendations.jsx` | CourseCard/ScannerCard/AffiliateCard sub-components | recommendationEngine |
+| `CrisisAlertModal.jsx` | Hotline 1800 599 920, focus trap, z-index 2000 | emotionDetectionService crisis keywords |
+| **Forms & Widgets** | | |
+| `SmartFormCard.jsx` | Auto-detected widget creation form | widgetDetectionService trigger |
+| `GoalSettingForm.jsx` | 4-step goal creation modal (area→desc→time→affirmation) | Intent detection: goal keywords |
+| `InlineChatForm.jsx` | 3-step compact inline form (goal/affirmation) | In-chat widget trigger |
+| `TemplateInlineForm.jsx` | 7 template types (fear, gratitude, journal...) | Template keyword detection |
+| `WidgetSuggestionCard.jsx` | "Add to Dashboard" suggestion card with tier limit | After form/widget creation |
+| `GoalTrackingCard.jsx` | Goal progress bar + milestones + edit amount | In-chat goal tracking widget |
+| `AffirmationCard.jsx` | Text + read-aloud via Web Speech API | In-chat affirmation widget |
+| `ActionChecklistCard.jsx` | Toggleable checklist with strikethrough | In-chat checklist widget |
+| `StatsWidget.jsx` | 4-stat grid (goals/streak/affirmations/widgets) | In-chat stats summary |
+| **Export & Voice** | | |
+| `ExportButton.jsx` | Download trigger with message count badge | Chat header action |
+| `ExportTemplateSelector.jsx` | 4 format cards (Text/MD/JSON/PDF). PDF locked to TIER3 | ExportButton click |
+| `ExportPreview.jsx` | Preview with formatted content, download/cancel | After template selection |
+| `RecordingIndicator.jsx` | Pulsing red dot + 5-bar waveform + duration timer | voiceService recording |
+| `VoiceQuotaDisplay.jsx` | Progress bar for voice quota, unlimited tier handling | Voice input area |
 
 ### 5.3 Pages (6 file moi)
 
@@ -647,7 +723,7 @@ Ca hai query nen tra ve **0 rows**.
 | [`docs/SCANNER_SYNC_MASTER_PLAN.md`](./SCANNER_SYNC_MASTER_PLAN.md) | Ke hoach sync Scanner web-mobile |
 | [`TAISAN_MASTER_PLAN.md`](../TAISAN_MASTER_PLAN.md) | Ke hoach sync Tai San (Account) web-mobile |
 | [`TAISAN_GAP_ANALYSIS.md`](../TAISAN_GAP_ANALYSIS.md) | Gap analysis chi tiet giua mobile Account va web Account |
-| [`docs/Web_Troubleshooting_Tips.md`](./Web_Troubleshooting_Tips.md) | 19 engineering rules cho web frontend |
+| [`docs/Web_Troubleshooting_Tips.md`](./Web_Troubleshooting_Tips.md) | 26 engineering rules cho web frontend |
 
 ---
 

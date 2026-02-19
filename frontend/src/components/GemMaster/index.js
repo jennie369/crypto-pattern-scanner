@@ -36,3 +36,10 @@ export { default as GoalTrackingCard } from './GoalTrackingCard';
 export { default as AffirmationCard } from './AffirmationCard';
 export { default as ActionChecklistCard } from './ActionChecklistCard';
 export { default as StatsWidget } from './StatsWidget';
+
+// Export & Voice Components (Stream E)
+export { default as ExportButton } from './ExportButton';
+export { default as ExportTemplateSelector } from './ExportTemplateSelector';
+export { default as ExportPreview } from './ExportPreview';
+export { default as RecordingIndicator } from './RecordingIndicator';
+export { default as VoiceQuotaDisplay } from './VoiceQuotaDisplay';

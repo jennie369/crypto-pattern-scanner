@@ -1,0 +1,257 @@
+.smart-form-card {
+  background: rgba(15, 10, 30, 0.92);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 8px 4px;
+  border: 1px solid rgba(255, 189, 89, 0.25);
+}
+
+.smart-form-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.smart-form-card__header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.smart-form-card__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #FFBD59;
+}
+
+.smart-form-card__dismiss-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.smart-form-card__dismiss-btn:hover {
+  opacity: 1;
+}
+
+.smart-form-card__description {
+  font-size: 14px;
+  color: #E2E8F0;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.smart-form-card__highlight {
+  color: #FFBD59;
+  font-weight: 600;
+}
+
+.smart-form-card__tag-container {
+  display: flex;
+  margin-bottom: 12px;
+}
+
+.smart-form-card__tag {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 189, 89, 0.15);
+  padding: 8px 12px;
+  border-radius: 20px;
+  gap: 6px;
+}
+
+.smart-form-card__tag-icon {
+  font-size: 16px;
+}
+
+.smart-form-card__tag-text {
+  color: #FFBD59;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.smart-form-card__explanation-box {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.smart-form-card__explanation-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #FFBD59;
+  margin-bottom: 4px;
+}
+
+.smart-form-card__explanation-text {
+  font-size: 12px;
+  color: #A0AEC0;
+  line-height: 1.5;
+}
+
+.smart-form-card__preview-box {
+  margin-bottom: 16px;
+}
+
+.smart-form-card__preview-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #E2E8F0;
+  margin-bottom: 8px;
+}
+
+.smart-form-card__preview-item {
+  font-size: 12px;
+  color: #A0AEC0;
+  margin-left: 8px;
+  margin-bottom: 4px;
+  font-style: italic;
+}
+
+.smart-form-card__preview-more {
+  font-size: 11px;
+  color: #718096;
+  margin-left: 8px;
+}
+
+.smart-form-card__button-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.smart-form-card__skip-btn {
+  background: none;
+  border: none;
+  color: #718096;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 10px 16px;
+  transition: color 0.2s;
+}
+
+.smart-form-card__skip-btn:hover {
+  color: #A0AEC0;
+}
+
+.smart-form-card__add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #FFBD59;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.smart-form-card__add-btn:hover {
+  background: #FFD080;
+  transform: translateY(-1px);
+}
+
+.smart-form-card__add-btn:active {
+  transform: translateY(0);
+}
+
+.smart-form-card__add-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.smart-form-card__add-text {
+  color: #0A0F1C;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Alert Modal */
+.smart-form-card__modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.smart-form-card__modal-content {
+  background: #1a1a2e;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  width: 85%;
+  max-width: 340px;
+  text-align: center;
+}
+
+.smart-form-card__modal-icon {
+  margin-bottom: 12px;
+}
+
+.smart-form-card__modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #FFBD59;
+  margin-bottom: 8px;
+}
+
+.smart-form-card__modal-message {
+  font-size: 14px;
+  color: #A0AEC0;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.smart-form-card__modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.smart-form-card__modal-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  color: #718096;
+  transition: background 0.2s;
+}
+
+.smart-form-card__modal-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.smart-form-card__modal-btn--primary {
+  background: #FFBD59;
+  color: #0A0F1C;
+  font-weight: 700;
+}
+
+.smart-form-card__modal-btn--primary:hover {
+  background: #FFD080;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
