@@ -53,7 +53,7 @@ frontend/src/
 │   ├── VisionBoard/         # 9 components (Vision Board UI)
 │   ├── Rituals/cosmic/      # 4 components (Breathing, Background, GlassCard, GlowButton)
 │   ├── Scanner/             # Pattern scanner components
-│   ├── PaperTrading/        # Paper trading widgets
+│   ├── PaperTrading/        # Paper trading widgets (unified tables — 2026-02-19)
 │   ├── account/             # 8 components (Tai San sync - 2026-02-19)
 │   │   ├── AdminPanel.jsx         # Admin section voi pending badges (152 lines)
 │   │   ├── AffiliateSection.jsx   # 4-state affiliate: none/pending/rejected/active (204 lines)
@@ -584,7 +584,7 @@ Ca hai query nen tra ve **0 rows**.
 | [`docs/SCANNER_SYNC_MASTER_PLAN.md`](./SCANNER_SYNC_MASTER_PLAN.md) | Ke hoach sync Scanner web-mobile |
 | [`TAISAN_MASTER_PLAN.md`](../TAISAN_MASTER_PLAN.md) | Ke hoach sync Tai San (Account) web-mobile |
 | [`TAISAN_GAP_ANALYSIS.md`](../TAISAN_GAP_ANALYSIS.md) | Gap analysis chi tiet giua mobile Account va web Account |
-| [`docs/Web_Troubleshooting_Tips.md`](./Web_Troubleshooting_Tips.md) | 13+ engineering rules cho web frontend |
+| [`docs/Web_Troubleshooting_Tips.md`](./Web_Troubleshooting_Tips.md) | 19 engineering rules cho web frontend |
 
 ---
 
@@ -638,3 +638,106 @@ Verification:
 # Phai tra ve 0 ket qua (tru comments va .backup files)
 grep -rn "from('users')" frontend/src/ --include='*.jsx' --include='*.js' --include='*.tsx' --include='*.ts' | grep -v '.backup' | grep -v '// ' | grep -v ' \* '
 ```
+
+---
+
+## 12. Forum/Community Module (Moi - 2026-02-19)
+
+Module Forum/Community tren web duoc sync tu mobile app ForumScreen, dat feature parity 100% voi mobile. Bao gom 5 services, 13 components, 6 pages moi, va 4 hooks.
+
+### 12.1 Services (5 file moi/enhanced)
+
+| Service | Dong | Supabase Tables/RPCs | Chuc nang chinh |
+|---------|------|----------------------|-----------------|
+| `forum.js` | 1027 | `forum_posts`, `post_reactions`, `forum_saved`, `post_edit_history`, `scheduled_posts`, `post_views`, `post_boosts` | Enhanced: toggleReaction (6 types), updatePost (edit history), schedulePost, getPostAnalytics, getEditHistory, getPostsByHashtag, pinPost, hidePost, boostPost, recordView |
+| `feedService.js` | 405 | RPC `get_personalized_feed`, `user_follows`, `custom_feeds` | FeedService: 5 feed types (personalized/following/popular/latest/academy), custom feed CRUD, getTrendingHashtags, recordImpression |
+| `commentService.js` | 247 | `forum_comments`, `comment_reactions` | Threaded comments: flat-to-tree builder, createComment with thread_depth, toggleCommentReaction, reportComment |
+| `karmaService.js` | 73 | RPC `get_user_karma`, `karma_history` | Karma display, leaderboard, history |
+| `linkPreviewService.js` | 92 | Edge fn `fetch-link-preview` | URL preview fetch, 10-min Map cache, extractUrls regex |
+
+**Tong cong**: ~1,844 dong code moi/enhanced cho services.
+
+### 12.2 Components (13 file moi/enhanced)
+
+| Component | Dong | Mo ta |
+|-----------|------|-------|
+| `PostCard.jsx` | 832 | Enhanced: 6-type reaction picker (like/love/haha/wow/sad/angry), TrendingBadge, PinnedBadge, boosted badge, LinkPreviewCard, QuotedPost, ImageLightbox, @mention highlighting, hashtag click |
+| `PostCreationModal.jsx` | 741 | Enhanced: MentionInput, auto URL detection, schedule toggle, tag chips, image drag-drop, character count, preview mode |
+| `CenterFeed.jsx` | 273 | Enhanced: IntersectionObserver sentinel for infinite scroll, PostSkeleton loading, ScrollToTop |
+| `ThreadedComments.jsx` | 256 | NEW: Tree structure, sort toggle, collapse/expand, load more |
+| `CommentItem.jsx` | 303 | NEW: Avatar, tier badge, @mention, 3 quick reactions, reply, edit/delete, thread connector |
+| `LinkPreviewCard.jsx` | 103 | NEW: Full/compact variants, loading skeleton, error fallback |
+| `PostSkeleton.jsx` | 43 | NEW: CSS-only shimmer animation |
+| `ImageLightbox.jsx` | 157 | NEW: Portal, dark overlay, arrow nav, counter, ESC/swipe close |
+| `ReactionDisplay.jsx` | 120 | NEW: Top 3 emoji + counts, hover tooltip |
+| `MentionInput.jsx` | 233 | NEW: @mention autocomplete, debounced search, arrow key nav |
+| `ScrollToTop.jsx` | 43 | NEW: Floating button, Framer Motion fade |
+| `QuotedPost.jsx` | 69 | NEW: Gold left border, content snippet, deleted fallback |
+| `TrendingBadge.jsx` + `PinnedBadge.jsx` | 40 | NEW: Trending/Pinned visual badges |
+
+**Tong cong**: ~3,213 dong code moi/enhanced cho components.
+
+### 12.3 Pages (6 file moi + 5 enhanced)
+
+| Page | Dong | Route | Mo ta |
+|------|------|-------|-------|
+| `EditPost.jsx` | 296 | `/forum/edit/:postId` | Author-only edit form, tag editor, image management |
+| `UserProfile.jsx` | 366 | `/forum/user/:userId` | Profile with follow/stats/tabs (Posts/Liked/Saved) |
+| `HashtagFeed.jsx` | 206 | `/forum/hashtag/:tag` | Hashtag filtered infinite scroll feed |
+| `PostAnalytics.jsx` | 323 | `/forum/post/:postId/analytics` | Recharts, reaction breakdown, top commenters |
+| `ScheduledPosts.jsx` | 236 | `/forum/scheduled` | Scheduled post management, publish/delete |
+| `EditHistory.jsx` | 220 | `/forum/post/:postId/history` | Edit history with diff view |
+| `Forum3Column.jsx` | 390 | `/forum` | Enhanced: infinite scroll, feed type switching, custom feeds, skeleton loading |
+| `ThreadDetail.jsx` | 600 | `/forum/thread/:threadId` | Enhanced: threaded comments, 6-type reactions, mentions |
+| `CreateThread.jsx` | 561 | `/forum/new` | Enhanced: @mention, link preview, schedule post |
+| `LeftSidebar.jsx` | 419 | (component) | Enhanced: karma display, custom feed CRUD |
+| `RightSidebar.jsx` | 336 | (component) | Enhanced: karma leaderboard with crown icons |
+
+**Tong cong**: ~3,953 dong code moi/enhanced cho pages.
+
+### 12.4 Hooks (4 file moi)
+
+| Hook | Dong | Return Values | Service Wrapped |
+|------|------|---------------|-----------------|
+| `usePosts.js` | 125 | `posts, loading, hasMore, error, fetchNextPage, refresh` | `feedService` (7 feed types) |
+| `useComments.js` | 119 | `comments, loading, error, addComment, editComment, deleteComment, toggleReaction` | `commentService` |
+| `useReactions.js` | 109 | `reactions, userReaction, toggleReaction, loading` | `forum.toggleReaction` (optimistic) |
+| `useKarma.js` | 57 | `karma, leaderboard, history, loading` | `karmaService` |
+
+### 12.5 Routes Moi
+
+Tat ca Forum routes deu lazy-loaded voi `React.lazy()` + `Suspense`:
+
+```
+/forum                          -> Forum 3-column layout (infinite scroll)
+/forum/new                      -> Tao bai viet moi (@mention, schedule, link preview)
+/forum/thread/:threadId         -> Chi tiet bai viet (threaded comments, 6 reactions)
+/forum/edit/:postId             -> Chinh sua bai viet (author-only)
+/forum/user/:userId             -> Profile nguoi dung (follow, tabs)
+/forum/hashtag/:tag             -> Feed theo hashtag
+/forum/post/:postId/analytics   -> Thong ke bai viet (charts, reactions)
+/forum/post/:postId/history     -> Lich su chinh sua (diff view)
+/forum/scheduled                -> Bai viet da len lich
+```
+
+### 12.6 Design Token Compliance
+
+Tat ca 12 CSS files trong Forum module da duoc audit:
+- 150+ hardcoded hex colors converted sang `var(--token, #fallback)`
+- Mobile-first responsive: base = mobile, `@media (min-width: 768px)` = tablet, `@media (min-width: 1024px)` = desktop
+- Touch targets: tat ca interactive elements >= 44px
+
+### 12.7 6-Type Reaction System
+
+Dong bo voi mobile app:
+
+| ID | Emoji | Label (VI) |
+|----|-------|------------|
+| `like` | 👍 | Thich |
+| `love` | ❤️ | Yeu thich |
+| `haha` | 😂 | Ha ha |
+| `wow` | 😮 | Wow |
+| `sad` | 😢 | Buon |
+| `angry` | 😡 | Tuc gian |
+
+Database: `post_reactions` table (user_id, post_id, reaction_type). Unique constraint tren (user_id, post_id) — moi user chi 1 reaction/post.

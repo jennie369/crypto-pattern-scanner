@@ -961,6 +961,130 @@ const { data } = await supabase
 
 ---
 
+# SECTION F: FORUM/COMMUNITY (2026-02-19)
+
+---
+
+## Rule 15: Hardcoded CSS Colors Instead of Design Tokens
+**Source:** Forum/Community Sync QA — 150+ hardcoded hex colors found across 12 CSS files
+
+### Khi nao ap dung (When to apply)
+Khi viet CSS cho bat ky component nao trong project co design token system. Dac biet sau khi copy code tu AI-generated sources hoac Figma inspect.
+
+### Trieu chung (Symptoms)
+- Mau sac khong nhat quan giua cac trang
+- Theme switching khong ap dung cho mot so components
+- Khi thay doi brand color trong tokens, mot so UI van giu mau cu
+
+### Nguyen nhan goc (Root cause pattern)
+```css
+/* SAI: Hardcoded hex */
+.post-card { background: #1A1B3A; color: #ffffff; }
+
+/* DUNG: Design token voi fallback */
+.post-card { background: var(--bg-card, #1A1B3A); color: var(--text-primary, #ffffff); }
+```
+
+### Bien phap phong ngua (Preventive measures)
+- Luon dung `var(--token, #fallback)` format
+- Stylelint rule `declaration-strict-value` de block hardcoded colors
+- Post-QA grep: `grep -rn 'color:.*#[0-9a-fA-F]' src/ --include='*.css' | grep -v 'var('`
+
+---
+
+## Rule 16: Desktop-First Media Queries (Should Be Mobile-First)
+**Source:** Forum/Community Sync QA — CSS dung `max-width` thay vi `min-width`
+
+### Khi nao ap dung (When to apply)
+Khi project quy uoc mobile-first responsive nhung developer viet `@media (max-width:)`.
+
+### Trieu chung (Symptoms)
+- Mobile layout bi vo vi base styles la desktop styles
+- Nhieu override properties trong media queries
+
+### Nguyen nhan goc (Root cause pattern)
+```css
+/* SAI: Desktop-first */
+.sidebar { width: 300px; display: flex; }
+@media (max-width: 768px) { .sidebar { width: 100%; display: none; } }
+
+/* DUNG: Mobile-first */
+.sidebar { display: none; }
+@media (min-width: 768px) { .sidebar { display: flex; width: 300px; } }
+```
+
+### Bien phap phong ngua (Preventive measures)
+- Quy uoc: base CSS = mobile, `@media (min-width: 768px)` = tablet, `@media (min-width: 1024px)` = desktop
+- Grep audit: `grep -rn 'max-width' src/ --include='*.css'` — moi match can duoc xem xet
+
+---
+
+## Rule 17: Missing Tooltips on Icon-Only Buttons
+**Source:** Forum/Community Sync QA — 20+ icon buttons thieu `title` attribute
+
+### Khi nao ap dung (When to apply)
+Khi render icon button khong co text label — user khong biet chuc nang neu khong co tooltip.
+
+### Nguyen nhan goc (Root cause pattern)
+```jsx
+/* SAI */ <button onClick={handleDelete}><Trash2 size={16} /></button>
+/* DUNG */ <button onClick={handleDelete} title="Xoa bai viet" aria-label="Xoa bai viet"><Trash2 size={16} /></button>
+```
+
+### Bien phap phong ngua (Preventive measures)
+- Moi `<button>` chi chua icon PHAI co `title` va `aria-label`
+- ESLint `jsx-a11y` rules
+- Code review checklist: "Icon buttons co tooltip khong?"
+
+---
+
+## Rule 18: Missing Access Control Guards on Mutations
+**Source:** Forum/Community Sync QA — Edit/delete buttons hien thi cho tat ca users
+
+### Khi nao ap dung (When to apply)
+Khi render actions (edit, delete, pin, hide) tren user-generated content.
+
+### Nguyen nhan goc (Root cause pattern)
+```jsx
+/* SAI: Khong kiem tra ownership */
+<button onClick={() => deletePost(post.id)}>Xoa</button>
+
+/* DUNG: Kiem tra ownership + role */
+{(post.user_id === currentUser?.id || currentUser?.role === 'admin') && (
+  <button onClick={() => deletePost(post.id)} title="Xoa bai viet">Xoa</button>
+)}
+```
+
+### Bien phap phong ngua (Preventive measures)
+- Document access control matrix: guest/authenticated/owner/admin
+- Shared utility: `canEdit(post, user)`, `canDelete(post, user)`
+- Server-side RLS la security, client guard la UX — CA HAI phai co
+
+---
+
+## Rule 19: Missing Null Guards and Empty States
+**Source:** Forum/Community Sync QA — Components crash khi data la null/undefined
+
+### Khi nao ap dung (When to apply)
+Khi component nhan data tu API co the la null/undefined/empty array.
+
+### Nguyen nhan goc (Root cause pattern)
+```jsx
+/* SAI */ <p>{post.author.display_name}</p>  // Crash neu author = null
+/* DUNG */ <p>{post.author?.display_name || 'Nguoi dung'}</p>
+
+/* SAI */ {post.images.map(img => ...)}     // Crash neu images = null
+/* DUNG */ {(post.images || []).map(img => ...)}
+```
+
+### Bien phap phong ngua (Preventive measures)
+- Optional chaining `?.` cho MOI property access tren API data
+- Default values: `(array || [])`, `(string || '')`, `(number || 0)`
+- Moi component co 3 states: loading, error, empty
+- Image onError fallback: `<img onError={(e) => e.target.src = '/default-avatar.png'} />`
+
+---
+
 ## Grep Commands for Common Web Issues
 
 ```bash
@@ -973,7 +1097,21 @@ grep -rn "users:\w\+_id(" frontend/src/ --include='*.jsx' --include='*.js'
 # Rule 14: Column name mismatch (compare with DB schema)
 # Run: supabase gen types typescript > frontend/src/types/database.ts
 
-```bash
+# Rule 15: Hardcoded CSS colors (should use var(--token))
+grep -rn 'color:.*#[0-9a-fA-F]' frontend/src/ --include='*.css' | grep -v 'var('
+
+# Rule 16: Desktop-first media queries (should be min-width)
+grep -rn 'max-width' frontend/src/ --include='*.css'
+
+# Rule 17: Icon buttons without tooltip
+grep -rn '<button' frontend/src/ --include='*.jsx' -A2 | grep -v 'title='
+
+# Rule 18: Missing access control on mutations
+grep -rn 'deletePost\|editPost\|pinPost\|hidePost' frontend/src/ --include='*.jsx' -B3 | grep -v 'user_id\|isAdmin\|role'
+
+# Rule 19: Missing null guards on array operations
+grep -rn '\.map(' frontend/src/ --include='*.jsx' | grep -v '|| \[\]' | grep -v '?.'
+
 # Rule 1: Deep relative imports (potential wrong path depth)
 grep -rn '../../../../' src/ --include='*.jsx' --include='*.tsx'
 
@@ -1034,3 +1172,8 @@ grep -rn 'TYPOGRAPHY.fontSize' src/ --include='*.jsx' -B2 | grep -i 'input\|text
 | 12 | Platform | Design Token Misuse Across Platforms | Platform bug |
 | 13 | Database | Wrong Table Name (`users` vs `profiles`) | Silent data loss |
 | 14 | Database | Column Name Mismatch Between Platforms | Silent data loss |
+| 15 | UI | Hardcoded CSS Colors Instead of Design Tokens | Visual inconsistency |
+| 16 | Layout | Desktop-First Media Queries | Mobile layout break |
+| 17 | Accessibility | Missing Tooltips on Icon-Only Buttons | UX/a11y |
+| 18 | Security | Missing Access Control Guards on Mutations | UX/security |
+| 19 | UI | Missing Null Guards and Empty States | Runtime crash |
