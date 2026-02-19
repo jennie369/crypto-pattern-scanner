@@ -76,7 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .select(`
           id,
           email,
@@ -139,7 +139,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       };
 
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .insert([newProfile])
         .select()
         .single();
@@ -202,7 +202,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Check profile
       const { data: profileData } = await supabase
-        .from('users')
+        .from('profiles')
         .select(`
           id,
           email,
@@ -348,7 +348,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .select(`
           id,
           email,

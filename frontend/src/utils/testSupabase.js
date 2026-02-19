@@ -21,7 +21,7 @@ export async function testSupabaseConnection() {
   try {
     // Step 2: Test database connection
     const { data, error } = await supabase
-      .from('users')
+      .from('profiles')
       .select('count')
       .limit(1);
 

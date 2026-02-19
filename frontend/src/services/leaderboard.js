@@ -17,7 +17,7 @@ class LeaderboardService {
         .from('user_stats')
         .select(`
           *,
-          users:user_id(
+          profiles:user_id(
             id,
             display_name,
             avatar_url,

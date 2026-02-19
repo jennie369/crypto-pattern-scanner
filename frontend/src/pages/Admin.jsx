@@ -127,7 +127,7 @@ function Admin() {
       );
 
       const queryPromise = supabase
-        .from('users')
+        .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -157,7 +157,7 @@ function Admin() {
 
       // Count users by scanner_tier
       const usersQuery = supabase
-        .from('users')
+        .from('profiles')
         .select('scanner_tier, role');
 
       const { data: usersData, error: usersError } = await Promise.race([usersQuery, timeoutPromise]);
@@ -190,7 +190,7 @@ function Admin() {
 
       // Partnership stats
       const { data: partnerStats, error: partnerError } = await supabase
-        .from('users')
+        .from('profiles')
         .select('partner_role, partner_tier')
         .not('partner_role', 'is', null);
 
@@ -538,7 +538,7 @@ function Admin() {
     try {
       // Delete user (CASCADE will handle related records)
       const { error } = await supabase
-        .from('users')
+        .from('profiles')
         .delete()
         .eq('id', userId);
 
@@ -569,7 +569,7 @@ function Admin() {
       if (editingUser) {
         // Update existing user
         const { error } = await supabase
-          .from('users')
+          .from('profiles')
           .update({
             full_name: userData.full_name,
             scanner_tier: userData.scanner_tier,

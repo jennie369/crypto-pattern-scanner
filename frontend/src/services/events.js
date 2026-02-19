@@ -17,7 +17,7 @@ class EventsService {
         .from('community_events')
         .select(`
           *,
-          users:host_id(
+          profiles:host_id(
             id,
             display_name,
             avatar_url
@@ -74,7 +74,7 @@ class EventsService {
         .from('community_events')
         .select(`
           *,
-          users:host_id(
+          profiles:host_id(
             id,
             display_name,
             avatar_url
@@ -109,7 +109,7 @@ class EventsService {
         .from('community_events')
         .select(`
           *,
-          users:host_id(
+          profiles:host_id(
             id,
             display_name,
             avatar_url,
@@ -120,7 +120,7 @@ class EventsService {
             status,
             user_id,
             created_at,
-            users:user_id(
+            profiles:user_id(
               id,
               display_name,
               avatar_url
@@ -310,7 +310,7 @@ class EventsService {
           *,
           community_events(
             *,
-            users:host_id(
+            profiles:host_id(
               id,
               display_name,
               avatar_url
@@ -346,7 +346,7 @@ class EventsService {
             id,
             status,
             user_id,
-            users:user_id(
+            profiles:user_id(
               id,
               display_name,
               avatar_url
@@ -376,7 +376,7 @@ class EventsService {
         .from('event_rsvps')
         .select(`
           *,
-          users:user_id(
+          profiles:user_id(
             id,
             display_name,
             avatar_url,

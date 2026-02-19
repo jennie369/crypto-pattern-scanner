@@ -26,7 +26,7 @@ export async function createConversationImproved(participantIds, isGroup = false
     console.log('🔍 [IMPROVED] Step 1: Verifying users exist...');
 
     const { data: existingUsers, error: userCheckError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id, display_name, email')
       .in('id', participantIds);
 
@@ -69,7 +69,7 @@ export async function createConversationImproved(participantIds, isGroup = false
               unread_count,
               last_read_at,
               user_id,
-              users:user_id(
+              profiles:user_id(
                 id,
                 display_name,
                 avatar_url,
@@ -195,7 +195,7 @@ export async function createConversationImproved(participantIds, isGroup = false
           unread_count,
           last_read_at,
           user_id,
-          users:user_id(
+          profiles:user_id(
             id,
             display_name,
             avatar_url,

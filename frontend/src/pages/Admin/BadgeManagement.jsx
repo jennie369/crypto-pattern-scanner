@@ -35,7 +35,7 @@ export default function BadgeManagement() {
       setLoading(true);
 
       let query = supabase
-        .from('users')
+        .from('profiles')
         .select(`
           id,
           email,
@@ -91,7 +91,7 @@ export default function BadgeManagement() {
 
     try {
       const { error } = await supabase
-        .from('users')
+        .from('profiles')
         .update({
           verified_seller: editForm.verified_seller,
           verified_trader: editForm.verified_trader,

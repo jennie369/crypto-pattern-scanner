@@ -32,7 +32,7 @@ export default function TelegramConnect() {
   const fetchTelegramId = async () => {
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .select('telegram_id')
         .eq('id', user.id)
         .single()
@@ -76,7 +76,7 @@ export default function TelegramConnect() {
 
       // Update user's telegram_id in database
       const { error: updateError } = await supabase
-        .from('users')
+        .from('profiles')
         .update({ telegram_id: inputChatId.trim() })
         .eq('id', user.id)
 
@@ -111,7 +111,7 @@ export default function TelegramConnect() {
       setLoading(true)
 
       const { error } = await supabase
-        .from('users')
+        .from('profiles')
         .update({ telegram_id: null })
         .eq('id', user.id)
 

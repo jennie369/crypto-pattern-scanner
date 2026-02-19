@@ -26,7 +26,7 @@ class MessagingService {
             unread_count,
             last_read_at,
             user_id,
-            users:user_id(
+            profiles:user_id(
               id,
               display_name,
               avatar_url,
@@ -77,7 +77,7 @@ class MessagingService {
         .from('messages')
         .select(`
           *,
-          users:sender_id(
+          profiles:sender_id(
             id,
             display_name,
             avatar_url
@@ -170,7 +170,7 @@ class MessagingService {
               unread_count,
               last_read_at,
               user_id,
-              users:user_id(
+              profiles:user_id(
                 id,
                 display_name,
                 avatar_url,
@@ -243,7 +243,7 @@ class MessagingService {
             unread_count,
             last_read_at,
             user_id,
-            users:user_id(
+            profiles:user_id(
               id,
               display_name,
               avatar_url,
@@ -297,7 +297,7 @@ class MessagingService {
       if (!query || query.length < 2) return [];
 
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .select('id, display_name, avatar_url, email, online_status')
         .or(`display_name.ilike.%${query}%,email.ilike.%${query}%`)
         .limit(10);
@@ -370,7 +370,7 @@ class MessagingService {
               .from('messages')
               .select(`
                 *,
-                users:sender_id(
+                profiles:sender_id(
                   id,
                   display_name,
                   avatar_url
@@ -412,7 +412,7 @@ class MessagingService {
               .from('messages')
               .select(`
                 *,
-                users:sender_id(
+                profiles:sender_id(
                   id,
                   display_name,
                   avatar_url
@@ -457,7 +457,7 @@ class MessagingService {
       if (!user) throw new Error('Not authenticated');
 
       const { error } = await supabase
-        .from('users')
+        .from('profiles')
         .update({
           online_status: status,
           last_seen: new Date().toISOString()

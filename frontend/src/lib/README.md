@@ -14,7 +14,7 @@ import { supabase } from './lib/supabaseClient';
 
 // Query database
 const { data, error } = await supabase
-  .from('users')
+  .from('profiles')
   .select('*')
   .eq('id', userId);
 ```

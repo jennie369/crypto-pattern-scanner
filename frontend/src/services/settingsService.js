@@ -345,7 +345,7 @@ export async function getSubscriptionInfo(userId) {
   try {
     // Get user tier info from users table
     const { data: userData, error: userError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('tier, tier_expires_at, course_tier, scanner_tier, chatbot_tier, course_tier_expires_at, scanner_tier_expires_at, chatbot_tier_expires_at')
       .eq('id', userId)
       .single();
@@ -440,7 +440,7 @@ export async function exportUserData(userId) {
   try {
     // Fetch all user-related data
     const [userResult, settingsResult, sessionsResult, keysResult, invoicesResult, scansResult, tradesResult] = await Promise.all([
-      supabase.from('users').select('*').eq('id', userId).single(),
+      supabase.from('profiles').select('*').eq('id', userId).single(),
       supabase.from('user_settings').select('*').eq('user_id', userId).single(),
       supabase.from('user_sessions').select('*').eq('user_id', userId),
       supabase.from('api_keys').select('*').eq('user_id', userId),
@@ -505,7 +505,7 @@ export async function requestAccountDeletion(userId, password) {
 export async function updateProfile(userId, profileData) {
   try {
     const { data, error } = await supabase
-      .from('users')
+      .from('profiles')
       .update({
         ...profileData,
         updated_at: new Date().toISOString(),
