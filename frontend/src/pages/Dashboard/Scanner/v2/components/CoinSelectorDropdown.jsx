@@ -21,13 +21,19 @@ export const CoinSelectorDropdown = ({ selected = [], onChange, maxCoins = 2, ti
 
   // Fetch coins from Binance API
   useEffect(() => {
-    fetchCoins();
+    const controller = new AbortController();
+    fetchCoins(controller.signal);
     loadFavorites();
+    return () => controller.abort();
   }, []);
 
-  const fetchCoins = async () => {
+  const fetchCoins = async (signal) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     try {
-      const response = await fetch('https://fapi.binance.com/fapi/v1/ticker/24hr');
+      const response = await fetch('https://fapi.binance.com/fapi/v1/ticker/24hr', {
+        signal: signal || controller.signal,
+      });
       const data = await response.json();
 
       // FIX: Get ALL USDT pairs (500+), not just 100
@@ -44,6 +50,7 @@ export const CoinSelectorDropdown = ({ selected = [], onChange, maxCoins = 2, ti
 
       setAllCoins(usdtPairs);
     } catch (error) {
+      if (error.name === 'AbortError') return;
       console.error('Error fetching coins:', error);
       // Fallback to mock data
       setAllCoins([
@@ -51,6 +58,8 @@ export const CoinSelectorDropdown = ({ selected = [], onChange, maxCoins = 2, ti
         { symbol: 'ETH', fullSymbol: 'ETHUSDT', price: 3422.1, change: 1.8 },
         { symbol: 'BNB', fullSymbol: 'BNBUSDT', price: 957.5, change: -0.5 },
       ]);
+    } finally {
+      clearTimeout(timeoutId);
     }
   };
 

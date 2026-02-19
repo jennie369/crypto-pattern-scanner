@@ -230,8 +230,10 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
     console.log(`[TradingChart]    Limit: ${limit} candles`);
     console.log(`[TradingChart]    URL: ${url}`);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: controller.signal });
 
       // Step 1: Check HTTP status
       if (!response.ok) {
@@ -302,8 +304,12 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
 
       return { candleData, volumeData };
     } catch (error) {
-      console.error('[TradingChart] [ERROR] CRITICAL ERROR:', error.message);
-      console.error('[TradingChart] [ERROR] Stack:', error.stack);
+      if (error.name === 'AbortError') {
+        console.warn('[TradingChart] [TIMEOUT] Binance fetch timed out after 10s');
+      } else {
+        console.error('[TradingChart] [ERROR] CRITICAL ERROR:', error.message);
+        console.error('[TradingChart] [ERROR] Stack:', error.stack);
+      }
 
       // Mark as failed (NOT loaded)
       isLoadingHistoricalRef.current = false;
@@ -311,6 +317,8 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
 
       // 🔥 FIX: NO MOCK DATA FALLBACK - Show error to user
       throw new Error(`Failed to load ${cleanedSymbol} data: ${error.message}`);
+    } finally {
+      clearTimeout(timeoutId);
     }
   };
 

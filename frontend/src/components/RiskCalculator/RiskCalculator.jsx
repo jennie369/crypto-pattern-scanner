@@ -57,15 +57,19 @@ export default function RiskCalculator({ pattern = null }) {
   const [notificationType, setNotificationType] = useState('success')
 
   useEffect(() => {
+    const controller = new AbortController()
     if (user) {
-      fetchUserTier()
+      fetchUserTier(controller.signal)
     }
+    return () => controller.abort()
   }, [user])
 
   useEffect(() => {
+    const controller = new AbortController()
     if (user && userTier !== 'free') {
-      fetchSavedCalculations()
+      fetchSavedCalculations(controller.signal)
     }
+    return () => controller.abort()
   }, [user, userTier])
 
   // 🆕 Auto-populate from pattern data
@@ -88,22 +92,30 @@ export default function RiskCalculator({ pattern = null }) {
     }
   }, [pattern])
 
-  const fetchUserTier = async () => {
+  const fetchUserTier = async (signal) => {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .select('tier')
         .eq('id', user.id)
         .single()
+        .abortSignal(signal || controller.signal)
 
       if (error) throw error
       setUserTier(data.tier || 'free')
     } catch (error) {
+      if (error.name === 'AbortError') return
       console.error('Error fetching tier:', error)
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 
-  const fetchSavedCalculations = async () => {
+  const fetchSavedCalculations = async (signal) => {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
     try {
       const { data, error } = await supabase
         .from('risk_calculations')
@@ -111,11 +123,15 @@ export default function RiskCalculator({ pattern = null }) {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(10)
+        .abortSignal(signal || controller.signal)
 
       if (error) throw error
       setSavedCalculations(data || [])
     } catch (error) {
+      if (error.name === 'AbortError') return
       console.error('Error fetching calculations:', error)
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 
@@ -317,6 +333,8 @@ export default function RiskCalculator({ pattern = null }) {
       return
     }
 
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
     try {
       const { error } = await supabase
         .from('risk_calculations')
@@ -332,14 +350,21 @@ export default function RiskCalculator({ pattern = null }) {
           risk_amount: parseFloat(results.riskAmount),
           risk_reward: results.riskReward ? parseFloat(results.riskReward) : null
         }])
+        .abortSignal(controller.signal)
 
       if (error) throw error
 
       showNotificationModal('Đã lưu calculation!', 'success')
       fetchSavedCalculations()
     } catch (error) {
+      if (error.name === 'AbortError') {
+        showNotificationModal('Request timed out. Please try again.', 'error')
+        return
+      }
       console.error('Error saving calculation:', error)
       showNotificationModal('Lỗi khi lưu: ' + error.message, 'error')
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 
@@ -352,19 +377,28 @@ export default function RiskCalculator({ pattern = null }) {
       return
     }
 
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
     try {
       const { error } = await supabase
         .from('risk_calculations')
         .delete()
         .eq('id', id)
+        .abortSignal(controller.signal)
 
       if (error) throw error
 
       showNotificationModal('Đã xóa calculation!', 'success')
       fetchSavedCalculations()
     } catch (error) {
+      if (error.name === 'AbortError') {
+        showNotificationModal('Request timed out. Please try again.', 'error')
+        return
+      }
       console.error('Error deleting calculation:', error)
       showNotificationModal('Lỗi khi xóa: ' + error.message, 'error')
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 

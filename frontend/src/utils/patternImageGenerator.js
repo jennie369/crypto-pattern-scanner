@@ -4,6 +4,16 @@
  * Used in TradingInfoSidebar to visualize detected patterns
  */
 
+import { COLORS } from '../shared/design-tokens';
+
+/** Convert hex color to rgba string for canvas */
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 /**
  * Generate pattern thumbnail image using Canvas API
  * @param {Object} pattern - Pattern data with candlestick information
@@ -15,11 +25,11 @@ export async function generatePatternThumbnail(pattern, candles, config = {}) {
   const {
     width = 300,
     height = 200,
-    backgroundColor = '#1a1a1a',
-    highlightColor = '#FFD700',
+    backgroundColor = COLORS.bgCard || '#1a1a1a',
+    highlightColor = COLORS.gold || '#FFD700',
     highlightOpacity = 0.15,
-    bullishColor = '#0ECB81',
-    bearishColor = '#F6465D',
+    bullishColor = COLORS.success || '#0ECB81',
+    bearishColor = COLORS.error || '#F6465D',
   } = config;
 
   // Create canvas
@@ -156,7 +166,7 @@ function drawPatternHighlight(ctx, pattern, candles, params) {
  */
 function drawPatternLabel(ctx, pattern, width, padding) {
   // Draw pattern icon and name
-  ctx.fillStyle = '#FFD700';
+  ctx.fillStyle = COLORS.gold || '#FFD700';
   ctx.font = 'bold 14px Arial';
   const labelText = `${pattern.patternIcon || '📊'} ${pattern.patternCode || pattern.patternType}`;
   const textWidth = ctx.measureText(labelText).width;
@@ -167,7 +177,7 @@ function drawPatternLabel(ctx, pattern, width, padding) {
   ctx.fillRect(labelX - 6, padding.top / 2 - 12, textWidth + 12, 18);
 
   // Draw label text
-  ctx.fillStyle = '#FFD700';
+  ctx.fillStyle = COLORS.gold || '#FFD700';
   ctx.fillText(labelText, labelX, padding.top / 2);
 }
 
@@ -180,7 +190,7 @@ function createPlaceholderImage(ctx, pattern, width, height) {
   ctx.fillRect(0, 0, width, height);
 
   // Draw icon
-  ctx.fillStyle = '#FFD700';
+  ctx.fillStyle = COLORS.gold || '#FFD700';
   ctx.font = '48px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';

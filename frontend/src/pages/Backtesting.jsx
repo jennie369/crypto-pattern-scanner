@@ -66,7 +66,8 @@ const Backtesting = () => {
       }
 
       // Save config first
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
 
       // Debug: Log config before sending
       console.log('📋 Backtest Config Before Submit:', currentConfig);

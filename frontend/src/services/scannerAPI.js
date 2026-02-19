@@ -48,12 +48,14 @@ export const scanPatterns = async (filters) => {
     console.log('[scanPatterns] 🔵 Fetching REAL current prices from Binance for', coins.length, 'coins...');
 
     // 🔥 FIX: Fetch REAL current prices for all coins from Binance
+    const priceController = new AbortController();
+    const priceTimeoutId = setTimeout(() => priceController.abort(), 10000);
     const pricePromises = coins.map(async (coin) => {
       try {
         // Clean symbol for Binance API
         const cleanedSymbol = coin.replace(/[\/\-_]/g, '').toUpperCase().replace(/USDT$/, '') + 'USDT';
         const url = `https://fapi.binance.com/fapi/v1/ticker/price?symbol=${cleanedSymbol}`;
-        const response = await fetch(url);
+        const response = await fetch(url, { signal: priceController.signal });
 
         if (!response.ok) {
           console.warn(`[scanPatterns] ⚠️ Failed to fetch price for ${coin}, using fallback`);
@@ -65,21 +67,23 @@ export const scanPatterns = async (filters) => {
         console.log(`[scanPatterns] ✅ ${coin}: $${price.toFixed(price < 1 ? 6 : 2)}`);
         return { coin, price };
       } catch (error) {
+        if (error.name === 'AbortError') {
+          console.warn(`[scanPatterns] ⚠️ Price fetch timed out for ${coin}`);
+          return { coin, price: null };
+        }
         console.warn(`[scanPatterns] ⚠️ Error fetching price for ${coin}:`, error.message);
         return { coin, price: null };
       }
     });
 
     const priceResults = await Promise.all(pricePromises);
+    clearTimeout(priceTimeoutId);
     const priceMap = {};
     priceResults.forEach(({ coin, price }) => {
       priceMap[coin] = price;
     });
 
     console.log('[scanPatterns] 🔵 Price map:', priceMap);
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
 
     // 🔥 ISSUE #2: Track coins without price data
     const coinsWithoutData = coins.filter(coin => !priceMap[coin]);
@@ -291,117 +295,45 @@ export const downloadCSV = (csvContent, filename = 'pattern-scan-results.csv') =
 };
 
 /**
- * Get historical candlestick data
- * @param {string} coin - Coin symbol (e.g., 'BTC/USDT')
- * @param {string} timeframe - Timeframe (e.g., '1H')
+ * Get historical candlestick data from Binance Futures API
+ * @param {string} coin - Coin symbol (e.g., 'BTC/USDT' or 'BTC')
+ * @param {string} timeframe - Timeframe (e.g., '1h', '4h', '1d')
  * @param {number} limit - Number of candles to fetch
  * @returns {Promise<Array>} Array of candlestick data
  */
-export const getCandlestickData = async (coin, timeframe, limit = 100) => {
+export const getCandlestickData = async (coin, timeframe = '1h', limit = 200) => {
+  const cleanedSymbol = coin.replace(/[\/\-_\s]/g, '').toUpperCase().replace(/USDT$/, '') + 'USDT';
+  const tf = (timeframe || '1h').toLowerCase();
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
   try {
-    // TODO: Integrate with Binance API or your backend API
-    console.log(`Fetching candlestick data for ${coin} ${timeframe}`);
-
-    // Mock data generation
-    const data = [];
-    const now = Math.floor(Date.now() / 1000);
-    let currentPrice = Math.random() * 100000 + 1000;
-
-    for (let i = limit; i >= 0; i--) {
-      const change = (Math.random() - 0.5) * (currentPrice * 0.02);
-      const open = currentPrice;
-      const close = currentPrice + change;
-      const high = Math.max(open, close) + Math.random() * (currentPrice * 0.01);
-      const low = Math.min(open, close) - Math.random() * (currentPrice * 0.01);
-
-      data.push({
-        time: now - (i * 3600), // 1 hour intervals
-        open,
-        high,
-        low,
-        close,
-      });
-
-      currentPrice = close;
+    const response = await fetch(
+      `https://fapi.binance.com/fapi/v1/klines?symbol=${cleanedSymbol}&interval=${tf}&limit=${limit}`,
+      { signal: controller.signal }
+    );
+    if (!response.ok) {
+      throw new Error(`Binance API error: ${response.status}`);
     }
-
-    return data;
+    const data = await response.json();
+    return data.map(k => ({
+      time: k[0] / 1000, // Convert ms to seconds for lightweight-charts
+      open: parseFloat(k[1]),
+      high: parseFloat(k[2]),
+      low: parseFloat(k[3]),
+      close: parseFloat(k[4]),
+      volume: parseFloat(k[5]),
+    }));
   } catch (error) {
-    console.error('Error fetching candlestick data:', error);
-    throw error;
+    if (error.name === 'AbortError') {
+      console.warn(`getCandlestickData timed out for ${cleanedSymbol}`);
+    } else {
+      console.error('Error fetching candlestick data:', error);
+    }
+    return [];
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
-
-/**
- * WebSocket connection for real-time updates
- */
-export class ScannerWebSocket {
-  constructor() {
-    this.ws = null;
-    this.callbacks = {
-      onPattern: null,
-      onPrice: null,
-      onError: null,
-    };
-  }
-
-  connect(coins) {
-    try {
-      // TODO: Replace with actual WebSocket URL
-      const wsUrl = 'wss://stream.binance.com:9443/stream';
-
-      // For now, just log
-      console.log('WebSocket connection initialized for coins:', coins);
-
-      // Simulate WebSocket connection
-      this.simulateWebSocket(coins);
-    } catch (error) {
-      console.error('WebSocket connection error:', error);
-      if (this.callbacks.onError) {
-        this.callbacks.onError(error);
-      }
-    }
-  }
-
-  simulateWebSocket(coins) {
-    // Simulate periodic updates
-    this.interval = setInterval(() => {
-      if (this.callbacks.onPrice) {
-        coins.forEach(coin => {
-          this.callbacks.onPrice({
-            coin: `${coin}/USDT`,
-            price: Math.random() * 100000 + 1000,
-            change24h: (Math.random() - 0.5) * 10,
-          });
-        });
-      }
-    }, 3000);
-  }
-
-  onPattern(callback) {
-    this.callbacks.onPattern = callback;
-  }
-
-  onPrice(callback) {
-    this.callbacks.onPrice = callback;
-  }
-
-  onError(callback) {
-    this.callbacks.onError = callback;
-  }
-
-  disconnect() {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
-    }
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = null;
-    }
-    console.log('WebSocket disconnected');
-  }
-}
 
 export default {
   scanPatterns,
@@ -409,5 +341,4 @@ export default {
   exportToCSV,
   downloadCSV,
   getCandlestickData,
-  ScannerWebSocket,
 };

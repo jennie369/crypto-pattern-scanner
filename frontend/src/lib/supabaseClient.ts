@@ -44,9 +44,9 @@ export const isSupabaseConfigured = (): boolean => {
  */
 export const getCurrentUser = async (): Promise<User | null> => {
   try {
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const { data: { session }, error } = await supabase.auth.getSession();
     if (error) throw error;
-    return user;
+    return session?.user ?? null;
   } catch (error) {
     console.error('Error getting current user:', error);
     return null;
@@ -59,7 +59,7 @@ export const getCurrentUser = async (): Promise<User | null> => {
 export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
   try {
     const { data, error } = await supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();

@@ -74,7 +74,7 @@
 }
 
 .add-trade-modal h2 {
-  color: #FFBD59;
+  color: var(--brand-gold);
   font-size: 24px;
   font-weight: 800;
   margin: 0 0 32px 0;
@@ -100,7 +100,7 @@
 }
 
 .form-group label {
-  color: #DEBC81;
+  color: var(--brand-gold-light);
   font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
@@ -127,7 +127,7 @@
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #FFBD59;
+  border-color: var(--brand-gold);
   box-shadow: 0 0 0 4px rgba(255, 189, 89, 0.1);
 }
 

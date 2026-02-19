@@ -17,7 +17,7 @@
 }
 
 .calculator-header h2 {
-  color: #FFBD59;
+  color: var(--brand-gold);
   font-size: 32px;
   font-weight: 900;
   margin: 0;
@@ -25,7 +25,7 @@
 
 .tier-badge {
   background: rgba(255, 189, 89, 0.2);
-  color: #FFBD59;
+  color: var(--brand-gold);
   padding: 8px 16px;
   border-radius: 8px;
   font-size: 12px;
@@ -48,7 +48,7 @@
 
 .form-group label {
   display: block;
-  color: #DEBC81;
+  color: var(--brand-gold-light);
   font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
@@ -69,7 +69,7 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #FFBD59;
+  border-color: var(--brand-gold);
   box-shadow: 0 0 0 4px rgba(255, 189, 89, 0.1);
 }
 
@@ -145,7 +145,7 @@
 }
 
 .btn-calculate {
-  background: linear-gradient(135deg, #FFBD59, #FFD580);
+  background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
   color: #0f1b35;
 }
 
@@ -186,7 +186,7 @@
 }
 
 .calculation-results h3 {
-  color: #FFBD59;
+  color: var(--brand-gold);
   font-size: 24px;
   font-weight: 800;
   margin: 0 0 24px 0;
@@ -217,7 +217,7 @@
 }
 
 .result-card.primary {
-  border: 2px solid #FFBD59;
+  border: 2px solid var(--brand-gold);
   background: rgba(255, 189, 89, 0.1);
 }
 
@@ -282,7 +282,7 @@
 }
 
 .results-summary strong {
-  color: #FFBD59;
+  color: var(--brand-gold);
   font-weight: 700;
 }
 
@@ -302,12 +302,12 @@
 }
 
 .upgrade-prompt strong {
-  color: #FFBD59;
+  color: var(--brand-gold);
   font-weight: 800;
 }
 
 .btn-upgrade {
-  background: linear-gradient(135deg, #FFBD59, #FFD580);
+  background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
   color: #0f1b35;
   border: none;
   border-radius: 12px;
@@ -566,7 +566,7 @@
 }
 
 .detail-value.highlight {
-  color: #FFD700;
+  color: var(--brand-gold);
   font-size: 14px;
 }
 

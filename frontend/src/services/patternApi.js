@@ -3,7 +3,7 @@
  * Connects to Python backend for pattern scanning
  */
 
-const BACKEND_URL = 'http://localhost:8000'; // Update with your backend URL
+const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export class PatternAPI {
   /**
@@ -13,6 +13,8 @@ export class PatternAPI {
    * @returns {Promise<Array>} - Array of detected patterns
    */
   async scanPatterns(symbols, timeframe = '15m') {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     try {
       const response = await fetch(`${BACKEND_URL}/api/scan`, {
         method: 'POST',
@@ -39,7 +41,8 @@ export class PatternAPI {
             'Cup and Handle',
             'Rounding Bottom'
           ]
-        })
+        }),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -49,8 +52,14 @@ export class PatternAPI {
       const data = await response.json();
       return data.results;
     } catch (error) {
+      if (error.name === 'AbortError') {
+        console.warn('Pattern scan timed out after 10s');
+        return [];
+      }
       console.error('Pattern scan error:', error);
       throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
@@ -61,9 +70,12 @@ export class PatternAPI {
    * @returns {Promise<Object>} - Pattern details with chart image
    */
   async getPatternDetails(symbol, patternType) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     try {
       const response = await fetch(
-        `${BACKEND_URL}/api/pattern/${symbol}/${patternType}`
+        `${BACKEND_URL}/api/pattern/${symbol}/${patternType}`,
+        { signal: controller.signal }
       );
 
       if (!response.ok) {
@@ -72,8 +84,14 @@ export class PatternAPI {
 
       return await response.json();
     } catch (error) {
+      if (error.name === 'AbortError') {
+        console.warn('Pattern details request timed out after 10s');
+        return null;
+      }
       console.error('Get pattern details error:', error);
       throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
@@ -84,9 +102,12 @@ export class PatternAPI {
    * @returns {Promise<Array>} - Historical patterns
    */
   async getPatternHistory(symbol, limit = 50) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     try {
       const response = await fetch(
-        `${BACKEND_URL}/api/history/${symbol}?limit=${limit}`
+        `${BACKEND_URL}/api/history/${symbol}?limit=${limit}`,
+        { signal: controller.signal }
       );
 
       if (!response.ok) {
@@ -95,8 +116,14 @@ export class PatternAPI {
 
       return await response.json();
     } catch (error) {
+      if (error.name === 'AbortError') {
+        console.warn('Pattern history request timed out after 10s');
+        return [];
+      }
       console.error('Get pattern history error:', error);
       throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 }

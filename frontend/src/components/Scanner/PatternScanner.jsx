@@ -59,16 +59,20 @@ export default function PatternScanner({ filters, onFilterChange, onScanStateCha
       return
     }
 
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
     try {
       // Get user's telegram ID
       const { data: userData, error: fetchError } = await supabase
-        .from('users')
+        .from('profiles')
         .select('telegram_id')
         .eq('id', user.id)
         .single()
+        .abortSignal(controller.signal)
 
       if (fetchError) {
         console.error('[XCircle] Error fetching telegram ID:', fetchError)
+        clearTimeout(timeoutId)
         return
       }
 
@@ -97,8 +101,14 @@ export default function PatternScanner({ filters, onFilterChange, onScanStateCha
       console.log(`[CheckCheck] Successfully sent ${successCount}/${patterns.length} Telegram alerts`)
 
     } catch (error) {
+      if (error.name === 'AbortError') {
+        console.warn('[PatternScanner] Telegram alert fetch timed out')
+        return
+      }
       console.error('[XCircle] Error sending Telegram alerts:', error)
       // Don't block scan if Telegram fails - just log the error
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 

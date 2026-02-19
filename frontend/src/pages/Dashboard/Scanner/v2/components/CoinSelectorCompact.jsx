@@ -14,13 +14,19 @@ const CoinSelectorCompact = ({ selectedCoins = [], onChange }) => {
 
   // Load coins on mount
   useEffect(() => {
-    fetchCoins();
+    const controller = new AbortController();
+    fetchCoins(controller.signal);
     loadFavorites();
+    return () => controller.abort();
   }, []);
 
-  const fetchCoins = async () => {
+  const fetchCoins = async (signal) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     try {
-      const response = await fetch('https://fapi.binance.com/fapi/v1/ticker/24hr');
+      const response = await fetch('https://fapi.binance.com/fapi/v1/ticker/24hr', {
+        signal: signal || controller.signal,
+      });
       const data = await response.json();
 
       const usdtPairs = data
@@ -37,7 +43,10 @@ const CoinSelectorCompact = ({ selectedCoins = [], onChange }) => {
 
       setCoins(usdtPairs);
     } catch (error) {
+      if (error.name === 'AbortError') return;
       console.error('Error fetching coins:', error);
+    } finally {
+      clearTimeout(timeoutId);
     }
   };
 

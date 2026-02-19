@@ -18,7 +18,7 @@
 }
 
 .journal-title h2 {
-  color: #FFBD59;
+  color: var(--brand-gold);
   font-size: 28px;
   font-weight: 800;
   margin: 0;
@@ -26,7 +26,7 @@
 
 .tier-badge {
   background: rgba(255, 189, 89, 0.2);
-  color: #FFBD59;
+  color: var(--brand-gold);
   padding: 6px 14px;
   border-radius: 8px;
   font-size: 12px;
@@ -67,7 +67,7 @@
 }
 
 .btn-add-trade {
-  background: linear-gradient(135deg, #FFBD59, #FFD580);
+  background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
   color: #0f1b35;
 }
 
@@ -145,7 +145,7 @@
 }
 
 .trades-table th {
-  color: #FFBD59;
+  color: var(--brand-gold);
   font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
@@ -175,7 +175,7 @@
 
 .symbol {
   font-weight: 700;
-  color: #FFBD59;
+  color: var(--brand-gold);
 }
 
 .type-badge {
@@ -216,7 +216,7 @@
 
 .pattern-badge {
   background: rgba(255, 189, 89, 0.2);
-  color: #FFBD59;
+  color: var(--brand-gold);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 11px;
@@ -243,7 +243,7 @@
 
 .btn-edit:hover {
   background: rgba(255, 189, 89, 0.2);
-  border-color: #FFBD59;
+  border-color: var(--brand-gold);
   transform: scale(1.1);
 }
 
@@ -272,7 +272,7 @@
 }
 
 .journal-empty h3 {
-  color: #FFBD59;
+  color: var(--brand-gold);
   font-size: 24px;
   font-weight: 700;
   margin: 0 0 12px 0;
@@ -285,7 +285,7 @@
 }
 
 .btn-add-trade-empty {
-  background: linear-gradient(135deg, #FFBD59, #FFD580);
+  background: linear-gradient(135deg, var(--brand-gold), var(--brand-gold-light));
   color: #0f1b35;
   border: none;
   border-radius: 12px;
@@ -315,7 +315,7 @@
 }
 
 .tier-warning a {
-  color: #FFBD59;
+  color: var(--brand-gold);
   text-decoration: none;
   font-weight: 700;
 }
@@ -333,7 +333,7 @@
   width: 48px;
   height: 48px;
   border: 4px solid rgba(255, 189, 89, 0.2);
-  border-top-color: #FFBD59;
+  border-top-color: var(--brand-gold);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

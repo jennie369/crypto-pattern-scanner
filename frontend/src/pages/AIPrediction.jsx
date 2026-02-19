@@ -69,8 +69,8 @@ const AIPrediction = () => {
       console.log(`✅ Detected ${patterns.length} patterns`);
 
       // 3. Get user session
-      const { data: { user } } = await supabase.auth.getUser();
       const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
 
       if (!user || !session) {
         throw new Error('Not authenticated');

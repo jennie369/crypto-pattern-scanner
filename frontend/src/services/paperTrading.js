@@ -23,7 +23,7 @@ const INITIAL_BALANCE = 100000.00; // 100K USDT
  */
 export async function getUserTier(userId) {
   const { data: user, error } = await supabase
-    .from('users')
+    .from('profiles')
     .select('scanner_tier, scanner_tier_expires_at')
     .eq('id', userId)
     .single();

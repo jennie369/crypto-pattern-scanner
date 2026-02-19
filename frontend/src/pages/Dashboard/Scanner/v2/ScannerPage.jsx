@@ -8,8 +8,9 @@ import PaperTradingPanel from '../../../../components/PaperTradingPanel/PaperTra
 import OpenPositionsWidget from '../../../../components/PaperTrading/OpenPositionsWidget';
 import RecentTradesSection from '../../../../components/PaperTrading/RecentTradesSection';
 import CompactSidebar from '../../../../components/CompactSidebar/CompactSidebar';
-import { scanPatterns, ScannerWebSocket, exportToCSV, downloadCSV } from '../../../../services/scannerAPI';
+import { scanPatterns, exportToCSV, downloadCSV } from '../../../../services/scannerAPI';
 import { getHoldings, getOrders, closePosition, updatePosition } from '../../../../services/paperTrading';
+import { checkQuota, incrementQuota } from '../../../../services/scanQuotaService';
 import binanceWS from '../../../../services/binanceWebSocket';
 import { useAuth } from '../../../../contexts/AuthContext';
 import toast from 'react-hot-toast';
@@ -40,8 +41,6 @@ export const ScannerPage = () => {
   // Local state for errors (don't persist)
   const [error, setError] = useState(null);
   const [selectedCoin, setSelectedCoin] = useState('BTCUSDT'); // Coin for chart
-  const wsRef = useRef(null);
-
   // Paper trading panel state
   const [showPaperTradingPanel, setShowPaperTradingPanel] = useState(false);
   const [paperTradingSymbol, setPaperTradingSymbol] = useState(null);
@@ -53,36 +52,6 @@ export const ScannerPage = () => {
   const [loadingPositions, setLoadingPositions] = useState(false);
   const priceWsRefs = useRef([]);
   const loadedRef = useRef(false);
-
-  // Initialize WebSocket on mount
-  useEffect(() => {
-    wsRef.current = new ScannerWebSocket();
-
-    // Setup WebSocket callbacks
-    wsRef.current.onPattern((pattern) => {
-      console.log('New pattern detected:', pattern);
-      // Add new pattern to results (Zustand store)
-      // Access current state directly to avoid stale closure
-      const currentResults = useScannerStore.getState().scanResults;
-      setScanResults([pattern, ...currentResults]);
-    });
-
-    wsRef.current.onPrice((priceUpdate) => {
-      console.log('Price update:', priceUpdate);
-      // Update pattern prices if needed
-    });
-
-    wsRef.current.onError((error) => {
-      console.error('WebSocket error:', error);
-    });
-
-    // Cleanup on unmount
-    return () => {
-      if (wsRef.current) {
-        wsRef.current.disconnect();
-      }
-    };
-  }, [setScanResults]);
 
   // Manual data loading function (no automatic useEffect to avoid re-render issues)
   const handleRefreshPaperTrading = async () => {
@@ -148,8 +117,9 @@ export const ScannerPage = () => {
 
     console.log('[ScannerPage] [Paper Trading] Starting auto-refresh (30s interval)');
 
-    // Set up interval to refresh every 30 seconds
+    // Set up interval to refresh every 30 seconds (skip when tab hidden)
     const refreshInterval = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
       console.log('[ScannerPage] [Paper Trading] Auto-refreshing data...');
       handleRefreshPaperTrading();
     }, 30000); // 30 seconds
@@ -167,8 +137,20 @@ export const ScannerPage = () => {
     setError(null); // Clear previous errors
 
     try {
+      // Check scan quota for free users
+      const userTier = user?.tier || user?.scanner_tier || 'free';
+      const quota = await checkQuota(user?.id, userTier);
+      if (!quota.allowed) {
+        toast.error(`Daily scan limit reached (${quota.max}/${quota.max}). Upgrade for unlimited scans!`);
+        setIsScanning(false);
+        return;
+      }
+
       // Call actual scan API
       const results = await scanPatterns(filters);
+
+      // Increment quota after successful scan
+      await incrementQuota(user?.id, userTier);
       console.log('[ScannerPage] Scan results:', results);
 
       setScanResults(results);
@@ -205,10 +187,6 @@ export const ScannerPage = () => {
         console.log('[Scanner] [WARN] No patterns found');
       }
 
-      // Connect WebSocket for real-time updates
-      if (wsRef.current && filters.coins && filters.coins.length > 0) {
-        wsRef.current.connect(filters.coins);
-      }
     } catch (error) {
       console.error('[ScannerPage] Scan error:', error);
       setError(error.message || 'Failed to scan patterns. Please try again.');

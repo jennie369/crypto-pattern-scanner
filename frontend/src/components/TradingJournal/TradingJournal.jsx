@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { useAuth } from '../../contexts/AuthContext'
+import { COLORS } from '../../shared/design-tokens'
 import AddTradeModal from './AddTradeModal'
 import { BarChart3, XCircle, CheckCircle, AlertTriangle, FileText, Trash2, Download, Sparkles } from 'lucide-react'
 import './TradingJournal.css'
@@ -35,34 +36,46 @@ export default function TradingJournal() {
 
   // Fetch user tier only once on mount
   useEffect(() => {
+    const controller = new AbortController()
     if (user) {
-      fetchUserTier()
+      fetchUserTier(controller.signal)
     }
+    return () => controller.abort()
   }, [user])
 
   // Fetch trades when userTier is loaded (only once)
   useEffect(() => {
+    const controller = new AbortController()
     if (user && userTier && trades.length === 0) {
-      fetchTrades()
+      fetchTrades(controller.signal)
     }
+    return () => controller.abort()
   }, [user, userTier])
 
-  const fetchUserTier = async () => {
+  const fetchUserTier = async (signal) => {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .select('tier')
         .eq('id', user.id)
         .single()
+        .abortSignal(signal || controller.signal)
 
       if (error) throw error
       setUserTier(data.tier || 'free')
     } catch (error) {
+      if (error.name === 'AbortError') return
       console.error('Error fetching tier:', error)
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 
-  const fetchTrades = async () => {
+  const fetchTrades = async (signal) => {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
     try {
       setLoading(true)
 
@@ -78,16 +91,18 @@ export default function TradingJournal() {
         query = query.limit(50)
       }
 
-      const { data, error } = await query
+      const { data, error } = await query.abortSignal(signal || controller.signal)
 
       if (error) throw error
 
       setTrades(data || [])
       calculateStats(data || [])
     } catch (error) {
+      if (error.name === 'AbortError') return
       console.error('Error fetching trades:', error)
       showNotificationModal('Lỗi khi tải trades: ' + error.message, 'error')
     } finally {
+      clearTimeout(timeoutId)
       setLoading(false)
     }
   }
@@ -150,13 +165,15 @@ export default function TradingJournal() {
   }
 
   const handleAddTrade = async (tradeData) => {
-    try {
-      // Check tier limits
-      if (userTier === 'free' && trades.length >= 50) {
-        showNotificationModal('FREE tier chỉ lưu được 50 trades. Nâng cấp để unlimited!', 'warning')
-        return
-      }
+    // Check tier limits
+    if (userTier === 'free' && trades.length >= 50) {
+      showNotificationModal('FREE tier chỉ lưu được 50 trades. Nâng cấp để unlimited!', 'warning')
+      return
+    }
 
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
+    try {
       // Generate UUID for id (temporary fix until DB migration)
       const tradeId = crypto.randomUUID()
 
@@ -167,6 +184,7 @@ export default function TradingJournal() {
           user_id: user.id,
           ...tradeData
         }])
+        .abortSignal(controller.signal)
 
       if (error) throw error
 
@@ -174,18 +192,27 @@ export default function TradingJournal() {
       setShowAddModal(false)
       fetchTrades()
     } catch (error) {
+      if (error.name === 'AbortError') {
+        showNotificationModal('Request timed out. Please try again.', 'error')
+        return
+      }
       console.error('Error adding trade:', error)
       showNotificationModal('Lỗi khi thêm trade: ' + error.message, 'error')
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 
   const handleEditTrade = async (tradeData) => {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
     try {
       const { error } = await supabase
         .from('trading_journal')
         .update(tradeData)
         .eq('id', editingTrade.id)
         .eq('user_id', user.id)
+        .abortSignal(controller.signal)
 
       if (error) throw error
 
@@ -194,8 +221,14 @@ export default function TradingJournal() {
       setEditingTrade(null)
       fetchTrades()
     } catch (error) {
+      if (error.name === 'AbortError') {
+        showNotificationModal('Request timed out. Please try again.', 'error')
+        return
+      }
       console.error('Error updating trade:', error)
       showNotificationModal('Lỗi khi cập nhật: ' + error.message, 'error')
+    } finally {
+      clearTimeout(timeoutId)
     }
   }
 
@@ -203,20 +236,29 @@ export default function TradingJournal() {
     showConfirmationModal(
       'Bạn có chắc muốn xóa trade này?\n\nBạn sẽ không thể khôi phục lại.',
       async () => {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 10000)
         try {
           const { error } = await supabase
             .from('trading_journal')
             .delete()
             .eq('id', tradeId)
             .eq('user_id', user.id)
+            .abortSignal(controller.signal)
 
           if (error) throw error
 
           showNotificationModal('Đã xóa trade!', 'success')
           fetchTrades()
         } catch (error) {
+          if (error.name === 'AbortError') {
+            showNotificationModal('Request timed out. Please try again.', 'error')
+            return
+          }
           console.error('Error deleting trade:', error)
           showNotificationModal('Lỗi khi xóa: ' + error.message, 'error')
+        } finally {
+          clearTimeout(timeoutId)
         }
       }
     )
@@ -278,7 +320,7 @@ export default function TradingJournal() {
             fontWeight: 900,
             lineHeight: 1.1,
             letterSpacing: '-0.5px',
-            background: 'linear-gradient(135deg, #FFFFFF 0%, #FFBD59 100%)',
+            background: `linear-gradient(135deg, #FFFFFF 0%, ${COLORS.gold} 100%)`,
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
@@ -308,7 +350,7 @@ export default function TradingJournal() {
               background: 'rgba(17, 34, 80, 0.4)',
               border: '1px solid rgba(255, 189, 89, 0.3)',
               borderRadius: '8px',
-              color: '#FFBD59',
+              color: COLORS.gold,
               fontFamily: 'Poppins, sans-serif',
               fontSize: '12px',
               fontWeight: 600,
@@ -343,8 +385,8 @@ export default function TradingJournal() {
               justifyContent: 'center',
               gap: '8px',
               padding: '12px 24px',
-              background: 'linear-gradient(135deg, #9C0612 0%, #6B0F1A 100%)',
-              border: '2px solid #FFBD59',
+              background: `linear-gradient(135deg, ${COLORS.burgundy} 0%, #6B0F1A 100%)`,
+              border: `2px solid ${COLORS.gold}`,
               borderRadius: '50px',
               color: '#FFFFFF',
               fontFamily: 'Poppins, sans-serif',
@@ -429,7 +471,7 @@ export default function TradingJournal() {
           e.currentTarget.style.boxShadow = '0 0 18px rgba(0, 255, 136, 0.18)';
         }}>
           <div className="stat-label" style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Win Rate</div>
-          <div className="stat-value" style={{ fontSize: '48px', fontWeight: 900, color: '#00FF88', fontFamily: 'Poppins, sans-serif' }}>{stats.winRate.toFixed(1)}%</div>
+          <div className="stat-value" style={{ fontSize: '48px', fontWeight: 900, color: COLORS.success, fontFamily: 'Poppins, sans-serif' }}>{stats.winRate.toFixed(1)}%</div>
           <div className="stat-detail" style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.5)' }}>
             {stats.winningTrades}W / {stats.losingTrades}L
           </div>
@@ -460,7 +502,7 @@ export default function TradingJournal() {
           e.currentTarget.style.boxShadow = '0 0 18px rgba(255, 189, 89, 0.18)';
         }}>
           <div className="stat-label" style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Total P&L</div>
-          <div className={`stat-value ${stats.totalPL >= 0 ? 'positive' : 'negative'}`} style={{ fontSize: '48px', fontWeight: 900, color: stats.totalPL >= 0 ? '#00FF88' : '#FF4757', fontFamily: 'Poppins, sans-serif' }}>
+          <div className={`stat-value ${stats.totalPL >= 0 ? 'positive' : 'negative'}`} style={{ fontSize: '48px', fontWeight: 900, color: stats.totalPL >= 0 ? COLORS.success : COLORS.error, fontFamily: 'Poppins, sans-serif' }}>
             ${stats.totalPL.toFixed(2)}
           </div>
         </div>
@@ -491,9 +533,9 @@ export default function TradingJournal() {
         }}>
           <div className="stat-label" style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Avg Win / Loss</div>
           <div className="stat-value small" style={{ fontSize: '32px', fontWeight: 900, fontFamily: 'Poppins, sans-serif' }}>
-            <span className="positive" style={{ color: '#00FF88' }}>${stats.avgWin.toFixed(2)}</span>
+            <span className="positive" style={{ color: COLORS.success }}>${stats.avgWin.toFixed(2)}</span>
             <span style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '24px', margin: '0 4px' }}>/</span>
-            <span className="negative" style={{ color: '#FF4757' }}>${Math.abs(stats.avgLoss).toFixed(2)}</span>
+            <span className="negative" style={{ color: COLORS.error }}>${Math.abs(stats.avgLoss).toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -515,8 +557,8 @@ export default function TradingJournal() {
               justifyContent: 'center',
               gap: '8px',
               padding: '14px 32px',
-              background: 'linear-gradient(135deg, #9C0612 0%, #6B0F1A 100%)',
-              border: '2px solid #FFBD59',
+              background: `linear-gradient(135deg, ${COLORS.burgundy} 0%, #6B0F1A 100%)`,
+              border: `2px solid ${COLORS.gold}`,
               borderRadius: '50px',
               color: '#FFFFFF',
               fontFamily: 'Poppins, sans-serif',
