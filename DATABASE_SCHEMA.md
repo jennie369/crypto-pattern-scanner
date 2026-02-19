@@ -1,5 +1,5 @@
 # Gemral - Database Schema & Tier System
-## MASTER REFERENCE - Updated: 2026-02-17 (RLS Security Fix: 24 policies fixed + 20 tables enabled)
+## MASTER REFERENCE - Updated: 2026-02-19 (Seed Content System documented + Phase 14-16 fixes)
 
 > **IMPORTANT**: Tất cả code phải sử dụng CHÍNH XÁC các table, column và values trong file này.
 > **PRIMARY TABLE**: `profiles` - Sử dụng cho TẤT CẢ user data
@@ -6132,3 +6132,79 @@ AND roles='{public}' AND cmd IN ('ALL','UPDATE','INSERT','DELETE');
 ### Helper Functions
 - `is_admin_user()` — Returns true if `auth.uid()` is an admin (checks `profiles.role`)
 - `is_user_admin(user_id)` — Returns true if given UUID is an admin
+
+---
+
+## 72. SEED CONTENT SYSTEM TABLES (Migration 2025-12-05)
+
+> Separate tables for AI-generated "seed" posts and users. Decoupled from `auth.users` FK to allow batch generation without auth accounts.
+
+### `seed_users` Table
+```sql
+CREATE TABLE IF NOT EXISTS seed_users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email TEXT UNIQUE NOT NULL,
+  full_name TEXT NOT NULL,
+  avatar_url TEXT,
+  bio TEXT,
+  location TEXT,
+  tier VARCHAR(20) DEFAULT 'free',
+  followers_count INTEGER DEFAULT 0,
+  following_count INTEGER DEFAULT 0,
+  seed_persona VARCHAR(50),          -- 'trader', 'crystal_lover', 'loa_practitioner', etc.
+  is_premium_seed BOOLEAN DEFAULT false,
+  bot_enabled BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+**Indexes**: `seed_persona`, `is_premium_seed` (partial), `bot_enabled` (partial), `created_at DESC`
+
+### `seed_posts` Table
+```sql
+CREATE TABLE IF NOT EXISTS seed_posts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES seed_users(id) ON DELETE CASCADE,
+  title VARCHAR(500) NOT NULL,
+  content TEXT NOT NULL,
+  image_url TEXT,
+  media_urls JSONB DEFAULT '[]'::jsonb,
+  seed_topic VARCHAR(50),            -- 'trading', 'crystal', 'loa', 'general'
+  likes_count INTEGER DEFAULT 0,
+  comments_count INTEGER DEFAULT 0,
+  views_count INTEGER DEFAULT 0,
+  is_pinned BOOLEAN DEFAULT FALSE,
+  status VARCHAR(20) DEFAULT 'published',
+  feed_type VARCHAR(50) DEFAULT 'general',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+**Indexes**: `user_id`, `seed_topic`, `created_at DESC`, `status` (partial WHERE published), `(status, created_at DESC)` composite
+
+### Views
+- **`all_posts_view`** — UNION ALL of `forum_posts` + `seed_posts` with `is_seed_post` flag
+- **`all_users_view`** — UNION ALL of `profiles` + `seed_users` with `is_seed_user` flag
+
+### RPC Functions
+- `get_random_seed_users(count, exclude_id, persona_filter)` — Random seed users for bot activity
+- `get_seed_content_stats()` — JSONB with counts (users, posts, bot activity today)
+- `delete_all_seed_content()` — Cascading delete of all seed data (admin only)
+
+### RLS Policies
+| Table | Policy | Rule |
+|-------|--------|------|
+| `seed_users` | SELECT | Anyone (`USING (true)`) |
+| `seed_users` | ALL | Admin only (`is_admin`) |
+| `seed_users` | INSERT | System (`WITH CHECK (true)`) |
+| `seed_posts` | SELECT | Anyone (`USING (true)`) |
+| `seed_posts` | ALL | Admin only (`is_admin`) |
+| `seed_posts` | INSERT | System (`WITH CHECK (true)`) |
+
+### Content Generation Notes
+- **Generator**: `gem-mobile/src/services/seed/seedPostGenerator.js` — 450+ posts across trading/crystal/loa topics
+- **Title**: First 90 chars of content (no `#N` suffix — Rule 61)
+- **Content**: Raw text + hashtags only (no invisible unicode markers — Rule 61)
+- **Feed integration**: `feedService.js` queries `seed_posts` with `MAX_SEED_POSTS: 50` and interleaves with real `forum_posts`

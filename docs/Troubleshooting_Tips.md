@@ -1,6 +1,6 @@
 # Troubleshooting Tips
 
-Generalized engineering rules extracted from real bugs found during Phase 1-13 audits.
+Generalized engineering rules extracted from real bugs found during Phase 1-16 audits.
 
 ---
 
@@ -3457,3 +3457,207 @@ The same three-link failure chain will occur in ANY mobile app using:
 4. Check AppState transitions in logs — did the app go through background→active, or stay active?
 5. Check if `autoRefreshToken` timer fired — search logs for SDK refresh events
 6. Check if health check/recovery refreshed auth — search for `refreshSession` calls in logs
+
+---
+
+# RULE 60: Profile Fetch Must Have a Total Time Budget
+**Source:** Phase 16 — Startup watchdog fires after 15s because profile fetch retry takes 17s
+
+## What Failed
+On cold start with a slow Supabase connection, the app froze at the splash screen. After 15s, the startup watchdog force-unlocked navigation, but the profile was still `null` — causing the user to land on a degraded screen (isAdmin=false, tier=FREE).
+
+## Why It Failed
+`AuthContext.loadSession()` had a profile fetch with retry:
+```javascript
+const { data } = await getUserProfile(user.id);       // up to 8s (global fetch timeout)
+if (!data) {
+  await new Promise(r => setTimeout(r, 1000));         // 1s backoff
+  const { data: retry } = await getUserProfile(user.id); // up to 8s again
+}
+```
+Worst case: 8s + 1s + 8s = **17s**. The 15s startup watchdog (`AppNavigator.js`) fires before the retry completes. The `finally` block then sets profile to `null`, overwriting any result the retry might have returned.
+
+Each individual call had a timeout (8s via global fetch wrapper), but **the overall operation had no budget**. This is a classic Rule 28 (Loading State) variant: individual sub-steps are bounded, but the aggregate is not.
+
+## The Fix
+Wrap the entire profile fetch + retry in `Promise.race(10s)`:
+```javascript
+let profileData = null;
+try {
+  profileData = await Promise.race([
+    (async () => {
+      const { data, error } = await getUserProfile(user.id);
+      if (error || !data) {
+        await new Promise(r => setTimeout(r, 1000));
+        const { data: retryData } = await getUserProfile(user.id);
+        return retryData || null;
+      }
+      return data;
+    })(),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Profile fetch budget exceeded (10s)')), 10000)
+    ),
+  ]);
+} catch (budgetErr) {
+  console.warn('[AuthContext]', budgetErr.message, '— continuing with null profile');
+}
+setProfile(profileData);
+```
+Applied to both `loadSession()` and `onAuthStateChange()` INITIAL_SESSION handler.
+
+**Budget math**: 10s total < 15s watchdog. Even if the first attempt takes the full 8s, there's 2s left for the retry attempt (which will abort on budget timeout). The watchdog never fires.
+
+## How to Detect Similar Issues
+1. **Find multi-step async sequences**: Look for retry patterns where each step has its own timeout but the aggregate does not
+2. **Check if total worst-case > caller's timeout**: Sum all sequential await worst-cases. If the total exceeds the caller's budget (e.g., startup watchdog, navigation timeout), the operation will be killed mid-flight
+3. **Search for `getUserProfile` or `getUser` calls in startup paths**: Any DB call in the loadSession/onAuthStateChange hot path must fit within the startup budget
+4. **Log symptom**: `STARTUP WATCHDOG: Force-ready after Xs` in console means some initialization step exceeded the budget
+
+## Generalized Pattern: Aggregate Timeout for Sequential Operations
+When you have N sequential operations each with individual timeout T:
+- **Worst case = N × T** (not T)
+- The caller's timeout must be > N × T, OR you need a single aggregate timeout that wraps all N operations
+- `Promise.race([allOperations(), timeout(budget)])` is the standard pattern
+
+---
+
+# RULE 61: Generated/Seed Content Must Not Contain Debug Metadata
+**Source:** Phase 16 — Seed posts show `#231` in title and invisible markers in content
+
+## What Failed
+Forum feed displayed posts with `#231`, `#412` appended to every title. Post content showed invisible unicode markers (`​1771505097189-230-c9i24k​`) that became visible in certain rendering contexts (PostCard text truncation, search results).
+
+## Why It Failed
+`seedPostGenerator.js` added debug/dedup markers to generated content:
+
+```javascript
+// Title: appended post index for uniqueness
+const uniqueTitle = `${baseTitle} #${postIndex + 1}`;  // → "Cách vẽ HFZ chính xác #231"
+
+// Content: wrapped timestamp-based ID in zero-width spaces
+const uniqueMarker = `\u200B${Date.now()}-${postIndex}-${randomStr}\u200B`;
+const fullContent = rawContent + hashtagString + uniqueMarker;
+```
+
+These were meant for dedup during batch generation, but:
+1. **`#N` in title**: PostCard displays title. Users see `#231` as part of the post title
+2. **Zero-width spaces**: Not truly invisible — they affect text selection, copy-paste, search matching, and some font renderers show them as boxes or spaces
+3. **PostCard title-content dedup logic**: `post.title !== post.content && !post.content?.startsWith(post.title)` — the `#N` suffix made title ≠ content prefix, so PostCard prepended the full title above content (doubling it)
+
+## The Fix
+1. **Generator**: Removed `#N` suffix from title. Removed uniqueMarker from content. Title is now just `baseTitle` (first 90 chars of content). Uniqueness handled by UUID primary key.
+2. **Database cleanup**: `UPDATE seed_posts SET title = regexp_replace(title, '\s*#\d+$', '')` and `UPDATE seed_posts SET content = regexp_replace(content, E'\u200B[0-9]+-[0-9]+-[a-z0-9]+\u200B', '')` — cleaned 450 rows.
+
+## How to Detect Similar Issues
+1. **Copy-paste test**: Copy post text → paste into plain text editor → look for extra characters, spaces, or markers not visible in the UI
+2. **JSON inspection**: Query `SELECT content FROM seed_posts LIMIT 5` → check for `\u200B` or other unicode control chars
+3. **Search for `\u200B`, `\u200C`, `\u200D`, `\uFEFF`** in generators — these are common "invisible" markers that aren't truly invisible
+4. **Check if display logic does string comparison**: If UI compares title vs content (dedup, truncation), any extra characters will break the comparison
+
+## Generalized Pattern: Never Embed Metadata in User-Visible Fields
+Debug/dedup markers belong in:
+- **Separate columns** (e.g., `generation_batch_id`, `dedup_hash`)
+- **Metadata JSONB field** (e.g., `metadata->>'batch_index'`)
+- **NOT** in `title`, `content`, `description`, or any field that gets rendered to users
+
+---
+
+# RULE 62: FlatList getItemLayout Must Use Cumulative Offsets for Variable Heights
+**Source:** Phase 16 — Forum feed scroll jitter and auto-reload when tapping posts
+
+## What Failed
+Scrolling the forum feed caused visible jitter — posts jumping position, content appearing to reload. Tapping a post to view details caused the feed to "bounce" and sometimes reload entirely.
+
+## Why It Failed
+`ForumScreen.js` provided `getItemLayout` to FlatList with a fixed-height calculation:
+
+```javascript
+getItemLayout={(data, index) => {
+  const type = data?.[index]?.image_url ? 'image' : 'text';
+  const height = POST_ITEM_HEIGHTS[type] + SEPARATOR_HEIGHT;
+  return { length: height, offset: height * index, index };
+}}
+```
+
+The bug is `offset: height * index`. This assumes ALL items before index `i` have the SAME height. But PostCard heights vary wildly:
+- Text-only posts: ~120px
+- Single image: ~350px
+- Image carousel: ~400px
+- Long text with hashtags: ~200px
+
+When `offset` is wrong, FlatList places items at incorrect scroll positions. As you scroll, items jump to their "correct" rendered position (jitter). When navigating back, FlatList tries to restore scroll position using the wrong offsets, causing visible jumps or triggering a re-render.
+
+## The Fix
+**Removed `getItemLayout` entirely.** FlatList's built-in height measurement (auto-layout) is slower but accurate for variable-height items. Performance is maintained by:
+- `removeClippedSubviews={true}` — unmounts offscreen items
+- `windowSize={5}` — renders 5 viewports of content
+- `maxToRenderPerBatch={5}` — limits per-frame rendering
+
+```javascript
+// getItemLayout REMOVED — was causing scroll jitter because offset calculation
+// assumed all items have the same height. PostCard heights vary wildly
+// (text-only vs images vs carousel). FlatList auto-measurement is
+// slower but accurate. removeClippedSubviews + windowSize=5 handle performance.
+```
+
+## How to Detect Similar Issues
+1. **Scroll and watch for "jumping"**: Items visibly shift position during scroll = wrong `getItemLayout`
+2. **Check if items have variable heights**: If ANY item can be taller/shorter than others, `getItemLayout` with `offset: fixedHeight * index` is WRONG
+3. **Navigate away and back**: If the list "jumps" to a different position on return, `getItemLayout` offsets are stale
+4. **Search codebase**: `getItemLayout.*offset.*\*.*index` — the multiplication pattern is the red flag
+
+## When getItemLayout IS Correct
+- **All items identical height** (e.g., settings list, notification rows with fixed layout)
+- **Heights are pre-computed and accumulated**: `offset = sum(heights[0..index-1])` (must track individual heights)
+
+---
+
+# RULE 63: Tab Cache Duration Must Exceed Typical User Interaction Time
+**Source:** Phase 16 — Forum feed reloads with different posts after viewing a post detail
+
+## What Failed
+User scrolls feed → taps a post → reads it (30-60s) → goes back → feed shows completely different posts. The scroll position is lost and previously-read posts are replaced.
+
+## Why It Failed
+`ForumScreen.js` used `useFocusEffect` with a 30-second cache:
+
+```javascript
+const forumCache = {
+  CACHE_DURATION: 30000, // 30 seconds
+  lastFetch: 0,
+  // ...
+};
+
+useFocusEffect(
+  useCallback(() => {
+    const now = Date.now();
+    if (now - forumCache.lastFetch > forumCache.CACHE_DURATION) {
+      loadPosts(true); // FULL RESET — clears all posts and reloads
+    }
+  }, [])
+);
+```
+
+When the user navigates to post detail and back within 30s, the cache is valid and the feed is preserved. But if reading takes >30s (very common for longer posts), the cache expires and `loadPosts(true)` does a full reset — new query, new posts, scroll position lost.
+
+## The Fix
+Increased `CACHE_DURATION` from 30s to **5 minutes** (300,000ms):
+
+```javascript
+CACHE_DURATION: 300000, // 5 minutes — prevents full reset when returning from post detail
+```
+
+5 minutes covers the vast majority of post-reading sessions. The feed still refreshes on pull-to-refresh and on app resume (FORCE_REFRESH_EVENT).
+
+## How to Detect Similar Issues
+1. **Navigate to detail and back after N seconds**: If the list resets, the cache duration is too short
+2. **Search for `useFocusEffect` + `loadPosts(true)` patterns**: Any tab that reloads data on focus with a time gate is susceptible
+3. **Check cache duration vs. user behavior**: Chat reading (2-5 min), post reading (30s-3 min), course lesson (5-15 min). Cache must exceed the typical interaction time
+4. **Scroll position loss**: If the list component is `FlatList` and the data changes on focus, scroll position is invalidated because the data array changes
+
+## Generalized Pattern
+For any tab with a "stale check on focus":
+- **Too short** → frustrating reloads mid-session
+- **Too long** → stale content when actually switching contexts
+- **Sweet spot**: 3-5 minutes for social feeds, 10+ minutes for static content
+- **Always preserve**: Pull-to-refresh and explicit refresh as escape hatches

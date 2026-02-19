@@ -15,9 +15,12 @@ gem-mobile/src/
 │   ├── binanceService.js       # Binance Futures API + WebSocket
 │   ├── patternDetection.js     # Pattern detection engine (24+ patterns)
 │   ├── zoneManager.js          # Zone creation from patterns
+│   ├── feedService.js          # Feed generation (real + seed posts, pagination)
 │   ├── scanner/                # Scanner sub-services
 │   │   ├── patternEnricherService.js   # Field name normalization
 │   │   └── webSocketPoolService.js     # WebSocket connection pool
+│   ├── seed/                   # Seed content generation
+│   │   └── seedPostGenerator.js        # 450+ posts (trading, crystal, loa topics)
 │   └── adminAI/                # Admin AI assistant services
 │       ├── adminAIMarketService.js     # Market data for AI
 │       └── adminAIContextService.js    # Context building for AI
@@ -135,13 +138,25 @@ User clicks "Paper Trade" on pattern
 | 4 | — | 12 issues: ritual system, chat, vision board, notifications, KOL | `PHASE_4_MASTER_PLAN.md` |
 | 5 | `49399e7` | 13 critical: black screen, boost analytics, referral codes, scanner crash | `PHASE_5_MASTER_PLAN.md` |
 | 6 | `075aa4c` | 5 fixes: scanner state wipe, PENDING orders, TP mismatch, PNL, API URL | `gem-mobile/PHASE_6_MASTER_PLAN.md` |
+| 7 | — | iOS deep links: scheme + associatedDomains + Vercel rewrites for AASA | — |
+| 7.5 | `e0633bd` | Auth profile error check + feed timeout fix | — |
+| 7.75 | — | Pending orders disappearing: `paper_pending_orders` single source of truth | `docs/feature-phase7.75-resume-pending-fix.md` |
+| 7.8 | — | App resume deadlock: AppResumeManager sole AppState handler (27 files, 3 root causes) | `docs/feature-phase7.8-resume-deadlock-fix.md` |
+| 9 | `3efc32b` | Startup freeze: 6 files, 4 root causes | `docs/feature-phase9-startup-freeze-fix.md` |
+| 9b | — | Auth timeout cascade: `getCurrentUser()` → `getSession()` + race condition fix | — |
+| 10 | `fd9a8fc` | Biometric identity display + push notification dedup (5 root causes, 5 files) | — |
+| 11 | `310acd4` | RLS vulnerability fix: 44 tables + auth timeout fix (`getUser` → `getSession`) | — |
+| 14 | `fccd5e0` | 391 `getUser()` → `getSession()` across 85 files + JWT Freshness Guard (Rule 59) | — |
+| 15 | `61bd4ac` | Seed posts: `generateFeed()` queries `seed_posts` table + composite index | — |
+| 16 | `d85afe1` | 5 feed bugs: title `#N` cleanup, uniqueMarker removal, cache 5min, getItemLayout removed, MAX_SEED_POSTS 50 | — |
+| 16b | `2ff8666` | Cold start timeout: 10s profile fetch budget + 20s feed timeout | — |
 
 ## Documentation
 
 | Doc | Description |
 |-----|-------------|
 | `docs/feature-scanner-papertrade-engine.md` | Phase 6 architectural decisions and trade-offs |
-| `docs/Troubleshooting_Tips.md` | 59 generalized engineering rules from Phase 1-14 bugs |
+| `docs/Troubleshooting_Tips.md` | 63 generalized engineering rules from Phase 1-16 bugs |
 | `docs/SCANNER_TRADING_FEATURE_SPEC.md` | Complete Scanner/Trading feature specification (v4.1) |
 
 ## Important Conventions
