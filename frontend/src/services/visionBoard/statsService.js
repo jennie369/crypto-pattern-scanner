@@ -217,7 +217,7 @@ export const getDailyScore = async (userId) => {
     // Get rituals completed today
     const today = new Date().toISOString().split('T')[0];
     const { count: ritualsToday } = await supabase
-      .from('ritual_logs')
+      .from('calendar_ritual_logs')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId)
       .gte('completed_at', `${today}T00:00:00`)

@@ -167,10 +167,10 @@ export const completeRitual = async (userId, ritualId, metadata = {}) => {
     // Check for duplicate completion today
     const today = new Date().toISOString().split('T')[0];
     const { data: existingLog } = await supabase
-      .from('ritual_logs')
+      .from('calendar_ritual_logs')
       .select('id')
       .eq('user_id', userId)
-      .eq('ritual_id', ritualId)
+      .eq('ritual_slug', ritualId)
       .gte('completed_at', `${today}T00:00:00`)
       .lte('completed_at', `${today}T23:59:59`)
       .limit(1);
@@ -185,15 +185,13 @@ export const completeRitual = async (userId, ritualId, metadata = {}) => {
 
     // Create completion log
     const { error: logError } = await supabase
-      .from('ritual_logs')
+      .from('calendar_ritual_logs')
       .insert({
         user_id: userId,
-        ritual_id: ritualId,
+        ritual_slug: ritualId,
         ritual_name: ritual.name,
         duration_seconds: metadata.durationSeconds || ritual.duration,
         reflection: metadata.reflection || null,
-        mood_before: metadata.moodBefore || null,
-        mood_after: metadata.moodAfter || null,
         completed_at: new Date().toISOString(),
       });
 
@@ -243,8 +241,8 @@ export const getTodaysCompletedRituals = async (userId) => {
     const today = new Date().toISOString().split('T')[0];
 
     const { data, error } = await supabase
-      .from('ritual_logs')
-      .select('ritual_id, completed_at')
+      .from('calendar_ritual_logs')
+      .select('ritual_slug, completed_at')
       .eq('user_id', userId)
       .gte('completed_at', `${today}T00:00:00`)
       .lte('completed_at', `${today}T23:59:59`);
@@ -271,7 +269,7 @@ export const getRitualHistory = async (userId, days = 30) => {
     startDate.setDate(startDate.getDate() - days);
 
     const { data, error } = await supabase
-      .from('ritual_logs')
+      .from('calendar_ritual_logs')
       .select('*')
       .eq('user_id', userId)
       .gte('completed_at', startDate.toISOString())
@@ -295,7 +293,7 @@ export const getRitualHistory = async (userId, days = 30) => {
 export const getRitualStreak = async (userId) => {
   try {
     const { data: logs } = await supabase
-      .from('ritual_logs')
+      .from('calendar_ritual_logs')
       .select('completed_at')
       .eq('user_id', userId)
       .order('completed_at', { ascending: false })

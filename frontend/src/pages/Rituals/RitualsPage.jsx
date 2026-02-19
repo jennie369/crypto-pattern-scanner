@@ -51,7 +51,7 @@ const RitualsPage = () => {
       // Get today's completed
       const { data: completed, error: completedError } = await getTodaysCompletedRituals(user.id);
       if (completedError) throw completedError;
-      setTodaysCompleted((completed || []).map((c) => c.ritual_id));
+      setTodaysCompleted((completed || []).map((c) => c.ritual_slug));
 
       // Get streak
       const { currentStreak } = await getRitualStreak(user.id);
