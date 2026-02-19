@@ -11,6 +11,13 @@
 BEGIN;
 
 -- ─────────────────────────────────────────────────────────────────────────────
+-- 0. Add missing columns to user_paper_trade_settings
+-- ─────────────────────────────────────────────────────────────────────────────
+ALTER TABLE user_paper_trade_settings
+  ADD COLUMN IF NOT EXISTS total_realized_pnl numeric DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS last_trade_at timestamptz DEFAULT NULL;
+
+-- ─────────────────────────────────────────────────────────────────────────────
 -- 1. Migrate paper_trading_accounts → user_paper_trade_settings
 --    ON CONFLICT keep higher balance so we never lose a user's money
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -164,7 +171,7 @@ SELECT
   UPPER(COALESCE(pto.order_type, 'MARKET')),
   'custom',
   pto.created_at,
-  CASE WHEN pto.side = 'sell' THEN pto.updated_at ELSE NULL END,
+  CASE WHEN pto.side = 'sell' THEN pto.filled_at ELSE NULL END,
   pto.created_at,
   NOW()
 FROM paper_trading_orders pto
