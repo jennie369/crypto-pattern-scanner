@@ -782,7 +782,196 @@ const FORM_TYPOGRAPHY = {
 
 ---
 
+## Rule 13: Wrong Table Name — `from('users')` vs `from('profiles')` (Data Source Mismatch)
+**Source:** Tai San Web Sync — 46 occurrences across 13 files queried wrong table
+
+### Khi nao ap dung (When to apply)
+Khi Supabase project co nhieu tables chua user data (vd: `auth.users`, `public.profiles`, `public.users` view), va codebase khong nhat quan ve table nao la source of truth.
+
+### Trieu chung (Symptoms)
+- Query tra ve `null` hoac empty object cho user da ton tai (table khong co row cho user do)
+- Profile data load thanh cong tren mobile nhung fail tren web (hoac nguoc lai)
+- `profile.is_admin === false` du user la admin (vi query sai table, profile = null, fallback = false)
+- Signup tao profile trong table A nhung login doc tu table B → user "mat" profile
+- PostgREST embedded joins (`users:sender_id(...)`) tra ve null cho related data
+- Columns khong match: web query `author_id` nhung table thuc su dung `user_id`
+
+### Nguyen nhan goc (Root cause pattern)
+Supabase co 3 "user" concepts khac nhau va dev nham lan giua chung:
+
+```
+1. auth.users          — Supabase Auth internal table (email, password hash, metadata)
+                          KHONG nen query truc tiep tu client code
+
+2. public.profiles     — Application profile table (display_name, avatar, tier, gems, badges)
+                          DAY LA SOURCE OF TRUTH cho app code
+
+3. public.users        — Co the la:
+                          (a) Table cu tu early development (deprecated)
+                          (b) View tren auth.users (khong co app-specific columns)
+                          (c) KHONG ton tai (query fail silently voi PostgREST)
+```
+
+**Hau qua cascade khi query sai table:**
+```
+from('users') → query fails/returns null
+  → profile = null
+    → profile?.is_admin = undefined → isAdmin = false
+    → profile?.scanner_tier = undefined → tier = 'FREE'
+    → profile?.gems = undefined → gems display "undefined"
+    → profile?.display_name = undefined → shows "Anonymous"
+```
+
+**Embedded join cung bi anh huong:**
+```javascript
+// SAI: join voi table 'users' (khong co display_name/avatar_url)
+.select(`*, users:sender_id(id, display_name, avatar_url)`)
+
+// DUNG: join voi table 'profiles'
+.select(`*, profiles:sender_id(id, display_name, avatar_url)`)
+```
+
+### Cach dieu tra (Investigation steps)
+1. **Xac dinh single source of truth**: kiem tra mobile app dung table nao
+   ```bash
+   grep -rn "from('profiles')" gem-mobile/src/ | head -5
+   grep -rn "from('users')" gem-mobile/src/ | head -5
+   ```
+2. **Tim tat ca violations tren web**:
+   ```bash
+   # Direct queries
+   grep -rn "from('users')" frontend/src/ --include='*.jsx' --include='*.js' --include='*.tsx' --include='*.ts'
+
+   # Embedded joins (PostgREST)
+   grep -rn "users:\w\+_id(" frontend/src/ --include='*.jsx' --include='*.js'
+   ```
+3. **Kiem tra bang nao ton tai thuc su trong DB**:
+   ```sql
+   SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename IN ('users', 'profiles');
+   ```
+4. **So sanh columns**: table sai co the thieu columns ma code can
+   ```sql
+   SELECT column_name FROM information_schema.columns WHERE table_name='profiles' ORDER BY ordinal_position;
+   SELECT column_name FROM information_schema.columns WHERE table_name='users' ORDER BY ordinal_position;
+   ```
+
+### Bien phap phong ngua (Preventive measures)
+- **Quy tac bat buoc (Memory Rule #1)**: `from('profiles')` KHONG BAO GIO `from('users')` trong app code
+- **Grep guard trong CI/CD**:
+  ```bash
+  # Them vao pre-commit hook hoac CI pipeline
+  VIOLATIONS=$(grep -rn "from('users')" frontend/src/ --include='*.jsx' --include='*.js' --include='*.tsx' --include='*.ts' | grep -v '.backup' | grep -v '// ' | grep -v ' \* ' | wc -l)
+  if [ "$VIOLATIONS" -gt 0 ]; then
+    echo "ERROR: Found from('users') in frontend code. Use from('profiles') instead."
+    exit 1
+  fi
+  ```
+- **ESLint custom rule** (hoac `no-restricted-syntax`):
+  ```json
+  {
+    "no-restricted-syntax": ["error", {
+      "selector": "CallExpression[callee.property.name='from'][arguments.0.value='users']",
+      "message": "Use from('profiles') instead of from('users'). See Rule 13."
+    }]
+  }
+  ```
+- **Code review checklist**: bat ky PR nao touch Supabase queries phai verify table name = `profiles`
+- **Document trong codebase**: them comment `// IMPORTANT: from('profiles') NOT from('users')` o dau moi service file co Supabase queries
+- **Embedded joins**: khi dung PostgREST `table:fk_column(...)`, LUON verify table name la `profiles`
+
+### Cach fix batch (khi phat hien nhieu violations)
+```bash
+# 1. Tim tat ca files vi pham
+grep -rl "from('users')" frontend/src/ --include='*.jsx' --include='*.js' --include='*.tsx' --include='*.ts'
+
+# 2. Fix truc tiep (can than voi embedded joins)
+# Direct queries: from('users') → from('profiles')
+# Embedded joins: users:sender_id( → profiles:sender_id(
+#                 users:user_id( → profiles:user_id(
+#                 users:host_id( → profiles:host_id(
+
+# 3. Verify build
+cd frontend && npx vite build
+
+# 4. Verify zero violations
+grep -rn "from('users')" frontend/src/ --include='*.jsx' --include='*.js' --include='*.tsx' --include='*.ts' | grep -v '.backup' | grep -v '//' | grep -v ' \* '
+# Expected: 0 results
+```
+
+### Dau hieu nhan biet (Code smell indicators)
+- `from('users')` bat ky dau trong frontend code (ngoai tru comments va documentation)
+- `users:column_name(` trong PostgREST select strings
+- Mobile code dung `from('profiles')` nhung web code dung `from('users')` — inconsistency
+- Profile data load returns null cho user da ton tai — signal table mismatch
+- Column name mismatch: `author_id` vs `user_id`, `name` vs `full_name` — signal different table schema
+- Signup creates row in table A, login reads from table B — profile "disappears"
+
+---
+
+# SECTION E: DATA SOURCE INTEGRITY
+
+---
+
+## Rule 14: Column Name Mismatch Between Platforms (Silent Data Loss)
+**Source:** Tai San Web Sync — NewsFeed.jsx used `author_id` but table has `user_id`
+
+### Khi nao ap dung (When to apply)
+Khi web va mobile code query cung 1 table nhung dung column names khac nhau. Thuong xay ra khi 2 teams (hoac 2 thoi diem) viet code doc lap.
+
+### Trieu chung (Symptoms)
+- Query khong tra ve error nhung data thinh thoang bi null/undefined
+- PostgREST embedded join tra ve null cho relationship ma BIET la co data
+- Mobile hien thi data dung, web hien thi empty/null cho cung user
+- `select('author_id, ...')` tra ve row nhung `author_id` field la undefined (column khong ton tai)
+
+### Nguyen nhan goc (Root cause pattern)
+PostgREST/Supabase **KHONG bao loi** khi select column khong ton tai — no silently tra ve row KHONG co field do:
+```javascript
+// Table has column: user_id (NOT author_id)
+const { data } = await supabase
+  .from('posts')
+  .select('id, author_id, content')  // author_id khong ton tai
+// data = [{ id: 1, content: 'hello' }]  ← author_id KHONG co trong result, NO ERROR
+
+// Embedded join cung tuong tu:
+.select('*, users:author_id(display_name)')  // FK author_id khong ton tai → join fails silently
+// data = [{ id: 1, content: 'hello', users: null }]  ← null, NO ERROR
+```
+
+### Cach dieu tra (Investigation steps)
+1. So sanh mobile code va web code query cung 1 table — column names co khop khong?
+2. Kiem tra table schema thuc te:
+   ```sql
+   SELECT column_name FROM information_schema.columns WHERE table_name='posts' ORDER BY ordinal_position;
+   ```
+3. Log `Object.keys(data[0])` de xem columns thuc te tra ve — co thieu column nao khong?
+4. Kiem tra FK relationships: `\d+ table_name` trong psql
+
+### Bien phap phong ngua (Preventive measures)
+- **Reference mobile code truoc khi viet web query**: mobile la source of truth cho table schema
+- **Dung TypeScript**: define interface match voi table schema, compile-time check column names
+- **Supabase generate types**: `supabase gen types typescript` → import va dung generated types
+- **Grep audit**: khi fix 1 column name, grep toan bo codebase cho old name
+
+### Dau hieu nhan biet (Code smell indicators)
+- Web code dung `author_id` nhung mobile dung `user_id` cho cung 1 table
+- Embedded join tra ve null nhung data BIET la ton tai
+- `data?.column_name` vo cung nhieu (defensive coding vi data bi null thuong xuyen)
+- Khong co TypeScript types cho Supabase tables
+
+---
+
 ## Grep Commands for Common Web Issues
+
+```bash
+# Rule 13: Wrong table name (from('users') should be from('profiles'))
+grep -rn "from('users')" frontend/src/ --include='*.jsx' --include='*.js' --include='*.tsx' --include='*.ts' | grep -v '.backup' | grep -v '//'
+
+# Rule 13b: Wrong embedded join table
+grep -rn "users:\w\+_id(" frontend/src/ --include='*.jsx' --include='*.js'
+
+# Rule 14: Column name mismatch (compare with DB schema)
+# Run: supabase gen types typescript > frontend/src/types/database.ts
 
 ```bash
 # Rule 1: Deep relative imports (potential wrong path depth)
@@ -843,3 +1032,5 @@ grep -rn 'TYPOGRAPHY.fontSize' src/ --include='*.jsx' -B2 | grep -i 'input\|text
 | 10 | Layout | Missing Safe Area Insets on Fixed Bottom Bars | Platform bug |
 | 11 | Platform | AsyncStorage to localStorage Traps | Silent data |
 | 12 | Platform | Design Token Misuse Across Platforms | Platform bug |
+| 13 | Database | Wrong Table Name (`users` vs `profiles`) | Silent data loss |
+| 14 | Database | Column Name Mismatch Between Platforms | Silent data loss |

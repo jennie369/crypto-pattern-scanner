@@ -23,10 +23,11 @@ React 19 + Vite SPA cho GEM Trading & Spiritual Ecosystem. Dark theme, Framer Mo
 
 **Dac diem chinh:**
 - Dark theme nhat quan voi design tokens (CSS variables + JS exports)
-- 70+ routes, 100+ components, 70+ services
+- 82+ routes, 140+ components, 75+ services
 - 4-tier subscription model (FREE / TIER1 / TIER2 / TIER3)
 - Lazy loading cho cac page nang (GemMaster, Dashboard, Forum sub-pages)
 - Mobile-first responsive: base = mobile, `@media 768px` = tablet, `1024px` = desktop
+- Forum/Community 3-column layout synced from mobile app (6-type reactions, threaded comments, infinite scroll)
 
 ---
 
@@ -53,7 +54,16 @@ frontend/src/
 │   ├── Rituals/cosmic/      # 4 components (Breathing, Background, GlassCard, GlowButton)
 │   ├── Scanner/             # Pattern scanner components
 │   ├── PaperTrading/        # Paper trading widgets
-│   ├── Forum/               # Forum components
+│   ├── account/             # 8 components (Tai San sync - 2026-02-19)
+│   │   ├── AdminPanel.jsx         # Admin section voi pending badges (152 lines)
+│   │   ├── AffiliateSection.jsx   # 4-state affiliate: none/pending/rejected/active (204 lines)
+│   │   ├── AssetStatsCards.jsx    # Stat cards (gems, tier, streak)
+│   │   ├── EditProfileModal.jsx   # Inline edit modal + avatar upload (210 lines)
+│   │   ├── ProfileHeader.jsx      # Profile header component
+│   │   ├── QuickActionsGrid.jsx   # Quick actions grid
+│   │   ├── SettingsMenu.jsx       # Settings menu items
+│   │   └── StatsRow.jsx           # Stats row display
+│   ├── Forum/               # 13 Forum components (Phase B - 2026-02-19)
 │   ├── Courses/             # Course components
 │   ├── Shop/                # Shop components
 │   ├── Widgets/             # Dashboard widgets
@@ -106,9 +116,19 @@ frontend/src/
 │   ├── Dashboard/           # Scanner v2, Portfolio v2
 │   ├── Forum/               # Forum 3-column + sub-pages
 │   ├── Account/             # Account dashboard, profile
+│   ├── DailyCheckin/        # Daily check-in page (streak + calendar)
+│   ├── Orders/              # Orders page (invoices + pending payments)
+│   ├── Transactions/        # Gem transaction history
+│   ├── Partnership/         # CTV/KOL registration
+│   ├── Settings/            # Privacy settings
 │   ├── CourseAdmin/         # Teacher dashboard
 │   └── ...
-├── services/                # 70+ service files
+├── services/                # 75+ service files
+│   ├── forum.js                   # Forum CRUD + reactions + scheduling (1027 lines)
+│   ├── feedService.js             # Personalized/following/popular feeds (405 lines)
+│   ├── commentService.js          # Threaded comments CRUD (247 lines)
+│   ├── karmaService.js            # Karma RPC wrappers (73 lines)
+│   ├── linkPreviewService.js      # Link preview via edge function (92 lines)
 │   ├── chatHistoryService.js      # Chat persistence (509 lines)
 │   ├── readingHistoryService.js   # Tarot/I-Ching history (430 lines)
 │   ├── streakService.js           # Streak + XP + levels (502 lines)
@@ -562,3 +582,59 @@ Ca hai query nen tra ve **0 rows**.
 | [`docs/DEPLOYMENT_CHECKLIST.md`](./DEPLOYMENT_CHECKLIST.md) | Checklist deploy production |
 | [`docs/GEM_ROLES_QUOTA_ACCESS_CONTROL_REPORT.md`](./GEM_ROLES_QUOTA_ACCESS_CONTROL_REPORT.md) | Bao cao roles & quota |
 | [`docs/SCANNER_SYNC_MASTER_PLAN.md`](./SCANNER_SYNC_MASTER_PLAN.md) | Ke hoach sync Scanner web-mobile |
+| [`TAISAN_MASTER_PLAN.md`](../TAISAN_MASTER_PLAN.md) | Ke hoach sync Tai San (Account) web-mobile |
+| [`TAISAN_GAP_ANALYSIS.md`](../TAISAN_GAP_ANALYSIS.md) | Gap analysis chi tiet giua mobile Account va web Account |
+| [`docs/Web_Troubleshooting_Tips.md`](./Web_Troubleshooting_Tips.md) | 13+ engineering rules cho web frontend |
+
+---
+
+## 11. Tai San Module (Moi - 2026-02-19)
+
+Module Tai San (Account/Profile) tren web duoc sync tu mobile AccountScreen, bao gom 5 pages moi, 2 components moi, va nhieu cai tien cho AccountDashboard.
+
+### 11.1 Pages Moi (5 pages)
+
+| Page | Dong | Route | Mo ta |
+|------|------|-------|-------|
+| `DailyCheckinPage.jsx` | ~350 | `/daily-checkin` | Check-in streak, calendar grid, 6 milestones. RPCs: `perform_daily_checkin`, `get_checkin_status` |
+| `OrdersPage.jsx` | ~300 | `/orders` | Merge `subscription_invoices` + `pending_payments`, 6 filter tabs, expandable cards |
+| `TransactionHistoryPage.jsx` | ~280 | `/transactions` | `gems_transactions` voi pagination 20/page, type filters (credit/debit/purchase/gift/bonus) |
+| `PrivacySettings.jsx` | ~250 | `/settings/privacy` | 6 toggles + 2 selects, reads `profiles` + `user_settings` JSONB, debounced auto-save |
+| `PartnershipRegistration.jsx` | ~320 | `/partnership/register` | CTV/KOL type, form validation, referral code check, duplicate prevention |
+
+### 11.2 Components Moi (2 components)
+
+| Component | Dong | Mo ta |
+|-----------|------|-------|
+| `EditProfileModal.jsx` | 210 | Inline modal: avatar upload (Supabase Storage 'avatars' bucket), full_name, username, bio |
+| `AffiliateSection.jsx` | 204 | 4-state dynamic: no-affiliate (register CTA), pending, rejected, active (referral code + stats) |
+
+### 11.3 AccountDashboard Enhancements (10 features)
+
+1. **VisionBoard Card** — Navigation card den `/vision-board`
+2. **UpgradeBanner** — Gold gradient cho FREE tier, link den `/pricing`
+3. **AdminPanel Badges** — Pending counts tu `partnership_applications` + `withdrawal_requests`
+4. **GemEconomy Section** — Buy Gems (`/shop`) + Daily Checkin (`/daily-checkin`)
+5. **MyOrders Section** — All orders (`/orders`) + Link order (`/link-order`)
+6. **AffiliateSection** — 4-state dynamic component (thay the static link)
+7. **EditProfileModal** — Inline edit thay vi navigate away
+8. **UserBadges** — Badge display next to display name
+9. **PrivacySettings Link** — trong Cai Dat section
+10. **TransactionHistory Quick Action** — "Giao Dich" button
+
+### 11.4 Critical Bug Fix: `from('users')` → `from('profiles')`
+
+**46 occurrences** fixed across **13 source files**. Xem Rule 13 trong `Web_Troubleshooting_Tips.md`.
+
+Files da fix:
+- `AuthContext.jsx` (4), `AuthContext.tsx` (4), `useAuth.ts` (1), `useAuth.js` (1)
+- `Admin.jsx` (5), `BadgeManagement.jsx` (2)
+- `messaging.js` (8), `messaging_improved.js` (3), `events.js` (7)
+- `leaderboard.js` (1), `settingsService.js` (3), `userProfile.js` (6)
+- `TelegramConnect.jsx` (3), `testSupabase.js` (1)
+
+Verification:
+```bash
+# Phai tra ve 0 ket qua (tru comments va .backup files)
+grep -rn "from('users')" frontend/src/ --include='*.jsx' --include='*.js' --include='*.tsx' --include='*.ts' | grep -v '.backup' | grep -v '// ' | grep -v ' \* '
+```
