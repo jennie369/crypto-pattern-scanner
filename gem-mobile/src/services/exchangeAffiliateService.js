@@ -168,7 +168,8 @@ class ExchangeAffiliateService {
    */
   async openExchangeSignup(exchangeId, source = 'unknown') {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       const userId = user?.id;
 
       // Get affiliate link
@@ -262,7 +263,8 @@ class ExchangeAffiliateService {
    */
   async confirmExchangeSignup(exchangeId, email) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) {
         return { success: false, error: 'User not authenticated' };
       }
@@ -357,7 +359,8 @@ class ExchangeAffiliateService {
    */
   async getUserExchangeAccounts() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -389,7 +392,8 @@ class ExchangeAffiliateService {
    */
   async getUserExchangeSummary() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) {
         return {
           totalAccounts: 0,
@@ -442,7 +446,8 @@ class ExchangeAffiliateService {
    */
   async hasRegisteredExchange() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return false;
 
       const { count, error } = await supabase
@@ -465,7 +470,8 @@ class ExchangeAffiliateService {
    */
   async hasDepositedOnExchange(exchangeId = null) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return false;
 
       let query = supabase
@@ -494,7 +500,8 @@ class ExchangeAffiliateService {
    */
   async updateExchangeMilestone(exchangeId, milestone) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return { success: false, error: 'Not authenticated' };
 
       const { data, error } = await supabase.rpc('update_exchange_milestone', {
@@ -529,7 +536,8 @@ class ExchangeAffiliateService {
    */
   async scheduleDepositPrompt(exchangeId, promptType, delayMinutes = 0, contextData = {}) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return { success: false, error: 'Not authenticated' };
 
       const { data, error } = await supabase.rpc('schedule_deposit_prompt', {
@@ -558,7 +566,8 @@ class ExchangeAffiliateService {
    */
   async getPendingDepositPrompts() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return [];
 
       const { data, error } = await supabase.rpc('get_pending_prompts', {
@@ -634,7 +643,8 @@ class ExchangeAffiliateService {
       }
 
       // Check DB rate limit
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return false;
 
       const { data } = await supabase.rpc('should_show_deposit_prompt', {
@@ -704,7 +714,8 @@ class ExchangeAffiliateService {
         return { shouldPrompt: false, reason: 'Streak too low' };
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return { shouldPrompt: false, reason: 'Not authenticated' };
 
       const { data, error } = await supabase.rpc('check_win_streak_trigger', {
@@ -737,7 +748,8 @@ class ExchangeAffiliateService {
         return { shouldPrompt: false, reason: 'Grade not high enough' };
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return { shouldPrompt: false, reason: 'Not authenticated' };
 
       const { data, error } = await supabase.rpc('check_pattern_trigger', {

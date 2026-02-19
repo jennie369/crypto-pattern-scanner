@@ -610,7 +610,14 @@ const ScannerScreen = ({ navigation }) => {
           }
         });
 
-        const batchResults = await Promise.allSettled(batchPromises);
+        // Per-batch timeout: 30s max per batch to prevent overall scan hang
+        const batchResults = await Promise.race([
+          Promise.allSettled(batchPromises),
+          new Promise((resolve) => setTimeout(() => {
+            console.log(`[Scanner] Batch ${Math.floor(i/BATCH_SIZE) + 1} timed out after 30s`);
+            resolve(batch.map(() => ({ status: 'rejected', reason: new Error('Batch timeout') })));
+          }, 30000)),
+        ]);
 
         // Extract successful results
         batchResults.forEach(result => {
@@ -1002,11 +1009,15 @@ const ScannerScreen = ({ navigation }) => {
     const loadQuota = async () => {
       if (user?.id) {
         try {
-          const quota = await tierAccessService.checkScanLimit();
+          // Rule 29: Timeout on quota check (could take 8s × 3 retries = 24s)
+          const quota = await Promise.race([
+            tierAccessService.checkScanLimit(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Quota load timeout')), 8000)),
+          ]);
           setScanQuota(quota);
           console.log('[Scanner] Quota loaded:', quota);
         } catch (err) {
-          console.warn('[Scanner] Failed to load quota:', err);
+          console.warn('[Scanner] Failed to load quota:', err?.message);
         }
       }
     };
@@ -1029,10 +1040,14 @@ const ScannerScreen = ({ navigation }) => {
     const checkExchangeAccount = async () => {
       if (user?.id) {
         try {
-          const hasExchange = await exchangeAffiliateService.hasRegisteredExchange();
+          // Rule 29: Timeout on exchange check
+          const hasExchange = await Promise.race([
+            exchangeAffiliateService.hasRegisteredExchange(),
+            new Promise((resolve) => setTimeout(() => resolve(true), 5000)), // Hide banner on timeout
+          ]);
           setHasExchangeAccount(hasExchange);
         } catch (error) {
-          console.warn('[Scanner] Exchange check error:', error);
+          console.warn('[Scanner] Exchange check error:', error?.message);
           setHasExchangeAccount(true); // Hide banner on error
         }
       }
@@ -1052,17 +1067,17 @@ const ScannerScreen = ({ navigation }) => {
         // Only restore if zones are empty and we have scan results
         if (zones.length === 0 && scanResults.length > 0 && user?.id) {
           try {
-            const cachedZones = await zoneManager.getZonesForChart(
-              displayCoin,
-              selectedTimeframe,
-              user.id
-            );
+            // Rule 29: Timeout on zone cache restore
+            const cachedZones = await Promise.race([
+              zoneManager.getZonesForChart(displayCoin, selectedTimeframe, user.id),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Zone cache timeout')), 8000)),
+            ]);
             if (cachedZones && cachedZones.length > 0) {
               console.log('[Scanner] Restored zones from cache:', cachedZones.length);
               setZones(cachedZones);
             }
           } catch (error) {
-            console.log('[Scanner] No cached zones to restore:', error.message);
+            console.log('[Scanner] No cached zones to restore:', error?.message);
           }
         }
       };

@@ -45,54 +45,42 @@ export const partnershipService = {
     try {
       console.log('[Partnership] Using fallback for user:', userId);
 
-      // 1. Check affiliate_profiles table for approved partnership
-      const { data: affiliateProfile, error: profileError } = await supabase
-        .from('affiliate_profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
+      // FIX: Run all 4 queries in PARALLEL instead of sequential
+      // Each query has 8s timeout via global fetch wrapper, total was 32s sequential → now 8s parallel
+      const [affiliateResult, applicationsResult, profileResult, courseResult] = await Promise.allSettled([
+        // 1. Check affiliate_profiles table for approved partnership
+        supabase.from('affiliate_profiles').select('*').eq('user_id', userId).maybeSingle(),
+        // 2. Check partnership_applications table for pending/rejected applications
+        supabase.from('partnership_applications').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(1),
+        // 3. Check profiles table for partnership_role
+        supabase.from('profiles').select('partnership_role, affiliate_code, ctv_tier').eq('id', userId).single(),
+        // 4. Check CTV eligibility (has purchased course)
+        supabase.from('course_access').select('id').eq('user_id', userId).limit(1),
+      ]);
 
-      if (profileError) {
-        console.log('[Partnership] affiliate_profiles query error:', profileError.message);
+      // Extract results safely
+      const affiliateProfile = affiliateResult.status === 'fulfilled' && !affiliateResult.value.error
+        ? affiliateResult.value.data : null;
+      if (affiliateResult.status === 'fulfilled' && affiliateResult.value.error) {
+        console.log('[Partnership] affiliate_profiles query error:', affiliateResult.value.error.message);
       }
 
-      // 2. Check partnership_applications table for pending/rejected applications
-      const { data: applications, error: appError } = await supabase
-        .from('partnership_applications')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      if (appError) {
-        console.log('[Partnership] partnership_applications query error:', appError.message);
+      const applications = applicationsResult.status === 'fulfilled' && !applicationsResult.value.error
+        ? applicationsResult.value.data : null;
+      if (applicationsResult.status === 'fulfilled' && applicationsResult.value.error) {
+        console.log('[Partnership] partnership_applications query error:', applicationsResult.value.error.message);
       }
-
       const latestApp = applications?.[0];
 
-      // 3. Check profiles table for partnership_role
-      const { data: profile, error: pError } = await supabase
-        .from('profiles')
-        .select('partnership_role, affiliate_code, ctv_tier')
-        .eq('id', userId)
-        .single();
-
-      if (pError) {
-        console.log('[Partnership] profiles query error:', pError.message);
+      const profile = profileResult.status === 'fulfilled' && !profileResult.value.error
+        ? profileResult.value.data : null;
+      if (profileResult.status === 'fulfilled' && profileResult.value.error) {
+        console.log('[Partnership] profiles query error:', profileResult.value.error.message);
       }
 
-      // 4. Check CTV eligibility (has purchased course)
-      let isCtvEligible = false;
-      try {
-        const { data: courseAccess } = await supabase
-          .from('course_access')
-          .select('id')
-          .eq('user_id', userId)
-          .limit(1);
-        isCtvEligible = courseAccess && courseAccess.length > 0;
-      } catch (e) {
-        console.log('[Partnership] course_access query error');
-      }
+      const courseAccess = courseResult.status === 'fulfilled' && !courseResult.value.error
+        ? courseResult.value.data : null;
+      let isCtvEligible = courseAccess && courseAccess.length > 0;
 
       // Build response
       const hasPartnership = !!(affiliateProfile || profile?.partnership_role);

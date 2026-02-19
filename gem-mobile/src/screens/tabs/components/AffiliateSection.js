@@ -68,43 +68,54 @@ export default function AffiliateSection({ user, navigation }) {
     }
   }, [user?.id]);
 
-  // Rule 31: Recovery listener — reset stuck loading + re-fetch on app resume
+  // Rule 31 + Rule 55: Recovery listener — reset stuck loading + re-fetch on app resume
+  // FIX: Use skipLoading param to avoid React 18 batching no-op
+  // (setLoading(false) + loadPartnershipData() which calls setLoading(true) = batched to true)
   useEffect(() => {
     const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
       console.log('[AffiliateSection] Force refresh received');
       setLoading(false);
+      setPartnershipStatus(null);
+      setCommissionStats(null);
       if (user?.id) {
-        loadPartnershipData();
+        // setTimeout breaks React batch — ensures setLoading(false) commits first
+        setTimeout(() => loadPartnershipData(true), 50);
       }
     });
     return () => listener.remove();
   }, [user?.id]);
 
-  const loadPartnershipData = async () => {
-    setLoading(true);
+  const loadPartnershipData = async (skipLoading = false) => {
+    if (!skipLoading) setLoading(true);
     try {
-      // Get partnership status + centralized referral code in parallel (Rule 20 fix)
-      const { affiliateService } = require('../../../services/affiliateService');
-      const [statusResult, code] = await Promise.all([
-        partnershipService.getPartnershipStatus(user.id),
-        affiliateService.getReferralCode(user.id).catch(() => null),
-      ]);
+      // Overall timeout — worst case 15s, not 56s
+      const result = await Promise.race([
+        (async () => {
+          // Get partnership status + centralized referral code in parallel (Rule 20 fix)
+          const { affiliateService } = require('../../../services/affiliateService');
+          const [statusResult, code] = await Promise.all([
+            partnershipService.getPartnershipStatus(user.id),
+            affiliateService.getReferralCode(user.id).catch(() => null),
+          ]);
 
-      if (code) setCentralReferralCode(code);
+          if (code) setCentralReferralCode(code);
 
-      if (statusResult.success) {
-        setPartnershipStatus(statusResult.data);
+          if (statusResult.success) {
+            setPartnershipStatus(statusResult.data);
 
-        // If has partnership, also get commission stats
-        if (statusResult.data?.has_partnership) {
-          const statsResult = await partnershipService.getCommissionStats(user.id);
-          if (statsResult.success) {
-            setCommissionStats(statsResult.stats);
+            // If has partnership, also get commission stats
+            if (statusResult.data?.has_partnership) {
+              const statsResult = await partnershipService.getCommissionStats(user.id);
+              if (statsResult.success) {
+                setCommissionStats(statsResult.stats);
+              }
+            }
           }
-        }
-      }
+        })(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Partnership data timeout')), 15000)),
+      ]);
     } catch (error) {
-      console.error('[AffiliateSection] Load error:', error);
+      console.error('[AffiliateSection] Load error:', error?.message);
     } finally {
       setLoading(false);
     }

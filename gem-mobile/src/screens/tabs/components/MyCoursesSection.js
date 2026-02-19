@@ -52,26 +52,30 @@ export default function MyCoursesSection({ navigation }) {
   );
 
   // Rule 55: Recovery listener for child components
+  // FIX: Use setTimeout to break React 18 batch (setLoading(false) + setLoading(true) = no-op)
   useEffect(() => {
     const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
       console.log('[MyCoursesSection] Force refresh received');
       setLoading(false);
       if (user?.id) {
-        loadCourseStats();
+        setTimeout(() => loadCourseStats(true), 50);
       }
     });
     return () => listener.remove();
   }, [user?.id]);
 
-  const loadCourseStats = async () => {
+  const loadCourseStats = async (skipLoading = false) => {
     try {
-      setLoading(true);
+      if (!skipLoading) setLoading(true);
 
-      // Get course stats
-      const courseStats = await courseService.getUserCourseStats(user.id);
+      // Get course stats with timeout
+      const courseStats = await Promise.race([
+        courseService.getUserCourseStats(user.id),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Course stats timeout')), 10000)),
+      ]);
       setStats(courseStats);
     } catch (error) {
-      console.error('[MyCoursesSection] Load stats error:', error);
+      console.error('[MyCoursesSection] Load stats error:', error?.message);
     } finally {
       setLoading(false);
     }

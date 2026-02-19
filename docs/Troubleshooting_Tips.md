@@ -1400,6 +1400,8 @@ test('binanceService throws on HTTP 200 with error code', async () => {
 | 38 | RLS Policy `TO` Clause Defaults to `{public}` | D: Security | 11 |
 | 39 | Tables Without RLS Enabled Are Fully Open | D: Security | 11 |
 | 40 | Same Fix Must Apply to ALL Code Paths | F: Architecture | 11 |
+| 57 | FORCE_REFRESH Handler Must Break React 18 Batch | A: State | 14 |
+| 58 | Sequential Supabase Queries Must Run in Parallel | C: Concurrency | 14 |
 
 ---
 
@@ -3302,3 +3304,63 @@ try {
 2. **Check if each await has timeout**: Individual calls may have timeout, but does the OVERALL function?
 3. **Check for scan/task ID pattern**: If the function can be re-triggered while in progress, old invocation's finally can corrupt new invocation's state
 4. **Test**: Start operation → background app → return → start operation again → does the first finally interfere?
+
+# RULE 57: FORCE_REFRESH Handler Must Break React 18 Batch
+**Source:** Phase 14 — AffiliateSection permanently stuck in "Đang tải..." after app resume
+
+## What Failed
+AffiliateSection had a FORCE_REFRESH_EVENT listener (Rule 55). But after resume, it STILL showed infinite loading.
+
+## Why It Failed
+React 18 automatic batching: `setLoading(false)` immediately followed by `loadPartnershipData()` (which calls `setLoading(true)`) in the same synchronous handler gets batched. React only commits the LAST state update — loading stays `true`.
+
+```javascript
+// BAD: React batches these — loading is STILL true after handler runs
+DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+  setLoading(false);        // Batched with next call
+  loadPartnershipData();    // calls setLoading(true) — last wins
+});
+
+// GOOD: setTimeout breaks the batch — setLoading(false) commits first
+DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
+  setLoading(false);
+  setTimeout(() => loadPartnershipData(true), 50); // skipLoading=true
+});
+```
+
+## How to Detect
+1. **Find FORCE_REFRESH handlers** that call `setLoading(false)` then immediately call a reload function
+2. **Check if the reload function** starts with `setLoading(true)`
+3. If yes → React batches them → loading never clears → infinite spinner
+4. Fix: Use `setTimeout` to break the batch, OR pass `skipLoading=true` parameter
+
+# RULE 58: Sequential Supabase Queries Must Run in Parallel
+**Source:** Phase 14 — partnershipService fallback took 32s (4 × 8s sequential queries)
+
+## What Failed
+`getPartnershipStatusFallback()` made 4 sequential Supabase queries. Each has 8s timeout via global fetch wrapper. Total worst case: 32s. User sees "Đang tải..." for 32 seconds.
+
+## Why It Failed
+Code was written sequentially for readability but queries are independent — no data dependency between them.
+
+```javascript
+// BAD: Sequential (32s worst case)
+const { data: affiliate } = await supabase.from('affiliate_profiles')...;
+const { data: apps } = await supabase.from('partnership_applications')...;
+const { data: profile } = await supabase.from('profiles')...;
+const { data: course } = await supabase.from('course_access')...;
+
+// GOOD: Parallel with Promise.allSettled (8s worst case)
+const [affiliate, apps, profile, course] = await Promise.allSettled([
+  supabase.from('affiliate_profiles')...,
+  supabase.from('partnership_applications')...,
+  supabase.from('profiles')...,
+  supabase.from('course_access')...,
+]);
+```
+
+## How to Detect
+1. **Find functions with 3+ sequential Supabase queries** (consecutive `await supabase.from(...)`)
+2. **Check data dependencies**: Does query 2 need query 1's result?
+3. If independent → use `Promise.allSettled()` for parallel execution
+4. Use `Promise.allSettled` (not `Promise.all`) so one failure doesn't abort others
