@@ -139,6 +139,8 @@ function _decodeJwtExp(token) {
  * refresh the session before the request proceeds.
  * Uses singleton promise to dedup concurrent refresh calls.
  */
+const JWT_REFRESH_TIMEOUT = 4000; // 4s cap — must be less than any caller's timeout (feed=15s, query=8s)
+
 async function _ensureSessionFresh() {
   if (!_supabaseInstance) return;
 
@@ -147,9 +149,14 @@ async function _ensureSessionFresh() {
   // Fast path: cached exp is still valid (sub-ms check)
   if (_cachedExp > 0 && _cachedExp > nowSec + 60) return;
 
-  // Another refresh is already in progress — wait for it
+  // Another refresh is already in progress — wait for it (with timeout)
   if (_refreshPromise) {
-    try { await _refreshPromise; } catch {}
+    try {
+      await Promise.race([
+        _refreshPromise,
+        new Promise((resolve) => setTimeout(resolve, JWT_REFRESH_TIMEOUT)),
+      ]);
+    } catch {}
     return;
   }
 
@@ -166,8 +173,14 @@ async function _ensureSessionFresh() {
 
     if (exp > 0 && exp < nowSec + 60) {
       console.log('[Supabase] JWT expired/expiring (<60s), auto-refreshing...');
-      _refreshPromise = _supabaseInstance.auth.refreshSession()
-        .then(({ data: refreshData, error }) => {
+      // 4s internal timeout — prevents eating into caller's time budget
+      // (e.g., feed 15s timeout: 4s refresh + 8s query = 12s < 15s)
+      _refreshPromise = Promise.race([
+        _supabaseInstance.auth.refreshSession(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('JWT refresh timeout (4s)')), JWT_REFRESH_TIMEOUT)),
+      ])
+        .then((result) => {
+          const { data: refreshData, error } = result || {};
           if (error) {
             console.warn('[Supabase] JWT auto-refresh error:', error.message);
           } else if (refreshData?.session?.access_token) {
