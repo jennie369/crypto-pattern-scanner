@@ -14,10 +14,15 @@ export const partnershipService = {
    */
   async getPartnershipStatus(userId) {
     try {
-      // Try RPC first
-      const { data, error } = await supabase.rpc('get_partnership_status', {
-        user_id_param: userId,
-      });
+      // Try RPC first with 4s timeout — if it hangs, fall back fast
+      // Global fetch wrapper gives 8s, but we need faster fallback to fit 15s budget
+      // (4s RPC + 8s fallback = 12s < 15s overall timeout in AffiliateSection)
+      const rpcResult = await Promise.race([
+        supabase.rpc('get_partnership_status', { user_id_param: userId }),
+        new Promise((resolve) => setTimeout(() => resolve({ data: null, error: { message: 'RPC timeout (4s)' } }), 4000)),
+      ]);
+
+      const { data, error } = rpcResult;
 
       if (error) {
         console.log('[Partnership] RPC failed, using fallback:', error.message);
@@ -595,8 +600,8 @@ export const partnershipService = {
    */
   async submitCTVApplication(data) {
     try {
-      const { data: user } = await supabase.auth.getUser();
-      const userId = user?.user?.id;
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
 
       if (!userId) {
         throw new Error('User not authenticated');
