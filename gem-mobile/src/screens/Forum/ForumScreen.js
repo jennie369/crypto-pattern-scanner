@@ -102,7 +102,7 @@ const MAX_TRACKED_POSTS = 500;
 // Individual Supabase DB queries abort at 8s (see supabase.js global.fetch).
 // feedService now uses Promise.allSettled so slow optional queries (follows, profiles)
 // don't block the critical posts query. 15s gives headroom for retry/fallback.
-const FEED_LOAD_TIMEOUT = 15000; // 15 seconds
+const FEED_LOAD_TIMEOUT = 20000; // 20s — budget: 4s JWT refresh + 8s query + 8s cold start pool warmup
 // Budget: 4s JWT refresh + 8s query = 12s min → 15s with margin
 const FEED_LOADMORE_TIMEOUT = 15000; // 15 seconds for pagination
 const TIMEOUT_RETRY_COOLDOWN = 3000; // 3 second cooldown between retries after timeout

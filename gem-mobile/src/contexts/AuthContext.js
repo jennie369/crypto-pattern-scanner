@@ -418,21 +418,30 @@ export const AuthProvider = ({ children }) => {
           userRef.current = user;
           setUser(user);
 
-          // Fetch profile with error handling + retry
+          // Fetch profile with error handling + retry + 10s total budget
+          // Budget: first try (up to 8s) + 1s delay + retry (up to 8s) = 17s worst case.
+          // Watchdog fires at 15s. Cap entire profile fetch at 10s so loadSession
+          // completes in <12s. App recovers via FORCE_REFRESH_EVENT if profile is null.
           console.time('[AUTH] getUserProfile');
           let profileData = null;
-          const { data: firstTry, error: firstError } = await getUserProfile(user.id);
-          if (firstError || !firstTry) {
-            console.warn('[AuthContext] loadSession: profile fetch failed, retrying in 1s...', firstError?.message);
-            await new Promise(r => setTimeout(r, 1000));
-            const { data: retryData, error: retryError } = await getUserProfile(user.id);
-            if (retryData) {
-              profileData = retryData;
-            } else {
-              console.error('[AuthContext] loadSession: profile retry also failed:', retryError?.message);
-            }
-          } else {
-            profileData = firstTry;
+          try {
+            profileData = await Promise.race([
+              (async () => {
+                const { data: firstTry, error: firstError } = await getUserProfile(user.id);
+                if (firstError || !firstTry) {
+                  console.warn('[AuthContext] loadSession: profile fetch failed, retrying in 1s...', firstError?.message);
+                  await new Promise(r => setTimeout(r, 1000));
+                  const { data: retryData, error: retryError } = await getUserProfile(user.id);
+                  if (retryData) return retryData;
+                  console.error('[AuthContext] loadSession: profile retry also failed:', retryError?.message);
+                  return null;
+                }
+                return firstTry;
+              })(),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch budget exceeded (10s)')), 10000)),
+            ]);
+          } catch (budgetErr) {
+            console.warn('[AuthContext] loadSession:', budgetErr.message, '— continuing with null profile');
           }
           setProfile(profileData);
           console.timeEnd('[AUTH] getUserProfile');
@@ -536,20 +545,26 @@ export const AuthProvider = ({ children }) => {
           userRef.current = session.user;
           setUser(session.user);
 
-          // Fetch profile with error handling + retry
+          // Fetch profile with error handling + retry + 10s budget
           let profileData = null;
-          const { data: firstTry, error: firstError } = await getUserProfile(session.user.id);
-          if (firstError || !firstTry) {
-            console.warn('[AuthContext] onAuthStateChange: profile fetch failed, retrying in 1s...', firstError?.message);
-            await new Promise(r => setTimeout(r, 1000));
-            const { data: retryData, error: retryError } = await getUserProfile(session.user.id);
-            if (retryData) {
-              profileData = retryData;
-            } else {
-              console.error('[AuthContext] onAuthStateChange: profile retry also failed:', retryError?.message);
-            }
-          } else {
-            profileData = firstTry;
+          try {
+            profileData = await Promise.race([
+              (async () => {
+                const { data: firstTry, error: firstError } = await getUserProfile(session.user.id);
+                if (firstError || !firstTry) {
+                  console.warn('[AuthContext] onAuthStateChange: profile fetch failed, retrying in 1s...', firstError?.message);
+                  await new Promise(r => setTimeout(r, 1000));
+                  const { data: retryData, error: retryError } = await getUserProfile(session.user.id);
+                  if (retryData) return retryData;
+                  console.error('[AuthContext] onAuthStateChange: profile retry also failed:', retryError?.message);
+                  return null;
+                }
+                return firstTry;
+              })(),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch budget exceeded (10s)')), 10000)),
+            ]);
+          } catch (budgetErr) {
+            console.warn('[AuthContext] onAuthStateChange:', budgetErr.message);
           }
           setProfile(profileData);
 
