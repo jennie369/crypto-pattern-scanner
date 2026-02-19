@@ -19,9 +19,12 @@ import AnalyticsContent from './tools/AnalyticsContent';
 import MultiTFPatternCard from './MultiTFPatternCard';
 import { scanMultipleTimeframes, MULTI_TF_TIMEFRAMES } from '../../../../../services/multiTimeframeScanner';
 import { useAuth } from '../../../../../contexts/AuthContext';
+import { useScannerStore } from '../../../../../stores/scannerStore';
 import './SubToolsPanel.css';
 
-export const SubToolsPanel = ({ pattern, onSelectTimeframe }) => {
+export const SubToolsPanel = () => {
+  // Read pattern from Zustand store (no prop drilling)
+  const pattern = useScannerStore((s) => s.selectedPattern);
   const { user, getScannerTier, isAdmin } = useAuth();
   const [activePanel, setActivePanel] = useState(null);
   const [multiTFPatterns, setMultiTFPatterns] = useState([]);
@@ -240,7 +243,7 @@ export const SubToolsPanel = ({ pattern, onSelectTimeframe }) => {
                 <MultiTFPatternCard
                   key={idx}
                   pattern={mtfPattern}
-                  onSelectTimeframe={onSelectTimeframe}
+                  onSelectTimeframe={null}
                 />
               ))}
             </div>

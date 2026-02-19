@@ -243,12 +243,7 @@ function TopNavBar() {
 
                   <Link to="/account" className="dropdown-item" onClick={() => setActiveDropdown(null)}>
                     <User size={18} />
-                    <span>Account Dashboard</span>
-                  </Link>
-
-                  <Link to="/profile" className="dropdown-item" onClick={() => setActiveDropdown(null)}>
-                    <UserCircle size={18} />
-                    <span>Profile</span>
+                    <span>Tài sản</span>
                   </Link>
 
                   <Link to="/settings" className="dropdown-item" onClick={() => setActiveDropdown(null)}>

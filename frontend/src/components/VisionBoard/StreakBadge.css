@@ -5,8 +5,8 @@
 .streak-badge {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xs) var(--spacing-sm);
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
   background: rgba(255, 189, 89, 0.1);
   border: 1px solid rgba(255, 189, 89, 0.2);
   border-radius: var(--radius-full);
@@ -23,13 +23,13 @@
 }
 
 .streak-badge-label {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-weight: 400;
 }
 
 /* Size variants */
 .streak-badge-sm {
-  padding: 2px var(--spacing-xs);
+  padding: 2px var(--space-xs);
   gap: 2px;
 }
 
@@ -50,8 +50,8 @@
 }
 
 .streak-badge-lg {
-  padding: var(--spacing-sm) var(--spacing-md);
-  gap: var(--spacing-sm);
+  padding: var(--space-sm) var(--space-md);
+  gap: var(--space-sm);
 }
 
 .streak-badge-lg .streak-badge-count {

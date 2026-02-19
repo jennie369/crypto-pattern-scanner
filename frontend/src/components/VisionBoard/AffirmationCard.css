@@ -7,7 +7,7 @@
   background: linear-gradient(135deg, rgba(106, 91, 255, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
   border: 1px solid rgba(106, 91, 255, 0.2);
   border-radius: var(--radius-xl);
-  padding: var(--spacing-2xl);
+  padding: var(--space-2xl);
   text-align: center;
   overflow: hidden;
 }
@@ -17,13 +17,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-sm);
+  gap: var(--space-sm);
   min-height: 150px;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }
 
 .affirmation-card-empty-icon {
-  color: var(--color-accent);
+  color: var(--brand-purple);
   opacity: 0.5;
 }
 
@@ -39,20 +39,20 @@
 /* Sparkles */
 .affirmation-card-sparkle {
   position: absolute;
-  color: var(--color-primary);
+  color: var(--brand-purple);
   opacity: 0.3;
   animation: sparkle 3s ease-in-out infinite;
 }
 
 .affirmation-card-sparkle-1 {
-  top: var(--spacing-base);
-  left: var(--spacing-base);
+  top: var(--space-3);
+  left: var(--space-3);
   animation-delay: 0s;
 }
 
 .affirmation-card-sparkle-2 {
-  top: var(--spacing-lg);
-  right: var(--spacing-lg);
+  top: var(--space-lg);
+  right: var(--space-lg);
   animation-delay: 1.5s;
 }
 
@@ -70,20 +70,20 @@
 /* Category */
 .affirmation-card-category {
   display: inline-block;
-  padding: var(--spacing-xs) var(--spacing-md);
+  padding: var(--space-xs) var(--space-md);
   border-radius: var(--radius-full);
   font-size: var(--font-size-xs);
   font-weight: 500;
-  margin-bottom: var(--spacing-base);
+  margin-bottom: var(--space-3);
 }
 
 /* Text */
 .affirmation-card-text {
   font-size: var(--font-size-xl);
   font-weight: 500;
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   line-height: 1.6;
-  margin: 0 0 var(--spacing-xl) 0;
+  margin: 0 0 var(--space-xl) 0;
   font-style: italic;
 }
 
@@ -91,7 +91,7 @@
 .affirmation-card-controls {
   display: flex;
   justify-content: center;
-  gap: var(--spacing-md);
+  gap: var(--space-md);
 }
 
 .affirmation-card-btn {
@@ -103,14 +103,14 @@
   border-radius: var(--radius-full);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .affirmation-card-btn:hover {
   background: rgba(255, 255, 255, 0.1);
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   transform: scale(1.1);
 }
 
@@ -126,7 +126,7 @@
 /* Responsive - Tablet */
 @media (max-width: 768px) {
   .affirmation-card {
-    padding: var(--spacing-xl);
+    padding: var(--space-xl);
   }
 
   .affirmation-card-text {
@@ -137,7 +137,7 @@
 /* Responsive - Mobile */
 @media (max-width: 640px) {
   .affirmation-card {
-    padding: var(--spacing-lg);
+    padding: var(--space-lg);
   }
 
   .affirmation-card-text {

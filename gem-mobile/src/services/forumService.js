@@ -530,8 +530,11 @@ export const forumService = {
       const { category, feed = 'explore', page = 1, limit = 50, search, topic, sortBy = 'hot' } = filters;
 
       // Get current user for personalized feeds
-      const { data: { user } } = await supabase.auth.getUser();
-      const currentUserId = user?.id;
+      // Rule 35: Use getSession() (reads from local storage, instant) instead of
+      // getUser() (API call to /auth/v1/user, 1-8s on slow network).
+      // Session validation is handled by AppResumeManager + onAuthStateChange.
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentUserId = session?.user?.id;
 
       // Detect custom feed UUIDs and delegate to getCustomFeedPosts
       const isUUID = (str) => /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(str);

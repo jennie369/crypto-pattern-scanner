@@ -4,9 +4,13 @@ import { useAuth } from '../../../../../contexts/AuthContext';
 import ResultsList from './ResultsList';
 import CoinSelectorDropdown from './CoinSelectorDropdown';
 import CustomSelect from '../../../../../components/CustomSelect/CustomSelect';
+import { useScannerStore } from '../../../../../stores/scannerStore';
 import './ControlPanel.css';
 
-export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, selectedPattern, onOpenPaperTrading }) => {
+export const ControlPanel = ({ onScan, onOpenPaperTrading }) => {
+  // Read scanner state from Zustand store (no prop drilling)
+  const isScanning = useScannerStore((s) => s.isScanning);
+  const scanResults = useScannerStore((s) => s.scanResults);
   const { profile, getScannerTier } = useAuth();
   const [selectedCoins, setSelectedCoins] = useState(['BTCUSDT']); // Multi-coin support
   const [timeframe, setTimeframe] = useState('1H');
@@ -166,12 +170,9 @@ export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, sel
         )}
       </button>
 
-      {/* Results List */}
-      {results.length > 0 && (
+      {/* Results List — reads from Zustand store */}
+      {scanResults.length > 0 && (
         <ResultsList
-          results={results}
-          onSelect={onSelectPattern}
-          selectedPattern={selectedPattern}
           onOpenPaperTrading={onOpenPaperTrading}
         />
       )}

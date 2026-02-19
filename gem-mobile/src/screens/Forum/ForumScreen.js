@@ -598,13 +598,18 @@ const ForumScreen = ({ navigation }) => {
 
       // Get posts from API with feed type and topic filter
       // OPTIMIZED: Reduced limit for faster initial load
-      const result = await forumService.getPosts({
-        feed: selectedFeed,
-        topic: selectedTopic,
-        page: currentPage,
-        limit: 20,
-        sortBy: selectedFeed === 'explore' ? 'hot' : 'latest',
-      });
+      // Rule 21: Wrap in timeout — getPosts has sequential queries that can hang
+      const result = await withTimeout(
+        forumService.getPosts({
+          feed: selectedFeed,
+          topic: selectedTopic,
+          page: currentPage,
+          limit: 20,
+          sortBy: selectedFeed === 'explore' ? 'hot' : 'latest',
+        }),
+        FEED_LOAD_TIMEOUT,
+        'forumService.getPosts'
+      );
 
       // RACE CONDITION FIX: Check if this request is still current
       // If user switched tabs while loading, ignore this stale response
@@ -815,71 +820,22 @@ const ForumScreen = ({ navigation }) => {
 
       // On timeout: keep existing posts visible if we have cached data
       if (isTimeout) {
-        // If we already have posts cached, keep them visible and allow retry
         if (feedItems.length > 0) {
           console.log('[ForumScreen] Timeout - keeping cached data, retry after cooldown');
           lastTimeoutRef.current = Date.now();
           setHasMore(true);
-          // Loading states cleared by loadPosts finally block
           return;
         }
-        // First load with no cache: fall through to legacy fallback below
-        console.log('[ForumScreen] Timeout on first load with no cache - trying legacy fallback');
+        // First load with no cache: DO NOT fallback to forumService.getPosts().
+        // Rule 34: getPosts() is HEAVIER (getUser API call + 6 sequential queries)
+        // than generateFeed (2 parallel queries). If generateFeed can't load in 15s,
+        // getPosts has zero chance — it just adds another 15s wait (30s total).
+        // Re-throw so parent loadPosts catch shows error UI with retry button immediately.
+        console.warn('[ForumScreen] Timeout on first load — showing error UI (no cascading fallback)');
       }
 
-      // Fallback to legacy loading with new return format
-      setUseHybridFeed(false);
-      const currentPage = reset ? 1 : page;
-      const result = await withTimeout(
-        forumService.getPosts({
-          feed: selectedFeed,
-          topic: selectedTopic,
-          page: currentPage,
-          limit: 20,
-        }),
-        FEED_LOAD_TIMEOUT,
-        'forumService.getPosts fallback'
-      );
-
-      // Check again after fallback fetch
-      if (requestId !== currentRequestIdRef.current) {
-        console.log(`[ForumScreen] Ignoring stale fallback response (requestId: ${requestId}, current: ${currentRequestIdRef.current})`);
-        return;
-      }
-
-      // Handle new return format
-      const feedData = result.posts || [];
-      const postsOnly = feedData
-        .filter(item => item.type === 'post')
-        .map(item => item.data);
-
-      if (reset) {
-        setPosts(postsOnly);
-        setFeedItems(feedData);
-        setSessionId(result.sessionId);
-
-        // Update cache for instant display on tab switch
-        forumCache.posts = postsOnly;
-        forumCache.feedItems = feedData;
-        forumCache.sessionId = result.sessionId;
-        forumCache.lastFetch = Date.now();
-        forumCache.feed = selectedFeed;
-        trimCache(); // Prevent memory overflow
-      } else {
-        // Dedupe before appending
-        setPosts(prev => {
-          const existingIds = new Set(prev.map(p => p.id));
-          const newPosts = postsOnly.filter(p => !existingIds.has(p.id));
-          return [...prev, ...newPosts];
-        });
-        setFeedItems(prev => {
-          const existingIds = new Set(prev.map(item => item.data?.id));
-          const newItems = feedData.filter(item => !existingIds.has(item.data?.id));
-          return [...prev, ...newItems];
-        });
-      }
-      // INFINITE SCROLL: Allow more if we got data
-      setHasMore(result.hasMore);
+      // Re-throw to parent loadPosts catch block which shows error UI
+      throw error;
     } finally {
       // End performance measurement (dev only)
       performanceService.endMeasure(`loadHybridFeed.${reset ? 'reset' : 'page'}`, 2500);

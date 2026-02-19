@@ -121,6 +121,20 @@ frontend/src/
 │   ├── Transactions/        # Gem transaction history
 │   ├── Partnership/         # CTV/KOL registration
 │   ├── Settings/            # Privacy settings
+│   ├── Admin/              # Admin dashboard (13 files — route-based sub-pages, 2026-02-19)
+│   │   ├── AdminLayout.jsx       # Layout: header, stats, quick actions, tab nav, <Outlet />
+│   │   ├── adminUtils.js         # Shared: formatCurrency, formatDate, sendPartnershipNotification
+│   │   ├── UsersPage.jsx         # User management + UserModal
+│   │   ├── ApplicationsPage.jsx  # Partnership applications
+│   │   ├── WithdrawalsPage.jsx   # Withdrawal requests
+│   │   ├── AnalyticsPage.jsx     # System analytics
+│   │   ├── SystemPage.jsx        # System info (static)
+│   │   ├── NotificationsPage.jsx # Broadcast notifications
+│   │   ├── BannersPage.jsx       # Sponsor banners
+│   │   ├── CalendarPage.jsx      # Content calendar
+│   │   ├── AutoPostLogsPage.jsx  # Auto-post logs
+│   │   ├── PlatformSettingsPage.jsx # Social platform connections
+│   │   └── SeedContentPage.jsx   # Seed users & posts
 │   ├── CourseAdmin/         # Teacher dashboard
 │   └── ...
 ├── services/                # 75+ service files
@@ -144,7 +158,7 @@ frontend/src/
 ├── shared/                  # Shared components/utilities
 ├── stores/                  # Zustand stores
 │   ├── courseStore.js       # Course state
-│   ├── scannerStore.js      # Scanner state
+│   ├── scannerStore.js      # Scanner state (results, selectedPattern, zones, highlightedZoneId — 2026-02-19)
 │   └── shopStore.js         # Shop/cart state
 ├── styles/
 │   └── design-tokens.css    # CSS custom properties (xem Section 6)
@@ -310,11 +324,24 @@ npm run lint         # ESLint check
 | `/affiliate` | AffiliateDashboard.jsx | Dashboard doi tac/CTV |
 | `/dashboard` | Dashboard.jsx | Dashboard widgets (drag & drop) |
 
-### Admin
+### Admin (Refactored — Route-Based Sub-Pages, 2026-02-19)
 
 | Route | Page | Mo ta |
 |-------|------|-------|
-| `/admin` | Admin.jsx | Admin dashboard (ProtectedAdminRoute) |
+| `/admin` | AdminLayout.jsx | Admin layout (redirect → `/admin/users`) |
+| `/admin/users` | UsersPage.jsx | Quan ly users (search, edit, delete) |
+| `/admin/applications` | ApplicationsPage.jsx | Duyet don dang ky Affiliate/CTV |
+| `/admin/withdrawals` | WithdrawalsPage.jsx | Xu ly yeu cau rut tien |
+| `/admin/analytics` | AnalyticsPage.jsx | Thong ke he thong & partnership |
+| `/admin/system` | SystemPage.jsx | Thong tin he thong |
+| `/admin/notifications` | NotificationsPage.jsx | Gui thong bao den users |
+| `/admin/banners` | BannersPage.jsx | Quan ly banner quang cao |
+| `/admin/calendar` | CalendarPage.jsx | Lich noi dung & auto-post |
+| `/admin/autologs` | AutoPostLogsPage.jsx | Nhat ky auto-post |
+| `/admin/platforms` | PlatformSettingsPage.jsx | Ket noi nen tang (FB, TikTok...) |
+| `/admin/seedcontent` | SeedContentPage.jsx | Quan ly seed users & posts |
+
+All admin sub-routes duoc protected boi `ProtectedAdminRoute` va rendered inside `AdminLayout` (header, stats, quick actions, tab nav) via React Router `<Outlet />`.
 
 ### Legacy Redirects
 
@@ -596,7 +623,7 @@ Ca hai query nen tra ve **0 rows**.
 | Quy tac | Mo ta |
 |---------|-------|
 | Lazy loading | Pages nang dung `React.lazy()` + `Suspense`. Xem App.jsx de biet nhung page nao. |
-| Zustand stores | Dung cho state can share giua nhieu page (scanner, course, shop). Context cho auth/price. |
+| Zustand stores | Dung cho state can share giua nhieu page (scanner, course, shop). Context cho auth/price. Scanner store chua: scanResults, selectedPattern, zones, highlightedZoneId — components doc truc tiep tu store (KHONG prop drilling). |
 | localStorage cache | Services dung localStorage thay cho AsyncStorage (web). Cache expiry 24h. |
 
 ---
@@ -755,6 +782,77 @@ Tat ca Forum routes deu lazy-loaded voi `React.lazy()` + `Suspense`:
 /forum/post/:postId/history     -> Lich su chinh sua (diff view)
 /forum/scheduled                -> Bai viet da len lich
 ```
+
+---
+
+## 13. Scanner Zone Drawing & Store Refactor (2026-02-19)
+
+Scanner page da duoc refactor de match mobile app: zone drawing tren chart + Zustand store thay the prop drilling.
+
+### 13.1 Architecture
+
+```
+Zustand scannerStore.js (single source of truth)
+  ├── scanResults[]           # Tat ca pattern results tu scan
+  ├── selectedPattern         # Pattern dang duoc chon
+  ├── zones[]                 # Zone boundaries (zoneHigh, zoneLow, zoneType)
+  ├── highlightedZoneId       # Zone dang highlight tren chart
+  └── isScanning              # Loading state
+
+Components doc tu store (KHONG props):
+  ControlPanel.jsx     → reads: isScanning, scanResults
+  ResultsList.jsx      → reads: scanResults, selectedPattern; writes: setSelectedPattern
+  TradingChart.jsx     → reads: selectedPattern, zones, highlightedZoneId
+  SubToolsPanel.jsx    → reads: selectedPattern (alias: pattern)
+  PatternInfoUltraCompact.jsx → reads: selectedPattern (alias: pattern)
+
+Chi giu props cho side-effect callbacks:
+  onScan (ControlPanel)       → ScannerPage orchestrates quota check + toast
+  onOpenPaperTrading (ResultsList, ControlPanel) → ScannerPage manages side panel
+```
+
+### 13.2 Zone Drawing (Canvas Overlay)
+
+TradingChart.jsx dung canvas overlay (khong phai HTML divs) de ve zones — match mobile approach:
+
+| Element | Color | Style |
+|---------|-------|-------|
+| TP zone | `rgba(0, 255, 136, 0.12)` | Filled rectangle (entry ↔ TP) |
+| SL zone | `rgba(246, 70, 93, 0.12)` | Filled rectangle (entry ↔ SL) |
+| Entry line | `#00FFFF` (cyan) | Solid 2px |
+| SL line | `#F6465D` (red) | Dashed 1.5px |
+| TP line | `#00FF88` (green) | Dashed 1.5px |
+| Labels | Respective colors | Bold 11px monospace, right-aligned |
+
+Canvas redraws via `requestAnimationFrame` loop — auto-follows zoom/pan via `priceToCoordinate()`.
+
+### 13.3 Zone Calculation (scannerAPI.js)
+
+Moi scan result bao gom zone data:
+```
+LONG (SL < entry):  zoneHigh = entry,    zoneLow = stopLoss,  zoneType = 'LFZ'
+SHORT (SL > entry): zoneHigh = stopLoss, zoneLow = entry,     zoneType = 'HFZ'
+```
+
+### 13.4 Enhanced ResultsList UI
+
+Moi result card hien thi them:
+- **Direction badge**: LONG (green) / SHORT (red) voi TrendingUp/TrendingDown icon
+- **R:R ratio**: `1:X.XX` voi CheckCircle icon neu >= 2.0
+- **Confidence bar**: 3px progress bar (green/yellow/red) duoi confidence %
+
+### 13.5 Files Modified (8 files)
+
+| File | Lines | Thay doi |
+|------|-------|---------|
+| `stores/scannerStore.js` | 73→91 | +zones, +highlightedZoneId, +setZones, +clearZones |
+| `services/scannerAPI.js` | 345→355 | +zoneHigh, +zoneLow, +zoneType per result |
+| `TradingChart.jsx` | 1319→1480 | +canvas overlay, +drawZones, +requestAnimationFrame loop, reads from store |
+| `ScannerPage.jsx` | 393→405 | Removed prop drilling, +setZones after scan |
+| `ControlPanel.jsx` | 183→183 | Reads isScanning/scanResults from store |
+| `ResultsList.jsx` | 199→218 | Reads from store, +direction badge, +R:R, +confidence bar |
+| `SubToolsPanel.jsx` | 283→283 | Reads pattern from store |
+| `PatternInfoUltraCompact.jsx` | 896→898 | Reads pattern from store |
 
 ### 12.6 Design Token Compliance
 

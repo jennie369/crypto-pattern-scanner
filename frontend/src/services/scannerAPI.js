@@ -127,6 +127,13 @@ export const scanPatterns = async (filters) => {
           // Get direction info from PATTERN_SIGNALS
           const signalInfo = getPatternSignal(pattern.patternType || pattern.pattern);
 
+          // Compute zone boundaries (matching mobile zoneCalculator.js)
+          const entryPrice = pattern.entry;
+          const slPrice = pattern.stopLoss;
+          const tpPrice = pattern.takeProfit || pattern.target;
+          const isLong = slPrice < entryPrice; // SL below entry = LONG
+          const direction = signalInfo?.direction || pattern.direction || (isLong ? 'LONG' : 'SHORT');
+
           return {
             id: `${coin}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
             coin: `${coin}/USDT`,
@@ -135,18 +142,22 @@ export const scanPatterns = async (filters) => {
             patternName: pattern.fullLabel || pattern.description || pattern.pattern,
             confidence: pattern.confidence || 70,
             timeframe: timeframe,
-            entry: pattern.entry,
-            stopLoss: pattern.stopLoss,
-            takeProfit: pattern.takeProfit || pattern.target,
+            entry: entryPrice,
+            stopLoss: slPrice,
+            takeProfit: tpPrice,
             target: pattern.target || pattern.takeProfit,
             riskReward: pattern.riskReward || 2.0,
             detectedAt: pattern.detectedAt || new Date().toISOString(),
-            // 🔥 CRITICAL: Include direction from PATTERN_SIGNALS
-            direction: signalInfo?.direction || pattern.direction,
+            // Direction & signal info
+            direction: direction,
             signal: signalInfo?.signal || pattern.signal,
             type: signalInfo?.type || pattern.type,
             color: signalInfo?.color || pattern.color,
             icon: signalInfo?.icon || pattern.icon,
+            // Zone boundaries for chart overlay
+            zoneHigh: isLong ? entryPrice : slPrice,
+            zoneLow: isLong ? slPrice : entryPrice,
+            zoneType: isLong ? 'LFZ' : 'HFZ',
           };
         }
 

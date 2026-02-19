@@ -231,6 +231,12 @@ class BinanceService {
   subscribe(symbol, callback) {
     if (!symbol || typeof callback !== 'function') return () => {};
 
+    // Normalize symbol: ensure it ends with 'USDT' (Rule 11: Format Normalization)
+    if (!symbol.endsWith('USDT')) {
+      console.warn(`[Binance] subscribe: normalizing symbol "${symbol}" → "${symbol}USDT"`);
+      symbol = symbol + 'USDT';
+    }
+
     // Ensure wsPool is initialized
     wsPool.init();
 
@@ -317,6 +323,11 @@ class BinanceService {
    * Used for initial price when no cached data available
    */
   async fetchAndNotifyPrice(symbol, callback) {
+    // Normalize symbol: ensure it ends with 'USDT' (Rule 11: Format Normalization)
+    if (symbol && !symbol.endsWith('USDT')) {
+      console.warn(`[Binance] fetchAndNotifyPrice: normalizing symbol "${symbol}" → "${symbol}USDT"`);
+      symbol = symbol + 'USDT';
+    }
     try {
       checkRateLimit();
       const url = `${this.futuresBaseUrl}/ticker/24hr?symbol=${symbol}`;
@@ -352,6 +363,8 @@ class BinanceService {
    * Checks local cache first, then wsPool
    */
   getPrice(symbol) {
+    // Normalize symbol (Rule 11)
+    if (symbol && !symbol.endsWith('USDT')) symbol = symbol + 'USDT';
     const local = this.prices.get(symbol);
     if (local) return local;
 

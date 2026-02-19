@@ -36,6 +36,8 @@ export const ScannerPage = () => {
     setScanResults,
     setSelectedPattern,
     setIsScanning,
+    setZones,
+    setHighlightedZoneId,
   } = useScannerStore();
 
   // Local state for errors (don't persist)
@@ -155,6 +157,22 @@ export const ScannerPage = () => {
 
       setScanResults(results);
 
+      // Build zone data from scan results for chart overlay
+      const computedZones = results
+        .filter(r => r.zoneHigh && r.zoneLow)
+        .map(r => ({
+          id: r.id,
+          zoneHigh: r.zoneHigh,
+          zoneLow: r.zoneLow,
+          zoneType: r.zoneType,
+          entry: r.entry,
+          stopLoss: r.stopLoss,
+          takeProfit: r.takeProfit,
+          direction: r.direction,
+          pattern: r,
+        }));
+      setZones(computedZones);
+
       // Auto-select best pattern (highest confidence + BTC tiebreaker)
       if (results.length > 0) {
         const sorted = [...results].sort((a, b) => {
@@ -211,7 +229,7 @@ export const ScannerPage = () => {
       }
 
       console.log('[Scanner] [SELECT] Pattern selected:', pattern.coin, pattern.pattern);
-      setSelectedPattern(pattern);
+      setSelectedPattern(pattern); // Also sets highlightedZoneId via store action
       setSelectedCoin(pattern.coin);
 
     } catch (error) {
@@ -324,10 +342,6 @@ export const ScannerPage = () => {
         <div className="scanner-left">
           <ControlPanel
             onScan={handleScan}
-            isScanning={isScanning}
-            results={scanResults}
-            onSelectPattern={handleSelectPattern}
-            selectedPattern={selectedPattern}
             onOpenPaperTrading={handleOpenPaperTrading}
           />
         </div>
@@ -335,7 +349,6 @@ export const ScannerPage = () => {
         {/* CENTER - Trading Chart + Market/Chatbot */}
         <div className="scanner-center">
           <TradingChart
-            pattern={selectedPattern}
             symbol={selectedCoin}
           />
 
@@ -348,13 +361,9 @@ export const ScannerPage = () => {
         {/* RIGHT - Sub-Tools (Top) + Pattern Info (Bottom) + Paper Trading Widgets */}
         <div className="scanner-right">
           <div className="right-column-scroll-wrapper">
-            <SubToolsPanel
-              pattern={selectedPattern}
-            />
+            <SubToolsPanel />
 
-            <PatternInfoUltraCompact
-              pattern={selectedPattern}
-            />
+            <PatternInfoUltraCompact />
 
             {/* Paper Trading Widgets - MANUAL REFRESH VERSION */}
             <div className="paper-trading-widgets-section">

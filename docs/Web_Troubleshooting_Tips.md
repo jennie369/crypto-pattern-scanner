@@ -1186,6 +1186,311 @@ if (trade.status === 'OPEN') {
 
 ---
 
+## Rule 21: Monolithic Single-File Component with Inline Tab Switching (UX Dead Zone)
+**Source:** Admin Dashboard Refactor — Admin.jsx (2443 lines, 11 tabs) used `setActiveTab()` state to switch content inline. Clicking a tab rendered content below the fold — invisible without scrolling.
+
+### Khi nao ap dung (When to apply)
+Khi page component su dung `activeTab` state de conditionally render content inline (cung trang), va page co nhieu sections phia tren tab content area (header, stats, quick actions, etc.).
+
+### Trieu chung (Symptoms)
+- User click tab button → khong thay content thay doi (content render DUOI fold, phai scroll)
+- User bao "UX qua te", "click khong co gi xay ra"
+- Page component qua lon (1000+ lines) vi tat ca tabs, handlers, state nam cung 1 file
+- URL khong thay doi khi chuyen tab → khong the bookmark/share tab cu the
+- Browser Back button khong quay lai tab truoc (vi khong co URL change)
+- Multiple tabs load data on mount (khong lazy) → slow initial load
+- Shared state giua tabs gay unnecessary re-renders
+
+### Nguyen nhan goc (Root cause pattern)
+Inline tab switching render content tai vi tri cua `{activeTab === 'x' && <Content />}` trong JSX — thuong nam SAU header/stats/actions. Khi page co nhieu sections phia tren, tab content bi day xuong duoi viewport:
+
+```jsx
+// SAI: Inline tab switching — content render duoi fold
+function AdminPage() {
+  const [activeTab, setActiveTab] = useState('users');
+  return (
+    <div>
+      <Header />           {/* 100px */}
+      <StatsGrid />        {/* 200px */}
+      <FinancialCards />   {/* 150px */}
+      <QuickActions />     {/* 300px */}
+      <TabButtons onClick={setActiveTab} />  {/* 50px — user click o day */}
+      {/* Tab content renders HERE — 800px below top of page! */}
+      {activeTab === 'users' && <UsersContent />}    {/* INVISIBLE without scroll */}
+      {activeTab === 'analytics' && <AnalyticsContent />}
+    </div>
+  );
+}
+
+// DUNG: Route-based sub-pages — content replaces via <Outlet />
+function AdminLayout() {
+  return (
+    <div>
+      <Header />
+      <StatsGrid />
+      <QuickActions />
+      <TabNav />      {/* NavLink — active style + URL change */}
+      <Outlet />      {/* Child route content renders HERE — replaces on navigate */}
+    </div>
+  );
+}
+// App.jsx:
+// <Route path="/admin" element={<AdminLayout />}>
+//   <Route index element={<Navigate to="/admin/users" />} />
+//   <Route path="users" element={<UsersPage />} />
+//   <Route path="analytics" element={<AnalyticsPage />} />
+// </Route>
+```
+
+### Cach dieu tra (Investigation steps)
+1. Do page length: scroll tu tab buttons den tab content — bao nhieu px?
+2. Kiem tra file size: file co bao nhieu dong? 500+ la warning, 1000+ la critical
+3. Dem so tabs: 5+ tabs trong 1 file = refactor candidate
+4. Test UX: click tab → phai scroll de thay content khong?
+5. Check URL: URL co thay doi khi click tab khong? Neu khong → khong bookmarkable
+
+### Bien phap phong ngua (Preventive measures)
+- **Route-based sub-pages** thay vi inline tabs khi:
+  - Page co 5+ tabs
+  - Page co nhieu content phia tren tab area (header, stats, cards)
+  - Tab content can rieng state/data loading
+  - Tabs can duoc bookmark/share
+- **React Router nested routes**:
+  ```jsx
+  // Layout component
+  <Outlet />  // Child route content renders here
+
+  // App.jsx
+  <Route path="/admin" element={<AdminLayout />}>
+    <Route index element={<Navigate to="users" />} />
+    <Route path="users" element={<UsersPage />} />
+  </Route>
+  ```
+- **NavLink** thay vi `<button onClick={setActiveTab}>`:
+  ```jsx
+  <NavLink to="/admin/users" className={({isActive}) => isActive ? 'active' : ''}>
+    Users
+  </NavLink>
+  ```
+- **Shared utilities file**: extract common functions (formatCurrency, formatDate) vao `adminUtils.js`
+- **Each sub-page owns its state**: khong can shared state — moi page load data rieng
+- **File size guard**: bat ky component > 500 lines nen duoc review de split
+
+### Cach fix (migration steps)
+1. **Tao layout component**: move header/stats/quick-actions + `<Outlet />` vao `AdminLayout.jsx`
+2. **Extract utility functions**: `formatCurrency`, `formatDate`, notification helpers → `adminUtils.js`
+3. **Extract inline tabs thanh sub-page components**: moi tab → `{TabName}Page.jsx` voi rieng state + handlers
+4. **Move self-contained components**: tabs da la standalone component → chi can copy ra file rieng
+5. **Update routes**: single route → nested routes voi `<Route path="admin">` + child routes
+6. **Replace `setActiveTab()` voi `navigate()`**: quick action cards dung `navigate('/admin/users')` thay vi `setActiveTab('users')`
+7. **Replace tab buttons voi `<NavLink>`**: auto active styling khi URL match
+8. **Delete monolith**: sau khi tat ca content da move, xoa file cu
+9. **Verify build**: `npm run build` — no errors
+10. **Test navigation**: moi tab → URL change, content render ngay (khong can scroll)
+
+### Dau hieu nhan biet (Code smell indicators)
+- Component file > 1000 lines voi nhieu conditional renders `{activeTab === 'x' && ...}`
+- `useState('users')` hoac tuong tu cho tab state — signal inline switching
+- Tab content nam sau nhieu sections (stats, cards) trong JSX tree
+- URL khong thay doi khi click tab
+- Nhieu `const [xxxLoading, setXxxLoading]` states trong 1 component (1 per tab)
+- Nhieu handlers (handleApprove, handleReject, handleProcess...) tat ca trong 1 file
+- Component co 30+ state variables
+
+---
+
+# SECTION G: SCANNER & CHART (2026-02-19)
+
+---
+
+## Rule 22: Prop Drilling Scanner State Instead of Centralized Store (Maintenance & Perf Trap)
+**Source:** Scanner Page Fix — ScannerPage.jsx passed `selectedPattern`, `scanResults`, `isScanning` as props to 4+ child components. Every parent re-render re-rendered ALL children even when their data hadn't changed.
+
+### Khi nao ap dung (When to apply)
+Khi parent component truyen state xuong 3+ children qua props, dac biet khi state thay doi thuong xuyen (selected item, scan results, loading flags) va chi 1-2 children thuc su can state do.
+
+### Trieu chung (Symptoms)
+- Parent component co 5+ props drilling xuong children (`pattern={selectedPattern} results={results} isScanning={isScanning} ...`)
+- React DevTools Profiler thay ALL children re-render khi chi 1 state thay doi (vd: click result card → chart + control panel + subtools + info panel ALL re-render)
+- Adding a new piece of state (vd: `zones`, `highlightedZoneId`) requires editing EVERY component in the chain
+- Refactoring fear: doi prop name → phai doi o 5+ files
+- Props cua child component la "pass-through" — child nhan props chi de truyen xuong grandchild
+
+### Nguyen nhan goc (Root cause pattern)
+Scanner state (`selectedPattern`, `scanResults`, `zones`, `isScanning`) bi truyen nhu props tu ScannerPage xuong 4 children. Khi user click 1 result card, `selectedPattern` thay doi → ScannerPage re-render → ALL children re-render (ke ca TradingChart va SubToolsPanel khong lien quan den click event):
+
+```jsx
+// SAI: Prop drilling — moi thay doi selectedPattern re-render tat ca
+function ScannerPage() {
+  const [selectedPattern, setSelectedPattern] = useState(null);
+  const [scanResults, setScanResults] = useState([]);
+  const [isScanning, setIsScanning] = useState(false);
+
+  return (
+    <>
+      <ControlPanel
+        isScanning={isScanning}          // ← prop drill
+        results={scanResults}             // ← prop drill
+        selectedPattern={selectedPattern} // ← prop drill
+        onSelectPattern={setSelectedPattern}
+      />
+      <TradingChart pattern={selectedPattern} /> {/* ← re-render khi bat ky state thay doi */}
+      <SubToolsPanel pattern={selectedPattern} />
+      <PatternInfoUltraCompact pattern={selectedPattern} />
+    </>
+  );
+}
+
+// DUNG: Zustand store — moi child subscribe chi data no can
+function ScannerPage() {
+  // Parent chi giu side-effect handlers (scan, paper trading)
+  return (
+    <>
+      <ControlPanel onScan={handleScan} onOpenPaperTrading={handleOpenPaperTrading} />
+      <TradingChart symbol={selectedCoin} />  {/* Doc selectedPattern tu store */}
+      <SubToolsPanel />                        {/* Doc selectedPattern tu store */}
+      <PatternInfoUltraCompact currentPrice={livePrice} />
+    </>
+  );
+}
+
+// Trong moi child:
+const selectedPattern = useScannerStore((s) => s.selectedPattern);
+// Chi re-render khi selectedPattern thuc su thay doi — khong bi anh huong boi isScanning, scanResults, etc.
+```
+
+### Cach dieu tra (Investigation steps)
+1. Dem so props cua parent component → children: 5+ props la warning
+2. React DevTools Profiler: click 1 element → bao nhieu components re-render?
+3. Grep `pattern={` hoac `selectedPattern={` — bao nhieu noi truyen prop nay?
+4. Kiem tra: child co dung TAT CA props nhan duoc khong? Hay chi 1-2 props?
+5. Thu thay doi 1 prop name → bao nhieu files phai doi theo?
+
+### Bien phap phong ngua (Preventive measures)
+- **Zustand store cho shared scanner state**: `scanResults`, `selectedPattern`, `zones`, `highlightedZoneId`, `isScanning`
+- **Selective subscriptions**: `useScannerStore((s) => s.selectedPattern)` — chi re-render khi selectedPattern thay doi
+- **Props CHI cho side-effect callbacks**: `onScan`, `onOpenPaperTrading` (trigger toast/modal o parent) — KHONG truyen data props
+- **Store actions**: `setSelectedPattern()` cung set `highlightedZoneId` — atomic update, khong can 2 props
+- **partialize cho persistence**: chi persist can thiet (`scanResults`, `selectedPattern`, `zones`) — khong persist `isScanning`
+
+### Dau hieu nhan biet (Code smell indicators)
+- Parent component truyen 5+ props xuong 1 child
+- Cung 1 prop (`pattern`, `selectedPattern`) xuat hien o 3+ component props
+- Child nhan props chi de truyen xuong grandchild (pass-through)
+- Adding new state field doi edit 4+ files
+- `React.memo` duoc them vao de fix re-render thay vi fix root cause (prop drilling)
+
+---
+
+## Rule 23: Price Lines Only — Missing Canvas Overlay for Zone Drawing (Visual Gap vs Mobile)
+**Source:** Scanner Page Fix — TradingChart.jsx chi ve 3 dashed price lines (entry/SL/TP) bang lightweight-charts `createPriceLine()`. Mobile app ve colored rectangular zones (demand/supply areas) bang Canvas overlay. Web user thay "chi co duong ke" — khong thay zone areas nhu mobile.
+
+### Khi nao ap dung (When to apply)
+Khi chart component can hien thi "areas" (ranges giua 2 gia) thay vi chi "lines" (1 gia duy nhat). Dac biet khi mobile app da co zone drawing ma web chua co.
+
+### Trieu chung (Symptoms)
+- Web chart chi co 3 duong ngang (entry cyan, SL red, TP green) — khong co vung mau
+- Mobile chart co vung mau xanh la (TP zone) va do (SL zone) giua entry va TP/SL
+- User bao "web khong co zone drawing nhu mobile"
+- Chart thinh thoang khong update zones khi zoom/pan (neu dung HTML overlay thay vi canvas)
+- Zones khong theo chart khi zoom in/out (vi position la fixed pixels, khong recalculate)
+
+### Nguyen nhan goc (Root cause pattern)
+`lightweight-charts` library chi co `createPriceLine()` API — ve 1 duong ngang tai 1 gia. KHONG co built-in API de ve rectangles/areas giua 2 gia. Developer dung `createPriceLine()` vi don gian, nhung mat visual context cua zone:
+
+```javascript
+// SAI: Chi ve price lines — khong co zone areas
+useEffect(() => {
+  if (pattern) {
+    series.createPriceLine({ price: pattern.entry, color: '#00FFFF' });
+    series.createPriceLine({ price: pattern.stopLoss, color: '#F6465D' });
+    series.createPriceLine({ price: pattern.takeProfit, color: '#00FF88' });
+  }
+}, [pattern]);
+// Ket qua: 3 duong ke — user khong biet "vung" nao la danger, vung nao la profit
+
+// DUNG: Canvas overlay ve colored zones
+const drawZones = useCallback(() => {
+  const canvas = zoneCanvasRef.current;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (!selectedPattern || !candlestickSeriesRef.current) return;
+
+  const entryY = candlestickSeriesRef.current.priceToCoordinate(selectedPattern.entry);
+  const slY = candlestickSeriesRef.current.priceToCoordinate(selectedPattern.stopLoss);
+  const tpY = candlestickSeriesRef.current.priceToCoordinate(selectedPattern.takeProfit);
+  if (entryY === null || slY === null || tpY === null) return;
+
+  // TP zone — green rectangle giua entry va TP
+  ctx.fillStyle = 'rgba(0, 255, 136, 0.12)';
+  ctx.fillRect(0, Math.min(entryY, tpY), canvas.width, Math.abs(tpY - entryY));
+
+  // SL zone — red rectangle giua entry va SL
+  ctx.fillStyle = 'rgba(246, 70, 93, 0.12)';
+  ctx.fillRect(0, Math.min(entryY, slY), canvas.width, Math.abs(slY - entryY));
+
+  // Entry line — cyan solid
+  ctx.strokeStyle = '#00FFFF';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, entryY);
+  ctx.lineTo(canvas.width, entryY);
+  ctx.stroke();
+}, [selectedPattern]);
+
+// requestAnimationFrame loop — auto-follow zoom/pan
+useEffect(() => {
+  const loop = () => {
+    drawZones();
+    zoneAnimFrameRef.current = requestAnimationFrame(loop);
+  };
+  zoneAnimFrameRef.current = requestAnimationFrame(loop);
+  return () => cancelAnimationFrame(zoneAnimFrameRef.current);
+}, [drawZones]);
+```
+
+### Cach dieu tra (Investigation steps)
+1. So sanh visual output web vs mobile: mobile co colored areas? Web chi co lines?
+2. Grep `createPriceLine` trong chart component — co bao nhieu? Co `fillRect` hoac `fillStyle` khong?
+3. Kiem tra co `<canvas>` element overlay tren chart khong (DevTools Elements panel)
+4. Zoom/pan chart — zones co follow khong? Neu khong → canvas khong redraw on scroll
+
+### Bien phap phong ngua (Preventive measures)
+- **Canvas overlay** (KHONG dung HTML div overlay): canvas re-render moi frame via `requestAnimationFrame`, tu dong follow zoom/pan
+- **`priceToCoordinate()`** de map gia → pixel Y: API cua lightweight-charts, luon chinh xac khi zoom
+- **`requestAnimationFrame` loop**: moi frame goi `drawZones()` — zones LUON sync voi chart state
+- **`pointerEvents: 'none'`** tren canvas: chart van interactive (zoom, pan, click) phia duoi canvas
+- **Canvas cleanup**: `cancelAnimationFrame()` trong useEffect cleanup — tranh memory leak
+- **Zone data trong store**: `zones[]`, `highlightedZoneId` — click result card → highlight zone tren chart (atomic via store action)
+- **Chart disposal cleanup**: khi chart bi destroy (symbol change), cancel animation frame truoc
+
+### Canvas overlay positioning (critical CSS)
+```jsx
+<canvas
+  ref={zoneCanvasRef}
+  style={{
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    pointerEvents: 'none',  // CRITICAL: chart interactive phia duoi
+    zIndex: 2,               // Tren chart (zIndex 1) nhung duoi tooltips (zIndex 3)
+  }}
+/>
+```
+
+### Dau hieu nhan biet (Code smell indicators)
+- Chart component chi dung `createPriceLine()` — khong co canvas overlay
+- Khong co `<canvas>` element trong chart JSX
+- Khong co `requestAnimationFrame` trong chart component
+- Mobile co "zone drawing" ma web khong co → visual parity gap
+- `priceToCoordinate()` khong duoc goi — zones dung fixed pixel positions (khong follow zoom)
+- Zone "disappears" khi zoom in/out (vi pixel Y khong duoc recalculate)
+
+---
+
 ## Grep Commands for Common Web Issues
 
 ```bash
@@ -1254,6 +1559,21 @@ grep -rn 'TYPOGRAPHY.fontSize' src/ --include='*.jsx' -B2 | grep -i 'input\|text
 
 # Rule 20: Deprecated paper trading tables (should use unified tables)
 grep -rn "paper_trading_accounts\|paper_trading_holdings\|paper_trading_orders\|paper_trading_stop_orders" frontend/src/ --include='*.js' --include='*.jsx' | grep -v '//' | grep -v '\*'
+
+# Rule 21: Monolithic components with inline tab switching
+grep -rn "activeTab\|setActiveTab" frontend/src/ --include='*.jsx' --include='*.js' | grep -v 'node_modules'
+# Also check file sizes (files > 500 lines are refactor candidates):
+wc -l frontend/src/pages/*.jsx frontend/src/pages/**/*.jsx 2>/dev/null | sort -rn | head -20
+
+# Rule 22: Prop drilling scanner state (should use Zustand store)
+grep -rn 'pattern={selectedPattern}\|results={scanResults}\|isScanning={isScanning}\|selectedPattern={' frontend/src/ --include='*.jsx' --include='*.js'
+# Check if children read from store directly (DUNG):
+grep -rn 'useScannerStore' frontend/src/ --include='*.jsx' --include='*.js'
+
+# Rule 23: Price lines only — missing canvas overlay for zones
+grep -rn 'createPriceLine' frontend/src/ --include='*.jsx' --include='*.js'
+# Check if canvas overlay exists (DUNG):
+grep -rn 'zoneCanvasRef\|drawZones\|requestAnimationFrame' frontend/src/ --include='*.jsx' --include='*.js'
 ```
 
 ---
@@ -1282,3 +1602,6 @@ grep -rn "paper_trading_accounts\|paper_trading_holdings\|paper_trading_orders\|
 | 18 | Security | Missing Access Control Guards on Mutations | UX/security |
 | 19 | UI | Missing Null Guards and Empty States | Runtime crash |
 | 20 | Architecture | Dual-Table Split (Web/Mobile Different Tables) | Invisible feature gap |
+| 21 | Architecture | Monolithic Single-File Component with Inline Tab Switching | UX dead zone |
+| 22 | Architecture | Prop Drilling Scanner State Instead of Centralized Store | Maintenance/perf |
+| 23 | UI | Price Lines Only — Missing Canvas Overlay for Zone Drawing | Visual gap vs mobile |

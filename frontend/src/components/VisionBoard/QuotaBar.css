@@ -5,7 +5,7 @@
 .quota-bar {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--space-xs);
 }
 
 .quota-bar-header {
@@ -17,15 +17,15 @@
 .quota-bar-label {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--space-xs);
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
 }
 
 .quota-bar-info {
   display: flex;
   cursor: help;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }
 
 .quota-bar-count {
@@ -34,16 +34,16 @@
 
 .quota-bar-current {
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--text-primary);
 }
 
 .quota-bar-separator {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   margin: 0 2px;
 }
 
 .quota-bar-limit {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }
 
 .quota-bar-track {
@@ -63,13 +63,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-xs);
-  margin-top: var(--spacing-xs);
-  padding: var(--spacing-sm);
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+  padding: var(--space-sm);
   background: rgba(106, 91, 255, 0.1);
   border: 1px solid rgba(106, 91, 255, 0.2);
   border-radius: var(--radius-sm);
-  color: var(--color-accent);
+  color: var(--brand-purple);
   font-size: var(--font-size-xs);
   font-weight: 500;
   cursor: pointer;
@@ -81,7 +81,7 @@
 }
 
 .quota-bar-warning {
-  margin: var(--spacing-xs) 0 0 0;
+  margin: var(--space-xs) 0 0 0;
   font-size: var(--font-size-xs);
-  color: var(--color-warning);
+  color: var(--accent-orange);
 }

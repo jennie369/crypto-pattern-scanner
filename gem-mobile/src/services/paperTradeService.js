@@ -671,8 +671,18 @@ class PaperTradeService {
       const cloudPendingIds = new Set(this.pendingOrders.map(p => p.id));
 
       // Find orphaned trades (in local but not in cloud)
-      const orphanedPositions = localOpenPositions.filter(p => !cloudPositionIds.has(p.id));
-      const orphanedPending = localPendingOrders.filter(p => !cloudPendingIds.has(p.id));
+      // Also filter out invalid entries: zero margin, missing symbol, or very old trades (>30 days)
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const isValidTrade = (p) => {
+        if (!p.symbol) return false;
+        if (!p.margin && !p.positionSize) return false;  // Zero margin = invalid
+        // Skip very old orphaned trades — they were likely test data or already closed on server
+        const openedAt = p.openedAt || p.opened_at || p.pendingAt || p.pending_at;
+        if (openedAt && openedAt < thirtyDaysAgo) return false;
+        return true;
+      };
+      const orphanedPositions = localOpenPositions.filter(p => !cloudPositionIds.has(p.id) && isValidTrade(p));
+      const orphanedPending = localPendingOrders.filter(p => !cloudPendingIds.has(p.id) && isValidTrade(p));
 
       if (orphanedPositions.length > 0 || orphanedPending.length > 0) {
         console.log('[PaperTrade] Found orphaned trades:', {
@@ -736,6 +746,12 @@ class PaperTradeService {
     // Validate
     if (!pattern || !positionSize || positionSize <= 0) {
       throw new Error('Invalid parameters');
+    }
+
+    // Normalize symbol: ensure it ends with 'USDT' (Rule 11: Format Normalization)
+    if (pattern.symbol && !pattern.symbol.endsWith('USDT')) {
+      console.warn(`[PaperTrade] openPosition: normalizing symbol "${pattern.symbol}" → "${pattern.symbol}USDT"`);
+      pattern = { ...pattern, symbol: pattern.symbol + 'USDT' };
     }
 
     if (positionSize > this.balance) {
@@ -2658,11 +2674,16 @@ class PaperTradeService {
       }
     }
 
+    // Normalize symbol: ensure it ends with 'USDT' (Rule 11: Format Normalization)
+    const normalizedSymbol = data.symbol && !data.symbol.endsWith('USDT')
+      ? data.symbol + 'USDT'
+      : data.symbol;
+
     return {
       id: data.id,
       userId: data.user_id,
-      symbol: data.symbol,
-      baseAsset: data.symbol?.replace('USDT', ''),
+      symbol: normalizedSymbol,
+      baseAsset: normalizedSymbol?.replace('USDT', ''),
       direction: data.direction,
       patternType: data.pattern_type,
       timeframe: data.timeframe,

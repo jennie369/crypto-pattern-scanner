@@ -4,14 +4,17 @@ import { getPatternSignal, getPatternState } from '../../../../../constants/patt
 import PatternBadgeTooltip from '../../../../../components/PatternBadgeTooltip/PatternBadgeTooltip';
 import { STATE_TOOLTIPS, TIMEFRAME_TOOLTIPS, DIRECTION_TOOLTIPS } from '../../../../../constants/badgeTooltips';
 import { useTranslation } from '../../../../../hooks/useTranslation';
+import { useScannerStore } from '../../../../../stores/scannerStore';
 import './PatternInfoUltraCompact.css';
 
 /**
  * Pattern Info Ultra Compact - Single card design
  * Enhanced with signal badges, state badges, timeframe quality, win rate, and current price
- * Single-line header + 2x2 grid + actions
+ * Reads pattern from Zustand store (no prop drilling)
  */
-export const PatternInfoUltraCompact = ({ pattern, currentPrice }) => {
+export const PatternInfoUltraCompact = ({ currentPrice }) => {
+  // Read pattern from Zustand store
+  const pattern = useScannerStore((s) => s.selectedPattern);
   const { t } = useTranslation();
 
   if (!pattern) {

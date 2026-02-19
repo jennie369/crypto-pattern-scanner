@@ -3,10 +3,10 @@
  */
 
 .daily-score-card {
-  background: var(--color-bg-card);
+  background: var(--bg-card);
   border-radius: var(--radius-xl);
-  border: 1px solid var(--color-border-light);
-  padding: var(--spacing-xl);
+  border: 1px solid var(--border-primary);
+  padding: var(--space-xl);
 }
 
 .daily-score-card-empty {
@@ -14,28 +14,28 @@
   align-items: center;
   justify-content: center;
   min-height: 200px;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }
 
 /* Main Score */
 .daily-score-main {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xl);
-  margin-bottom: var(--spacing-xl);
-  padding-bottom: var(--spacing-xl);
-  border-bottom: 1px solid var(--color-border-light);
+  gap: var(--space-xl);
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-xl);
+  border-bottom: 1px solid var(--border-primary);
 }
 
 .daily-score-value {
   font-size: var(--font-size-2xl);
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--text-primary);
 }
 
 .daily-score-label {
   font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -47,13 +47,13 @@
 .daily-score-title {
   font-size: var(--font-size-lg);
   font-weight: 600;
-  color: var(--color-text-primary);
-  margin: 0 0 var(--spacing-xs) 0;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-xs) 0;
 }
 
 .daily-score-message {
   font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -61,19 +61,19 @@
 .daily-score-breakdown {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--space-md);
 }
 
 .daily-score-category {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--space-xs);
 }
 
 .daily-score-category-header {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--space-sm);
 }
 
 .daily-score-category-icon {
@@ -84,13 +84,13 @@
 
 .daily-score-category-label {
   font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .daily-score-category-weight {
   font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   cursor: help;
 }
 
@@ -118,29 +118,29 @@
 }
 
 .daily-score-category-detail span:last-child {
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }
 
 /* Tooltip */
 .daily-score-tooltip {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  margin-top: var(--spacing-lg);
-  padding-top: var(--spacing-md);
-  border-top: 1px solid var(--color-border-light);
+  gap: var(--space-xs);
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-primary);
   font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }
 
 /* Responsive - Tablet */
 @media (max-width: 768px) {
   .daily-score-card {
-    padding: var(--spacing-lg);
+    padding: var(--space-lg);
   }
 
   .daily-score-main {
-    gap: var(--spacing-lg);
+    gap: var(--space-lg);
   }
 
   .daily-score-title {
@@ -151,13 +151,13 @@
 /* Responsive - Mobile */
 @media (max-width: 640px) {
   .daily-score-card {
-    padding: var(--spacing-base);
+    padding: var(--space-3);
   }
 
   .daily-score-main {
     flex-direction: column;
     text-align: center;
-    gap: var(--spacing-md);
+    gap: var(--space-md);
   }
 
   .daily-score-value {

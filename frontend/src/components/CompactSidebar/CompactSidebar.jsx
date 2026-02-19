@@ -17,8 +17,7 @@ import {
   Users,
   MessageSquare,
   Sparkles,
-  GraduationCap,
-  Target
+  GraduationCap
 } from 'lucide-react';
 import './CompactSidebar.css';
 
@@ -84,20 +83,6 @@ const CompactSidebar = () => {
       icon: LayoutDashboard,
       path: '/account',
       description: 'Account overview'
-    },
-    {
-      id: 'vision-board',
-      label: 'Vision Board',
-      icon: Target,
-      path: '/vision-board',
-      description: 'Goals & habits'
-    },
-    {
-      id: 'profile',
-      label: 'Profile',
-      icon: User,
-      path: '/profile',
-      description: 'Your profile & achievements'
     },
     {
       id: 'affiliate',

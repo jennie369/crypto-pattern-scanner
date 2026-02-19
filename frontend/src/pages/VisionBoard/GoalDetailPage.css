@@ -5,7 +5,7 @@
 .goal-detail-page {
   max-width: 700px;
   margin: 0 auto;
-  padding: var(--spacing-xl);
+  padding: var(--space-xl);
 }
 
 /* Header */
@@ -13,7 +13,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: var(--space-2xl);
 }
 
 .goal-detail-back {
@@ -23,21 +23,21 @@
   width: 44px;
   height: 44px;
   background: transparent;
-  border: 1px solid var(--color-border-light);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-full);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .goal-detail-back:hover {
-  background: var(--color-bg-card);
-  color: var(--color-text-primary);
+  background: var(--bg-card);
+  color: var(--text-primary);
 }
 
 .goal-detail-header-actions {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--space-sm);
   position: relative;
 }
 
@@ -49,17 +49,17 @@
   width: 44px;
   height: 44px;
   background: transparent;
-  border: 1px solid var(--color-border-light);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-full);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .goal-detail-edit-btn:hover,
 .goal-detail-menu-btn:hover {
-  background: var(--color-bg-card);
-  color: var(--color-text-primary);
+  background: var(--bg-card);
+  color: var(--text-primary);
 }
 
 /* Menu */
@@ -73,10 +73,10 @@
   position: absolute;
   top: 100%;
   right: 0;
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border-light);
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-md);
-  padding: var(--spacing-xs);
+  padding: var(--space-xs);
   min-width: 160px;
   z-index: 10;
   box-shadow: var(--shadow-lg);
@@ -85,25 +85,25 @@
 .goal-detail-menu button {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--space-sm);
   width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--space-sm) var(--space-md);
   background: transparent;
   border: none;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   font-size: var(--font-size-sm);
   cursor: pointer;
   border-radius: var(--radius-sm);
 }
 
 .goal-detail-menu button:hover {
-  background: var(--color-bg-card-hover);
-  color: var(--color-text-primary);
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
 }
 
 .goal-detail-menu button.danger:hover {
   background: rgba(255, 107, 107, 0.15);
-  color: var(--color-error);
+  color: var(--accent-red);
 }
 
 /* Progress Section */
@@ -111,20 +111,20 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-2xl);
+  gap: var(--space-md);
+  margin-bottom: var(--space-2xl);
 }
 
 .goal-detail-progress-info {
   font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }
 
 .goal-detail-completed-badge {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  color: var(--color-success);
+  gap: var(--space-xs);
+  color: var(--accent-green);
   font-weight: 600;
 }
 
@@ -132,62 +132,62 @@
 .goal-detail-badge {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xs) var(--spacing-md);
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
   border-radius: var(--radius-full);
   font-size: var(--font-size-xs);
   font-weight: 500;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--space-md);
 }
 
 /* Title */
 .goal-detail-title {
   font-size: var(--font-size-2xl);
   font-weight: 700;
-  color: var(--color-text-primary);
-  margin: 0 0 var(--spacing-md) 0;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-md) 0;
 }
 
 /* Description */
 .goal-detail-description {
   font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   line-height: 1.6;
-  margin: 0 0 var(--spacing-lg) 0;
+  margin: 0 0 var(--space-lg) 0;
 }
 
 /* Date */
 .goal-detail-date {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--space-xs);
   font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
-  margin-bottom: var(--spacing-2xl);
+  color: var(--text-muted);
+  margin-bottom: var(--space-2xl);
 }
 
 .goal-detail-date.overdue {
-  color: var(--color-error);
+  color: var(--accent-red);
 }
 
 /* Section */
 .goal-detail-section {
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: var(--space-2xl);
 }
 
 .goal-detail-section h2 {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--space-sm);
   font-size: var(--font-size-md);
   font-weight: 600;
-  color: var(--color-text-primary);
-  margin: 0 0 var(--spacing-md) 0;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-md) 0;
 }
 
 .goal-detail-section-count {
   font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-weight: 400;
   margin-left: auto;
 }
@@ -196,27 +196,27 @@
 .goal-detail-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--space-xs);
 }
 
 .goal-detail-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md);
-  background: var(--color-bg-card);
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-card);
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
 .goal-detail-item:hover {
-  background: var(--color-bg-card-hover);
+  background: var(--bg-card-hover);
 }
 
 .goal-detail-item.completed span {
   text-decoration: line-through;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }
 
 .goal-detail-item-check {
@@ -224,21 +224,21 @@
   border: none;
   cursor: pointer;
   display: flex;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }
 
 .goal-detail-item span {
   flex: 1;
   font-size: var(--font-size-base);
-  color: var(--color-text-primary);
+  color: var(--text-primary);
 }
 
 .goal-detail-item-delete {
   background: transparent;
   border: none;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   cursor: pointer;
-  padding: var(--spacing-xs);
+  padding: var(--space-xs);
   border-radius: var(--radius-sm);
   opacity: 0;
   transition: all 0.2s ease;
@@ -249,30 +249,30 @@
 }
 
 .goal-detail-item-delete:hover {
-  color: var(--color-error);
+  color: var(--accent-red);
   background: rgba(255, 107, 107, 0.1);
 }
 
 /* Add Action */
 .goal-detail-add-action {
   display: flex;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-md);
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
 }
 
 .goal-detail-add-action input {
   flex: 1;
-  padding: var(--spacing-md);
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border-light);
+  padding: var(--space-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-md);
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   font-size: var(--font-size-base);
 }
 
 .goal-detail-add-action input:focus {
   outline: none;
-  border-color: var(--color-accent);
+  border-color: var(--brand-purple);
 }
 
 .goal-detail-add-action button {
@@ -281,7 +281,7 @@
   justify-content: center;
   width: 48px;
   height: 48px;
-  background: var(--color-accent);
+  background: var(--brand-purple);
   border: none;
   border-radius: var(--radius-md);
   color: white;
@@ -297,59 +297,59 @@
 .goal-detail-edit-form {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
-  padding: var(--spacing-lg);
-  background: var(--color-bg-card);
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--bg-card);
   border-radius: var(--radius-lg);
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: var(--space-2xl);
 }
 
 .goal-detail-edit-title {
   font-size: var(--font-size-xl);
   font-weight: 600;
-  padding: var(--spacing-md);
+  padding: var(--space-md);
   background: transparent;
-  border: 1px solid var(--color-border-light);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-md);
-  color: var(--color-text-primary);
+  color: var(--text-primary);
 }
 
 .goal-detail-edit-desc {
-  padding: var(--spacing-md);
+  padding: var(--space-md);
   background: transparent;
-  border: 1px solid var(--color-border-light);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-md);
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   font-family: inherit;
   resize: vertical;
 }
 
 .goal-detail-edit-row {
   display: flex;
-  gap: var(--spacing-md);
+  gap: var(--space-md);
 }
 
 .goal-detail-edit-row select,
 .goal-detail-edit-row input {
   flex: 1;
-  padding: var(--spacing-md);
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-light);
+  padding: var(--space-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-md);
-  color: var(--color-text-primary);
+  color: var(--text-primary);
 }
 
 .goal-detail-edit-actions {
   display: flex;
-  gap: var(--spacing-md);
+  gap: var(--space-md);
   justify-content: flex-end;
 }
 
 .goal-detail-edit-actions button {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-sm) var(--spacing-lg);
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-lg);
   border-radius: var(--radius-md);
   font-weight: 500;
   cursor: pointer;
@@ -358,12 +358,12 @@
 
 .goal-detail-edit-actions button:first-child {
   background: transparent;
-  border: 1px solid var(--color-border-light);
-  color: var(--color-text-secondary);
+  border: 1px solid var(--border-primary);
+  color: var(--text-secondary);
 }
 
 .goal-detail-edit-actions button.primary {
-  background: var(--color-accent);
+  background: var(--brand-purple);
   border: none;
   color: white;
 }
@@ -374,15 +374,15 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-4xl);
+  gap: var(--space-md);
+  padding: var(--space-24);
   text-align: center;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
 }
 
 .goal-detail-error button {
-  padding: var(--spacing-sm) var(--spacing-lg);
-  background: var(--color-accent);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--brand-purple);
   border: none;
   border-radius: var(--radius-md);
   color: white;
@@ -392,7 +392,7 @@
 /* Responsive */
 @media (max-width: 640px) {
   .goal-detail-page {
-    padding: var(--spacing-base);
+    padding: var(--space-3);
   }
 
   .goal-detail-title {

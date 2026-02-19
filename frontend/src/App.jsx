@@ -41,7 +41,18 @@ import History from './pages/History';
 import ScanHistory from './pages/ScanHistory';
 import Settings from './pages/Settings';
 import EnhancedSettings from './pages/EnhancedSettings/EnhancedSettings';
-import Admin from './pages/Admin';
+import AdminLayout from './pages/Admin/AdminLayout';
+import UsersPage from './pages/Admin/UsersPage';
+import ApplicationsPage from './pages/Admin/ApplicationsPage';
+import WithdrawalsPage from './pages/Admin/WithdrawalsPage';
+import AnalyticsPage from './pages/Admin/AnalyticsPage';
+import SystemPage from './pages/Admin/SystemPage';
+import NotificationsPage from './pages/Admin/NotificationsPage';
+import BannersPage from './pages/Admin/BannersPage';
+import CalendarPage from './pages/Admin/CalendarPage';
+import AutoPostLogsPage from './pages/Admin/AutoPostLogsPage';
+import PlatformSettingsPage from './pages/Admin/PlatformSettingsPage';
+import SeedContentPage from './pages/Admin/SeedContentPage';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Pricing from './pages/Pricing';
@@ -892,11 +903,24 @@ function App() {
             element={
               <ProtectedAdminRoute>
                 <AuthenticatedLayout>
-                  <Admin />
+                  <AdminLayout />
                 </AuthenticatedLayout>
               </ProtectedAdminRoute>
             }
-          />
+          >
+            <Route index element={<Navigate to="/admin/users" replace />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="applications" element={<ApplicationsPage />} />
+            <Route path="withdrawals" element={<WithdrawalsPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="system" element={<SystemPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="banners" element={<BannersPage />} />
+            <Route path="calendar" element={<CalendarPage />} />
+            <Route path="autologs" element={<AutoPostLogsPage />} />
+            <Route path="platforms" element={<PlatformSettingsPage />} />
+            <Route path="seedcontent" element={<SeedContentPage />} />
+          </Route>
           <Route
             path="/test"
             element={

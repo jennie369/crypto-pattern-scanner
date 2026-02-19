@@ -16,6 +16,10 @@ export const useScannerStore = create(
       isScanning: false,
       lastScanTime: null,
 
+      // Zone state for chart overlay
+      zones: [],
+      highlightedZoneId: null,
+
       // Multi-TF Results (persisted to prevent loss on tab switch)
       multiTFResults: null,
 
@@ -31,9 +35,19 @@ export const useScannerStore = create(
           lastScanTime: Date.now(),
         }),
 
-      setSelectedPattern: (pattern) => set({ selectedPattern: pattern }),
+      setSelectedPattern: (pattern) =>
+        set({
+          selectedPattern: pattern,
+          highlightedZoneId: pattern?.id || null,
+        }),
 
       setIsScanning: (status) => set({ isScanning: status }),
+
+      setZones: (zones) => set({ zones }),
+
+      setHighlightedZoneId: (id) => set({ highlightedZoneId: id }),
+
+      clearZones: () => set({ zones: [], highlightedZoneId: null }),
 
       setMultiTFResults: (results) => set({ multiTFResults: results }),
 
@@ -43,6 +57,8 @@ export const useScannerStore = create(
           selectedPattern: null,
           multiTFResults: null,
           lastScanTime: null,
+          zones: [],
+          highlightedZoneId: null,
         }),
 
       setSelectedCoin: (coin) => set({ selectedCoin: coin }),
@@ -62,6 +78,7 @@ export const useScannerStore = create(
       partialize: (state) => ({
         scanResults: state.scanResults,
         selectedPattern: state.selectedPattern,
+        zones: state.zones,
         multiTFResults: state.multiTFResults,
         lastScanTime: state.lastScanTime,
         selectedCoin: state.selectedCoin,

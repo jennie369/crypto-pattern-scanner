@@ -5,41 +5,41 @@
 .create-goal-page {
   max-width: 600px;
   margin: 0 auto;
-  padding: var(--spacing-xl);
+  padding: var(--space-xl);
 }
 
 /* Header */
 .create-goal-header {
   display: flex;
   align-items: center;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-2xl);
+  gap: var(--space-lg);
+  margin-bottom: var(--space-2xl);
 }
 
 .create-goal-back {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--space-xs);
   background: transparent;
   border: none;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  padding: var(--spacing-sm);
-  margin-left: calc(-1 * var(--spacing-sm));
+  padding: var(--space-sm);
+  margin-left: calc(-1 * var(--space-sm));
   border-radius: var(--radius-sm);
   transition: all 0.2s ease;
 }
 
 .create-goal-back:hover {
-  color: var(--color-text-primary);
-  background: var(--color-bg-card);
+  color: var(--text-primary);
+  background: var(--bg-card);
 }
 
 .create-goal-header h1 {
   font-size: var(--font-size-2xl);
   font-weight: 700;
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -47,19 +47,19 @@
 .create-goal-form {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xl);
+  gap: var(--space-xl);
 }
 
 /* Error */
 .create-goal-error {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md);
+  gap: var(--space-sm);
+  padding: var(--space-md);
   background: rgba(255, 107, 107, 0.1);
   border: 1px solid rgba(255, 107, 107, 0.2);
   border-radius: var(--radius-md);
-  color: var(--color-error);
+  color: var(--accent-red);
   font-size: var(--font-size-sm);
 }
 
@@ -67,32 +67,32 @@
 .create-goal-field {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--space-sm);
 }
 
 .create-goal-field label {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: var(--space-sm);
   font-size: var(--font-size-sm);
   font-weight: 500;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
 }
 
 .create-goal-hint {
   font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   margin: 0;
 }
 
 .create-goal-field input[type="text"],
 .create-goal-field input[type="date"],
 .create-goal-field textarea {
-  padding: var(--spacing-md);
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border-light);
+  padding: var(--space-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-md);
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   font-size: var(--font-size-base);
   font-family: inherit;
   transition: border-color 0.2s ease;
@@ -101,7 +101,7 @@
 .create-goal-field input:focus,
 .create-goal-field textarea:focus {
   outline: none;
-  border-color: var(--color-accent);
+  border-color: var(--brand-purple);
 }
 
 .create-goal-field textarea {
@@ -113,18 +113,18 @@
 .create-goal-life-areas {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-sm);
+  gap: var(--space-sm);
 }
 
 .create-goal-life-area {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-full);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   font-size: var(--font-size-sm);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -135,25 +135,25 @@
 }
 
 .create-goal-life-area.selected {
-  color: var(--color-text-primary);
+  color: var(--text-primary);
 }
 
 /* List Items */
 .create-goal-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--space-xs);
 }
 
 .create-goal-list-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--color-bg-card);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-card);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
+  color: var(--text-primary);
 }
 
 .create-goal-list-item button {
@@ -162,36 +162,36 @@
   justify-content: center;
   background: transparent;
   border: none;
-  color: var(--color-text-muted);
+  color: var(--text-muted);
   cursor: pointer;
-  padding: var(--spacing-xs);
+  padding: var(--space-xs);
   border-radius: var(--radius-sm);
 }
 
 .create-goal-list-item button:hover {
-  color: var(--color-error);
+  color: var(--accent-red);
   background: rgba(255, 107, 107, 0.1);
 }
 
 /* Add Row */
 .create-goal-add-row {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--space-sm);
 }
 
 .create-goal-add-row input {
   flex: 1;
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border-light);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-sm);
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   font-size: var(--font-size-sm);
 }
 
 .create-goal-add-row input:focus {
   outline: none;
-  border-color: var(--color-accent);
+  border-color: var(--brand-purple);
 }
 
 .create-goal-add-row button {
@@ -200,7 +200,7 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: var(--color-accent);
+  background: var(--brand-purple);
   border: none;
   border-radius: var(--radius-sm);
   color: white;
@@ -220,18 +220,18 @@
 /* Actions */
 .create-goal-actions {
   display: flex;
-  gap: var(--spacing-md);
-  padding-top: var(--spacing-lg);
-  border-top: 1px solid var(--color-border-light);
+  gap: var(--space-md);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border-primary);
 }
 
 .create-goal-cancel {
   flex: 1;
-  padding: var(--spacing-md);
+  padding: var(--space-md);
   background: transparent;
-  border: 1px solid var(--color-border-light);
+  border: 1px solid var(--border-primary);
   border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   font-size: var(--font-size-base);
   font-weight: 500;
   cursor: pointer;
@@ -239,8 +239,8 @@
 }
 
 .create-goal-cancel:hover {
-  background: var(--color-bg-card);
-  color: var(--color-text-primary);
+  background: var(--bg-card);
+  color: var(--text-primary);
 }
 
 .create-goal-submit {
@@ -248,9 +248,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md);
-  background: var(--color-accent);
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--brand-purple);
   border: none;
   border-radius: var(--radius-md);
   color: white;
@@ -272,7 +272,7 @@
 /* Responsive */
 @media (max-width: 640px) {
   .create-goal-page {
-    padding: var(--spacing-base);
+    padding: var(--space-3);
   }
 
   .create-goal-header h1 {
@@ -280,11 +280,11 @@
   }
 
   .create-goal-life-areas {
-    gap: var(--spacing-xs);
+    gap: var(--space-xs);
   }
 
   .create-goal-life-area {
-    padding: var(--spacing-xs) var(--spacing-sm);
+    padding: var(--space-xs) var(--space-sm);
     font-size: var(--font-size-xs);
   }
 

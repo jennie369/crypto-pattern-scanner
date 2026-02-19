@@ -1,26 +1,41 @@
-import React, { useEffect, useRef, useState, useReducer } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createChart } from 'lightweight-charts';
 import { Wifi, WifiOff, GripHorizontal, CheckCircle, AlertTriangle } from 'lucide-react';
 import ChartControls from './ChartControls';
+import { useScannerStore } from '../../../../../stores/scannerStore';
 import './TradingChart.css';
 
 /**
  * Trading Chart Component
  * Integration with TradingView Lightweight Charts
+ * Reads selectedPattern from Zustand store (no prop drilling)
  */
-export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
+export const TradingChart = ({ symbol = 'BTCUSDT' }) => {
+  // Read pattern from Zustand store instead of props
+  const selectedPattern = useScannerStore((s) => s.selectedPattern);
+  const highlightedZoneId = useScannerStore((s) => s.highlightedZoneId);
+  const zones = useScannerStore((s) => s.zones);
+  const setHighlightedZoneId = useScannerStore((s) => s.setHighlightedZoneId);
+  const setSelectedPattern = useScannerStore((s) => s.setSelectedPattern);
+
+  // Use store pattern as the effective pattern
+  const pattern = selectedPattern;
   const chartContainerRef = useRef(null);
   const chartRef = useRef(null);
   const candlestickSeriesRef = useRef(null);
   const volumeSeriesRef = useRef(null);
   const priceLinesRef = useRef([]); // Track price lines to prevent duplicates
 
-  // 🔥 FIX #5: Track pattern lines (Entry, SL, TP)
+  // 🔥 FIX #5: Track pattern lines (Entry, SL, TP) — kept for fallback
   const patternLinesRef = useRef({
     entryLine: null,
     stopLossLine: null,
     takeProfitLine: null,
   });
+
+  // Zone canvas overlay for drawing colored zones
+  const zoneCanvasRef = useRef(null);
+  const zoneAnimFrameRef = useRef(null);
 
   // 🔥 FIX #1: Track candle data array for proper updates
   const candleDataRef = useRef([]);
@@ -424,6 +439,137 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
     }
   };
 
+  // Draw zone overlays on canvas (matching mobile's canvas approach)
+  const drawZones = useCallback(() => {
+    const canvas = zoneCanvasRef.current;
+    const series = candlestickSeriesRef.current;
+    const chart = chartRef.current;
+    if (!canvas || !series || !chart || isChartDisposedRef.current) return;
+
+    const ctx = canvas.getContext('2d');
+    const container = canvas.parentElement;
+    if (!container) return;
+
+    // Sync canvas size with container
+    const rect = container.getBoundingClientRect();
+    if (canvas.width !== rect.width || canvas.height !== rect.height) {
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const pat = pattern;
+    if (!pat?.entry) return;
+
+    const entry = parseFloat(pat.entry);
+    const sl = parseFloat(pat.stopLoss);
+    const tp = parseFloat(pat.takeProfit);
+    if (!entry || !sl || !tp) return;
+
+    // Convert prices to Y coordinates
+    let entryY, slY, tpY;
+    try {
+      entryY = series.priceToCoordinate(entry);
+      slY = series.priceToCoordinate(sl);
+      tpY = series.priceToCoordinate(tp);
+    } catch (e) {
+      return; // Series not ready
+    }
+    if (entryY === null || slY === null || tpY === null) return;
+
+    const chartWidth = canvas.width;
+
+    // TP zone (green area between entry and TP)
+    const tpTop = Math.min(entryY, tpY);
+    const tpHeight = Math.abs(tpY - entryY);
+    ctx.fillStyle = 'rgba(0, 255, 136, 0.12)';
+    ctx.fillRect(0, tpTop, chartWidth, tpHeight);
+    // TP zone border
+    ctx.strokeStyle = 'rgba(0, 255, 136, 0.30)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0, tpTop, chartWidth, tpHeight);
+
+    // SL zone (red area between entry and SL)
+    const slTop = Math.min(entryY, slY);
+    const slHeight = Math.abs(slY - entryY);
+    ctx.fillStyle = 'rgba(246, 70, 93, 0.12)';
+    ctx.fillRect(0, slTop, chartWidth, slHeight);
+    // SL zone border
+    ctx.strokeStyle = 'rgba(246, 70, 93, 0.30)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0, slTop, chartWidth, slHeight);
+
+    // Entry line — solid cyan
+    ctx.beginPath();
+    ctx.strokeStyle = '#00FFFF';
+    ctx.lineWidth = 2;
+    ctx.moveTo(0, entryY);
+    ctx.lineTo(chartWidth, entryY);
+    ctx.stroke();
+
+    // SL line — dashed red
+    ctx.beginPath();
+    ctx.strokeStyle = '#F6465D';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 4]);
+    ctx.moveTo(0, slY);
+    ctx.lineTo(chartWidth, slY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // TP line — dashed green
+    ctx.beginPath();
+    ctx.strokeStyle = '#00FF88';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 4]);
+    ctx.moveTo(0, tpY);
+    ctx.lineTo(chartWidth, tpY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Labels
+    ctx.font = 'bold 11px monospace';
+    const labelX = chartWidth - 10;
+
+    // Entry label
+    ctx.fillStyle = '#00FFFF';
+    ctx.textAlign = 'right';
+    ctx.fillText(`Entry $${entry.toLocaleString()}`, labelX, entryY - 5);
+
+    // SL label
+    ctx.fillStyle = '#F6465D';
+    ctx.fillText(`SL $${sl.toLocaleString()}`, labelX, slY + (slY > entryY ? 14 : -5));
+
+    // TP label
+    ctx.fillStyle = '#00FF88';
+    ctx.fillText(`TP $${tp.toLocaleString()}`, labelX, tpY + (tpY < entryY ? -5 : 14));
+  }, [pattern]);
+
+  // Zone animation loop — redraws on zoom/pan via requestAnimationFrame
+  useEffect(() => {
+    if (!pattern?.entry || !zoneCanvasRef.current) return;
+
+    const animate = () => {
+      drawZones();
+      zoneAnimFrameRef.current = requestAnimationFrame(animate);
+    };
+    zoneAnimFrameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (zoneAnimFrameRef.current) {
+        cancelAnimationFrame(zoneAnimFrameRef.current);
+        zoneAnimFrameRef.current = null;
+      }
+      // Clear canvas on cleanup
+      const canvas = zoneCanvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    };
+  }, [pattern, drawZones]);
+
   useEffect(() => {
     if (!chartContainerRef.current) return;
     console.log('[TradingChart] Loading chart for:', pattern?.coin || symbol);
@@ -552,6 +698,12 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
     return () => {
       // 🔥 FIX: Mark chart as disposed FIRST to prevent WebSocket updates
       isChartDisposedRef.current = true;
+
+      // Cancel zone animation frame
+      if (zoneAnimFrameRef.current) {
+        cancelAnimationFrame(zoneAnimFrameRef.current);
+        zoneAnimFrameRef.current = null;
+      }
 
       window.removeEventListener('resize', handleResize);
       clearPriceLines(); // Clean up price lines
@@ -1285,8 +1437,22 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
       />
 
       {/* Chart Area - TradingView Lightweight Charts */}
-      <div className="chart-card">
+      <div className="chart-card" style={{ position: 'relative' }}>
         <div ref={chartContainerRef} className="chart-canvas" />
+
+        {/* Zone overlay canvas — positioned over chart, pointer-events:none so chart remains interactive */}
+        <canvas
+          ref={zoneCanvasRef}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'none',
+            zIndex: 2,
+          }}
+        />
 
         {/* GEM TRADING Watermark */}
         <div className="chart-watermark">GEM TRADING</div>

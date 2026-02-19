@@ -1,9 +1,15 @@
 import React from 'react';
-import { Circle } from 'lucide-react';
+import { Circle, TrendingUp, TrendingDown, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../../../../contexts/AuthContext';
+import { useScannerStore } from '../../../../../stores/scannerStore';
 import './ResultsList.css';
 
-export const ResultsList = ({ results, onSelect, selectedPattern, onOpenPaperTrading }) => {
+export const ResultsList = ({ onOpenPaperTrading }) => {
+  // Read scanner state from Zustand store (no prop drilling)
+  const results = useScannerStore((s) => s.scanResults);
+  const selectedPattern = useScannerStore((s) => s.selectedPattern);
+  const setSelectedPattern = useScannerStore((s) => s.setSelectedPattern);
+  const setHighlightedZoneId = useScannerStore((s) => s.setHighlightedZoneId);
   const { user, profile, getScannerTier, isAdmin } = useAuth();
 
   // Get user's scanner tier for validation
@@ -60,7 +66,6 @@ export const ResultsList = ({ results, onSelect, selectedPattern, onOpenPaperTra
   // Debug logging on component render
   console.log('[ResultsList] Rendered:', {
     resultsCount: results.length,
-    hasOnSelect: !!onSelect,
     selectedId: selectedPattern?.id,
   });
 
@@ -95,22 +100,10 @@ export const ResultsList = ({ results, onSelect, selectedPattern, onOpenPaperTra
     return `${diffInDays}d ago`;
   };
 
-  // Debug wrapper for click handling
+  // Click handler — writes directly to Zustand store
   const handleCardClick = (result) => {
-    console.log('[ResultsList] [CLICK] Card clicked!', {
-      coin: result.coin,
-      pattern: result.pattern,
-      confidence: result.confidence,
-      hasOnSelect: !!onSelect,
-      resultData: result,
-    });
-
-    if (!onSelect) {
-      console.error('[ResultsList] [ERROR] onSelect prop is missing!');
-      return;
-    }
-
-    onSelect(result);
+    console.log('[ResultsList] [CLICK] Card clicked:', result.coin, result.pattern);
+    setSelectedPattern(result); // Also sets highlightedZoneId via store action
   };
 
   return (
@@ -134,10 +127,36 @@ export const ResultsList = ({ results, onSelect, selectedPattern, onOpenPaperTra
               </span>
             </div>
 
+            {/* Confidence bar */}
+            <div className="result-confidence-bar">
+              <div
+                className={`confidence-bar-fill ${getConfidenceColor(result.confidence)}`}
+                style={{ width: `${result.confidence}%` }}
+              />
+            </div>
+
             <div className="result-pattern">
               <span className="pattern-code">{result.pattern}</span>
+              {/* Direction badge */}
+              {result.direction && (
+                <span className={`result-direction-badge ${result.direction === 'LONG' ? 'direction-long' : 'direction-short'}`}>
+                  {result.direction === 'LONG' ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                  {result.direction}
+                </span>
+              )}
               <span className="result-timeframe">{result.timeframe}</span>
             </div>
+
+            {/* R:R ratio display */}
+            {result.riskReward && (
+              <div className="result-rr-ratio">
+                <span className="rr-label">R:R</span>
+                <span className={`rr-value ${result.riskReward >= 2 ? 'rr-good' : 'rr-weak'}`}>
+                  1:{typeof result.riskReward === 'number' ? result.riskReward.toFixed(2) : result.riskReward}
+                  {result.riskReward >= 2 && <CheckCircle size={12} />}
+                </span>
+              </div>
+            )}
 
             {/* 3-column layout: Entry, Stop, Target */}
             <div className="result-details-3col">

@@ -4,17 +4,17 @@
 
 .life-area-selector {
   position: relative;
-  margin: 0 calc(-1 * var(--spacing-base));
-  padding: 0 var(--spacing-base);
+  margin: 0 calc(-1 * var(--space-3));
+  padding: 0 var(--space-3);
 }
 
 .life-area-selector-scroll {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--space-sm);
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: var(--spacing-xs) 0;
+  padding: var(--space-xs) 0;
 }
 
 .life-area-selector-scroll::-webkit-scrollbar {
@@ -24,12 +24,12 @@
 .life-area-tab {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-full);
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   font-size: var(--font-size-sm);
   font-weight: 500;
   cursor: pointer;
@@ -40,11 +40,11 @@
 
 .life-area-tab:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: var(--color-text-primary);
+  color: var(--text-primary);
 }
 
 .life-area-tab-selected {
-  color: var(--color-text-primary);
+  color: var(--text-primary);
   border-color: var(--area-color);
   background: color-mix(in srgb, var(--area-color) 10%, transparent);
 }
@@ -58,12 +58,12 @@
     right: 0;
     bottom: 0;
     width: 40px;
-    background: linear-gradient(to left, var(--color-bg-primary), transparent);
+    background: linear-gradient(to left, var(--bg-primary), transparent);
     pointer-events: none;
   }
 
   .life-area-tab {
-    padding: var(--spacing-sm) var(--spacing-base);
+    padding: var(--space-sm) var(--space-3);
     font-size: var(--font-size-xs);
   }
 }
