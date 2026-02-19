@@ -81,16 +81,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           id,
           email,
           full_name,
+          display_name,
+          bio,
+          avatar_url,
           scan_count,
           last_scan_at,
           created_at,
           updated_at,
+          tier,
           course_tier,
           scanner_tier,
           chatbot_tier,
           course_tier_expires_at,
           scanner_tier_expires_at,
-          chatbot_tier_expires_at
+          chatbot_tier_expires_at,
+          role,
+          is_admin,
+          gems
         `)
         .eq('id', userId)
         .maybeSingle();
@@ -101,7 +108,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       if (data) {
-        console.log('Profile loaded:', data);
+        // Derive tier from scanner_tier (authoritative)
+        (data as any).tier = (data as any).scanner_tier || (data as any).tier || 'free';
         setProfile(data as UserProfile);
         setLoading(false);
         return;
@@ -207,21 +215,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           id,
           email,
           full_name,
+          display_name,
+          bio,
+          avatar_url,
           scan_count,
           last_scan_at,
           created_at,
           updated_at,
+          tier,
           course_tier,
           scanner_tier,
           chatbot_tier,
           course_tier_expires_at,
           scanner_tier_expires_at,
-          chatbot_tier_expires_at
+          chatbot_tier_expires_at,
+          role,
+          is_admin,
+          gems
         `)
         .eq('id', authData.user?.id)
         .maybeSingle();
 
       if (profileData) {
+        (profileData as any).tier = (profileData as any).scanner_tier || (profileData as any).tier || 'free';
         setProfile(profileData as UserProfile);
       } else if (authData.user) {
         await createUserProfile(authData.user.id);
@@ -353,24 +369,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           id,
           email,
           full_name,
+          display_name,
+          bio,
+          avatar_url,
           scan_count,
           last_scan_at,
           created_at,
           updated_at,
+          tier,
           course_tier,
           scanner_tier,
           chatbot_tier,
           course_tier_expires_at,
           scanner_tier_expires_at,
-          chatbot_tier_expires_at
+          chatbot_tier_expires_at,
+          role,
+          is_admin,
+          gems
         `)
         .eq('id', user.id)
         .single();
 
       if (error) throw error;
 
+      // Derive tier from scanner_tier (authoritative)
+      (data as any).tier = (data as any).scanner_tier || (data as any).tier || 'free';
+
       setProfile(data as UserProfile);
-      console.log('Profile refreshed successfully:', data);
       return { success: true, profile: data as UserProfile };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to refresh profile';

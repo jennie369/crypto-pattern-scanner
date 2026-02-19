@@ -17,11 +17,8 @@ import {
   Users,
   MessageSquare,
   Sparkles,
-  Trophy,
-  Calendar,
   GraduationCap,
-  Target,
-  Moon
+  Target
 } from 'lucide-react';
 import './CompactSidebar.css';
 
@@ -83,24 +80,10 @@ const CompactSidebar = () => {
     },
     {
       id: 'dashboard',
-      label: 'Dashboard',
+      label: 'Tài Sản',
       icon: LayoutDashboard,
       path: '/account',
       description: 'Account overview'
-    },
-    {
-      id: 'leaderboard',
-      label: 'Leaderboard',
-      icon: Trophy,
-      path: '/leaderboard',
-      description: 'Top traders ranking'
-    },
-    {
-      id: 'events',
-      label: 'Events',
-      icon: Calendar,
-      path: '/events',
-      description: 'Community events'
     },
     {
       id: 'vision-board',
@@ -108,13 +91,6 @@ const CompactSidebar = () => {
       icon: Target,
       path: '/vision-board',
       description: 'Goals & habits'
-    },
-    {
-      id: 'rituals',
-      label: 'Rituals',
-      icon: Moon,
-      path: '/rituals',
-      description: 'Trader mindfulness'
     },
     {
       id: 'profile',

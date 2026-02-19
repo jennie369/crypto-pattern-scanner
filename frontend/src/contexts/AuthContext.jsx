@@ -126,6 +126,7 @@ export const AuthProvider = ({ children }) => {
           last_scan_at,
           created_at,
           updated_at,
+          tier,
           course_tier,
           scanner_tier,
           chatbot_tier,
@@ -137,7 +138,9 @@ export const AuthProvider = ({ children }) => {
           level_badge,
           role_badge,
           achievement_badges,
-          role
+          role,
+          is_admin,
+          gems
         `)
         .eq('id', userId)
         .maybeSingle();
@@ -159,37 +162,16 @@ export const AuthProvider = ({ children }) => {
       if (data) {
         console.log('✅ Profile loaded:', data);
 
-        // 🔍 CHECK: localStorage interference
-        console.log('localStorage profile:', localStorage.getItem('profile'));
-        console.log('sessionStorage profile:', sessionStorage.getItem('profile'));
-
-        // 🔍 DETAILED PROFILE STATE DEBUG
-        console.log('═══ PROFILE STATE DEBUG ═══');
-        console.log('1. Raw Supabase data:', JSON.stringify(data, null, 2));
-        console.log('2. Data has course_tier?:', 'course_tier' in (data || {}));
-        console.log('3. Data has scanner_tier?:', 'scanner_tier' in (data || {}));
-        console.log('4. Tier values:', {
-          course: data?.course_tier,
-          scanner: data?.scanner_tier,
-          chatbot: data?.chatbot_tier
-        });
-        console.log('5. About to call setProfile with:', data);
+        // Derive `tier` from scanner_tier (scanner_tier is the authoritative tier in DB)
+        // The `tier` column in DB is stale for many users — scanner_tier is kept up to date
+        const highestTier = data.scanner_tier || data.tier || 'free';
+        data.tier = highestTier;
 
         setProfile(data);
         setLoading(false);
-
-        // ⚡ FIX: Force refresh profile khi load
         window.currentUserProfile = data;
 
-        // 🔍 CHECK: Profile state after setProfile
-        setTimeout(() => {
-          console.log('6. Profile state after setProfile (100ms delay):', profile);
-          console.log('7. Profile has course_tier?:', profile?.course_tier);
-          console.log('8. Profile has scanner_tier?:', profile?.scanner_tier);
-          console.log('9. window.currentUserProfile:', window.currentUserProfile);
-        }, 100);
-
-        console.log('═══════════════════════════');
+        console.log('[AuthContext] Profile set — tier:', data.tier, 'role:', data.role, 'is_admin:', data.is_admin);
 
         return;
       }
@@ -410,7 +392,8 @@ export const AuthProvider = ({ children }) => {
 
   // Check if admin
   const isAdmin = () => {
-    return profile && profile.role === 'admin';
+    if (!profile) return false;
+    return profile.role === 'admin' || profile.is_admin === true || profile.scanner_tier === 'ADMIN';
   };
 
   // Check if teacher
@@ -550,29 +533,32 @@ export const AuthProvider = ({ children }) => {
           last_scan_at,
           created_at,
           updated_at,
+          tier,
           course_tier,
           scanner_tier,
           chatbot_tier,
           course_tier_expires_at,
           scanner_tier_expires_at,
-          chatbot_tier_expires_at
+          chatbot_tier_expires_at,
+          verified_seller,
+          verified_trader,
+          level_badge,
+          role_badge,
+          achievement_badges,
+          role,
+          is_admin,
+          gems
         `)
         .eq('id', user.id)
         .single();
 
-      // 🔍 DEBUG LOGS
-      console.log('═══ AUTH CONTEXT DEBUG (refreshProfile) ═══');
-      console.log('User ID:', user?.id);
-      console.log('Profile Data:', data);
-      console.log('Course Tier:', data?.course_tier);
-      console.log('Scanner Tier:', data?.scanner_tier);
-      console.log('Fetch Error:', error);
-      console.log('══════════════════════════');
-
       if (error) throw error;
 
+      // Derive tier from scanner_tier (authoritative)
+      data.tier = data.scanner_tier || data.tier || 'free';
+
       setProfile(data);
-      console.log('✅ Profile refreshed successfully:', data);
+      console.log('[AuthContext] Profile refreshed — tier:', data.tier, 'role:', data.role);
       return { success: true, profile: data };
     } catch (error) {
       console.error('❌ Error refreshing profile:', error);
