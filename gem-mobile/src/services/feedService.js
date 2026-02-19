@@ -278,15 +278,22 @@ export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG
 
     // Run queries in parallel — use allSettled so a slow/failed query
     // doesn't block the entire feed (posts are critical, others are optional)
-    const [postsSettled, userPrefsSettled] = await Promise.allSettled([
-      // Query 1: Recent posts with minimal joins (CRITICAL)
+    const [postsSettled, seedPostsSettled, userPrefsSettled] = await Promise.allSettled([
+      // Query 1: Recent forum posts with minimal joins (CRITICAL)
       supabase
         .from('forum_posts')
         .select(POST_SELECT_FAST)
         .eq('status', 'published')
         .order('created_at', { ascending: false })
         .limit(limit + 10), // Get extra for sorting
-      // Query 2: User preferences for tier check (OPTIONAL — degrades to FREE tier ads)
+      // Query 2: Seed posts (CRITICAL — community content)
+      supabase
+        .from('seed_posts')
+        .select(SEED_POST_SELECT_QUERY)
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+        .limit(FEED_CONFIG.MAX_SEED_POSTS),
+      // Query 3: User preferences for tier check (OPTIONAL — degrades to FREE tier ads)
       supabase
         .from('profiles')
         .select('scanner_tier, chatbot_tier')
@@ -294,8 +301,9 @@ export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG
         .single(),
     ]);
 
-    // Extract results — only posts query is critical
+    // Extract results — only forum posts query is critical
     const postsResult = postsSettled.status === 'fulfilled' ? postsSettled.value : { data: null, error: postsSettled.reason };
+    const seedPostsResult = seedPostsSettled.status === 'fulfilled' ? seedPostsSettled.value : { data: null, error: seedPostsSettled.reason };
     const userPrefsResult = userPrefsSettled.status === 'fulfilled' ? userPrefsSettled.value : { data: null, error: userPrefsSettled.reason };
 
     if (postsResult.error) {
@@ -303,11 +311,52 @@ export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG
       throw postsResult.error;
     }
 
-    const recentPosts = postsResult.data || [];
+    if (seedPostsResult.error) {
+      console.warn('[FeedService] Seed posts query error (non-fatal):', seedPostsResult.error);
+    }
+
+    // Transform forum posts
+    const forumPosts = (postsResult.data || []).map(post => ({
+      ...post,
+      author: post.profiles,
+    }));
+
+    // Transform seed posts to match PostCard format
+    const seedPosts = (seedPostsResult.data || []).map(post => ({
+      ...post,
+      is_seed_post: true,
+      feed_source: 'seed',
+      author: post.seed_users ? {
+        id: post.seed_users.id,
+        full_name: post.seed_users.full_name,
+        username: post.seed_users.full_name?.toLowerCase().replace(/\s+/g, '_'),
+        avatar_url: post.seed_users.avatar_url,
+        role: post.seed_users.is_premium_seed ? 'premium_user' : 'user',
+        seed_persona: post.seed_users.seed_persona,
+        scanner_tier: post.seed_users.tier === 'vip' ? 'TIER_3' : post.seed_users.tier === 'premium' ? 'TIER_2' : 'FREE',
+      } : null,
+      profiles: post.seed_users ? {
+        id: post.seed_users.id,
+        full_name: post.seed_users.full_name,
+        username: post.seed_users.full_name?.toLowerCase().replace(/\s+/g, '_'),
+        avatar_url: post.seed_users.avatar_url,
+        role: post.seed_users.is_premium_seed ? 'premium_user' : 'user',
+      } : null,
+      tagged_products: post.seed_post_products?.length > 0
+        ? post.seed_post_products.sort((a, b) => a.position - b.position)
+        : [],
+      category: null,
+      categories: null,
+      likes: [],
+      saved: [],
+    }));
+
+    // Merge forum + seed posts
+    const recentPosts = [...forumPosts, ...seedPosts];
     const followingIds = new Set(); // Empty until follows table is created
     const userTier = userPrefsResult.data?.scanner_tier || userPrefsResult.data?.chatbot_tier || 'FREE';
 
-    console.log(`[FeedService] ⚡ Loaded ${recentPosts.length} posts, following ${followingIds.size} users, tier: ${userTier}`);
+    console.log(`[FeedService] ⚡ Loaded ${forumPosts.length} forum + ${seedPosts.length} seed = ${recentPosts.length} posts, tier: ${userTier}`);
 
     // ============================================
     // PERSONALIZATION: Sort posts - following users first
@@ -324,12 +373,12 @@ export async function generateFeed(userId, sessionId = null, limit = FEED_CONFIG
     }).slice(0, limit); // Take only what we need
 
     // Transform posts to feed format
-    // Map 'profiles' to 'author' for PostCard compatibility
+    // author is already set during transformation above (profiles for forum, seed_users for seed)
     const feedItems = sortedPosts.map(post => ({
       type: 'post',
       data: {
         ...post,
-        author: post.profiles, // PostCard expects 'author' not 'profiles'
+        author: post.author || post.profiles, // Already set for seed posts, fallback for forum
         user_liked: false, // Will be loaded on demand when user interacts
         user_saved: false, // Will be loaded on demand when user interacts
         is_following: followingIds.has(post.user_id),
