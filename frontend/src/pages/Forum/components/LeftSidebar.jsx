@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
+import { supabase } from '../../../lib/supabaseClient';
 import {
   Home,
   TrendingUp,
@@ -23,20 +25,21 @@ import {
   Coins,
   Rss,
   Plus,
-  Edit3
+  Edit3,
+  Award,
+  Trash2,
+  X
 } from 'lucide-react';
 import './LeftSidebar.css';
 
 /**
- * LeftSidebar Component - SYNCED FROM MOBILE SideMenu
+ * LeftSidebar Component - ENHANCED
  * Left column of 3-column Community Hub
  *
- * Features (synced from Mobile):
- * - Quick Actions: Đã Thích, Đã Lưu
- * - Feed Types: Explore, Following, News, Popular, Academy
- * - Categories: Giao dịch, Tinh thần, Thịnh vượng, Kiếm tiền
- * - Trending Hashtags
- * - Custom Feeds
+ * Enhanced:
+ * - Custom feeds section with create/edit/delete
+ * - Karma level display
+ * - Better mobile drawer behavior
  */
 export default function LeftSidebar({
   categories = [],
@@ -50,28 +53,48 @@ export default function LeftSidebar({
   onEditFeeds
 }) {
   const navigate = useNavigate();
-  const location = useLocation();
+  const { user } = useAuth();
 
-  // Expanded states for sections
+  // Expanded states
   const [tradingExpanded, setTradingExpanded] = useState(true);
   const [wellnessExpanded, setWellnessExpanded] = useState(false);
   const [prosperityExpanded, setProsperityExpanded] = useState(false);
   const [earnExpanded, setEarnExpanded] = useState(false);
-  const [customExpanded, setCustomExpanded] = useState(false);
+  const [customExpanded, setCustomExpanded] = useState(true);
 
   // Trending hashtags
   const [trendingHashtags, setTrendingHashtags] = useState([]);
   const [loadingTrending, setLoadingTrending] = useState(false);
 
-  // Load trending hashtags on mount
+  // Karma
+  const [karmaData, setKarmaData] = useState(null);
+
+  // Custom feed modal
+  const [showCreateFeedModal, setShowCreateFeedModal] = useState(false);
+  const [newFeedName, setNewFeedName] = useState('');
+
   useEffect(() => {
     loadTrendingHashtags();
-  }, []);
+    if (user) loadKarma();
+  }, [user]);
 
   const loadTrendingHashtags = async () => {
     setLoadingTrending(true);
     try {
-      // Mock data - replace with actual API call
+      const { data } = await supabase.rpc('get_trending_hashtags', { result_limit: 5 });
+      if (data && data.length > 0) {
+        setTrendingHashtags(data);
+      } else {
+        // Fallback mock data
+        setTrendingHashtags([
+          { hashtag: 'bitcoin', count: 1234 },
+          { hashtag: 'ethereum', count: 892 },
+          { hashtag: 'trading', count: 756 },
+          { hashtag: 'crystal', count: 543 },
+          { hashtag: 'mindset', count: 421 }
+        ]);
+      }
+    } catch {
       setTrendingHashtags([
         { hashtag: 'bitcoin', count: 1234 },
         { hashtag: 'ethereum', count: 892 },
@@ -79,10 +102,17 @@ export default function LeftSidebar({
         { hashtag: 'crystal', count: 543 },
         { hashtag: 'mindset', count: 421 }
       ]);
-    } catch (error) {
-      console.error('[LeftSidebar] Load trending error:', error);
     } finally {
       setLoadingTrending(false);
+    }
+  };
+
+  const loadKarma = async () => {
+    try {
+      const { data } = await supabase.rpc('get_user_karma_full', { p_user_id: user.id });
+      if (data) setKarmaData(data);
+    } catch {
+      // Karma RPC may not exist yet — silently ignore
     }
   };
 
@@ -90,18 +120,40 @@ export default function LeftSidebar({
     navigate(`/forum/hashtag/${hashtag}`);
   };
 
-  /**
-   * Main Feed Types - Compact version
-   */
+  const handleCreateCustomFeed = async () => {
+    if (!newFeedName.trim() || !user) return;
+    try {
+      await supabase
+        .from('custom_feeds')
+        .insert({ user_id: user.id, name: newFeedName.trim(), filters: {} });
+      setNewFeedName('');
+      setShowCreateFeedModal(false);
+      onCreateFeed?.();
+    } catch (err) {
+      console.error('[LeftSidebar] Create feed error:', err);
+      alert('Không thể tạo feed. Vui lòng thử lại.');
+    }
+  };
+
+  const handleDeleteCustomFeed = async (feedId) => {
+    if (!window.confirm('Xóa feed này?')) return;
+    try {
+      await supabase.from('custom_feeds').delete().eq('id', feedId).eq('user_id', user.id);
+      onEditFeeds?.();
+    } catch (err) {
+      console.error('[LeftSidebar] Delete feed error:', err);
+    }
+  };
+
+  // Feed types
   const mainFeeds = [
     { id: 'explore', label: 'Khám phá', icon: Sparkles },
     { id: 'following', label: 'Theo dõi', icon: Users },
+    { id: 'popular', label: 'Phổ biến', icon: TrendingUp },
     { id: 'news', label: 'Tin tức', icon: Newspaper }
   ];
 
-  /**
-   * Category Feeds - Compact version (no subtitles)
-   */
+  // Category feeds
   const categoryFeeds = {
     trading: {
       section: 'GIAO DỊCH',
@@ -177,19 +229,42 @@ export default function LeftSidebar({
     );
   };
 
+  // Karma level calc
+  const karmaLevel = karmaData ? Math.floor((karmaData.total_karma || 0) / 100) + 1 : 1;
+  const karmaProgress = karmaData ? ((karmaData.total_karma || 0) % 100) : 0;
+
   return (
     <aside className="left-sidebar">
-      {/* Quick Actions - Compact */}
+      {/* Karma Display */}
+      {user && (
+        <div className="karma-display">
+          <div className="karma-header">
+            <Award size={14} className="karma-icon" />
+            <span className="karma-label">Karma Level {karmaLevel}</span>
+          </div>
+          <div className="karma-bar">
+            <div
+              className="karma-bar-fill"
+              style={{ width: `${karmaProgress}%` }}
+            />
+          </div>
+          <span className="karma-points">
+            {karmaData?.total_karma || 0} điểm
+          </span>
+        </div>
+      )}
+
+      {/* Quick Actions */}
       <div className="quick-actions">
         <button
-          className="quick-action-btn"
+          className={`quick-action-btn ${selectedFeed === 'liked' ? 'active' : ''}`}
           onClick={() => onQuickAction?.('liked')}
         >
           <Heart size={14} className="quick-icon liked" />
           <span>Thích</span>
         </button>
         <button
-          className="quick-action-btn"
+          className={`quick-action-btn ${selectedFeed === 'saved' ? 'active' : ''}`}
           onClick={() => onQuickAction?.('saved')}
         >
           <Bookmark size={14} className="quick-icon saved" />
@@ -197,7 +272,7 @@ export default function LeftSidebar({
         </button>
       </div>
 
-      {/* Main Feeds - Compact */}
+      {/* Main Feeds */}
       <div className="feed-section main-feeds">
         <div className="section-header-row">
           <Rss size={12} className="section-icon" />
@@ -229,7 +304,7 @@ export default function LeftSidebar({
       {renderCategorySection('prosperity', categoryFeeds.prosperity, prosperityExpanded, setProsperityExpanded)}
       {renderCategorySection('earn', categoryFeeds.earn, earnExpanded, setEarnExpanded)}
 
-      {/* Trending Hashtags - Compact */}
+      {/* Trending Hashtags */}
       {trendingHashtags.length > 0 && (
         <div className="feed-section trending-section">
           <div className="section-header-row">
@@ -241,7 +316,7 @@ export default function LeftSidebar({
             {loadingTrending ? (
               <div className="trending-loading">Đang tải...</div>
             ) : (
-              trendingHashtags.slice(0, 3).map((item, index) => (
+              trendingHashtags.slice(0, 5).map((item, index) => (
                 <button
                   key={`trending-${index}`}
                   className="trending-item"
@@ -249,6 +324,7 @@ export default function LeftSidebar({
                 >
                   <Hash size={12} className="trending-icon" />
                   <span className="hashtag-name">#{item.hashtag}</span>
+                  <span className="hashtag-count">{item.count}</span>
                 </button>
               ))
             )}
@@ -256,56 +332,88 @@ export default function LeftSidebar({
         </div>
       )}
 
-      {/* Custom Feeds - Compact */}
-      {customFeeds.length > 0 && (
-        <div className="feed-section">
-          <button
-            className="section-header"
-            onClick={() => setCustomExpanded(!customExpanded)}
-          >
-            <Sparkles size={12} className="section-icon" />
-            <span className="section-title">TÙY CHỈNH</span>
-            <span className="section-chevron">
-              {customExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-            </span>
-          </button>
+      {/* Custom Feeds */}
+      <div className="feed-section">
+        <button
+          className="section-header"
+          onClick={() => setCustomExpanded(!customExpanded)}
+        >
+          <Sparkles size={12} className="section-icon" />
+          <span className="section-title">TÙY CHỈNH</span>
+          <span className="feed-count">{customFeeds.length}</span>
+          <span className="section-chevron">
+            {customExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+          </span>
+        </button>
 
-          {customExpanded && (
-            <div className="section-items">
-              {customFeeds.map((feed) => (
-                <button
-                  key={feed.id}
-                  className={`feed-item ${selectedFeed === feed.id ? 'active' : ''}`}
-                  onClick={() => onFeedChange?.(feed.id)}
-                >
-                  <Sparkles size={14} className="feed-icon" />
-                  <span className="feed-item-title">{feed.name}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+        {customExpanded && (
+          <div className="section-items">
+            {customFeeds.length > 0 ? (
+              customFeeds.map((feed) => (
+                <div key={feed.id} className="custom-feed-row">
+                  <button
+                    className={`feed-item ${selectedFeed === `custom-${feed.id}` ? 'active' : ''}`}
+                    onClick={() => onFeedChange?.(`custom-${feed.id}`)}
+                  >
+                    <Sparkles size={14} className="feed-icon" />
+                    <span className="feed-item-title">{feed.name}</span>
+                  </button>
+                  <button
+                    className="delete-feed-btn"
+                    onClick={() => handleDeleteCustomFeed(feed.id)}
+                    title="Xóa feed"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="custom-feeds-empty">
+                <span>Chưa có feed tùy chỉnh</span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
-      {/* Create Feed - Compact */}
+      {/* Create Feed */}
       <div className="feed-actions">
         <button
           className="feed-action-btn"
-          onClick={onCreateFeed}
+          onClick={() => setShowCreateFeedModal(true)}
         >
           <Plus size={12} />
           <span>Tạo Feed</span>
         </button>
-        {customFeeds.length > 0 && (
-          <button
-            className="feed-action-btn outline"
-            onClick={onEditFeeds}
-          >
-            <Edit3 size={12} />
-            <span>Quản Lý</span>
-          </button>
-        )}
       </div>
+
+      {/* Create Feed Modal (inline) */}
+      {showCreateFeedModal && (
+        <div className="create-feed-inline">
+          <div className="create-feed-header">
+            <span>Tạo Feed Mới</span>
+            <button onClick={() => setShowCreateFeedModal(false)}>
+              <X size={14} />
+            </button>
+          </div>
+          <input
+            type="text"
+            className="create-feed-input"
+            value={newFeedName}
+            onChange={(e) => setNewFeedName(e.target.value)}
+            placeholder="Tên feed..."
+            maxLength={50}
+            onKeyDown={(e) => e.key === 'Enter' && handleCreateCustomFeed()}
+          />
+          <button
+            className="create-feed-submit"
+            onClick={handleCreateCustomFeed}
+            disabled={!newFeedName.trim()}
+          >
+            Tạo
+          </button>
+        </div>
+      )}
     </aside>
   );
 }

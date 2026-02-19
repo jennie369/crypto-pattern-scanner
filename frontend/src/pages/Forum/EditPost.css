@@ -1,0 +1,284 @@
+/* EditPost.css — Edit Post Page */
+
+.edit-post-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-3);
+  min-height: calc(100vh - 80px);
+}
+
+/* Header */
+.edit-post-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.edit-post-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  background: var(--gradient-gold-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  transition: all var(--transition-fast);
+}
+
+.btn-back:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+/* Loading & Error */
+.edit-post-loading,
+.edit-post-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-20) var(--space-8);
+  text-align: center;
+  color: var(--text-secondary);
+  gap: var(--space-4);
+}
+
+.edit-post-error svg {
+  color: var(--accent-red);
+}
+
+.spinner-icon {
+  animation: spin 1s linear infinite;
+  color: var(--brand-gold);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error banner */
+.edit-post-error-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(255, 71, 87, 0.15);
+  border: 1px solid rgba(255, 71, 87, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--accent-red);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-4);
+}
+
+/* Form */
+.edit-post-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-bottom: 100px; /* space for fixed bottom bar */
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+}
+
+.form-label .required {
+  color: var(--accent-red);
+}
+
+.form-input {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.form-input:focus {
+  border-color: var(--brand-gold);
+}
+
+.form-input.error {
+  border-color: var(--accent-red);
+}
+
+.form-textarea {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  outline: none;
+  resize: vertical;
+  min-height: 200px;
+  transition: border-color var(--transition-fast);
+}
+
+.form-textarea:focus {
+  border-color: var(--brand-gold);
+}
+
+.form-textarea.error {
+  border-color: var(--accent-red);
+}
+
+.error-text {
+  font-size: var(--text-xs);
+  color: var(--accent-red);
+}
+
+.char-count {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-align: right;
+}
+
+/* Category Grid */
+.category-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.category-btn {
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.category-btn.selected {
+  background: rgba(255, 189, 89, 0.15);
+  border-color: var(--cat-color, var(--brand-gold));
+  color: var(--cat-color, var(--brand-gold));
+}
+
+.category-btn:hover:not(.selected) {
+  border-color: var(--border-hover);
+}
+
+/* Bottom Actions */
+.edit-post-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6);
+  background: var(--bg-overlay);
+  border-top: 1px solid var(--border-primary);
+  backdrop-filter: blur(16px);
+  z-index: var(--z-sticky);
+}
+
+.btn-cancel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: transparent;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-cancel:hover {
+  border-color: var(--border-hover);
+}
+
+.btn-save {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: var(--gradient-burgundy);
+  border: 2px solid var(--brand-gold);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-save:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--glow-gold);
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .edit-post-page {
+    padding: var(--space-3) var(--space-3);
+  }
+
+  .edit-post-header {
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .edit-post-title {
+    font-size: var(--text-lg);
+  }
+
+  .edit-post-actions {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .category-grid {
+    gap: var(--space-1);
+  }
+
+  .category-btn {
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-2);
+  }
+}

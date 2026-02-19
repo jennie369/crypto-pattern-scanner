@@ -403,6 +403,624 @@ export class ForumService {
   async getTopMembers(limit = 10) {
     return this.getSuggestedCreators(limit);
   }
+
+  // ─── REACTIONS (6 types) ───────────────────────────────────────────
+
+  /**
+   * Toggle reaction on a post — upsert logic:
+   * - Same type exists → remove
+   * - Different type exists → update
+   * - No reaction → insert
+   * @param {string} postId
+   * @param {string} type - like|love|haha|wow|sad|angry
+   * @param {string} userId
+   * @returns {{ action: 'added'|'removed'|'changed', type: string }}
+   */
+  async toggleReaction(postId, type, userId) {
+    try {
+      const { data: existing } = await supabase
+        .from('post_reactions')
+        .select('id, type')
+        .eq('post_id', postId)
+        .eq('user_id', userId)
+        .single();
+
+      if (existing) {
+        if (existing.type === type) {
+          // Same type → remove
+          const { error } = await supabase
+            .from('post_reactions')
+            .delete()
+            .eq('id', existing.id);
+          if (error) throw error;
+          return { action: 'removed', type };
+        } else {
+          // Different type → update
+          const { error } = await supabase
+            .from('post_reactions')
+            .update({ type })
+            .eq('id', existing.id);
+          if (error) throw error;
+          return { action: 'changed', type };
+        }
+      }
+
+      // No reaction → insert
+      const { error } = await supabase
+        .from('post_reactions')
+        .insert({ post_id: postId, user_id: userId, type });
+      if (error) throw error;
+      return { action: 'added', type };
+    } catch (error) {
+      console.error('toggleReaction error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all reactions for a post with user profiles
+   * @param {string} postId
+   * @returns {Array<{ id, type, user_id, created_at, user: { id, full_name, avatar_url } }>}
+   */
+  async getReactions(postId) {
+    try {
+      const { data, error } = await supabase
+        .from('post_reactions')
+        .select(`
+          id, type, user_id, created_at,
+          user:profiles(id, full_name, avatar_url)
+        `)
+        .eq('post_id', postId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('getReactions error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get reaction counts per type from post's reaction_counts jsonb column
+   * Falls back to aggregate query if column is null
+   * @param {string} postId
+   * @returns {Object} e.g. { like: 3, love: 1, haha: 0, wow: 0, sad: 0, angry: 0, total: 4 }
+   */
+  async getReactionCounts(postId) {
+    try {
+      // Try reading from the cached jsonb column first
+      const { data: post, error: postError } = await supabase
+        .from('forum_posts')
+        .select('reaction_counts')
+        .eq('id', postId)
+        .single();
+
+      if (!postError && post?.reaction_counts) {
+        const counts = post.reaction_counts;
+        const total = Object.values(counts).reduce((s, n) => s + (n || 0), 0);
+        return { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0, ...counts, total };
+      }
+
+      // Fallback — aggregate from post_reactions
+      const { data, error } = await supabase
+        .from('post_reactions')
+        .select('type')
+        .eq('post_id', postId);
+
+      if (error) throw error;
+
+      const counts = { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 };
+      (data || []).forEach(r => { counts[r.type] = (counts[r.type] || 0) + 1; });
+      const total = Object.values(counts).reduce((s, n) => s + n, 0);
+      return { ...counts, total };
+    } catch (error) {
+      console.error('getReactionCounts error:', error);
+      return { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0, total: 0 };
+    }
+  }
+
+  // ─── EDIT POST ─────────────────────────────────────────────────────
+
+  /**
+   * Update a post and record edit history
+   * @param {string} postId
+   * @param {Object} data - { title, content, category_id, image_url, media_urls, hashtags }
+   * @returns {Object} Updated post
+   */
+  async updatePost(postId, data) {
+    try {
+      // Get current post for history
+      const { data: currentPost, error: fetchErr } = await supabase
+        .from('forum_posts')
+        .select('title, content, category_id, image_url, media_urls, hashtags, user_id')
+        .eq('id', postId)
+        .single();
+      if (fetchErr) throw fetchErr;
+
+      // Record edit history
+      await supabase
+        .from('post_edit_history')
+        .insert({
+          post_id: postId,
+          user_id: currentPost.user_id,
+          previous_title: currentPost.title,
+          previous_content: currentPost.content,
+          previous_category_id: currentPost.category_id,
+        });
+
+      // Apply update
+      const updateFields = {};
+      if (data.title !== undefined) updateFields.title = data.title;
+      if (data.content !== undefined) updateFields.content = data.content;
+      if (data.category_id !== undefined) updateFields.category_id = data.category_id;
+      if (data.image_url !== undefined) updateFields.image_url = data.image_url;
+      if (data.media_urls !== undefined) updateFields.media_urls = data.media_urls;
+      if (data.hashtags !== undefined) updateFields.hashtags = data.hashtags;
+      updateFields.edited_at = new Date().toISOString();
+
+      const { data: updated, error } = await supabase
+        .from('forum_posts')
+        .update(updateFields)
+        .eq('id', postId)
+        .select(`
+          *,
+          author:profiles(id, full_name, avatar_url, scanner_tier, role),
+          category:forum_categories(id, name, color)
+        `)
+        .single();
+
+      if (error) throw error;
+      return updated;
+    } catch (error) {
+      console.error('updatePost error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get edit history for a post
+   * @param {string} postId
+   * @returns {Array}
+   */
+  async getEditHistory(postId) {
+    try {
+      const { data, error } = await supabase
+        .from('post_edit_history')
+        .select(`
+          *,
+          editor:profiles(id, full_name, avatar_url)
+        `)
+        .eq('post_id', postId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('getEditHistory error:', error);
+      return [];
+    }
+  }
+
+  // ─── SCHEDULED POSTS ──────────────────────────────────────────────
+
+  /**
+   * Schedule a post for future publishing
+   * @param {Object} data - { title, content, category_id, user_id, scheduled_at, image_url, media_urls, hashtags }
+   * @returns {Object} Created scheduled post
+   */
+  async schedulePost(data) {
+    try {
+      const { data: scheduled, error } = await supabase
+        .from('scheduled_posts')
+        .insert({
+          title: data.title || '',
+          content: data.content,
+          category_id: data.category_id,
+          user_id: data.user_id,
+          scheduled_at: data.scheduled_at,
+          image_url: data.image_url || null,
+          media_urls: data.media_urls || null,
+          hashtags: data.hashtags || null,
+          status: 'pending',
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return scheduled;
+    } catch (error) {
+      console.error('schedulePost error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get user's scheduled posts
+   * @param {string} userId
+   * @returns {Array}
+   */
+  async getScheduledPosts(userId) {
+    try {
+      const { data, error } = await supabase
+        .from('scheduled_posts')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'pending')
+        .order('scheduled_at', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('getScheduledPosts error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Delete a scheduled post
+   * @param {string} id
+   */
+  async deleteScheduledPost(id) {
+    try {
+      const { error } = await supabase
+        .from('scheduled_posts')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    } catch (error) {
+      console.error('deleteScheduledPost error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Publish a scheduled post immediately — moves it to forum_posts
+   * @param {string} id - scheduled_posts id
+   * @returns {Object} Created forum post
+   */
+  async publishScheduledPost(id) {
+    try {
+      // Fetch the scheduled post
+      const { data: sp, error: fetchErr } = await supabase
+        .from('scheduled_posts')
+        .select('*')
+        .eq('id', id)
+        .single();
+      if (fetchErr) throw fetchErr;
+
+      // Insert into forum_posts
+      const { data: post, error: insertErr } = await supabase
+        .from('forum_posts')
+        .insert({
+          title: sp.title,
+          content: sp.content,
+          category_id: sp.category_id,
+          user_id: sp.user_id,
+          image_url: sp.image_url,
+          media_urls: sp.media_urls,
+          hashtags: sp.hashtags,
+          status: 'published',
+        })
+        .select(`
+          *,
+          author:profiles(id, full_name, avatar_url, scanner_tier, role)
+        `)
+        .single();
+      if (insertErr) throw insertErr;
+
+      // Mark scheduled as published
+      await supabase
+        .from('scheduled_posts')
+        .update({ status: 'published' })
+        .eq('id', id);
+
+      return post;
+    } catch (error) {
+      console.error('publishScheduledPost error:', error);
+      throw error;
+    }
+  }
+
+  // ─── POST ANALYTICS ───────────────────────────────────────────────
+
+  /**
+   * Get analytics for a post — views, reactions breakdown, engagement
+   * @param {string} postId
+   * @returns {Object} { views, uniqueViews, reactions, interactions, engagement }
+   */
+  async getPostAnalytics(postId) {
+    try {
+      // Fetch all in parallel
+      const [viewsRes, reactionsRes, interactionsRes, postRes] = await Promise.all([
+        supabase
+          .from('post_views')
+          .select('id, user_id, created_at', { count: 'exact' })
+          .eq('post_id', postId),
+        supabase
+          .from('post_reactions')
+          .select('type')
+          .eq('post_id', postId),
+        supabase
+          .from('post_interactions')
+          .select('type')
+          .eq('post_id', postId),
+        supabase
+          .from('forum_posts')
+          .select('likes_count, comments_count, reposts_count, shares_count, views_count')
+          .eq('id', postId)
+          .single(),
+      ]);
+
+      // View counts
+      const views = viewsRes.count || 0;
+      const uniqueViewers = new Set((viewsRes.data || []).filter(v => v.user_id).map(v => v.user_id));
+      const uniqueViews = uniqueViewers.size;
+
+      // Reaction breakdown
+      const reactionBreakdown = { like: 0, love: 0, haha: 0, wow: 0, sad: 0, angry: 0 };
+      (reactionsRes.data || []).forEach(r => { reactionBreakdown[r.type] = (reactionBreakdown[r.type] || 0) + 1; });
+      const totalReactions = Object.values(reactionBreakdown).reduce((s, n) => s + n, 0);
+
+      // Interaction breakdown
+      const interactionBreakdown = {};
+      (interactionsRes.data || []).forEach(i => { interactionBreakdown[i.type] = (interactionBreakdown[i.type] || 0) + 1; });
+
+      const post = postRes.data || {};
+      const engagement = views > 0
+        ? ((totalReactions + (post.comments_count || 0) + (post.shares_count || 0)) / views * 100).toFixed(1)
+        : '0.0';
+
+      return {
+        views,
+        uniqueViews,
+        reactions: { breakdown: reactionBreakdown, total: totalReactions },
+        interactions: interactionBreakdown,
+        likes: post.likes_count || 0,
+        comments: post.comments_count || 0,
+        reposts: post.reposts_count || 0,
+        shares: post.shares_count || 0,
+        engagementRate: parseFloat(engagement),
+      };
+    } catch (error) {
+      console.error('getPostAnalytics error:', error);
+      return { views: 0, uniqueViews: 0, reactions: { breakdown: {}, total: 0 }, interactions: {}, engagementRate: 0 };
+    }
+  }
+
+  // ─── HASHTAGS ──────────────────────────────────────────────────────
+
+  /**
+   * Get posts by hashtag with pagination
+   * @param {string} hashtag - without #
+   * @param {number} page
+   * @param {number} limit
+   * @returns {{ posts: Array, total: number, page: number, totalPages: number }}
+   */
+  async getPostsByHashtag(hashtag, page = 1, limit = 20) {
+    try {
+      const from = (page - 1) * limit;
+      const to = from + limit - 1;
+
+      const { data, error, count } = await supabase
+        .from('forum_posts')
+        .select(`
+          *,
+          author:profiles(id, full_name, avatar_url, scanner_tier, role),
+          category:forum_categories(id, name, color)
+        `, { count: 'exact' })
+        .eq('status', 'published')
+        .contains('hashtags', [hashtag])
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+      if (error) throw error;
+      return {
+        posts: data || [],
+        total: count || 0,
+        page,
+        totalPages: Math.ceil((count || 0) / limit),
+      };
+    } catch (error) {
+      console.error('getPostsByHashtag error:', error);
+      return { posts: [], total: 0, page, totalPages: 0 };
+    }
+  }
+
+  // ─── PIN / HIDE / BOOST ────────────────────────────────────────────
+
+  /**
+   * Pin a post (admin/moderator action)
+   * @param {string} postId
+   * @param {string} userId - who pinned
+   */
+  async pinPost(postId, userId) {
+    try {
+      const { error } = await supabase
+        .from('pinned_posts')
+        .insert({ post_id: postId, pinned_by: userId });
+      if (error) throw error;
+    } catch (error) {
+      console.error('pinPost error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Unpin a post
+   * @param {string} postId
+   */
+  async unpinPost(postId) {
+    try {
+      const { error } = await supabase
+        .from('pinned_posts')
+        .delete()
+        .eq('post_id', postId);
+      if (error) throw error;
+    } catch (error) {
+      console.error('unpinPost error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Hide a post for a user
+   * @param {string} postId
+   * @param {string} userId
+   */
+  async hidePost(postId, userId) {
+    try {
+      const { error } = await supabase
+        .from('hidden_posts')
+        .insert({ post_id: postId, user_id: userId });
+      if (error) throw error;
+    } catch (error) {
+      console.error('hidePost error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Boost a post (paid promotion)
+   * @param {string} postId
+   * @param {Object} data - { user_id, gems_spent, duration_hours, target_audience }
+   * @returns {Object} Created boost
+   */
+  async boostPost(postId, data) {
+    try {
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + (data.duration_hours || 24));
+
+      const { data: boost, error } = await supabase
+        .from('post_boosts')
+        .insert({
+          post_id: postId,
+          user_id: data.user_id,
+          gems_spent: data.gems_spent || 0,
+          duration_hours: data.duration_hours || 24,
+          target_audience: data.target_audience || null,
+          expires_at: expiresAt.toISOString(),
+          status: 'active',
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return boost;
+    } catch (error) {
+      console.error('boostPost error:', error);
+      throw error;
+    }
+  }
+
+  // ─── VIEW TRACKING ─────────────────────────────────────────────────
+
+  /**
+   * Record a post view (deduplication handled by unique constraint on table)
+   * @param {string} postId
+   * @param {string|null} userId
+   * @param {string|null} fingerprint - for anonymous views
+   */
+  async recordView(postId, userId, fingerprint = null) {
+    try {
+      const { error } = await supabase
+        .from('post_views')
+        .insert({
+          post_id: postId,
+          user_id: userId || null,
+          fingerprint: fingerprint || null,
+        });
+      // Ignore unique constraint violations — means already viewed
+      if (error && !error.message?.includes('duplicate')) throw error;
+    } catch (error) {
+      console.error('recordView error:', error);
+    }
+  }
+
+  // ─── FOLLOW SYSTEM ─────────────────────────────────────────────────
+
+  /**
+   * Get followers of a user
+   * @param {string} userId
+   * @returns {Array<{ follower_id, created_at, follower: { id, full_name, avatar_url } }>}
+   */
+  async getFollowers(userId) {
+    try {
+      const { data, error } = await supabase
+        .from('user_follows')
+        .select(`
+          follower_id, created_at,
+          follower:profiles!user_follows_follower_id_fkey(id, full_name, avatar_url, scanner_tier)
+        `)
+        .eq('following_id', userId);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('getFollowers error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get users that a user is following
+   * @param {string} userId
+   * @returns {Array}
+   */
+  async getFollowing(userId) {
+    try {
+      const { data, error } = await supabase
+        .from('user_follows')
+        .select(`
+          following_id, created_at,
+          following:profiles!user_follows_following_id_fkey(id, full_name, avatar_url, scanner_tier)
+        `)
+        .eq('follower_id', userId);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('getFollowing error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Toggle follow/unfollow a user
+   * @param {string} targetUserId - user to follow/unfollow
+   * @param {string} currentUserId
+   * @returns {{ following: boolean }}
+   */
+  async toggleFollow(targetUserId, currentUserId) {
+    try {
+      if (targetUserId === currentUserId) throw new Error('Cannot follow yourself');
+
+      const { data: existing } = await supabase
+        .from('user_follows')
+        .select('id')
+        .eq('follower_id', currentUserId)
+        .eq('following_id', targetUserId)
+        .single();
+
+      if (existing) {
+        const { error } = await supabase
+          .from('user_follows')
+          .delete()
+          .eq('id', existing.id);
+        if (error) throw error;
+        return { following: false };
+      }
+
+      const { error } = await supabase
+        .from('user_follows')
+        .insert({ follower_id: currentUserId, following_id: targetUserId });
+      if (error) throw error;
+      return { following: true };
+    } catch (error) {
+      console.error('toggleFollow error:', error);
+      throw error;
+    }
+  }
 }
 
 export const forumService = new ForumService();

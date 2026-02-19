@@ -86,6 +86,14 @@ import Forum from './pages/Forum/Forum3Column'; // Updated to 3-column layout
 import CreateThread from './pages/Forum/CreateThread';
 import ThreadDetail from './pages/Forum/ThreadDetail';
 
+// Forum Sub-pages (lazy loaded)
+const EditPost = lazy(() => import('./pages/Forum/EditPost'));
+const ForumUserProfile = lazy(() => import('./pages/Forum/UserProfile'));
+const HashtagFeed = lazy(() => import('./pages/Forum/HashtagFeed'));
+const PostAnalytics = lazy(() => import('./pages/Forum/PostAnalytics'));
+const ScheduledPosts = lazy(() => import('./pages/Forum/ScheduledPosts'));
+const EditHistory = lazy(() => import('./pages/Forum/EditHistory'));
+
 // Direct Messaging
 import Messages from './pages/Messages/Messages';
 
@@ -101,8 +109,23 @@ import Leaderboard from './pages/Community/Leaderboard';
 // Gemral Chatbot
 import Chatbot from './pages/Chatbot';
 
+// GemMaster Pages - Lazy loaded for performance
+const ChatHistoryPage = lazy(() => import('./pages/GemMaster/ChatHistoryPage'));
+const ReadingHistoryPage = lazy(() => import('./pages/GemMaster/ReadingHistoryPage'));
+const ReadingDetailPage = lazy(() => import('./pages/GemMaster/ReadingDetailPage'));
+const SpreadSelectionPage = lazy(() => import('./pages/GemMaster/SpreadSelectionPage'));
+const TarotReadingPage = lazy(() => import('./pages/GemMaster/TarotReadingPage'));
+const GamificationPage = lazy(() => import('./pages/GemMaster/GamificationPage'));
+
 // Dashboard (Widgets) - Lazy loaded for performance
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+
+// Tài Sản Sub-pages - Lazy loaded
+const DailyCheckinPage = lazy(() => import('./pages/DailyCheckin/DailyCheckinPage'));
+const OrdersPage = lazy(() => import('./pages/Orders/OrdersPage'));
+const TransactionHistoryPage = lazy(() => import('./pages/Transactions/TransactionHistoryPage'));
+const PrivacySettings = lazy(() => import('./pages/Settings/PrivacySettings'));
+const PartnershipRegistration = lazy(() => import('./pages/Partnership/PartnershipRegistration'));
 
 // Affiliate Dashboard
 import AffiliateDashboard from './pages/AffiliateDashboard';
@@ -353,17 +376,55 @@ function App() {
             }
           />
 
-          {/* Community Forum Routes */}
+          {/* Community Forum Routes — PUBLIC (guests can view) */}
           <Route
             path="/forum"
             element={
-              <ProtectedRoute>
-                <AuthenticatedLayout>
-                  <Forum />
-                </AuthenticatedLayout>
-              </ProtectedRoute>
+              <AuthenticatedLayout>
+                <Forum />
+              </AuthenticatedLayout>
             }
           />
+          <Route
+            path="/forum/thread/:threadId"
+            element={
+              <AuthenticatedLayout>
+                <ThreadDetail />
+              </AuthenticatedLayout>
+            }
+          />
+          <Route
+            path="/forum/user/:userId"
+            element={
+              <AuthenticatedLayout>
+                <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                  <ForumUserProfile />
+                </Suspense>
+              </AuthenticatedLayout>
+            }
+          />
+          <Route
+            path="/forum/hashtag/:tag"
+            element={
+              <AuthenticatedLayout>
+                <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                  <HashtagFeed />
+                </Suspense>
+              </AuthenticatedLayout>
+            }
+          />
+          <Route
+            path="/forum/post/:postId/history"
+            element={
+              <AuthenticatedLayout>
+                <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                  <EditHistory />
+                </Suspense>
+              </AuthenticatedLayout>
+            }
+          />
+
+          {/* Forum Sub-pages — PROTECTED (login required) */}
           <Route
             path="/forum/new"
             element={
@@ -375,11 +436,37 @@ function App() {
             }
           />
           <Route
-            path="/forum/thread/:threadId"
+            path="/forum/edit/:postId"
             element={
               <ProtectedRoute>
                 <AuthenticatedLayout>
-                  <ThreadDetail />
+                  <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                    <EditPost />
+                  </Suspense>
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forum/post/:postId/analytics"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                    <PostAnalytics />
+                  </Suspense>
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forum/scheduled"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                    <ScheduledPosts />
+                  </Suspense>
                 </AuthenticatedLayout>
               </ProtectedRoute>
             }
@@ -433,6 +520,82 @@ function App() {
             }
           />
 
+          {/* ═══════════════════════════════════════════════════════════════
+              GEM MASTER ROUTES - Chat History, Readings, Spreads, Gamification
+              ═══════════════════════════════════════════════════════════════ */}
+          <Route
+            path="/gemmaster/chat-history"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                    <ChatHistoryPage />
+                  </Suspense>
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/gemmaster/readings"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                    <ReadingHistoryPage />
+                  </Suspense>
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/gemmaster/readings/:id"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                    <ReadingDetailPage />
+                  </Suspense>
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/gemmaster/spreads"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                    <SpreadSelectionPage />
+                  </Suspense>
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/gemmaster/reading"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                    <TarotReadingPage />
+                  </Suspense>
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/gemmaster/gamification"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                    <GamificationPage />
+                  </Suspense>
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
           {/* Dashboard (Widgets) Route */}
           <Route
             path="/dashboard"
@@ -478,6 +641,82 @@ function App() {
               <ProtectedRoute>
                 <AuthenticatedLayout>
                   <ProfilePage />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Tài Sản alias — mirrors /account */}
+          <Route
+            path="/tai-san"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <AccountDashboard />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ═══════════════════════════════════════════════════════════════
+              TÀI SẢN SUB-PAGES
+              ═══════════════════════════════════════════════════════════════ */}
+          <Route
+            path="/daily-checkin"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                    <DailyCheckinPage />
+                  </Suspense>
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                    <OrdersPage />
+                  </Suspense>
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/transactions"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                    <TransactionHistoryPage />
+                  </Suspense>
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings/privacy"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                    <PrivacySettings />
+                  </Suspense>
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/partnership/register"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading...</p></div>}>
+                    <PartnershipRegistration />
+                  </Suspense>
                 </AuthenticatedLayout>
               </ProtectedRoute>
             }

@@ -1,0 +1,41 @@
+/* ScrollToTop - Floating scroll button */
+
+.scroll-to-top-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-base-light, #1E2A5E);
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  border-radius: var(--radius-circle, 50%);
+  color: var(--brand-gold, #FFBD59);
+  cursor: pointer;
+  box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.2));
+  z-index: var(--z-fixed, 1030);
+  transition: background var(--transition-fast, 0.15s ease),
+              border-color var(--transition-fast, 0.15s ease),
+              box-shadow var(--transition-fast, 0.15s ease);
+}
+
+.scroll-to-top-btn:hover {
+  background: rgba(255, 189, 89, 0.15);
+  border-color: var(--brand-gold, #FFBD59);
+  box-shadow: var(--glow-gold, 0 0 30px rgba(255, 189, 89, 0.5));
+}
+
+.scroll-to-top-btn svg {
+  color: inherit;
+}
+
+@media (min-width: 768px) {
+  .scroll-to-top-btn {
+    bottom: 32px;
+    right: 32px;
+    width: 52px;
+    height: 52px;
+  }
+}

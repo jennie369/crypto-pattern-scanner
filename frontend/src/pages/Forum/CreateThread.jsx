@@ -1,13 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { forumService, forumCategories } from '../../services/forum';
 import { useAuth } from '../../contexts/AuthContext';
-import { PenLine, ClipboardList, Send } from 'lucide-react';
+import { supabase } from '../../lib/supabaseClient';
+import {
+  PenLine,
+  ClipboardList,
+  Send,
+  Clock,
+  Calendar,
+  Link2,
+  AtSign,
+  X,
+  Image as ImageIcon,
+  Eye
+} from 'lucide-react';
 import './Forum.css';
 
+/**
+ * CreateThread - ENHANCED
+ * - @mention support with autocomplete dropdown
+ * - Link preview auto-detection
+ * - Schedule post option (date/time picker)
+ * - Image attachment placeholder
+ * - Preview mode toggle
+ */
 export default function CreateThread() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const contentRef = useRef(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -18,12 +39,63 @@ export default function CreateThread() {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
+  // Schedule state
+  const [scheduleEnabled, setScheduleEnabled] = useState(false);
+  const [scheduledDate, setScheduledDate] = useState('');
+  const [scheduledTime, setScheduledTime] = useState('');
+
+  // Mention state
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [mentionResults, setMentionResults] = useState([]);
+  const [showMentionDropdown, setShowMentionDropdown] = useState(false);
+  const [mentionCursorPos, setMentionCursorPos] = useState(0);
+
+  // Link preview state
+  const [detectedLinks, setDetectedLinks] = useState([]);
+
+  // Preview mode
+  const [showPreview, setShowPreview] = useState(false);
+
   // Redirect if not authenticated
-  React.useEffect(() => {
+  useEffect(() => {
     if (!user) {
       navigate('/login');
     }
   }, [user, navigate]);
+
+  // Detect links in content
+  useEffect(() => {
+    const urlRegex = /https?:\/\/[^\s<>"{}|\\^`[\]]+/g;
+    const matches = formData.content.match(urlRegex) || [];
+    const unique = [...new Set(matches)];
+    setDetectedLinks(unique.slice(0, 3)); // Max 3 previews
+  }, [formData.content]);
+
+  // Search users for @mention
+  const searchMentionUsers = useCallback(async (query) => {
+    if (!query || query.length < 2) {
+      setMentionResults([]);
+      setShowMentionDropdown(false);
+      return;
+    }
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, display_name, avatar_url')
+        .ilike('display_name', `%${query}%`)
+        .limit(5);
+      if (data && data.length > 0) {
+        setMentionResults(data);
+        setShowMentionDropdown(true);
+      } else {
+        setMentionResults([]);
+        setShowMentionDropdown(false);
+      }
+    } catch {
+      setMentionResults([]);
+      setShowMentionDropdown(false);
+    }
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
@@ -44,6 +116,22 @@ export default function CreateThread() {
       newErrors.category = 'Vui lòng chọn danh mục';
     }
 
+    if (scheduleEnabled) {
+      if (!scheduledDate) {
+        newErrors.scheduledDate = 'Vui lòng chọn ngày đăng';
+      }
+      if (!scheduledTime) {
+        newErrors.scheduledTime = 'Vui lòng chọn giờ đăng';
+      }
+      // Check if scheduled time is in the future
+      if (scheduledDate && scheduledTime) {
+        const scheduled = new Date(`${scheduledDate}T${scheduledTime}`);
+        if (scheduled <= new Date()) {
+          newErrors.scheduledDate = 'Thời gian hẹn phải ở tương lai';
+        }
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -55,22 +143,35 @@ export default function CreateThread() {
 
     setSubmitting(true);
     try {
-      // Parse tags from comma-separated string
       const tags = formData.tags
         .split(',')
         .map(tag => tag.trim())
         .filter(tag => tag.length > 0);
 
-      const newThread = await forumService.createThread({
-        title: formData.title,
-        content: formData.content,
-        category: formData.category,
-        authorId: user.id,
-        tags
-      });
-
-      // Navigate to the newly created thread
-      navigate(`/forum/thread/${newThread.id}`);
+      if (scheduleEnabled && scheduledDate && scheduledTime) {
+        // Save to scheduled_posts table
+        const scheduledAt = new Date(`${scheduledDate}T${scheduledTime}`).toISOString();
+        await supabase.from('scheduled_posts').insert({
+          user_id: user.id,
+          title: formData.title,
+          content: formData.content,
+          category: formData.category,
+          tags,
+          scheduled_at: scheduledAt,
+          status: 'pending'
+        });
+        navigate('/forum/scheduled');
+      } else {
+        // Create immediately
+        const newThread = await forumService.createThread({
+          title: formData.title,
+          content: formData.content,
+          category: formData.category,
+          authorId: user.id,
+          tags
+        });
+        navigate(`/forum/thread/${newThread.id}`);
+      }
     } catch (error) {
       console.error('Error creating thread:', error);
       alert('Không thể tạo chủ đề. Vui lòng thử lại.');
@@ -81,10 +182,60 @@ export default function CreateThread() {
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: null }));
     }
+  };
+
+  // Handle content change with @mention detection
+  const handleContentChange = (e) => {
+    const value = e.target.value;
+    const cursorPos = e.target.selectionStart;
+    handleChange('content', value);
+
+    // Detect @mention trigger
+    const textBeforeCursor = value.substring(0, cursorPos);
+    const mentionMatch = textBeforeCursor.match(/@(\w{2,})$/);
+    if (mentionMatch) {
+      setMentionQuery(mentionMatch[1]);
+      setMentionCursorPos(cursorPos);
+      searchMentionUsers(mentionMatch[1]);
+    } else {
+      setShowMentionDropdown(false);
+      setMentionQuery('');
+    }
+  };
+
+  // Insert mention into content
+  const insertMention = (user_) => {
+    const content = formData.content;
+    const beforeMention = content.substring(0, mentionCursorPos - mentionQuery.length - 1);
+    const afterMention = content.substring(mentionCursorPos);
+    const newContent = `${beforeMention}@${user_.display_name} ${afterMention}`;
+
+    handleChange('content', newContent);
+    setShowMentionDropdown(false);
+    setMentionQuery('');
+
+    // Refocus textarea
+    setTimeout(() => {
+      if (contentRef.current) {
+        contentRef.current.focus();
+        const newPos = beforeMention.length + user_.display_name.length + 2;
+        contentRef.current.setSelectionRange(newPos, newPos);
+      }
+    }, 0);
+  };
+
+  // Remove detected link
+  const removeLink = (link) => {
+    setDetectedLinks(prev => prev.filter(l => l !== link));
+  };
+
+  // Get min date for schedule (today)
+  const getMinDate = () => {
+    const now = new Date();
+    return now.toISOString().split('T')[0];
   };
 
   if (!user) return null;
@@ -92,7 +243,7 @@ export default function CreateThread() {
   return (
     <div className="forum-page create-thread-page">
       {/* Back Button */}
-      <button className="back-btn" onClick={() => navigate('/forum')}>
+      <button className="back-btn" onClick={() => navigate('/forum')} title="Quay lại">
         ← Quay Lại Forum
       </button>
 
@@ -165,27 +316,110 @@ export default function CreateThread() {
             )}
           </div>
 
-          {/* Content Textarea */}
-          <div className="form-group">
-            <label htmlFor="content" className="form-label">
-              Nội Dung <span className="required">*</span>
-            </label>
-            <textarea
-              id="content"
-              value={formData.content}
-              onChange={(e) => handleChange('content', e.target.value)}
-              placeholder="Nhập nội dung chi tiết của chủ đề...&#10;&#10;Mẹo: Viết rõ ràng và chi tiết để nhận được nhiều phản hồi hữu ích hơn!"
-              className={`form-textarea ${errors.content ? 'error' : ''}`}
-              rows={12}
-              disabled={submitting}
-            />
+          {/* Content Textarea with @mention support */}
+          <div className="form-group" style={{ position: 'relative' }}>
+            <div className="form-label-row">
+              <label htmlFor="content" className="form-label">
+                Nội Dung <span className="required">*</span>
+              </label>
+              <button
+                type="button"
+                className="preview-toggle-btn"
+                onClick={() => setShowPreview(!showPreview)}
+              >
+                <Eye size={14} />
+                {showPreview ? 'Soạn thảo' : 'Xem trước'}
+              </button>
+            </div>
+
+            {showPreview ? (
+              <div className="content-preview">
+                {formData.content || 'Chưa có nội dung...'}
+              </div>
+            ) : (
+              <>
+                <textarea
+                  ref={contentRef}
+                  id="content"
+                  value={formData.content}
+                  onChange={handleContentChange}
+                  placeholder={"Nhập nội dung chi tiết...\n\nMẹo: Dùng @ để tag thành viên, dán link sẽ tự động được nhận diện!"}
+                  className={`form-textarea ${errors.content ? 'error' : ''}`}
+                  rows={12}
+                  disabled={submitting}
+                />
+
+                {/* Mention helper text */}
+                <div className="content-helpers">
+                  <span className="helper-tag">
+                    <AtSign size={12} />
+                    <span>@tên để tag</span>
+                  </span>
+                  <span className="helper-tag">
+                    <Link2 size={12} />
+                    <span>Dán link tự động</span>
+                  </span>
+                </div>
+
+                {/* @mention dropdown */}
+                {showMentionDropdown && mentionResults.length > 0 && (
+                  <div className="mention-dropdown">
+                    {mentionResults.map((u) => (
+                      <button
+                        key={u.id}
+                        type="button"
+                        className="mention-option"
+                        onClick={() => insertMention(u)}
+                      >
+                        <div className="mention-avatar">
+                          {u.avatar_url ? (
+                            <img src={u.avatar_url} alt={u.display_name} />
+                          ) : (
+                            <div className="avatar-placeholder-sm">
+                              {(u.display_name || 'U').charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <span className="mention-name">{u.display_name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+
             {errors.content && (
               <span className="error-message">{errors.content}</span>
             )}
             <span className="char-count">
-              {formData.content.length} ký tự
+              {formData.content.length} ky tu
             </span>
           </div>
+
+          {/* Detected Links Preview */}
+          {detectedLinks.length > 0 && (
+            <div className="form-group">
+              <label className="form-label">
+                <Link2 size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6 }} />
+                Link được phát hiện
+              </label>
+              <div className="detected-links">
+                {detectedLinks.map((link, i) => (
+                  <div key={i} className="detected-link-item">
+                    <Link2 size={14} className="link-icon" />
+                    <span className="link-url">{link.length > 60 ? link.substring(0, 60) + '...' : link}</span>
+                    <button
+                      type="button"
+                      className="remove-link-btn"
+                      onClick={() => removeLink(link)}
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Tags Input */}
           <div className="form-group">
@@ -204,6 +438,58 @@ export default function CreateThread() {
             <span className="helper-text">
               Tags giúp người khác dễ dàng tìm thấy chủ đề của bạn
             </span>
+          </div>
+
+          {/* Schedule Option */}
+          <div className="form-group schedule-section">
+            <label className="schedule-toggle">
+              <input
+                type="checkbox"
+                checked={scheduleEnabled}
+                onChange={(e) => setScheduleEnabled(e.target.checked)}
+                disabled={submitting}
+              />
+              <Clock size={16} />
+              <span>Hẹn giờ đăng bài</span>
+            </label>
+
+            {scheduleEnabled && (
+              <div className="schedule-inputs">
+                <div className="schedule-field">
+                  <Calendar size={14} />
+                  <input
+                    type="date"
+                    value={scheduledDate}
+                    onChange={(e) => {
+                      setScheduledDate(e.target.value);
+                      if (errors.scheduledDate) setErrors(prev => ({ ...prev, scheduledDate: null }));
+                    }}
+                    min={getMinDate()}
+                    className={`schedule-date-input ${errors.scheduledDate ? 'error' : ''}`}
+                    disabled={submitting}
+                  />
+                  {errors.scheduledDate && (
+                    <span className="error-message">{errors.scheduledDate}</span>
+                  )}
+                </div>
+                <div className="schedule-field">
+                  <Clock size={14} />
+                  <input
+                    type="time"
+                    value={scheduledTime}
+                    onChange={(e) => {
+                      setScheduledTime(e.target.value);
+                      if (errors.scheduledTime) setErrors(prev => ({ ...prev, scheduledTime: null }));
+                    }}
+                    className={`schedule-time-input ${errors.scheduledTime ? 'error' : ''}`}
+                    disabled={submitting}
+                  />
+                  {errors.scheduledTime && (
+                    <span className="error-message">{errors.scheduledTime}</span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Form Actions */}
@@ -226,6 +512,11 @@ export default function CreateThread() {
                 <>
                   <span className="spinner-small" />
                   Đang Tạo...
+                </>
+              ) : scheduleEnabled ? (
+                <>
+                  <Clock size={20} />
+                  Hẹn Giờ Đăng
                 </>
               ) : (
                 <>
@@ -259,6 +550,9 @@ export default function CreateThread() {
           </li>
           <li>
             <strong>Sử dụng tags:</strong> Thêm từ khóa liên quan để tăng khả năng tìm kiếm
+          </li>
+          <li>
+            <strong>Tag thành viên:</strong> Dùng @tên để tag trực tiếp người bạn muốn hỏi
           </li>
         </ul>
       </div>

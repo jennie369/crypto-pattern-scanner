@@ -15,7 +15,7 @@ class UserProfileService {
   async getPublicProfile(userId) {
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .select(`
           *,
           user_stats(*),
@@ -55,7 +55,7 @@ class UserProfileService {
   async updateProfile(userId, updates) {
     try {
       const { error } = await supabase
-        .from('users')
+        .from('profiles')
         .update({
           display_name: updates.displayName,
           bio: updates.bio,
@@ -230,7 +230,7 @@ class UserProfileService {
         .from('user_follows')
         .select(`
           *,
-          users:follower_id(
+          profiles:follower_id(
             id,
             display_name,
             avatar_url,
@@ -261,7 +261,7 @@ class UserProfileService {
         .from('user_follows')
         .select(`
           *,
-          users:following_id(
+          profiles:following_id(
             id,
             display_name,
             avatar_url,

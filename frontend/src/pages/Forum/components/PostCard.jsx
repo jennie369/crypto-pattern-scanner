@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Heart,
@@ -22,27 +22,27 @@ import {
   ChevronRight
 } from 'lucide-react';
 import forumService from '../../../services/forum';
-import { ReactionPicker } from '../../../components/forum/ReactionPicker';
 import { forumLinks } from '../../../utils/linkUtils';
+import TrendingBadge from './TrendingBadge';
+import PinnedBadge from './PinnedBadge';
+import ReactionDisplay from './ReactionDisplay';
+import LinkPreviewCard from './LinkPreviewCard';
+import QuotedPost from './QuotedPost';
+import ImageLightbox from './ImageLightbox';
 import './PostCard.css';
 
 /**
- * PostCard Component - SYNCED FROM MOBILE PostCard
- * Individual post card in the feed
- *
- * Features (synced from Mobile):
- * - Author info (avatar, name, timestamp)
- * - Post content (text + multi-image carousel)
- * - Trading data (entry, SL, TP, R:R) if present
- * - Like button with animation
- * - Bookmark/Save button
- * - Repost button
- * - Share button
- * - Delete button (for post owner)
- * - Report/Hide/Block options
- * - Category badge
- * - Hashtag highlighting
+ * Reaction definitions for the hover picker
  */
+const REACTIONS = [
+  { id: 'like', emoji: '❤️', label: 'Thích' },
+  { id: 'love', emoji: '😍', label: 'Yêu thích' },
+  { id: 'haha', emoji: '😂', label: 'Haha' },
+  { id: 'wow', emoji: '😮', label: 'Wow' },
+  { id: 'sad', emoji: '😢', label: 'Buồn' },
+  { id: 'angry', emoji: '😡', label: 'Phẫn nộ' },
+];
+
 // Constants for text truncation
 const MAX_LINES = 3;
 const MAX_CHARS = 150;
@@ -53,9 +53,13 @@ export default function PostCard({
   onLike,
   onDelete,
   onSave,
-  onRepost
+  onRepost,
+  onReact
 }) {
   const navigate = useNavigate();
+
+  // Edge case: null/undefined post
+  if (!post || !post.id) return null;
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.like_count || 0);
   const [isSaved, setIsSaved] = useState(post.user_saved || false);
@@ -63,6 +67,18 @@ export default function PostCard({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiking, setIsLiking] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Reaction state
+  const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [currentReaction, setCurrentReaction] = useState(post.user_reaction || null);
+  const [reactionCounts, setReactionCounts] = useState(post.reaction_counts || {});
+  const [hoveredReaction, setHoveredReaction] = useState(null);
+  const reactionTimeoutRef = useRef(null);
+  const pickerRef = useRef(null);
+
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   // Get images array
   const images = post.media_urls?.length > 0
@@ -87,36 +103,87 @@ export default function PostCard({
     checkLikeStatus();
   }, [currentUser, post.id]);
 
-  /**
-   * Handle like toggle with animation
-   */
-  const handleLike = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  // Close menu on outside click
+  useEffect(() => {
+    if (!showMenu) return;
+    const handleClick = (e) => {
+      if (!e.target.closest('.post-menu')) setShowMenu(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showMenu]);
 
+  /**
+   * Handle reaction selection
+   */
+  const handleReaction = (reactionId) => {
     if (!currentUser) {
-      alert('Vui lòng đăng nhập để thích bài viết');
+      alert('Vui lòng đăng nhập để thả cảm xúc');
       return;
     }
 
-    if (isLiking) return;
-    setIsLiking(true);
+    const isRemove = currentReaction === reactionId;
+    const newReaction = isRemove ? null : reactionId;
 
-    try {
-      // Optimistic update
-      setIsLiked(!isLiked);
-      setLikeCount(isLiked ? likeCount - 1 : likeCount + 1);
+    // Optimistic update counts
+    setReactionCounts(prev => {
+      const next = { ...prev };
+      if (currentReaction) {
+        next[currentReaction] = Math.max(0, (next[currentReaction] || 1) - 1);
+      }
+      if (newReaction) {
+        next[newReaction] = (next[newReaction] || 0) + 1;
+      }
+      return next;
+    });
 
-      // Call parent handler
-      await onLike?.();
-    } catch (err) {
-      // Revert on error
-      setIsLiked(isLiked);
-      setLikeCount(likeCount);
-      console.error('Error toggling like:', err);
-    } finally {
-      setIsLiking(false);
+    setCurrentReaction(newReaction);
+    setShowReactionPicker(false);
+
+    // Also update legacy like state
+    if (newReaction) {
+      setIsLiked(true);
+      setLikeCount(prev => currentReaction ? prev : prev + 1);
+    } else {
+      setIsLiked(false);
+      setLikeCount(prev => Math.max(0, prev - 1));
     }
+
+    // Call parent handler
+    onReact?.(post.id, newReaction);
+  };
+
+  /**
+   * Quick like (click on button without opening picker)
+   */
+  const handleQuickLike = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (currentReaction) {
+      handleReaction(currentReaction); // Remove current reaction
+    } else {
+      handleReaction('like'); // Default to like
+    }
+  };
+
+  /**
+   * Reaction picker hover handlers
+   */
+  const handleReactionMouseEnter = () => {
+    if (!currentUser) return;
+    clearTimeout(reactionTimeoutRef.current);
+    reactionTimeoutRef.current = setTimeout(() => {
+      setShowReactionPicker(true);
+    }, 400);
+  };
+
+  const handleReactionMouseLeave = () => {
+    clearTimeout(reactionTimeoutRef.current);
+    reactionTimeoutRef.current = setTimeout(() => {
+      setShowReactionPicker(false);
+      setHoveredReaction(null);
+    }, 300);
   };
 
   /**
@@ -124,12 +191,10 @@ export default function PostCard({
    */
   const handleSave = async (e) => {
     e.stopPropagation();
-
     if (!currentUser) {
       alert('Vui lòng đăng nhập để lưu bài viết');
       return;
     }
-
     try {
       setIsSaved(!isSaved);
       await onSave?.(post.id, !isSaved);
@@ -165,30 +230,11 @@ export default function PostCard({
   };
 
   /**
-   * Handle repost
-   */
-  const handleRepost = async (e) => {
-    e.stopPropagation();
-
-    if (!currentUser) {
-      alert('Vui lòng đăng nhập để chia sẻ lại');
-      return;
-    }
-
-    // TODO: Open RepostSheet modal
-    alert('Tính năng chia sẻ lại sẽ sớm được ra mắt!');
-  };
-
-  /**
    * Handle delete post
    */
   const handleDelete = async (e) => {
     e.stopPropagation();
-
-    if (!window.confirm('Bạn có chắc muốn xóa bài viết này?')) {
-      return;
-    }
-
+    if (!window.confirm('Bạn có chắc muốn xóa bài viết này?')) return;
     try {
       await onDelete?.();
       setShowMenu(false);
@@ -196,24 +242,6 @@ export default function PostCard({
       console.error('Error deleting post:', err);
       alert('Không thể xóa bài viết. Vui lòng thử lại.');
     }
-  };
-
-  /**
-   * Handle hide post
-   */
-  const handleHidePost = (e) => {
-    e.stopPropagation();
-    setShowMenu(false);
-    alert('Bài viết đã được ẩn khỏi bảng tin của bạn');
-  };
-
-  /**
-   * Handle report
-   */
-  const handleReport = (e) => {
-    e.stopPropagation();
-    setShowMenu(false);
-    alert('Báo cáo đã được gửi. Cảm ơn bạn!');
   };
 
   /**
@@ -234,6 +262,15 @@ export default function PostCard({
   const handleNextImage = (e) => {
     e.stopPropagation();
     setCurrentImageIndex(prev => (prev < images.length - 1 ? prev + 1 : 0));
+  };
+
+  /**
+   * Open image in lightbox
+   */
+  const handleImageClick = (e) => {
+    e.stopPropagation();
+    setLightboxIndex(currentImageIndex);
+    setLightboxOpen(true);
   };
 
   /**
@@ -285,8 +322,6 @@ export default function PostCard({
    */
   const truncateText = (text) => {
     if (!text) return '';
-
-    // Split by lines first
     const lines = text.split('\n');
     let result = '';
     let charCount = 0;
@@ -294,9 +329,7 @@ export default function PostCard({
     for (let i = 0; i < lines.length && i < MAX_LINES; i++) {
       const line = lines[i];
       const remaining = MAX_CHARS - charCount;
-
       if (remaining <= 0) break;
-
       if (line.length <= remaining) {
         result += (i > 0 ? '\n' : '') + line;
         charCount += line.length + 1;
@@ -305,7 +338,6 @@ export default function PostCard({
         break;
       }
     }
-
     return result.trim();
   };
 
@@ -318,75 +350,86 @@ export default function PostCard({
   };
 
   /**
-   * Render content with clickable hashtags and View More
+   * Render content with clickable hashtags and @mentions
    */
-  const renderContentWithHashtags = (text) => {
+  const renderContentWithMarkup = (text) => {
     if (!text) return null;
 
     const shouldTruncate = !isExpanded && needsTruncation(text);
     const displayText = shouldTruncate ? truncateText(text) : text;
 
-    const hashtagRegex = /#([\w\u00C0-\u024F\u1E00-\u1EFF]+)/g;
+    // Combined regex for hashtags and mentions
+    const markupRegex = /(#[\w\u00C0-\u024F\u1E00-\u1EFF]+)|(@[\w\u00C0-\u024F\u1E00-\u1EFF\s]+?)(?=\s|$|@|#)/g;
     const parts = [];
     let lastIndex = 0;
     let match;
 
-    while ((match = hashtagRegex.exec(displayText)) !== null) {
+    while ((match = markupRegex.exec(displayText)) !== null) {
       if (match.index > lastIndex) {
+        parts.push({ type: 'text', content: displayText.slice(lastIndex, match.index) });
+      }
+
+      if (match[1]) {
+        // Hashtag
         parts.push({
-          type: 'text',
-          content: displayText.slice(lastIndex, match.index)
+          type: 'hashtag',
+          content: match[1],
+          tag: match[1].slice(1)
+        });
+      } else if (match[2]) {
+        // Mention
+        parts.push({
+          type: 'mention',
+          content: match[2],
+          name: match[2].slice(1).trim()
         });
       }
-      parts.push({
-        type: 'hashtag',
-        content: match[0],
-        tag: match[1]
-      });
       lastIndex = match.index + match[0].length;
     }
 
     if (lastIndex < displayText.length) {
-      parts.push({
-        type: 'text',
-        content: displayText.slice(lastIndex)
-      });
+      parts.push({ type: 'text', content: displayText.slice(lastIndex) });
     }
 
-    if (parts.length === 0) {
-      return (
-        <div className="post-text-wrapper">
-          <p className="post-text">{displayText}</p>
-          {shouldTruncate && (
-            <button className="view-more-btn" onClick={handleViewMore}>
-              ... Xem thêm
-            </button>
-          )}
-        </div>
-      );
-    }
+    const renderParts = () => {
+      if (parts.length === 0) return displayText;
+
+      return parts.map((part, index) => {
+        if (part.type === 'hashtag') {
+          return (
+            <span
+              key={`h-${index}`}
+              className="hashtag-link"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/forum/hashtag/${part.tag}`);
+              }}
+            >
+              {part.content}
+            </span>
+          );
+        }
+        if (part.type === 'mention') {
+          return (
+            <span
+              key={`m-${index}`}
+              className="mention-link"
+              onClick={(e) => {
+                e.stopPropagation();
+                // Navigate to user profile when available
+              }}
+            >
+              {part.content}
+            </span>
+          );
+        }
+        return <span key={`t-${index}`}>{part.content}</span>;
+      });
+    };
 
     return (
       <div className="post-text-wrapper">
-        <p className="post-text">
-          {parts.map((part, index) => {
-            if (part.type === 'hashtag') {
-              return (
-                <span
-                  key={`hashtag-${index}`}
-                  className="hashtag-link"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/forum/hashtag/${part.tag}`);
-                  }}
-                >
-                  {part.content}
-                </span>
-              );
-            }
-            return <span key={`text-${index}`}>{part.content}</span>;
-          })}
-        </p>
+        <p className="post-text">{renderParts()}</p>
         {shouldTruncate && (
           <button className="view-more-btn" onClick={handleViewMore}>
             ... Xem thêm
@@ -398,9 +441,29 @@ export default function PostCard({
 
   const isOwner = currentUser && currentUser.id === post.author_id;
   const categoryBadge = getCategoryBadge(post.category);
+  const totalReactions = Object.values(reactionCounts).reduce((s, c) => s + c, 0);
+
+  // Link preview data
+  const linkPreview = post.link_preview || null;
+  const extractedUrl = post.extracted_urls?.[0] || null;
 
   return (
     <div className="post-card" onClick={handleCardClick}>
+      {/* ═══════════════════════════════════════════════════════════
+          BADGES ROW (Pinned + Boosted)
+          ═══════════════════════════════════════════════════════════ */}
+      {(post.is_pinned || post.is_boosted) && (
+        <div className="post-badges-row">
+          {post.is_pinned && <PinnedBadge />}
+          {post.is_boosted && (
+            <span className="boosted-badge">
+              <TrendingUp size={12} />
+              <span>Được đẩy</span>
+            </span>
+          )}
+        </div>
+      )}
+
       {/* ═══════════════════════════════════════════════════════════
           POST HEADER
           ═══════════════════════════════════════════════════════════ */}
@@ -434,6 +497,17 @@ export default function PostCard({
                   Đã chỉnh sửa
                 </span>
               )}
+              {/* View count */}
+              {post.view_count > 0 && (
+                <span className="view-count-badge">
+                  <Eye size={12} />
+                  {post.view_count}
+                </span>
+              )}
+              {/* Trending badge */}
+              {post.trending_score > 50 && (
+                <TrendingBadge score={post.trending_score} />
+              )}
             </div>
           </div>
         </div>
@@ -445,6 +519,7 @@ export default function PostCard({
               e.stopPropagation();
               setShowMenu(!showMenu);
             }}
+            title="Thêm tùy chọn"
           >
             <MoreVertical size={20} />
           </button>
@@ -457,21 +532,30 @@ export default function PostCard({
                     className="menu-item"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // TODO: Navigate to edit
+                      navigate(`/forum/edit/${post.id}`);
                       setShowMenu(false);
                     }}
+                    title="Chỉnh sửa"
                   >
                     <Edit2 size={16} />
                     Chỉnh sửa bài viết
                   </button>
-                  <button className="menu-item delete" onClick={handleDelete}>
+                  <button className="menu-item delete" onClick={handleDelete} title="Xóa">
                     <Trash2 size={16} />
                     Xóa bài viết
                   </button>
                 </>
               ) : (
                 <>
-                  <button className="menu-item" onClick={handleHidePost}>
+                  <button
+                    className="menu-item"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowMenu(false);
+                      if (!currentUser) { alert('Vui lòng đăng nhập'); return; }
+                      alert('Bài viết đã được ẩn khỏi bảng tin của bạn');
+                    }}
+                  >
                     <EyeOff size={16} />
                     Ẩn bài viết này
                   </button>
@@ -480,13 +564,23 @@ export default function PostCard({
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowMenu(false);
+                      if (!currentUser) { alert('Vui lòng đăng nhập'); return; }
                       alert('Đã chặn người dùng');
                     }}
                   >
                     <UserX size={16} />
                     Chặn người dùng
                   </button>
-                  <button className="menu-item delete" onClick={handleReport}>
+                  <button
+                    className="menu-item delete"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowMenu(false);
+                      if (!currentUser) { alert('Vui lòng đăng nhập'); return; }
+                      alert('Báo cáo đã được gửi. Cảm ơn bạn!');
+                    }}
+                    title="Báo cáo"
+                  >
                     <Flag size={16} />
                     Báo cáo bài viết
                   </button>
@@ -504,17 +598,37 @@ export default function PostCard({
         {/* Title */}
         {post.title && <h3 className="post-title">{post.title}</h3>}
 
-        {/* Content with hashtags */}
-        {renderContentWithHashtags(post.content)}
+        {/* Content with hashtags + mentions */}
+        {renderContentWithMarkup(post.content)}
+
+        {/* Quoted/Reposted Post */}
+        {(post.repost_of_id || post.post_type === 'repost') && (
+          <QuotedPost originalPost={post.original_post} />
+        )}
+
+        {/* Link Preview */}
+        {linkPreview && (
+          <LinkPreviewCard
+            url={linkPreview.url || extractedUrl}
+            title={linkPreview.title}
+            description={linkPreview.description}
+            image={linkPreview.image}
+            domain={linkPreview.domain}
+          />
+        )}
+        {!linkPreview && extractedUrl && (
+          <LinkPreviewCard url={extractedUrl} />
+        )}
 
         {/* Image Carousel */}
         {images.length > 0 && (
           <div className="post-media">
-            <div className="image-carousel">
+            <div className="image-carousel" onClick={handleImageClick}>
               <img
                 src={images[currentImageIndex]}
-                alt={`Post image ${currentImageIndex + 1}`}
+                alt={`Ảnh bài viết ${currentImageIndex + 1}`}
                 className="carousel-image"
+                onError={(e) => { e.target.style.display = 'none'; }}
               />
 
               {/* Navigation arrows */}
@@ -595,15 +709,23 @@ export default function PostCard({
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          POST FOOTER - Facebook Style (Clean)
+          POST FOOTER
           ═══════════════════════════════════════════════════════════ */}
       <div className="post-footer">
-        {/* Stats row - simple text like Facebook */}
-        {(likeCount > 0 || (post.reply_count || 0) > 0 || (post.repost_count || 0) > 0) && (
+        {/* Stats row */}
+        {(totalReactions > 0 || likeCount > 0 || (post.reply_count || 0) > 0 || (post.repost_count || 0) > 0) && (
           <div className="post-stats-row">
-            {likeCount > 0 && (
+            {/* Reaction display */}
+            {totalReactions > 0 ? (
+              <ReactionDisplay
+                reactionCounts={reactionCounts}
+                totalReactions={totalReactions}
+                reactedUsers={post.reacted_users}
+              />
+            ) : likeCount > 0 ? (
               <span className="stat-text">❤️ {likeCount}</span>
-            )}
+            ) : null}
+
             <span className="stat-text-right">
               {(post.reply_count || 0) > 0 && <span>{post.reply_count} bình luận</span>}
               {(post.reply_count || 0) > 0 && (post.repost_count || 0) > 0 && <span> · </span>}
@@ -612,18 +734,62 @@ export default function PostCard({
           </div>
         )}
 
-        {/* Actions row - Facebook style: Like, Comment, Gift, Share */}
+        {/* Actions row */}
         <div className="post-actions">
-          {/* Like Button */}
-          <button
-            type="button"
-            className={`action-btn like-btn ${isLiked ? 'liked' : ''} ${isLiking ? 'animating' : ''}`}
-            onClick={handleLike}
-            disabled={isLiking}
+          {/* Like/React Button with hover picker */}
+          <div
+            className="reaction-btn-wrapper"
+            ref={pickerRef}
+            onMouseEnter={handleReactionMouseEnter}
+            onMouseLeave={handleReactionMouseLeave}
           >
-            <Heart size={20} fill={isLiked ? 'currentColor' : 'none'} />
-            <span>Thích</span>
-          </button>
+            <button
+              type="button"
+              className={`action-btn like-btn ${currentReaction || isLiked ? 'liked' : ''} ${isLiking ? 'animating' : ''}`}
+              onClick={handleQuickLike}
+              disabled={isLiking}
+              title={currentReaction ? REACTIONS.find(r => r.id === currentReaction)?.label || 'Thích' : 'Thích'}
+            >
+              {currentReaction ? (
+                <span className="action-emoji">
+                  {REACTIONS.find(r => r.id === currentReaction)?.emoji || '❤️'}
+                </span>
+              ) : (
+                <Heart size={20} fill={isLiked ? 'currentColor' : 'none'} />
+              )}
+              <span>
+                {currentReaction
+                  ? REACTIONS.find(r => r.id === currentReaction)?.label || 'Thích'
+                  : 'Thích'
+                }
+              </span>
+            </button>
+
+            {/* Reaction picker popup */}
+            {showReactionPicker && (
+              <div className="post-reaction-picker">
+                {REACTIONS.map((reaction) => (
+                  <button
+                    key={reaction.id}
+                    className={`post-reaction-option ${currentReaction === reaction.id ? 'selected' : ''} ${hoveredReaction === reaction.id ? 'hovered' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleReaction(reaction.id);
+                    }}
+                    onMouseEnter={() => setHoveredReaction(reaction.id)}
+                    onMouseLeave={() => setHoveredReaction(null)}
+                    title={reaction.label}
+                  >
+                    <span className="post-reaction-emoji">{reaction.emoji}</span>
+                    {hoveredReaction === reaction.id && (
+                      <span className="post-reaction-tooltip">{reaction.label}</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Comment Button */}
           <button
@@ -634,6 +800,7 @@ export default function PostCard({
               e.stopPropagation();
               navigate(`/forum/thread/${post.id}`);
             }}
+            title="Bình luận"
           >
             <MessageCircle size={20} />
             <span>Bình luận</span>
@@ -650,21 +817,29 @@ export default function PostCard({
                 alert('Vui lòng đăng nhập để tặng quà');
                 return;
               }
-              // TODO: Open gift modal
               alert('Tính năng tặng quà sẽ sớm được ra mắt!');
             }}
+            title="Tặng quà"
           >
             <Gift size={20} />
             <span>Tặng quà</span>
           </button>
 
           {/* Share Button */}
-          <button type="button" className="action-btn" onClick={handleShare}>
+          <button type="button" className="action-btn" onClick={handleShare} title="Chia sẻ">
             <Share2 size={20} />
             <span>Chia sẻ</span>
           </button>
         </div>
       </div>
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={images}
+        initialIndex={lightboxIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
     </div>
   );
 }

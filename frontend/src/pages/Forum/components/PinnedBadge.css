@@ -1,0 +1,29 @@
+/* PinnedBadge - Inline pinned post indicator */
+
+.pinned-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full, 50px);
+}
+
+.pinned-badge svg {
+  color: var(--text-muted, rgba(255, 255, 255, 0.5));
+  transform: rotate(45deg);
+}
+
+.pinned-badge-text {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted, rgba(255, 255, 255, 0.5));
+}
+
+@media (min-width: 768px) {
+  .pinned-badge-text {
+    font-size: 12px;
+  }
+}

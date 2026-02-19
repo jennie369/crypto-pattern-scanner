@@ -1,0 +1,299 @@
+/* EditHistory.css */
+
+.edit-history-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-3);
+  min-height: calc(100vh - 80px);
+}
+
+/* Header */
+.history-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.history-header .btn-back {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.history-header .btn-back:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.history-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  background: var(--gradient-gold-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.history-title svg {
+  -webkit-text-fill-color: initial;
+  color: var(--brand-gold);
+}
+
+.history-post-title {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-top: var(--space-1);
+}
+
+/* Error */
+.history-error-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(255, 71, 87, 0.12);
+  border: 1px solid rgba(255, 71, 87, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--accent-red);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-4);
+}
+
+/* Empty */
+.history-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-16) var(--space-4);
+  text-align: center;
+  color: var(--text-muted);
+  gap: var(--space-3);
+}
+
+.history-empty h3 {
+  font-family: var(--font-display);
+  color: var(--text-secondary);
+}
+
+/* Cards */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.history-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.history-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.history-editor {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.editor-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-circle);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.editor-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.editor-avatar .avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-burgundy);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+}
+
+.editor-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.edit-label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.history-time {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.toggle-diff-btn {
+  background: none;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+  color: var(--brand-gold);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.toggle-diff-btn:hover {
+  background: rgba(255, 189, 89, 0.1);
+}
+
+/* Diff view */
+.history-diff {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-primary);
+}
+
+.diff-section {
+  margin-bottom: var(--space-3);
+}
+
+.diff-section-title {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-2);
+}
+
+.diff-view {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-primary);
+}
+
+.diff-line {
+  display: flex;
+  gap: var(--space-2);
+  padding: 2px var(--space-3);
+  line-height: 1.6;
+}
+
+.diff-marker {
+  width: 12px;
+  text-align: center;
+  flex-shrink: 0;
+  font-weight: var(--font-bold);
+}
+
+.diff-line.same {
+  background: transparent;
+  color: var(--text-tertiary);
+}
+
+.diff-line.removed {
+  background: rgba(255, 71, 87, 0.1);
+  color: var(--color-error, #FF6B6B);
+}
+
+.diff-line.added {
+  background: rgba(0, 255, 136, 0.1);
+  color: var(--accent-green, #00FF88);
+}
+
+.diff-added {
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  color: var(--accent-green, #00FF88);
+  font-size: var(--text-sm);
+}
+
+.diff-removed {
+  background: rgba(255, 71, 87, 0.1);
+  border: 1px solid rgba(255, 71, 87, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  color: var(--color-error, #FF6B6B);
+  font-size: var(--text-sm);
+  text-decoration: line-through;
+}
+
+/* Loading */
+.history-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-20) var(--space-8);
+  color: var(--text-secondary);
+  gap: var(--space-4);
+}
+
+.spinner-icon {
+  animation: spin 1s linear infinite;
+  color: var(--brand-gold);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .edit-history-page {
+    padding: var(--space-3);
+  }
+
+  .history-title {
+    font-size: var(--text-lg);
+  }
+
+  .history-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .diff-view {
+    font-size: 11px;
+  }
+}

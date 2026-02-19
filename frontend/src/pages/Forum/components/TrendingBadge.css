@@ -1,0 +1,44 @@
+/* TrendingBadge - Inline trending indicator */
+
+.trending-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, rgba(255, 159, 67, 0.15) 100%);
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  border-radius: var(--radius-full, 50px);
+  animation: trendingPulse 2s ease-in-out infinite;
+}
+
+@keyframes trendingPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 189, 89, 0); }
+  50% { box-shadow: 0 0 8px 2px rgba(255, 189, 89, 0.2); }
+}
+
+.trending-badge-icon {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.trending-badge-text {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--brand-gold, #FFBD59);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.trending-badge-score {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted, rgba(255, 255, 255, 0.5));
+}
+
+@media (min-width: 768px) {
+  .trending-badge-text {
+    font-size: 12px;
+  }
+}

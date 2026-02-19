@@ -1,0 +1,336 @@
+/* PrivacySettings.css — Mobile-first responsive */
+
+.privacy-page {
+  min-height: 100vh;
+  background: var(--bg-primary, #0A0B1A);
+  padding: 16px;
+  color: var(--text-primary, #FFFFFF);
+}
+
+.privacy-page__header {
+  margin-bottom: 24px;
+}
+
+.privacy-page__title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.privacy-page__subtitle {
+  font-size: 14px;
+  color: var(--text-secondary, #B8B8D0);
+  margin: 0;
+}
+
+/* Settings Group */
+.privacy-group {
+  background: var(--bg-card, #1A1B3A);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 4px 0;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.privacy-group__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted, rgba(255, 255, 255, 0.6));
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 16px 8px;
+  margin: 0;
+}
+
+/* Toggle Row */
+.privacy-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  min-height: 52px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.privacy-toggle:last-child {
+  border-bottom: none;
+}
+
+.privacy-toggle__info {
+  flex: 1;
+  margin-right: 12px;
+}
+
+.privacy-toggle__label {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0 0 2px;
+}
+
+.privacy-toggle__desc {
+  font-size: 12px;
+  color: var(--text-secondary, #B8B8D0);
+  margin: 0;
+}
+
+/* Custom Toggle Switch */
+.privacy-switch {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.privacy-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.privacy-switch__track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.privacy-switch input:checked + .privacy-switch__track {
+  background: #6A5BFF;
+}
+
+.privacy-switch__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  background: #FFFFFF;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+
+.privacy-switch input:checked ~ .privacy-switch__thumb {
+  transform: translateX(20px);
+}
+
+/* Select Row */
+.privacy-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  min-height: 52px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.privacy-select:last-child {
+  border-bottom: none;
+}
+
+.privacy-select__info {
+  flex: 1;
+  margin-right: 12px;
+}
+
+.privacy-select__label {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0 0 2px;
+}
+
+.privacy-select__desc {
+  font-size: 12px;
+  color: var(--text-secondary, #B8B8D0);
+  margin: 0;
+}
+
+.privacy-select__dropdown {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: var(--text-primary, #FFFFFF);
+  font-size: 13px;
+  padding: 8px 12px;
+  min-height: 36px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23B8B8D0' viewBox='0 0 16 16'%3E%3Cpath d='M1.5 5.5l6.5 6 6.5-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+.privacy-select__dropdown:focus {
+  outline: none;
+  border-color: rgba(106, 91, 255, 0.5);
+}
+
+.privacy-select__dropdown option {
+  background: #1A1B3A;
+  color: #FFFFFF;
+}
+
+/* Toast */
+.privacy-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(58, 247, 166, 0.15);
+  border: 1px solid rgba(58, 247, 166, 0.3);
+  color: #3AF7A6;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 1000;
+  animation: toastSlideUp 0.3s ease-out;
+}
+
+@keyframes toastSlideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.privacy-toast--error {
+  background: rgba(255, 107, 107, 0.15);
+  border-color: rgba(255, 107, 107, 0.3);
+  color: #FF6B6B;
+}
+
+/* Saving indicator */
+.privacy-saving {
+  font-size: 12px;
+  color: var(--text-muted, rgba(255, 255, 255, 0.6));
+  text-align: center;
+  padding: 8px;
+}
+
+/* Loading & Error */
+.privacy-page__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: 16px;
+}
+
+.privacy-page__loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #FFBD59;
+  border-radius: 50%;
+  animation: privSpin 0.8s linear infinite;
+}
+
+@keyframes privSpin {
+  to { transform: rotate(360deg); }
+}
+
+.privacy-page__loading-text {
+  font-size: 14px;
+  color: var(--text-secondary, #B8B8D0);
+}
+
+.privacy-page__error {
+  text-align: center;
+  padding: 40px 16px;
+}
+
+.privacy-page__error-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.privacy-page__error-text {
+  font-size: 14px;
+  color: var(--text-secondary, #B8B8D0);
+  margin: 0 0 16px;
+}
+
+.privacy-page__retry-btn {
+  padding: 12px 24px;
+  background: rgba(106, 91, 255, 0.2);
+  border: 1px solid rgba(106, 91, 255, 0.3);
+  border-radius: 10px;
+  color: #8B7FFF;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+/* Auth Wall */
+.privacy-page__auth {
+  text-align: center;
+  padding: 60px 16px;
+}
+
+.privacy-page__auth-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.privacy-page__auth-text {
+  font-size: 16px;
+  color: var(--text-secondary, #B8B8D0);
+  margin: 0 0 16px;
+}
+
+.privacy-page__auth-btn {
+  padding: 12px 32px;
+  background: linear-gradient(135deg, #FFBD59, #FF8A00);
+  border: none;
+  border-radius: 10px;
+  color: #0A0B1A;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+/* Tablet+ */
+@media (min-width: 768px) {
+  .privacy-page {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  .privacy-page__title {
+    font-size: 28px;
+  }
+
+  .privacy-toggle,
+  .privacy-select {
+    padding: 16px 20px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .privacy-page {
+    max-width: 700px;
+    padding: 32px;
+  }
+
+  .privacy-page__title {
+    font-size: 32px;
+  }
+}

@@ -121,7 +121,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .select(`
           id,
           email,
@@ -238,7 +238,7 @@ export const AuthProvider = ({ children }) => {
       console.log('📝 Inserting profile:', newProfile);
 
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .insert([newProfile])
         .select()
         .single();
@@ -311,7 +311,7 @@ export const AuthProvider = ({ children }) => {
       console.log('STEP 3: Checking if profile exists...');
 
       const { data: profile, error: profileError } = await supabase
-        .from('users')
+        .from('profiles')
         .select(`
           id,
           email,
@@ -545,7 +545,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .select(`
           id,
           email,
