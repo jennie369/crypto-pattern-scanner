@@ -3162,8 +3162,6 @@ export default function Landing() {
               © 2025 GEM Academy by Gemral. All rights reserved.
             </div>
             <div className="legal-links">
-              <a href="#">Công ty TNHH Gem Capital Holding</a>
-              <a href="#">MST: 0319056208</a>
               <a href="#">Chính sách cookie</a>
             </div>
           </div>
