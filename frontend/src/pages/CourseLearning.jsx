@@ -161,7 +161,83 @@ export default function CourseLearning() {
       return;
     }
 
-    // 2) Quiz option selection with instant feedback
+    // 2) Embedded button clicks (e.g. "Tính Điểm Tần Số", or any button with onclick)
+    //    dangerouslySetInnerHTML kills inline onclick — we re-implement them here
+    const clickedButton = e.target.closest('button[onclick], .retry-button, .submit-button, .calculate-button');
+    if (clickedButton) {
+      const onclickAttr = clickedButton.getAttribute('onclick') || '';
+      const articleEl = e.target.closest('.article-html-content');
+
+      // calculateFreqScore — frequency score quiz (radio buttons q1..qN)
+      if (onclickAttr.includes('calculateFreqScore') || clickedButton.textContent.includes('Tính Điểm')) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!articleEl) return;
+        let score = 0;
+        let answered = 0;
+        // Find all radio groups: q1, q2, q3, q4, ...
+        for (let i = 1; i <= 20; i++) {
+          const radios = articleEl.querySelectorAll(`input[name="q${i}"]`);
+          if (radios.length === 0) break;
+          for (const radio of radios) {
+            if (radio.checked) {
+              score += parseInt(radio.value, 10) || 0;
+              answered++;
+            }
+          }
+        }
+        const totalQuestions = (() => {
+          let count = 0;
+          for (let i = 1; i <= 20; i++) {
+            if (articleEl.querySelectorAll(`input[name="q${i}"]`).length === 0) break;
+            count++;
+          }
+          return count;
+        })();
+        if (answered < totalQuestions) {
+          // Show inline warning instead of alert (alert blocks browser automation)
+          clickedButton.style.outline = '2px solid #FF6B6B';
+          clickedButton.insertAdjacentHTML('afterend',
+            '<p class="freq-score-warning" style="color:#FF6B6B;text-align:center;margin-top:8px;font-weight:600;">Vui lòng trả lời hết ' + totalQuestions + ' câu hỏi để tính điểm chính xác!</p>');
+          setTimeout(() => {
+            clickedButton.style.outline = '';
+            const warn = articleEl.querySelector('.freq-score-warning');
+            if (warn) warn.remove();
+          }, 3000);
+          return;
+        }
+        // Show result
+        const scoreSpan = articleEl.querySelector('#total-freq-score');
+        const resultStep = articleEl.querySelector('#score-result-step');
+        const analysisBox = articleEl.querySelector('#score-analysis');
+        if (scoreSpan) scoreSpan.textContent = score;
+        if (resultStep) resultStep.style.display = 'block';
+        if (analysisBox) {
+          let resultHTML = '';
+          if (score <= 8) {
+            resultHTML = '<strong>Tầng 1 (dưới 200 Hz) - Năng lượng tiêu hao:</strong> Bạn đang ở trạng thái sinh tồn. Cần tập trung vào việc chữa lành và buông bỏ tiêu cực.';
+          } else if (score <= 12) {
+            resultHTML = '<strong>Tầng 2-3 (200-399 Hz) - Trung lập:</strong> Bạn đang ở trạng thái ổn định. Cần thêm động lực và cảm hứng để bứt phá.';
+          } else if (score <= 16) {
+            resultHTML = '<strong>Tầng 4-5 (400-599 Hz) - Sáng tạo:</strong> Tuyệt vời! Bạn đang ở trạng thái dòng chảy (flow). Hãy duy trì và phát huy.';
+          } else {
+            resultHTML = '<strong>Tầng 6+ (600+ Hz) - Gần giác ngộ:</strong> Xuất sắc! Tần số rung động của bạn rất cao. Bạn là nam châm thu hút điều tốt đẹp.';
+          }
+          analysisBox.innerHTML = resultHTML;
+        }
+        if (resultStep) resultStep.scrollIntoView({ behavior: 'smooth' });
+        // Disable button after calculation
+        clickedButton.style.background = '#444';
+        clickedButton.style.pointerEvents = 'none';
+        clickedButton.textContent = '✅ Đã tính điểm: ' + score + '/' + (totalQuestions * 5);
+        return;
+      }
+
+      // Generic: any other button with onclick — try to eval safely within article scope
+      // (skip for now — add specific handlers as new interactive elements appear)
+    }
+
+    // 3) Quiz option selection with instant feedback
     // Two HTML formats:
     //   A) Trading course: <li class="quiz-option"><span class="quiz-option-letter">B</span>...</li>
     //      Answer: <div class="quiz-answer"><div class="quiz-answer-label">✓ Đáp án đúng: B</div>...</div>
