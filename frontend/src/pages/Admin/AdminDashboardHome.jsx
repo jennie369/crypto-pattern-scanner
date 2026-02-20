@@ -129,19 +129,19 @@ export default function AdminDashboardHome() {
       {/* Pending Actions Alert */}
       {(analytics.pendingApplications > 0 || analytics.pendingWithdrawals > 0) && (
         <div className="admin-alert-card">
-          <h3 className="admin-alert-title"><AlertCircle size={18} /> C\u1EA7n x\u1EED l\u00FD</h3>
+          <h3 className="admin-alert-title"><AlertCircle size={18} /> Cần xử lý</h3>
           <div className="admin-alert-items">
             {analytics.pendingApplications > 0 && (
               <button className="admin-alert-item" onClick={() => navigate('/admin/applications')}>
                 <FileText size={18} color="#FF9F43" />
-                <span>{analytics.pendingApplications} \u0111\u01A1n \u0111\u0103ng k\u00FD ch\u1EDD duy\u1EC7t</span>
+                <span>{analytics.pendingApplications} đơn đăng ký chờ duyệt</span>
                 <ChevronDown size={16} style={{ transform: 'rotate(-90deg)' }} />
               </button>
             )}
             {analytics.pendingWithdrawals > 0 && (
               <button className="admin-alert-item" onClick={() => navigate('/admin/withdrawals')}>
                 <Wallet size={18} color="#00FF88" />
-                <span>{analytics.pendingWithdrawals} y\u00EAu c\u1EA7u r\u00FAt ti\u1EC1n ch\u1EDD</span>
+                <span>{analytics.pendingWithdrawals} yêu cầu rút tiền chờ</span>
                 <ChevronDown size={16} style={{ transform: 'rotate(-90deg)' }} />
               </button>
             )}
@@ -150,12 +150,12 @@ export default function AdminDashboardHome() {
       )}
 
       {/* Stats Overview */}
-      <h2 className="admin-section-title">T\u1ED5ng Quan</h2>
+      <h2 className="admin-section-title">Tổng Quan</h2>
       <div className="admin-stats-grid">
         <div className="admin-stat-card">
           <Users size={32} color="#4D9DE0" />
           <span className="admin-stat-value">{analytics.totalUsers}</span>
-          <span className="admin-stat-label">T\u1ED5ng Users</span>
+          <span className="admin-stat-label">Tổng Users</span>
         </div>
         <div className="admin-stat-card">
           <User size={32} color="#FF9F43" />
@@ -175,34 +175,34 @@ export default function AdminDashboardHome() {
       </div>
 
       {/* Financial Stats */}
-      <h2 className="admin-section-title">T\u00E0i Ch\u00EDnh</h2>
+      <h2 className="admin-section-title">Tài Chính</h2>
       <div className="admin-financial-cards">
         <div className="admin-financial-card revenue">
           <TrendingUp size={36} color="#00F0FF" />
           <div className="admin-financial-info">
-            <span className="admin-financial-label">Doanh thu th\u00E1ng n\u00E0y</span>
+            <span className="admin-financial-label">Doanh thu tháng này</span>
             <span className="admin-financial-value">{formatCurrency(0)}</span>
           </div>
         </div>
         <div className="admin-financial-card commission">
           <CircleDollarSign size={36} color="#FFBD59" />
           <div className="admin-financial-info">
-            <span className="admin-financial-label">T\u1ED5ng hoa h\u1ED3ng \u0111\u00E3 tr\u1EA3</span>
+            <span className="admin-financial-label">Tổng hoa hồng đã trả</span>
             <span className="admin-financial-value">{formatCurrency(analytics.totalCommissions)}</span>
           </div>
         </div>
       </div>
 
-      {/* Quick Actions - Qu\u1EA3n L\u00FD */}
-      <h2 className="admin-section-title">Qu\u1EA3n L\u00FD</h2>
+      {/* Quick Actions - Quản Lý */}
+      <h2 className="admin-section-title">Quản Lý</h2>
       <div className="admin-quick-actions">
         <button className="admin-action-card" onClick={() => navigate('/admin/applications')}>
           <div className="admin-action-icon" style={{ background: 'rgba(255, 159, 67, 0.2)' }}>
             <FileText size={24} color="#FF9F43" />
           </div>
           <div className="admin-action-content">
-            <span className="admin-action-title">Duy\u1EC7t \u0110\u01A1n \u0110\u0103ng K\u00FD</span>
-            <span className="admin-action-subtitle">{analytics.pendingApplications} \u0111\u01A1n ch\u1EDD x\u1EED l\u00FD</span>
+            <span className="admin-action-title">Duyệt Đơn Đăng Ký</span>
+            <span className="admin-action-subtitle">{analytics.pendingApplications} đơn chờ xử lý</span>
           </div>
           {analytics.pendingApplications > 0 && (
             <span className="admin-action-badge">{analytics.pendingApplications}</span>
@@ -215,8 +215,8 @@ export default function AdminDashboardHome() {
             <Wallet size={24} color="#00FF88" />
           </div>
           <div className="admin-action-content">
-            <span className="admin-action-title">X\u1EED L\u00FD R\u00FAt Ti\u1EC1n</span>
-            <span className="admin-action-subtitle">{analytics.pendingWithdrawals} y\u00EAu c\u1EA7u ch\u1EDD</span>
+            <span className="admin-action-title">Xử Lý Rút Tiền</span>
+            <span className="admin-action-subtitle">{analytics.pendingWithdrawals} yêu cầu chờ</span>
           </div>
           {analytics.pendingWithdrawals > 0 && (
             <span className="admin-action-badge">{analytics.pendingWithdrawals}</span>
@@ -229,8 +229,8 @@ export default function AdminDashboardHome() {
             <Users size={24} color="#4D9DE0" />
           </div>
           <div className="admin-action-content">
-            <span className="admin-action-title">Qu\u1EA3n L\u00FD Users</span>
-            <span className="admin-action-subtitle">Xem & ch\u1EC9nh s\u1EEDa th\u00F4ng tin users</span>
+            <span className="admin-action-title">Quản Lý Users</span>
+            <span className="admin-action-subtitle">Xem & chỉnh sửa thông tin users</span>
           </div>
           <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
         </button>
@@ -240,8 +240,8 @@ export default function AdminDashboardHome() {
             <BarChart3 size={24} color="#8B5CF6" />
           </div>
           <div className="admin-action-content">
-            <span className="admin-action-title">B\u00E1o C\u00E1o & Th\u1ED1ng K\u00EA</span>
-            <span className="admin-action-subtitle">Chi ti\u1EBFt doanh thu & hi\u1EC7u su\u1EA5t</span>
+            <span className="admin-action-title">Báo Cáo & Thống Kê</span>
+            <span className="admin-action-subtitle">Chi tiết doanh thu & hiệu suất</span>
           </div>
           <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
         </button>
@@ -251,8 +251,8 @@ export default function AdminDashboardHome() {
             <Bell size={24} color="#FFBD59" />
           </div>
           <div className="admin-action-content">
-            <span className="admin-action-title">G\u1EEDi Th\u00F4ng B\u00E1o</span>
-            <span className="admin-action-subtitle">Th\u00F4ng b\u00E1o h\u1EC7 th\u1ED1ng \u0111\u1EBFn users</span>
+            <span className="admin-action-title">Gửi Thông Báo</span>
+            <span className="admin-action-subtitle">Thông báo hệ thống đến users</span>
           </div>
           <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
         </button>
@@ -262,23 +262,23 @@ export default function AdminDashboardHome() {
             <ImageIcon size={24} color="#FF6B6B" />
           </div>
           <div className="admin-action-content">
-            <span className="admin-action-title">Qu\u1EA3n L\u00FD Banner</span>
-            <span className="admin-action-subtitle">Banner qu\u1EA3ng c\u00E1o Portfolio</span>
+            <span className="admin-action-title">Quản Lý Banner</span>
+            <span className="admin-action-subtitle">Banner quảng cáo Portfolio</span>
           </div>
           <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
         </button>
       </div>
 
-      {/* N\u1ED9i Dung & Auto-Post Section */}
-      <h2 className="admin-section-title">N\u1ED9i Dung & Auto-Post</h2>
+      {/* Nội Dung & Auto-Post Section */}
+      <h2 className="admin-section-title">Nội Dung & Auto-Post</h2>
       <div className="admin-quick-actions">
         <button className="admin-action-card" onClick={() => navigate('/admin/calendar')}>
           <div className="admin-action-icon" style={{ background: 'rgba(0, 200, 255, 0.2)' }}>
             <Calendar size={24} color="#00C8FF" />
           </div>
           <div className="admin-action-content">
-            <span className="admin-action-title">L\u1ECBch N\u1ED9i Dung</span>
-            <span className="admin-action-subtitle">Qu\u1EA3n l\u00FD & l\u00EAn l\u1ECBch b\u00E0i \u0111\u0103ng</span>
+            <span className="admin-action-title">Lịch Nội Dung</span>
+            <span className="admin-action-subtitle">Quản lý & lên lịch bài đăng</span>
           </div>
           <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
         </button>
@@ -288,8 +288,8 @@ export default function AdminDashboardHome() {
             <Send size={24} color="#4CAF50" />
           </div>
           <div className="admin-action-content">
-            <span className="admin-action-title">Nh\u1EADt K\u00FD Auto-Post</span>
-            <span className="admin-action-subtitle">Theo d\u00F5i \u0111\u0103ng b\u00E0i t\u1EF1 \u0111\u1ED9ng</span>
+            <span className="admin-action-title">Nhật Ký Auto-Post</span>
+            <span className="admin-action-subtitle">Theo dõi đăng bài tự động</span>
           </div>
           <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
         </button>
@@ -299,7 +299,7 @@ export default function AdminDashboardHome() {
             <Settings2 size={24} color="#9C27B0" />
           </div>
           <div className="admin-action-content">
-            <span className="admin-action-title">K\u1EBFt N\u1ED1i N\u1EC1n T\u1EA3ng</span>
+            <span className="admin-action-title">Kết Nối Nền Tảng</span>
             <span className="admin-action-subtitle">Facebook, TikTok, YouTube...</span>
           </div>
           <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
@@ -314,7 +314,7 @@ export default function AdminDashboardHome() {
             <Bot size={24} color="#8B5CF6" />
           </div>
           <div className="admin-action-content">
-            <span className="admin-action-title">Qu\u1EA3n L\u00FD Seed Content</span>
+            <span className="admin-action-title">Quản Lý Seed Content</span>
             <span className="admin-action-subtitle">Users, posts, AI bot 24/7</span>
           </div>
           <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
@@ -322,30 +322,30 @@ export default function AdminDashboardHome() {
       </div>
 
       {/* Course Admin Section */}
-      <h2 className="admin-section-title">Qu\u1EA3n L\u00FD Kh\u00F3a H\u1ECDc</h2>
+      <h2 className="admin-section-title">Quản Lý Khóa Học</h2>
       <div className="admin-quick-actions">
         <button className="admin-action-card" onClick={() => navigate('/courses/admin')}>
           <div className="admin-action-icon" style={{ background: 'rgba(0, 217, 255, 0.2)' }}>
             <GraduationCap size={24} color="#00D9FF" />
           </div>
           <div className="admin-action-content">
-            <span className="admin-action-title">Qu\u1EA3n L\u00FD Kh\u00F3a H\u1ECDc</span>
-            <span className="admin-action-subtitle">T\u1EA1o, s\u1EEDa, x\u00F3a courses & lessons</span>
+            <span className="admin-action-title">Quản Lý Khóa Học</span>
+            <span className="admin-action-subtitle">Tạo, sửa, xóa courses & lessons</span>
           </div>
           <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
         </button>
       </div>
 
       {/* System Settings Section */}
-      <h2 className="admin-section-title">H\u1EC7 Th\u1ED1ng</h2>
+      <h2 className="admin-section-title">Hệ Thống</h2>
       <div className="admin-quick-actions">
         <button className="admin-action-card" onClick={() => navigate('/admin/system')}>
           <div className="admin-action-icon" style={{ background: 'rgba(255, 189, 89, 0.2)' }}>
             <Settings size={24} color="#FFBD59" />
           </div>
           <div className="admin-action-content">
-            <span className="admin-action-title">C\u00E0i \u0110\u1EB7t H\u1EC7 Th\u1ED1ng</span>
-            <span className="admin-action-subtitle">C\u1EA5u h\u00ECnh h\u1EC7 th\u1ED1ng</span>
+            <span className="admin-action-title">Cài Đặt Hệ Thống</span>
+            <span className="admin-action-subtitle">Cấu hình hệ thống</span>
           </div>
           <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
         </button>
