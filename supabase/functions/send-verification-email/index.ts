@@ -44,7 +44,7 @@ async function sendEmailViaResend(
         'Authorization': `Bearer ${resendApiKey}`,
       },
       body: JSON.stringify({
-        from: Deno.env.get('EMAIL_FROM') || 'GEM App <no-reply@gem.app>',
+        from: Deno.env.get('EMAIL_FROM') || 'GEM App <no-reply@gemral.com>',
         to: [to],
         subject: subject,
         html: html,

@@ -13,7 +13,7 @@ const corsHeaders = {
 };
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'GEM Partnership <partnership@gem.vn>';
+const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'GEM Partnership <partnership@gemral.com>';
 const RESEND_URL = 'https://api.resend.com/emails';
 
 // Vietnamese tier info
