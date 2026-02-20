@@ -525,12 +525,43 @@ class PaperTradeService {
   }
 
   /**
+   * Verify session is valid AND JWT not expired before writing to Supabase.
+   * When refresh token is revoked (e.g. login from another device),
+   * getSession() still returns the cached session with an EXPIRED access_token.
+   * We must also check the JWT exp claim to avoid sending a dead token.
+   * getSession() reads from local storage — no network call.
+   */
+  async _hasValidSession() {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return false;
+
+      // Decode JWT exp without external library (base64url → JSON)
+      const payload = session.access_token.split('.')[1];
+      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const exp = JSON.parse(atob(base64)).exp || 0;
+      const nowSec = Math.floor(Date.now() / 1000);
+
+      // Token must be valid for at least 10s more (avoids race with request in-flight)
+      return exp > nowSec + 10;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
    * Sync user settings (balance, initial_balance) to Supabase
    */
   async syncSettingsToSupabase(userId) {
     if (!userId) {
       console.log('[PaperTrade] syncSettingsToSupabase - No userId, skipping');
       return { success: false, error: 'No userId' };
+    }
+
+    // Guard: skip write if session is invalid (refresh token revoked, etc.)
+    if (!await this._hasValidSession()) {
+      console.log('[PaperTrade] syncSettingsToSupabase - No active session, skipping');
+      return { success: false, error: 'No active session' };
     }
 
     console.log('[PaperTrade] syncSettingsToSupabase:', {
@@ -1901,8 +1932,8 @@ class PaperTradeService {
     // Save to local
     await this.saveToLocalStorage();
 
-    // Clear in Supabase if user is logged in
-    if (userId) {
+    // Clear in Supabase if user is logged in and session is valid
+    if (userId && await this._hasValidSession()) {
       try {
         // Delete all trades for this user
         await supabase
@@ -2120,6 +2151,12 @@ class PaperTradeService {
           currentUserId: this.currentUserId,
         });
         return { success: false, error: 'No valid userId' };
+      }
+
+      // Guard: skip write if session is invalid (refresh token revoked, etc.)
+      if (!await this._hasValidSession()) {
+        console.log('[PaperTrade] ❌ SYNC SKIPPED - No active session');
+        return { success: false, error: 'No active session' };
       }
 
       // Ensure position has userId for future reference

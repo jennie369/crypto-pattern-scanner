@@ -4060,3 +4060,91 @@ The component calls the service function directly, bypassing the Context. When d
 - Components should ONLY read from Context, never from service functions that maintain their own cache
 - When adding a new computed array (like `inProgressCourses`), explicitly consider the zero/default case
 - If a webhook writes to the DB, the UI must read from DB (via Context + realtime) — not from a local cache that the webhook never touches
+
+## Rule 58: Supabase Write Fails with RLS Violation Due to Expired JWT (Silent Auth Failure)
+**Source:** Phase 18 — `syncSettingsToSupabase FAILED: new row violates row-level security policy for table "user_paper_trade_settings"`
+
+### When to apply
+When a Supabase INSERT/UPDATE/UPSERT fails with `42501 row-level security policy violation`, but:
+- RLS policies look correct (e.g., `auth.uid() = user_id`)
+- The code passes the correct `user_id`
+- The user IS authenticated (has a session in local storage)
+
+### Symptoms
+- `new row violates row-level security policy for table "<table>"` error code `42501`
+- The same write worked before (user was logged in)
+- Auth logs show `Invalid Refresh Token: Refresh Token Not Found` around the same time
+- `_ensureSessionFresh()` in supabase.js did NOT throw (it silently swallows failures)
+- `supabase.auth.getSession()` returns a session object with an EXPIRED `access_token`
+
+### Root Cause (3 layers)
+**Layer 1 — Token lifecycle**: When user logs in on another device, Supabase rotates the refresh token. The old device's refresh token becomes invalid. When `autoRefreshToken` timer fires, it fails silently. The access_token expires (default 1 hour) and cannot be renewed.
+
+**Layer 2 — Silent failure in fetch wrapper**: `_ensureSessionFresh()` (supabase.js lines 144-199) calls `getSession()` → gets cached session → tries `refreshSession()` → fails → logs warning → **returns without throwing**. The request proceeds with the expired JWT.
+
+**Layer 3 — RLS sees anon role**: PostgREST receives a request with an expired JWT. Instead of returning 401, it processes the request as the `anon` role where `auth.uid()` = null. RLS policy `auth.uid() = user_id` evaluates to `null = '<uuid>'` → false → policy violation.
+
+**Bonus Layer — `{public}` vs `authenticated` policies**: If RLS policies use `TO {public}` (PostgreSQL public role = everyone including anon), the anon role CAN write — but `auth.uid()` is still null, so `USING(auth.uid() = user_id)` still fails. Even worse, duplicate overlapping policies from schema migrations create confusing behavior.
+
+### How to Fix
+1. **Pre-write session guard with JWT exp check**: Before any Supabase write, verify the session token is not just present but UNEXPIRED:
+```javascript
+async _hasValidSession() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) return false;
+    // Decode JWT exp — getSession() returns cached tokens including expired ones
+    const payload = session.access_token.split('.')[1];
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const exp = JSON.parse(atob(base64)).exp || 0;
+    const nowSec = Math.floor(Date.now() / 1000);
+    return exp > nowSec + 10; // 10s buffer
+  } catch { return false; }
+}
+```
+2. **Guard every cloud sync method**: `if (!await this._hasValidSession()) { console.warn('...skipped — no valid session'); return; }`
+3. **Clean up RLS policies**: Replace `TO {public}` with `TO authenticated` on all INSERT/UPDATE/DELETE policies. Keep `TO authenticated` for SELECT too (unless intentionally public). Add `TO service_role` ALL policy for webhooks/functions.
+4. **Drop duplicate policies**: Schema migrations often create overlapping policies. Audit with:
+```sql
+SELECT schemaname, tablename, policyname, roles, cmd, qual
+FROM pg_policies WHERE tablename = '<table>'
+ORDER BY tablename, policyname;
+```
+
+### How to Detect Similar Issues
+1. **Grep for unguarded Supabase writes**: `grep -rn "\.upsert\|\.insert\|\.update\|\.delete" services/` — any write without a session validity check is vulnerable
+2. **Check RLS policy roles**: `SELECT tablename, policyname, roles FROM pg_policies WHERE '{public}' = ANY(roles) AND cmd != 'SELECT';` — `{public}` write policies are almost always wrong
+3. **Check auth logs**: Supabase Dashboard → Auth → Logs → filter for "Invalid Refresh Token" — indicates devices with stale sessions
+4. **Test with expired token**: Sign in on device A, sign in on device B (rotates token), wait 1 hour on device A, trigger a write → should be gracefully skipped, not crash with RLS error
+5. **Audit `_ensureSessionFresh()` callers**: This function silently succeeds even when refresh fails — any code that depends on it for auth validity is vulnerable
+
+### Generalized Pattern
+- **`getSession()` returns cached expired tokens** — checking `!!session?.access_token` is NOT sufficient. You MUST decode the JWT `exp` claim.
+- **PostgREST does NOT return 401 for expired JWTs** — it downgrades to anon role, which triggers RLS violations instead of auth errors. This makes the root cause (expired token) look like a permissions issue.
+- **Silent failure is worse than loud failure** — `_ensureSessionFresh()` swallowing errors means writes proceed with no auth. Any interceptor/middleware that "tries" to refresh but doesn't gate the request on success has this bug.
+- **RLS policies should use `TO authenticated`** — not `TO {public}`. The `{public}` PostgreSQL role includes anon, which means unauthenticated requests hit your policies (and fail on `auth.uid() = user_id`).
+- **Guard writes at the service layer** — don't rely on the global fetch wrapper to catch auth failures. Each service method that writes to Supabase should independently verify session validity before attempting the write.
+
+## Rule 59: Cross-Tab Navigation Uses Wrong Navigator Name
+**Source:** Phase 18 — `The action 'NAVIGATE' with payload {"name":"AccountTab"} was not handled by any navigator`
+
+### When to apply
+When navigating from one tab to a screen nested in another tab, and the navigation action is silently dropped or throws "not handled".
+
+### Symptoms
+- `The action 'NAVIGATE' with payload {"name":"<TabName>",...} was not handled by any navigator`
+- The navigation call uses a name that LOOKS correct but doesn't match the registered tab name
+- Common pattern: code uses `<Name>Tab` but the tab is registered as just `<Name>`
+
+### Root Cause
+React Navigation requires exact string match for navigator/screen names. If `TabNavigator.js` registers a tab as `name="Account"` but the calling screen uses `navigation.navigate('AccountTab', {...})`, the navigation fails silently (no crash, just a console warning).
+
+### How to Fix
+1. Check `TabNavigator.js` for the exact registered tab name
+2. Update the navigation call to use the exact name: `navigation.navigate('Account', { screen: 'PartnershipRegistration' })`
+3. For nested navigators, the pattern is: `navigate('<TabName>', { screen: '<ScreenName>' })`
+
+### How to Detect Similar Issues
+1. **Grep for all cross-tab navigations**: `grep -rn "navigate.*Tab" screens/ components/` — check each against TabNavigator.js registered names
+2. **Audit TabNavigator.js**: List all registered tab names and search for mismatches across the codebase
+3. **Test all deep-link / cross-tab navigation paths**: FAQ actions, notification handlers, deep links — all are common sources of tab name mismatches

@@ -1886,7 +1886,7 @@ const GemMasterScreen = ({ navigation, route }) => {
 
       case 'navigate_partnership':
         // Navigate directly to partnership registration
-        navigation.navigate('AccountTab', {
+        navigation.navigate('Account', {
           screen: 'PartnershipRegistration',
         });
         break;
