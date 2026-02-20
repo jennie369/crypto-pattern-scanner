@@ -301,13 +301,7 @@ const AssetsHomeScreen = () => {
               onPress={() => navigation.navigate('Portfolio')}
               iconBg="rgba(139, 92, 246, 0.15)"
             />
-            <ActionCard
-              icon={<Music size={24} color="#F59E0B" />}
-              title="Âm Thanh"
-              subtitle="Thư viện"
-              onPress={() => navigation.navigate('SoundLibrary')}
-              iconBg="rgba(245, 158, 11, 0.15)"
-            />
+            {/* Âm Thanh — hidden (feature not ready) */}
             <ActionCard
               icon={<Settings size={24} color={COLORS.textMuted} />}
               title="Cài Đặt"

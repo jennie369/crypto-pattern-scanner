@@ -1490,16 +1490,6 @@ const ForumScreen = ({ navigation }) => {
 
               <TouchableOpacity
                 style={styles.shortcutBtn}
-                onPress={() => navigateToAccountScreen('SoundLibrary')}
-              >
-                <View style={[styles.shortcutIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                  <Music size={16} color={COLORS.gold} />
-                </View>
-                <Text style={styles.shortcutText}>Âm Thanh</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.shortcutBtn}
                 onPress={() => navigateToAccountScreen('BoostedPosts')}
               >
                 <View style={[styles.shortcutIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>

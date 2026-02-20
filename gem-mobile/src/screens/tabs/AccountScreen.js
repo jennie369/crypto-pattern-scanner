@@ -118,6 +118,16 @@ const accountCache = {
   CACHE_DURATION: 300000, // 5 minutes - reduced API calls for better performance
 };
 
+// Export cache clear function for logout cleanup (Rule 3: Module-Level State Bleed)
+export const clearAccountCache = () => {
+  accountCache.profile = null;
+  accountCache.stats = null;
+  accountCache.assetStats = null;
+  accountCache.adminStats = null;
+  accountCache.lastFetch = 0;
+  console.log('[AccountScreen] accountCache cleared');
+};
+
 export default function AccountScreen() {
   const navigation = useNavigation();
   const route = useRoute();
@@ -796,8 +806,9 @@ export default function AccountScreen() {
           </Pressable>
 
           {/* ═══════════════════════════════════════════ */}
-          {/* AI LIVESTREAM - Avatar AI bán hàng tự động */}
+          {/* AI LIVESTREAM - Admin only */}
           {/* ═══════════════════════════════════════════ */}
+          {isAdmin && (
           <Pressable
             style={({ pressed }) => [
               styles.livestreamCard,
@@ -824,6 +835,7 @@ export default function AccountScreen() {
               </View>
             </View>
           </Pressable>
+          )}
 
           {/* ═══════════════════════════════════════════ */}
           {/* 🚀 UPGRADE BANNER - For free users */}
@@ -973,14 +985,14 @@ export default function AccountScreen() {
 
             <TouchableOpacity
               style={styles.actionCard}
-              onPress={() => navigation.navigate('SoundLibrary')}
+              onPress={() => navigation.navigate('PaperTradeHistory')}
               activeOpacity={0.7}
             >
               <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Music size={24} color={COLORS.gold} />
+                <TrendingUp size={24} color={COLORS.gold} />
               </View>
-              <Text style={styles.actionTitle}>{t('account.soundLibrary', 'Âm Thanh')}</Text>
-              <Text style={styles.actionSubtitle}>{t('account.soundLibrarySub', 'Thư viện')}</Text>
+              <Text style={styles.actionTitle}>{t('account.paperTradeHistory', 'Paper Trade')}</Text>
+              <Text style={styles.actionSubtitle}>{t('account.paperTradeHistorySub2', 'Lịch sử giao dịch')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -1100,20 +1112,6 @@ export default function AccountScreen() {
 
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => navigation.navigate('PaperTradeHistory')}
-            >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <TrendingUp size={20} color={COLORS.gold} />
-              </View>
-              <View style={styles.menuContent}>
-                <Text style={styles.menuText}>{t('account.paperTradeHistory', 'Paper Trade History')}</Text>
-                <Text style={styles.menuSubtext}>{t('account.paperTradeHistorySub', 'Lịch sử giao dịch giả lập')}</Text>
-              </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
               onPress={() => navigation.navigate('KarmaDashboard')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
@@ -1204,47 +1202,7 @@ export default function AccountScreen() {
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => navigation.navigate('PrivacySettings')}
-            >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Shield size={20} color={COLORS.gold} />
-              </View>
-              <View style={styles.menuContent}>
-                <Text style={styles.menuText}>{t('account.privacySettings', 'Cài đặt quyền riêng tư')}</Text>
-                <Text style={styles.menuSubtext}>{t('account.privacySettingsSub', 'Ai có thể xem bài viết của bạn')}</Text>
-              </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => navigation.navigate('CloseFriends')}
-            >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <UserCheck size={20} color={COLORS.gold} />
-              </View>
-              <View style={styles.menuContent}>
-                <Text style={styles.menuText}>{t('account.closeFriends', 'Bạn thân')}</Text>
-                <Text style={styles.menuSubtext}>{t('account.closeFriendsSub', 'Quản lý danh sách bạn thân')}</Text>
-              </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => navigation.navigate('SavedPosts')}
-            >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Bookmark size={20} color={COLORS.gold} />
-              </View>
-              <View style={styles.menuContent}>
-                <Text style={styles.menuText}>{t('account.savedPosts', 'Bài viết đã lưu')}</Text>
-                <Text style={styles.menuSubtext}>{t('account.savedPostsSub', 'Các bài viết bạn đã bookmark')}</Text>
-              </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
-            </TouchableOpacity>
+            {/* Privacy Settings, Close Friends, Saved Posts — hidden (features not ready) */}
 
             <TouchableOpacity
               style={styles.menuItem}

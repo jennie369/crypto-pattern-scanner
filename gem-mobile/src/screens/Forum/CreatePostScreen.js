@@ -707,22 +707,7 @@ const CreatePostScreen = ({ navigation }) => {
               </View>
             )}
 
-            {/* Selected Sound Display */}
-            {selectedSound && (
-              <View style={styles.selectedSoundCard}>
-                <Music size={18} color={COLORS.gold} />
-                <View style={styles.selectedSoundInfo}>
-                  <Text style={styles.selectedSoundName}>{selectedSound.name}</Text>
-                  <Text style={styles.selectedSoundArtist}>{selectedSound.artist || 'Unknown'}</Text>
-                </View>
-                <TouchableOpacity
-                  onPress={() => setSelectedSound(null)}
-                  style={styles.removeSoundBtn}
-                >
-                  <X size={16} color={COLORS.error} />
-                </TouchableOpacity>
-              </View>
-            )}
+            {/* Selected Sound Display — hidden (audio feature not ready) */}
 
             {/* Linked Products Display - MULTI-SELECT */}
             {linkedProducts.length > 0 && (
@@ -768,13 +753,7 @@ const CreatePostScreen = ({ navigation }) => {
               <Text style={styles.actionRowText}>Gắn thẻ người dùng</Text>
             </TouchableOpacity>
 
-            {/* Row 2: Sound */}
-            <TouchableOpacity style={styles.actionRow} onPress={() => setShowSoundPicker(true)}>
-              <Music size={22} color={selectedSound ? COLORS.gold : COLORS.textMuted} />
-              <Text style={[styles.actionRowText, selectedSound && { color: COLORS.gold }]}>
-                {selectedSound ? selectedSound.name : 'Nhạc nền'}
-              </Text>
-            </TouchableOpacity>
+            {/* Row 2: Sound — hidden (audio feature not ready) */}
 
             {/* Row 3: Audience */}
             <TouchableOpacity style={styles.actionRow} onPress={() => setShowAudiencePicker(!showAudiencePicker)}>
@@ -849,15 +828,7 @@ const CreatePostScreen = ({ navigation }) => {
           onCancel={handleImageEditorCancel}
         />
 
-        {/* Sound Picker Modal */}
-        <SoundPicker
-          visible={showSoundPicker}
-          onClose={() => setShowSoundPicker(false)}
-          onSelect={(sound) => {
-            setSelectedSound(sound);
-            setShowSoundPicker(false);
-          }}
-        />
+        {/* Sound Picker Modal — hidden (audio feature not ready) */}
 
         {/* NOTE: Audience selection is handled by inline dropdown in toolbar, not modal */}
 
