@@ -38,22 +38,22 @@ export default function AutoPostLogsPage() {
   return (
     <div className="tab-content">
       <div className="content-header">
-        <h2>Nhat Ky Auto-Post</h2>
+        <h2>Nhật Ký Auto-Post</h2>
         <button className="add-user-btn" onClick={loadLogs}>
-          <RefreshCw size={16} /> Lam Moi
+          <RefreshCw size={16} /> Làm Mới
         </button>
       </div>
 
       {loading ? (
         <div className="admin-loading-state">
           <div className="spinner-large"></div>
-          <p>Dang tai logs...</p>
+          <p>Đang tải logs...</p>
         </div>
       ) : logs.length === 0 ? (
         <div className="admin-empty-state">
           <Send size={48} />
-          <h3>Chua co log nao</h3>
-          <p>Lich su dang bai tu dong se hien thi o day</p>
+          <h3>Chưa có log nào</h3>
+          <p>Lịch sử đăng bài tự động sẽ hiển thị ở đây</p>
         </div>
       ) : (
         <div className="admin-logs-list">

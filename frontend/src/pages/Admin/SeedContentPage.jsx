@@ -41,7 +41,7 @@ export default function SeedContentPage() {
   };
 
   const handleDeleteSeedUser = async (id) => {
-    if (!confirm('Xoa seed user nay?')) return;
+    if (!confirm('Xóa seed user này?')) return;
 
     try {
       const { error } = await supabase
@@ -52,14 +52,14 @@ export default function SeedContentPage() {
       if (error) throw error;
       loadSeedData();
     } catch (err) {
-      alert('Loi: ' + err.message);
+      alert('Lỗi: ' + err.message);
     }
   };
 
   return (
     <div className="tab-content">
       <div className="content-header">
-        <h2>Quan Ly Seed Content</h2>
+        <h2>Quản Lý Seed Content</h2>
         <div className="filter-buttons">
           <button
             className={`filter-btn ${activeSection === 'users' ? 'active' : ''}`}
@@ -79,14 +79,14 @@ export default function SeedContentPage() {
       {loading ? (
         <div className="admin-loading-state">
           <div className="spinner-large"></div>
-          <p>Dang tai...</p>
+          <p>Đang tải...</p>
         </div>
       ) : activeSection === 'users' ? (
         seedUsers.length === 0 ? (
           <div className="admin-empty-state">
             <Bot size={48} />
-            <h3>Chua co seed users</h3>
-            <p>Tao seed users cho AI bot</p>
+            <h3>Chưa có seed users</h3>
+            <p>Tạo seed users cho AI bot</p>
           </div>
         ) : (
           <div className="admin-seed-users-list">
@@ -105,8 +105,8 @@ export default function SeedContentPage() {
                   <small>Posts: {user.post_count || 0}</small>
                 </div>
                 <div className="actions-cell">
-                  <button className="action-btn edit">Sua</button>
-                  <button className="action-btn delete" onClick={() => handleDeleteSeedUser(user.id)}>Xoa</button>
+                  <button className="action-btn edit">Sửa</button>
+                  <button className="action-btn delete" onClick={() => handleDeleteSeedUser(user.id)}>Xóa</button>
                 </div>
               </div>
             ))}
@@ -116,8 +116,8 @@ export default function SeedContentPage() {
         seedPosts.length === 0 ? (
           <div className="admin-empty-state">
             <FileText size={48} />
-            <h3>Chua co seed posts</h3>
-            <p>Tao seed posts cho forum</p>
+            <h3>Chưa có seed posts</h3>
+            <p>Tạo seed posts cho forum</p>
           </div>
         ) : (
           <div className="admin-seed-posts-list">

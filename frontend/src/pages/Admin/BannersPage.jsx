@@ -41,12 +41,12 @@ export default function BannersPage() {
       if (error) throw error;
       loadBanners();
     } catch (err) {
-      alert('Loi: ' + err.message);
+      alert('Lỗi: ' + err.message);
     }
   };
 
   const handleDeleteBanner = async (id) => {
-    if (!confirm('Ban co chac muon xoa banner nay?')) return;
+    if (!confirm('Bạn có chắc muốn xóa banner này?')) return;
 
     try {
       const { error } = await supabase
@@ -57,29 +57,29 @@ export default function BannersPage() {
       if (error) throw error;
       loadBanners();
     } catch (err) {
-      alert('Loi: ' + err.message);
+      alert('Lỗi: ' + err.message);
     }
   };
 
   return (
     <div className="tab-content">
       <div className="content-header">
-        <h2>Quan Ly Banner Quang Cao</h2>
+        <h2>Quản Lý Banner Quảng Cáo</h2>
         <button className="add-user-btn" onClick={() => setEditingBanner({})}>
-          <ImageIcon size={16} /> Them Banner
+          <ImageIcon size={16} /> Thêm Banner
         </button>
       </div>
 
       {loading ? (
         <div className="admin-loading-state">
           <div className="spinner-large"></div>
-          <p>Dang tai banners...</p>
+          <p>Đang tải banners...</p>
         </div>
       ) : banners.length === 0 ? (
         <div className="admin-empty-state">
           <ImageIcon size={48} />
-          <h3>Chua co banner nao</h3>
-          <p>Them banner quang cao cho Portfolio</p>
+          <h3>Chưa có banner nào</h3>
+          <p>Thêm banner quảng cáo cho Portfolio</p>
         </div>
       ) : (
         <div className="admin-banners-grid">
@@ -100,10 +100,10 @@ export default function BannersPage() {
               </div>
               <div className="admin-banner-actions">
                 <button onClick={() => handleToggleActive(banner)} className="action-btn edit">
-                  {banner.is_active ? 'Tat' : 'Bat'}
+                  {banner.is_active ? 'Tắt' : 'Bật'}
                 </button>
                 <button onClick={() => handleDeleteBanner(banner.id)} className="action-btn delete">
-                  Xoa
+                  Xóa
                 </button>
               </div>
             </div>

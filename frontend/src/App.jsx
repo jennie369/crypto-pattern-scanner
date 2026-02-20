@@ -53,6 +53,7 @@ import CalendarPage from './pages/Admin/CalendarPage';
 import AutoPostLogsPage from './pages/Admin/AutoPostLogsPage';
 import PlatformSettingsPage from './pages/Admin/PlatformSettingsPage';
 import SeedContentPage from './pages/Admin/SeedContentPage';
+import AdminDashboardHome from './pages/Admin/AdminDashboardHome';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Pricing from './pages/Pricing';
@@ -908,7 +909,7 @@ function App() {
               </ProtectedAdminRoute>
             }
           >
-            <Route index element={<Navigate to="/admin/users" replace />} />
+            <Route index element={<AdminDashboardHome />} />
             <Route path="users" element={<UsersPage />} />
             <Route path="applications" element={<ApplicationsPage />} />
             <Route path="withdrawals" element={<WithdrawalsPage />} />

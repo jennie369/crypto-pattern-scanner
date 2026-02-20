@@ -38,7 +38,7 @@ export default function NotificationsPage() {
 
   const handleSendNotification = async () => {
     if (!title.trim() || !body.trim()) {
-      alert('Vui long nhap tieu de va noi dung thong bao');
+      alert('Vui lòng nhập tiêu đề và nội dung thông báo');
       return;
     }
 
@@ -54,13 +54,13 @@ export default function NotificationsPage() {
 
       if (error) throw error;
 
-      alert(`Da gui thong bao den ${data?.sent_count || 0} users!`);
+      alert(`Đã gửi thông báo đến ${data?.sent_count || 0} users!`);
       setTitle('');
       setBody('');
       loadNotificationHistory();
     } catch (err) {
       console.error('Error sending notification:', err);
-      alert('Loi: ' + err.message);
+      alert('Lỗi: ' + err.message);
     } finally {
       setSending(false);
     }
@@ -69,40 +69,40 @@ export default function NotificationsPage() {
   return (
     <div className="tab-content">
       <div className="content-header">
-        <h2>Gui Thong Bao He Thong</h2>
+        <h2>Gửi Thông Báo Hệ Thống</h2>
       </div>
 
       <div className="admin-form-card">
         <div className="admin-form-group">
-          <label>Tieu de thong bao</label>
+          <label>Tiêu đề thông báo</label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Nhap tieu de..."
+            placeholder="Nhập tiêu đề..."
             className="admin-input"
           />
         </div>
 
         <div className="admin-form-group">
-          <label>Noi dung thong bao</label>
+          <label>Nội dung thông báo</label>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder="Nhap noi dung thong bao..."
+            placeholder="Nhập nội dung thông báo..."
             className="admin-textarea"
             rows={4}
           />
         </div>
 
         <div className="admin-form-group">
-          <label>Doi tuong nhan</label>
+          <label>Đối tượng nhận</label>
           <select
             value={targetGroup}
             onChange={(e) => setTargetGroup(e.target.value)}
             className="admin-select"
           >
-            <option value="all">Tat ca users</option>
+            <option value="all">Tất cả users</option>
             <option value="premium">Premium users</option>
             <option value="free">Free users</option>
             <option value="partners">Affiliates & CTVs</option>
@@ -115,26 +115,26 @@ export default function NotificationsPage() {
           disabled={sending}
         >
           {sending ? (
-            <><RefreshCw size={16} className="spin" /> Dang gui...</>
+            <><RefreshCw size={16} className="spin" /> Đang gửi...</>
           ) : (
-            <><Bell size={16} /> Gui Thong Bao</>
+            <><Bell size={16} /> Gửi Thông Báo</>
           )}
         </button>
       </div>
 
       <h3 style={{ color: '#FFBD59', marginTop: '32px', marginBottom: '16px' }}>
-        Lich Su Thong Bao
+        Lịch Sử Thông Báo
       </h3>
       {loadingHistory ? (
         <div className="admin-loading-state">
           <div className="spinner-large"></div>
-          <p>Dang tai...</p>
+          <p>Đang tải...</p>
         </div>
       ) : history.length === 0 ? (
         <div className="admin-empty-state">
           <Bell size={48} />
-          <h3>Chua co thong bao nao</h3>
-          <p>Gui thong bao dau tien cho users</p>
+          <h3>Chưa có thông báo nào</h3>
+          <p>Gửi thông báo đầu tiên cho users</p>
         </div>
       ) : (
         <div className="admin-history-list">
@@ -144,7 +144,7 @@ export default function NotificationsPage() {
                 <strong>{item.title}</strong>
                 <p>{item.body}</p>
                 <small>
-                  Gui den: {item.target_group} | {new Date(item.created_at).toLocaleString('vi-VN')}
+                  Gửi đến: {item.target_group} | {new Date(item.created_at).toLocaleString('vi-VN')}
                 </small>
               </div>
             </div>

@@ -29,7 +29,7 @@ export default function PlatformSettingsPage() {
   };
 
   const handleDisconnect = async (id) => {
-    if (!confirm('Ngat ket noi nen tang nay?')) return;
+    if (!confirm('Ngắt kết nối nền tảng này?')) return;
 
     try {
       const { error } = await supabase
@@ -40,7 +40,7 @@ export default function PlatformSettingsPage() {
       if (error) throw error;
       loadPlatforms();
     } catch (err) {
-      alert('Loi: ' + err.message);
+      alert('Lỗi: ' + err.message);
     }
   };
 
@@ -55,13 +55,13 @@ export default function PlatformSettingsPage() {
   return (
     <div className="tab-content">
       <div className="content-header">
-        <h2>Ket Noi Nen Tang</h2>
+        <h2>Kết Nối Nền Tảng</h2>
       </div>
 
       {loading ? (
         <div className="admin-loading-state">
           <div className="spinner-large"></div>
-          <p>Dang tai...</p>
+          <p>Đang tải...</p>
         </div>
       ) : (
         <div className="admin-platforms-grid">
@@ -76,21 +76,21 @@ export default function PlatformSettingsPage() {
                   <h4>{platform.name}</h4>
                   {connected ? (
                     <>
-                      <p className="connected-text">Da ket noi</p>
-                      <small>Ket noi: {new Date(connected.created_at).toLocaleDateString('vi-VN')}</small>
+                      <p className="connected-text">Đã kết nối</p>
+                      <small>Kết nối: {new Date(connected.created_at).toLocaleDateString('vi-VN')}</small>
                     </>
                   ) : (
-                    <p className="disconnected-text">Chua ket noi</p>
+                    <p className="disconnected-text">Chưa kết nối</p>
                   )}
                 </div>
                 <div className="admin-platform-actions">
                   {connected ? (
                     <button className="action-btn delete" onClick={() => handleDisconnect(connected.id)}>
-                      Ngat ket noi
+                      Ngắt kết nối
                     </button>
                   ) : (
                     <button className="action-btn edit">
-                      <Link2 size={14} /> Ket noi
+                      <Link2 size={14} /> Kết nối
                     </button>
                   )}
                 </div>

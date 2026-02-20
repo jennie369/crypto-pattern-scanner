@@ -296,7 +296,7 @@ export default function UsersPage() {
   };
 
   const handleDeleteUser = async (userId, userEmail) => {
-    if (!confirm(`Ban co chac muon xoa user "${userEmail}"?\n\nHanh dong nay KHONG THE HOAN TAC!`)) {
+    if (!confirm(`Bạn có chắc muốn xóa user "${userEmail}"?\n\nHành động này KHÔNG THỂ HOÀN TÁC!`)) {
       return;
     }
 
@@ -309,7 +309,7 @@ export default function UsersPage() {
       if (error) throw error;
 
       console.log('User deleted:', userEmail);
-      alert(`Da xoa user: ${userEmail}`);
+      alert(`Đã xóa user: ${userEmail}`);
       await loadUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -342,9 +342,9 @@ export default function UsersPage() {
         if (error) throw error;
 
         console.log('User updated successfully');
-        alert(`Da cap nhat user: ${userData.email}`);
+        alert(`Đã cập nhật user: ${userData.email}`);
       } else {
-        alert('Chuc nang tao user moi chua duoc implement.\n\nVui long tao user qua trang Settings.');
+        alert('Chức năng tạo user mới chưa được implement.\n\nVui lòng tạo user qua trang Settings.');
         return;
       }
 

@@ -29,7 +29,7 @@ export default function CalendarPage() {
   };
 
   const handleDeletePost = async (id) => {
-    if (!confirm('Xoa bai dang nay?')) return;
+    if (!confirm('Xóa bài đăng này?')) return;
 
     try {
       const { error } = await supabase
@@ -40,29 +40,29 @@ export default function CalendarPage() {
       if (error) throw error;
       loadScheduledPosts();
     } catch (err) {
-      alert('Loi: ' + err.message);
+      alert('Lỗi: ' + err.message);
     }
   };
 
   return (
     <div className="tab-content">
       <div className="content-header">
-        <h2>Lich Noi Dung</h2>
+        <h2>Lịch Nội Dung</h2>
         <button className="add-user-btn">
-          <Calendar size={16} /> Tao Bai Dang Moi
+          <Calendar size={16} /> Tạo Bài Đăng Mới
         </button>
       </div>
 
       {loading ? (
         <div className="admin-loading-state">
           <div className="spinner-large"></div>
-          <p>Dang tai lich...</p>
+          <p>Đang tải lịch...</p>
         </div>
       ) : scheduledPosts.length === 0 ? (
         <div className="admin-empty-state">
           <Calendar size={48} />
-          <h3>Chua co bai dang nao duoc len lich</h3>
-          <p>Tao bai dang va len lich dang tu dong</p>
+          <h3>Chưa có bài đăng nào được lên lịch</h3>
+          <p>Tạo bài đăng và lên lịch đăng tự động</p>
         </div>
       ) : (
         <div className="admin-calendar-list">
@@ -81,8 +81,8 @@ export default function CalendarPage() {
                 </div>
               </div>
               <div className="admin-calendar-actions">
-                <button className="action-btn edit">Sua</button>
-                <button className="action-btn delete" onClick={() => handleDeletePost(post.id)}>Xoa</button>
+                <button className="action-btn edit">Sửa</button>
+                <button className="action-btn delete" onClick={() => handleDeletePost(post.id)}>Xóa</button>
               </div>
             </div>
           ))}

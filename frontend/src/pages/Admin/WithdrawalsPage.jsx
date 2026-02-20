@@ -65,7 +65,7 @@ export default function WithdrawalsPage() {
   };
 
   const handleApproveWithdrawal = async (withdrawal) => {
-    if (!confirm(`Duyet yeu cau rut ${formatCurrency(withdrawal.amount)} cho ${withdrawal.users?.email}?`)) {
+    if (!confirm(`Duyệt yêu cầu rút ${formatCurrency(withdrawal.amount)} cho ${withdrawal.users?.email}?`)) {
       return;
     }
 
@@ -82,11 +82,11 @@ export default function WithdrawalsPage() {
         amount: withdrawal.amount
       });
 
-      alert('Da duyet yeu cau rut tien!');
+      alert('Đã duyệt yêu cầu rút tiền!');
       await loadWithdrawals();
     } catch (error) {
       console.error('Error approving withdrawal:', error);
-      alert('Loi: ' + error.message);
+      alert('Lỗi: ' + error.message);
     }
   };
 
@@ -103,16 +103,16 @@ export default function WithdrawalsPage() {
 
       if (error) throw error;
 
-      alert('Dang xu ly chuyen khoan!');
+      alert('Đang xử lý chuyển khoản!');
       await loadWithdrawals();
     } catch (error) {
       console.error('Error processing withdrawal:', error);
-      alert('Loi: ' + error.message);
+      alert('Lỗi: ' + error.message);
     }
   };
 
   const handleCompleteWithdrawal = async (withdrawal) => {
-    const txId = prompt('Nhap ma giao dich ngan hang (Transaction ID):');
+    const txId = prompt('Nhập mã giao dịch ngân hàng (Transaction ID):');
     if (!txId) return;
 
     try {
@@ -129,16 +129,16 @@ export default function WithdrawalsPage() {
         transaction_id: txId
       });
 
-      alert('Da hoan tat chuyen khoan!');
+      alert('Đã hoàn tất chuyển khoản!');
       await loadWithdrawals();
     } catch (error) {
       console.error('Error completing withdrawal:', error);
-      alert('Loi: ' + error.message);
+      alert('Lỗi: ' + error.message);
     }
   };
 
   const handleRejectWithdrawal = async (withdrawal) => {
-    const reason = prompt('Ly do tu choi yeu cau rut tien:');
+    const reason = prompt('Lý do từ chối yêu cầu rút tiền:');
     if (!reason) return;
 
     try {
@@ -155,18 +155,18 @@ export default function WithdrawalsPage() {
         reason: reason
       });
 
-      alert('Da tu choi yeu cau rut tien!');
+      alert('Đã từ chối yêu cầu rút tiền!');
       await loadWithdrawals();
     } catch (error) {
       console.error('Error rejecting withdrawal:', error);
-      alert('Loi: ' + error.message);
+      alert('Lỗi: ' + error.message);
     }
   };
 
   return (
     <div className="tab-content">
       <div className="content-header">
-        <h2>Quan Ly Yeu Cau Rut Tien</h2>
+        <h2>Quản Lý Yêu Cầu Rút Tiền</h2>
         <div className="filter-buttons">
           {['all', 'pending', 'approved', 'processing', 'completed', 'rejected'].map(filter => (
             <button
@@ -174,12 +174,12 @@ export default function WithdrawalsPage() {
               className={`filter-btn ${withdrawalFilter === filter ? 'active' : ''}`}
               onClick={() => setWithdrawalFilter(filter)}
             >
-              {filter === 'all' && 'Tat ca'}
-              {filter === 'pending' && 'Cho duyet'}
-              {filter === 'approved' && 'Da duyet'}
-              {filter === 'processing' && 'Dang xu ly'}
-              {filter === 'completed' && 'Hoan tat'}
-              {filter === 'rejected' && 'Tu choi'}
+              {filter === 'all' && 'Tất cả'}
+              {filter === 'pending' && 'Chờ duyệt'}
+              {filter === 'approved' && 'Đã duyệt'}
+              {filter === 'processing' && 'Đang xử lý'}
+              {filter === 'completed' && 'Hoàn tất'}
+              {filter === 'rejected' && 'Từ chối'}
             </button>
           ))}
         </div>
@@ -188,15 +188,15 @@ export default function WithdrawalsPage() {
       {withdrawalsLoading && (
         <div className="admin-loading-state">
           <div className="spinner-large"></div>
-          <p>Dang tai danh sach yeu cau...</p>
+          <p>Đang tải danh sách yêu cầu...</p>
         </div>
       )}
 
       {!withdrawalsLoading && withdrawals.length === 0 && (
         <div className="admin-empty-state">
           <div className="empty-icon"><Wallet size={48} /></div>
-          <h3>Khong co yeu cau rut tien nao</h3>
-          <p>Chua co yeu cau rut tien nao {withdrawalFilter !== 'all' ? `o trang thai "${withdrawalFilter}"` : ''}</p>
+          <h3>Không có yêu cầu rút tiền nào</h3>
+          <p>Chưa có yêu cầu rút tiền nào {withdrawalFilter !== 'all' ? `ở trạng thái "${withdrawalFilter}"` : ''}</p>
         </div>
       )}
 
@@ -210,11 +210,11 @@ export default function WithdrawalsPage() {
                   <span className="amount">{formatCurrency(wd.amount)}</span>
                 </div>
                 <span className={`status-badge ${wd.status}`}>
-                  {wd.status === 'pending' && <><Clock size={12} /> Cho duyet</>}
-                  {wd.status === 'approved' && <><CheckCircle size={12} /> Da duyet</>}
-                  {wd.status === 'processing' && <><RefreshCw size={12} /> Dang xu ly</>}
-                  {wd.status === 'completed' && <><CheckCircle size={12} /> Hoan tat</>}
-                  {wd.status === 'rejected' && <><XCircle size={12} /> Tu choi</>}
+                  {wd.status === 'pending' && <><Clock size={12} /> Chờ duyệt</>}
+                  {wd.status === 'approved' && <><CheckCircle size={12} /> Đã duyệt</>}
+                  {wd.status === 'processing' && <><RefreshCw size={12} /> Đang xử lý</>}
+                  {wd.status === 'completed' && <><CheckCircle size={12} /> Hoàn tất</>}
+                  {wd.status === 'rejected' && <><XCircle size={12} /> Từ chối</>}
                 </span>
               </div>
 
@@ -223,7 +223,7 @@ export default function WithdrawalsPage() {
                   {wd.users?.full_name?.charAt(0) || wd.users?.email?.charAt(0) || '?'}
                 </div>
                 <div className="user-details">
-                  <div className="user-name">{wd.users?.full_name || 'Chua co ten'}</div>
+                  <div className="user-name">{wd.users?.full_name || 'Chưa có tên'}</div>
                   <div className="user-email">{wd.users?.email}</div>
                   <div className="user-role">
                     <span className={`role-badge ${wd.users?.partner_role}`}>
@@ -236,7 +236,7 @@ export default function WithdrawalsPage() {
               <div className="wd-bank-info">
                 <div className="bank-item">
                   <Building size={14} />
-                  <span className="label">Ngan hang:</span>
+                  <span className="label">Ngân hàng:</span>
                   <span className="value">{wd.bank_name}</span>
                 </div>
                 <div className="bank-item">
@@ -245,38 +245,38 @@ export default function WithdrawalsPage() {
                   <span className="value">{wd.bank_account_number}</span>
                   <button className="copy-btn" onClick={() => {
                     navigator.clipboard.writeText(wd.bank_account_number);
-                    alert('Da copy STK!');
+                    alert('Đã copy STK!');
                   }}>
                     <Copy size={12} />
                   </button>
                 </div>
                 <div className="bank-item">
                   <User size={14} />
-                  <span className="label">Chu TK:</span>
+                  <span className="label">Chủ TK:</span>
                   <span className="value">{wd.bank_account_name}</span>
                 </div>
               </div>
 
               <div className="wd-dates">
                 <div className="date-item">
-                  <span className="label">Ngay tao:</span>
+                  <span className="label">Ngày tạo:</span>
                   <span className="value">{formatDate(wd.created_at)}</span>
                 </div>
                 {wd.approved_at && (
                   <div className="date-item">
-                    <span className="label">Ngay duyet:</span>
+                    <span className="label">Ngày duyệt:</span>
                     <span className="value">{formatDate(wd.approved_at)}</span>
                   </div>
                 )}
                 {wd.processed_at && (
                   <div className="date-item">
-                    <span className="label">Ngay xu ly:</span>
+                    <span className="label">Ngày xử lý:</span>
                     <span className="value">{formatDate(wd.processed_at)}</span>
                   </div>
                 )}
                 {wd.completed_at && (
                   <div className="date-item">
-                    <span className="label">Ngay hoan tat:</span>
+                    <span className="label">Ngày hoàn tất:</span>
                     <span className="value">{formatDate(wd.completed_at)}</span>
                   </div>
                 )}
@@ -285,14 +285,14 @@ export default function WithdrawalsPage() {
               {wd.transaction_id && (
                 <div className="wd-transaction">
                   <CheckCircle size={14} />
-                  <span>Ma GD: {wd.transaction_id}</span>
+                  <span>Mã GD: {wd.transaction_id}</span>
                 </div>
               )}
 
               {wd.rejection_reason && (
                 <div className="wd-rejection">
                   <AlertCircle size={14} />
-                  <span>Ly do tu choi: {wd.rejection_reason}</span>
+                  <span>Lý do từ chối: {wd.rejection_reason}</span>
                 </div>
               )}
 
@@ -303,13 +303,13 @@ export default function WithdrawalsPage() {
                       className="action-btn approve"
                       onClick={() => handleApproveWithdrawal(wd)}
                     >
-                      <CheckCircle size={14} /> Duyet
+                      <CheckCircle size={14} /> Duyệt
                     </button>
                     <button
                       className="action-btn reject"
                       onClick={() => handleRejectWithdrawal(wd)}
                     >
-                      <Ban size={14} /> Tu choi
+                      <Ban size={14} /> Từ chối
                     </button>
                   </>
                 )}
@@ -318,7 +318,7 @@ export default function WithdrawalsPage() {
                     className="action-btn process"
                     onClick={() => handleProcessWithdrawal(wd)}
                   >
-                    <RefreshCw size={14} /> Bat dau xu ly
+                    <RefreshCw size={14} /> Bắt đầu xử lý
                   </button>
                 )}
                 {wd.status === 'processing' && (
@@ -326,7 +326,7 @@ export default function WithdrawalsPage() {
                     className="action-btn complete"
                     onClick={() => handleCompleteWithdrawal(wd)}
                   >
-                    <CheckCircle size={14} /> Hoan tat chuyen khoan
+                    <CheckCircle size={14} /> Hoàn tất chuyển khoản
                   </button>
                 )}
               </div>

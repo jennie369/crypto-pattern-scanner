@@ -60,7 +60,7 @@ export default function ApplicationsPage() {
   };
 
   const handleApproveApplication = async (application) => {
-    if (!confirm(`Duyet don dang ky ${application.application_type?.toUpperCase()} cho ${application.users?.email}?`)) {
+    if (!confirm(`Duyệt đơn đăng ký ${application.application_type?.toUpperCase()} cho ${application.users?.email}?`)) {
       return;
     }
 
@@ -78,16 +78,16 @@ export default function ApplicationsPage() {
         affiliate_code: data.affiliate_code
       });
 
-      alert(`Da duyet don! Ma affiliate: ${data.affiliate_code}`);
+      alert(`Đã duyệt đơn! Mã affiliate: ${data.affiliate_code}`);
       await loadApplications();
     } catch (error) {
       console.error('Error approving application:', error);
-      alert('Loi: ' + error.message);
+      alert('Lỗi: ' + error.message);
     }
   };
 
   const handleRejectApplication = async (application) => {
-    const reason = prompt('Ly do tu choi don dang ky:');
+    const reason = prompt('Lý do từ chối đơn đăng ký:');
     if (!reason) return;
 
     try {
@@ -103,18 +103,18 @@ export default function ApplicationsPage() {
         reason: reason
       });
 
-      alert('Da tu choi don dang ky!');
+      alert('Đã từ chối đơn đăng ký!');
       await loadApplications();
     } catch (error) {
       console.error('Error rejecting application:', error);
-      alert('Loi: ' + error.message);
+      alert('Lỗi: ' + error.message);
     }
   };
 
   return (
     <div className="tab-content">
       <div className="content-header">
-        <h2>Quan Ly Don Dang Ky Affiliate/CTV</h2>
+        <h2>Quản Lý Đơn Đăng Ký Affiliate/CTV</h2>
         <div className="filter-buttons">
           {['all', 'pending', 'approved', 'rejected'].map(filter => (
             <button
@@ -122,10 +122,10 @@ export default function ApplicationsPage() {
               className={`filter-btn ${applicationFilter === filter ? 'active' : ''}`}
               onClick={() => setApplicationFilter(filter)}
             >
-              {filter === 'all' && 'Tat ca'}
-              {filter === 'pending' && 'Cho duyet'}
-              {filter === 'approved' && 'Da duyet'}
-              {filter === 'rejected' && 'Tu choi'}
+              {filter === 'all' && 'Tất cả'}
+              {filter === 'pending' && 'Chờ duyệt'}
+              {filter === 'approved' && 'Đã duyệt'}
+              {filter === 'rejected' && 'Từ chối'}
             </button>
           ))}
         </div>
@@ -134,15 +134,15 @@ export default function ApplicationsPage() {
       {applicationsLoading && (
         <div className="admin-loading-state">
           <div className="spinner-large"></div>
-          <p>Dang tai danh sach don...</p>
+          <p>Đang tải danh sách đơn...</p>
         </div>
       )}
 
       {!applicationsLoading && applications.length === 0 && (
         <div className="admin-empty-state">
           <div className="empty-icon"><FileText size={48} /></div>
-          <h3>Khong co don dang ky nao</h3>
-          <p>Chua co don dang ky Affiliate/CTV nao {applicationFilter !== 'all' ? `o trang thai "${applicationFilter}"` : ''}</p>
+          <h3>Không có đơn đăng ký nào</h3>
+          <p>Chưa có đơn đăng ký Affiliate/CTV nào {applicationFilter !== 'all' ? `ở trạng thái "${applicationFilter}"` : ''}</p>
         </div>
       )}
 
@@ -160,9 +160,9 @@ export default function ApplicationsPage() {
                     )}
                   </span>
                   <span className={`status-badge ${app.status}`}>
-                    {app.status === 'pending' && <><Clock size={12} /> Cho duyet</>}
-                    {app.status === 'approved' && <><CheckCircle size={12} /> Da duyet</>}
-                    {app.status === 'rejected' && <><XCircle size={12} /> Tu choi</>}
+                    {app.status === 'pending' && <><Clock size={12} /> Chờ duyệt</>}
+                    {app.status === 'approved' && <><CheckCircle size={12} /> Đã duyệt</>}
+                    {app.status === 'rejected' && <><XCircle size={12} /> Từ chối</>}
                   </span>
                 </div>
                 <div className="app-date">{formatDate(app.created_at)}</div>
@@ -173,7 +173,7 @@ export default function ApplicationsPage() {
                   {app.users?.full_name?.charAt(0) || app.users?.email?.charAt(0) || '?'}
                 </div>
                 <div className="user-details">
-                  <div className="user-name">{app.users?.full_name || 'Chua co ten'}</div>
+                  <div className="user-name">{app.users?.full_name || 'Chưa có tên'}</div>
                   <div className="user-email">{app.users?.email}</div>
                 </div>
               </div>
@@ -181,23 +181,23 @@ export default function ApplicationsPage() {
               {app.application_type === 'ctv' && (
                 <div className="app-extra-info">
                   <div className="info-item">
-                    <span className="label">Khoa hoc da mua:</span>
-                    <span className="value">{app.courses_owned || 'Chua ro'}</span>
+                    <span className="label">Khóa học đã mua:</span>
+                    <span className="value">{app.courses_owned || 'Chưa rõ'}</span>
                   </div>
                   <div className="info-item">
-                    <span className="label">Kenh marketing:</span>
-                    <span className="value">{app.marketing_channels || 'Chua ro'}</span>
+                    <span className="label">Kênh marketing:</span>
+                    <span className="value">{app.marketing_channels || 'Chưa rõ'}</span>
                   </div>
                   <div className="info-item">
-                    <span className="label">Doanh so du kien/thang:</span>
-                    <span className="value">{app.estimated_monthly_sales || 'Chua ro'}</span>
+                    <span className="label">Doanh số dự kiến/tháng:</span>
+                    <span className="value">{app.estimated_monthly_sales || 'Chưa rõ'}</span>
                   </div>
                 </div>
               )}
 
               {app.reason && (
                 <div className="app-reason">
-                  <span className="label">Ly do dang ky:</span>
+                  <span className="label">Lý do đăng ký:</span>
                   <p>{app.reason}</p>
                 </div>
               )}
@@ -205,7 +205,7 @@ export default function ApplicationsPage() {
               {app.rejection_reason && (
                 <div className="app-rejection">
                   <AlertCircle size={14} />
-                  <span>Ly do tu choi: {app.rejection_reason}</span>
+                  <span>Lý do từ chối: {app.rejection_reason}</span>
                 </div>
               )}
 
@@ -215,13 +215,13 @@ export default function ApplicationsPage() {
                     className="action-btn approve"
                     onClick={() => handleApproveApplication(app)}
                   >
-                    <CheckCircle size={14} /> Duyet
+                    <CheckCircle size={14} /> Duyệt
                   </button>
                   <button
                     className="action-btn reject"
                     onClick={() => handleRejectApplication(app)}
                   >
-                    <Ban size={14} /> Tu choi
+                    <Ban size={14} /> Từ chối
                   </button>
                 </div>
               )}
@@ -229,7 +229,7 @@ export default function ApplicationsPage() {
               {app.status === 'approved' && app.users?.partner_role && (
                 <div className="app-result">
                   <CheckCircle size={14} />
-                  <span>Da tro thanh {app.users.partner_role?.toUpperCase()}</span>
+                  <span>Đã trở thành {app.users.partner_role?.toUpperCase()}</span>
                 </div>
               )}
             </div>

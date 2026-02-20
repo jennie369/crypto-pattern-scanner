@@ -184,7 +184,7 @@ export default function AnalyticsPage() {
         <div className="analytics-card">
           <div className="card-icon" style={{ color: '#F6465D' }}><FileText size={32} /></div>
           <div className="card-content">
-            <div className="card-label">Don cho duyet</div>
+            <div className="card-label">Đơn chờ duyệt</div>
             <div className="card-value">{analytics.pendingApplications}</div>
           </div>
         </div>
@@ -192,7 +192,7 @@ export default function AnalyticsPage() {
         <div className="analytics-card">
           <div className="card-icon" style={{ color: '#F6465D' }}><Wallet size={32} /></div>
           <div className="card-content">
-            <div className="card-label">Rut tien cho xu ly</div>
+            <div className="card-label">Rút tiền chờ xử lý</div>
             <div className="card-value">{analytics.pendingWithdrawals}</div>
           </div>
         </div>
@@ -200,7 +200,7 @@ export default function AnalyticsPage() {
         <div className="analytics-card">
           <div className="card-icon" style={{ color: '#0ECB81' }}><DollarSign size={32} /></div>
           <div className="card-content">
-            <div className="card-label">Tong Commission</div>
+            <div className="card-label">Tổng Commission</div>
             <div className="card-value" style={{ fontSize: '20px' }}>{formatCurrency(analytics.totalCommissions)}</div>
           </div>
         </div>
