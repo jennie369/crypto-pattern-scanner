@@ -1,6 +1,6 @@
 # Troubleshooting Tips
 
-Generalized engineering rules extracted from real bugs found during Phase 1-16 audits.
+Generalized engineering rules extracted from real bugs found during Phase 1-18b audits.
 
 ---
 
@@ -4148,3 +4148,311 @@ React Navigation requires exact string match for navigator/screen names. If `Tab
 1. **Grep for all cross-tab navigations**: `grep -rn "navigate.*Tab" screens/ components/` — check each against TabNavigator.js registered names
 2. **Audit TabNavigator.js**: List all registered tab names and search for mismatches across the codebase
 3. **Test all deep-link / cross-tab navigation paths**: FAQ actions, notification handlers, deep links — all are common sources of tab name mismatches
+
+---
+
+# SECTION H: PHASE 18b — CHATBOT, TIER RESOLUTION, RENDERING
+
+---
+
+## Rule 66: JavaScript `||` Operator Picks First Truthy String — Wrong Tier Resolution
+**Source:** Phase 18b — Tier 1 user sees lock icons on Pro (Tier 1) templates because `scanner_tier || chatbot_tier` picks 'FREE' (truthy string) over 'TIER1'
+
+### What Failed
+`AuthContext.js` computed `userTier` as:
+```javascript
+const userTier = scanner_tier || chatbot_tier || 'FREE';
+```
+When `scanner_tier = 'FREE'` and `chatbot_tier = 'TIER1'`, `userTier` resolved to `'FREE'` because `'FREE'` is a truthy string — `||` short-circuits and never reaches `chatbot_tier`.
+
+### Why It Failed
+JavaScript's `||` returns the first truthy operand. All non-empty strings are truthy, including `'FREE'`. The developer assumed `||` would skip `'FREE'` like it skips `null`/`undefined`, but it doesn't:
+```javascript
+'FREE' || 'TIER1'   // → 'FREE' (wrong — 'FREE' is truthy)
+null   || 'TIER1'   // → 'TIER1' (correct — null is falsy)
+''     || 'TIER1'   // → 'TIER1' (correct — empty string is falsy)
+```
+
+### What Guard Was Added
+Replaced `||` chain with a `useMemo` that compares tier ranks numerically:
+```javascript
+const chatbotTier = useMemo(() => {
+  if (isAdmin || isManager) return 'ADMIN';
+  const ct = (authProfile?.chatbot_tier || 'FREE').toUpperCase();
+  const st = (authProfile?.scanner_tier || 'FREE').toUpperCase();
+  const tierRank = { 'FREE': 0, 'TIER1': 1, 'TIER2': 2, 'TIER3': 3 };
+  return (tierRank[ct] || 0) >= (tierRank[st] || 0) ? ct : st;
+}, [isAdmin, isManager, authProfile?.chatbot_tier, authProfile?.scanner_tier]);
+```
+
+### How to Detect Similar Issues
+1. **Grep for `||` chains on string fields**: `grep -rn "scanner_tier\|chatbot_tier\|user_tier.*||" src/` — any `tierA || tierB` pattern is vulnerable
+2. **Check for "lowest common denominator" tier**: If a user has different tiers across products, `||` always picks the FIRST one, not the highest
+3. **Test with mixed tiers**: Set `scanner_tier = 'FREE'` and `chatbot_tier = 'TIER2'` in profiles → verify the UI grants Tier 2 access
+4. **Grep for `|| 'FREE'` or `|| 'free'`**: `grep -rn "|| 'FREE'\||| 'free'" src/` — check if the fallback masks a higher tier from another field
+
+### Code smell indicators
+- `fieldA || fieldB` where both are non-nullable string columns with meaningful default values
+- Tier/role resolution using `||` instead of explicit rank comparison
+- Admin user seeing restricted features (admin tier stored as 'ADMIN' in one field but `||` picks 'FREE' from another field first)
+
+---
+
+## Rule 67: React Native Cannot Render `<View>` Inside `<Text>` — Table Layout Corruption
+**Source:** Phase 18b — Markdown tables (View-based grid) nested inside Text wrapper rendered as single vertical column with no borders
+
+### What Failed
+`MessageBubble.js` rendered assistant messages inside a `<Text>` wrapper:
+```jsx
+<Text style={[styles.text, styles.textAssistant]}>
+  {renderMarkdownText(message.text)}  {/* Returns View elements for tables */}
+</Text>
+```
+When `renderMarkdownText()` returned `<View>` elements (for table rows/cells), React Native silently corrupted the layout — stacking everything vertically with no flex/border support.
+
+### Why It Failed
+React Native's `<Text>` component uses a text layout engine. Child `<View>` elements inside `<Text>` lose all flexbox behavior:
+- `flexDirection: 'row'` is ignored (columns stack vertically)
+- `borderWidth` is ignored (no visible borders)
+- `flex: 1` is ignored (columns don't distribute width)
+- No error or warning is thrown — it silently degrades
+
+This is unlike web HTML where `<div>` inside `<span>` triggers a warning and usually still renders.
+
+### What Guard Was Added
+Changed assistant message wrapper from `<Text>` to `<View>`:
+```jsx
+// BEFORE (broken for tables):
+<Text style={[styles.text, styles.textAssistant]}>
+  {renderMarkdownText(message.text)}
+</Text>
+
+// AFTER (supports both text and View elements):
+<View>
+  {renderMarkdownText(message.text)}
+</View>
+```
+Also removed trailing `'\n'` from each `<Text>` child (in a `<View>` parent, `<Text>` is block-level, so newlines cause double spacing).
+
+### How to Detect Similar Issues
+1. **Grep for View returns inside Text wrappers**: Look for functions called inside `<Text>` that return `<View>`:
+   ```bash
+   grep -B5 "renderMarkdown\|renderContent\|renderFormatted" src/ --include='*.js' | grep "<Text"
+   ```
+2. **Test table/grid rendering**: Send a message with `| col1 | col2 |` pipe syntax — verify columns are side-by-side, not stacked
+3. **Check for silent layout issues**: If a View component renders but looks "wrong" (no borders, no flex), check if its ancestor is a `<Text>`
+4. **Search for `<Text>` that contains dynamic content**: `grep -rn "<Text[^>]*>{.*render" src/` — any render function inside Text is suspect
+
+### Code smell indicators
+- `<Text>{renderSomething()}</Text>` where `renderSomething()` might return `<View>` elements
+- Markdown/rich-text renderer used inside a `<Text>` wrapper instead of a `<View>` wrapper
+- Tables/grids that render correctly on web but break on React Native
+- Layout elements (flex, border, padding) that appear in code but are invisible in the UI
+
+---
+
+## Rule 68: useCallback Closure Scope — Options Not Available in Nested Function
+**Source:** Phase 18b — `options.courseTags` referenced inside `generateResponse()` which has no `options` parameter — always undefined, silently caught
+
+### What Failed
+`handleSend` received `options` parameter and called `generateResponse()`. Inside `generateResponse()`, code referenced `options.courseTags` expecting to read the FAQ's course tags. But `generateResponse` has its own function signature `(userMessage, currentMessages)` — no `options` parameter:
+```javascript
+const handleSend = useCallback(async (text, options = {}) => {
+  // ...
+  const response = await generateResponse(text, messages);
+  // generateResponse has NO access to `options`
+}, [...]);
+
+const generateResponse = useCallback(async (userMessage, currentMessages) => {
+  // options.courseTags → ReferenceError (or undefined in scope — silent failure)
+}, [...]);
+```
+
+### Why It Failed
+JavaScript closures capture variables from their LEXICAL scope (where the function is defined), not from their CALL scope (where the function is called). `generateResponse` is defined at component level, not inside `handleSend`. Even though `handleSend` calls `generateResponse`, the `options` variable from `handleSend`'s parameter is NOT accessible inside `generateResponse`.
+
+The bug was silent because:
+1. `options` might exist as an unrelated variable in outer scope (or be `undefined`)
+2. `options?.courseTags` safely returns `undefined` (optional chaining)
+3. The `undefined` value triggers the fallback code path, which uses the wrong keyword-based tags
+
+### What Guard Was Added
+Moved courseTags handling to `handleSend` scope where `options` is available:
+```javascript
+const handleSend = useCallback(async (text, options = {}) => {
+  const response = await generateResponse(text, messages);
+  // courseTags handling HERE — in handleSend scope where options is accessible
+  if (options?.courseTags?.length > 0) {
+    products = await shopifyService.getProductsByTags(options.courseTags, 2, false);
+  }
+}, [...]);
+```
+
+### How to Detect Similar Issues
+1. **Check function signatures**: When referencing a variable in a nested function, verify it's either (a) a parameter of that function, (b) a React state/ref, or (c) a module-level variable
+2. **Grep for `options.` inside useCallback**: `grep -rn "options\." src/` — if `options` is not in the function's parameter list or dependency array, it's a closure bug
+3. **Test with console.log**: Add `console.log('options:', options)` at the start of the inner function — if it prints `undefined`, the variable is not in scope
+4. **Look for silent fallbacks**: `if (options?.foo) { ... } else { fallback() }` — if `options` is always undefined, the fallback ALWAYS runs, masking the bug
+
+### Code smell indicators
+- Variable referenced in inner function that's only a parameter of the outer function
+- `useCallback` that references variables not in its dependency array
+- Optional chaining (`?.`) on a variable that should always exist (masking scope bugs)
+- "Fallback always triggers" — the primary code path never executes
+
+---
+
+## Rule 69: Module-Level Singleton Caches Must Clear on Logout (Extended)
+**Source:** Phase 18b — Admin logged in after Tier 1 user, saw Tier 1 dashboard/courses because 7 module-level caches survived logout
+
+### What Failed
+After logging out from a Tier 1 account and logging in as an admin:
+1. AccountScreen showed Tier 1 profile data (5-minute `accountCache` not cleared)
+2. CourseSection showed 5 enrolled courses from Tier 1 (AsyncStorage `@gem_enrollments` not user-scoped)
+3. ShopScreen showed stale product data
+4. courseService in-memory caches (`_coursesCache`, `_enrollmentsCache`, `_progressCache`) held old user's data
+
+### Why It Failed
+This extends **Rule 3** (Module-Level State Bleed). The original Rule 3 identified `forumCache` and `notificationsCache` as problematic singletons that survive logout. Phase 18b found 7 MORE caches with the same bug:
+
+| Cache | Location | Type |
+|-------|----------|------|
+| `accountCache` | AccountScreen.js | Module-level object |
+| `shopCache` (local state) | ShopScreen.js | Module-level variable |
+| `courseCache` (local state) | CourseSection.js | Module-level variable |
+| `visionBoardCache` | VisionBoardScreen.js | Module-level variable |
+| `_coursesCache` | courseService.js | Module-level Map |
+| `_enrollmentsCache` | courseService.js | Module-level array |
+| `_progressCache` | courseService.js | Module-level Map |
+
+Each cache had no `clearXxxCache()` function, so `performFullCleanup()` in AuthContext couldn't reset them.
+
+### What Guard Was Added
+1. **Added `clearXxxCache()` exports** to all 5 files (7 caches total)
+2. **Called from `performFullCleanup()`** in AuthContext via defensive `require()?.()`:
+```javascript
+// AuthContext.js — performFullCleanup()
+try { const { clearAccountCache } = require('../screens/tabs/AccountScreen'); clearAccountCache?.(); } catch {}
+try { const { clearShopCache } = require('../screens/Shop/ShopScreen'); clearShopCache?.(); } catch {}
+try { const { clearCourseCache } = require('../screens/Shop/components/CourseSection'); clearCourseCache?.(); } catch {}
+try { const { clearVisionBoardCache } = require('../screens/VisionBoard/VisionBoardScreen'); clearVisionBoardCache?.(); } catch {}
+// courseService already had clearAllData() which now also calls clearInMemoryCache()
+```
+3. **CourseContext resets all arrays on user=null**: When `user` becomes null (logout), enrollments/courses/progress state arrays reset to `[]`
+
+### How to Detect Similar Issues
+1. **Grep for module-level `let` variables in screen/service files**:
+   ```bash
+   grep -rn "^let \|^const .*= \[\]\|^const .*= {}\|^const .*= null" src/screens/ src/services/ --include='*.js' | grep -v "import\|require\|Style\|COLORS"
+   ```
+   Any module-level mutable variable that stores user data is a potential bleed.
+
+2. **Check `performFullCleanup()` coverage**: List all cache-clearing functions called in `performFullCleanup()` vs all module-level caches in the app. Any cache NOT cleared in `performFullCleanup()` will bleed.
+
+3. **Test logout→login with different user**: Log in as User A, navigate to all tabs to populate caches, logout, login as User B, check each tab for User A's data.
+
+4. **Grep for AsyncStorage keys without user ID**: `grep -rn "AsyncStorage.*@gem_" src/` — keys like `@gem_enrollments` are shared across users. Should be `@gem_enrollments_${userId}` or cleared on logout.
+
+### Code smell indicators
+- Module-level `let cache = null` or `let lastFetch = 0` in screen/service files
+- AsyncStorage keys without user ID suffix
+- `performFullCleanup()` that doesn't call every cache's clear function
+- "New user sees old user's data" reported after multi-account testing
+
+---
+
+## Rule 70: FAQ Action Handlers Must Pass Domain-Specific Tags Through Options
+**Source:** Phase 18b — Asking about "Khóa Tư Duy Triệu Phú" shows crystal product cards instead of the correct course
+
+### What Failed
+FAQ question data included `courseTags: ['Tư Duy Triệu Phú', 'Manifest', 'Khóa học']` — correct Shopify product tags for the specific course. But when the question was selected:
+1. `handleFAQQuestionSelect` sent the question's `prompt` text to `handleSend()`
+2. `handleSend()` extracted product tags from the prompt TEXT using keyword matching
+3. `shopRecommendationService.extractTagsFromContext("Giới thiệu Khóa Tư Duy Triệu Phú")` matched `manifest` → crystal tags, `tiền bạc` → crystal tags
+4. Product cards showed crystals instead of the trading course
+
+The FAQ question's explicit `courseTags` were NEVER passed to the product recommendation system.
+
+### Why It Failed
+Two independent product tag systems existed:
+1. **FAQ-level tags**: `courseTags` in FAQPanelData.js — accurate, hand-mapped to Shopify
+2. **Keyword extraction**: `shopRecommendationService.extractTagsFromContext()` — generic, maps Vietnamese keywords to crystal/category tags
+
+When a FAQ question triggered a chat message, only the TEXT was forwarded. The structured `courseTags` metadata was lost at the handoff point.
+
+### What Guard Was Added
+1. **Pass courseTags through handleSend options**:
+```javascript
+case 'course_detail':
+  handleSend(question.prompt, { skipFormDetection: true, courseTags: question.courseTags || [] });
+  break;
+```
+
+2. **Prioritize courseTags over keyword extraction** in handleSend's product section:
+```javascript
+if (options?.courseTags?.length > 0) {
+  products = await shopifyService.getProductsByTags(options.courseTags, 2, false);
+} else {
+  // Fallback to keyword extraction
+}
+```
+
+3. **Added course-specific keywords** to `shopRecommendationService.CONTEXT_TO_TAGS` as a safety net
+
+### How to Detect Similar Issues
+1. **Audit FAQ actions that trigger product cards**: Check if `handleFAQQuestionSelect` passes all metadata (tags, courseId, etc.) through to the product system
+2. **Test specific course questions**: Ask about each course by name → verify the product card matches the course, not generic crystals
+3. **Grep for `courseTags` usage**: `grep -rn "courseTags" src/` — ensure tags flow from FAQPanelData → handleFAQQuestionSelect → handleSend → product fetch
+4. **Check keyword→tag mapping**: Search for course-specific terms in `CONTEXT_TO_TAGS` — if a course name is missing, keyword extraction will fall back to generic tags
+
+### Code smell indicators
+- Structured metadata (tags, IDs) defined in data file but only text/prompt forwarded to handler
+- Two systems for the same purpose (FAQ tags vs keyword extraction) with no priority mechanism
+- Generic keyword matcher that overlaps with domain-specific terms (Vietnamese course names containing crystal-related words)
+- FAQ action that calls `handleSend(text)` without passing through the question's metadata as options
+
+---
+
+## Rule 71: Concurrent State Setters Race — Never Overwrite Good Data with Null
+
+**Source:** Phase 18b — Admin dashboard not showing, GemMaster shows "FREE" badge despite DB having `role='admin'`, `is_admin=true`, `scanner_tier='ADMIN'`, `chatbot_tier='ADMIN'`
+
+### What Failed
+AuthContext loads the user profile at startup via TWO concurrent paths:
+1. `loadSession()` calls `getUserProfile()` → `setProfile(profileData)`
+2. `onAuthStateChange(INITIAL_SESSION)` fires → also calls `getUserProfile()` → `setProfile(profileData)`
+
+Both paths call `setProfile(profileData)` unconditionally — even when `profileData` is null (timeout, error). If path A succeeds and sets the admin profile, but path B times out and calls `setProfile(null)`, the null overwrites the good profile. Result: `isAdmin = false`, `userTier = 'FREE'`, admin dashboard hidden.
+
+### Why It Was Hard to Find
+- DB data was confirmed correct (`role='admin'`, `is_admin=true`)
+- `getUserProfile()` does `select('*')` — fetches all columns
+- RLS policies allow authenticated SELECT with `qual=true`
+- `isAdmin` computation is comprehensive (5 conditions)
+- AccountScreen still showed "Gem Admin" name because it has its OWN profile fetch via `forumService.getUserProfile()` that succeeds later
+
+The symptom (wrong tier, hidden admin) pointed toward profile schema issues, but the root cause was a race between two async state setters.
+
+### What Guard Was Added
+```javascript
+// BEFORE (both paths):
+setProfile(profileData); // Overwrites even when null!
+
+// AFTER (both paths):
+if (profileData) {
+  setProfile(profileData);
+} else {
+  console.warn('[AuthContext] profileData is null — keeping existing profile');
+}
+```
+
+### How to Detect Similar Issues
+1. **Search for `setState(data)` after async with timeout**: Any `setState(x)` after a `Promise.race` timeout where `x` was initialized to `null` is a potential overwrite bug
+2. **Multiple concurrent paths setting same state**: If `loadX()` and `onEvent()` both call `setX()`, the last writer wins. If one fails, the state is corrupted
+3. **Profile appears correct in DB but wrong at runtime**: Always check if multiple code paths set the profile and if any can set it to null
+4. **Different screens show different data for same field**: One screen (AccountScreen) has its own fetch, another (GemMasterScreen) relies on AuthContext — inconsistency means AuthContext state was corrupted
+
+### Code smell indicators
+- `let data = null; try { data = await ...; } catch { } setState(data);` — null remains if catch fires
+- Two listeners/loaders that both call `setProfile()` without coordinating
+- `Promise.race` with timeout that initializes result to null and sets state unconditionally after

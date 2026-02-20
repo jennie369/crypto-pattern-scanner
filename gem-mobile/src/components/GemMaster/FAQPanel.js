@@ -16,9 +16,10 @@ import {
   Modal,
   Pressable,
 } from 'react-native';
-import { X, ChevronRight } from 'lucide-react-native';
+import { X, ChevronRight, Lock } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 import { getTopicById, getQuestionsForTopic } from './FAQPanelData';
+import { checkTemplateAccess } from '../../config/templateAccessControl';
 
 // Theme blue color for consistent styling
 const THEME_COLOR = COLORS.primary || '#8B5CF6';
@@ -39,6 +40,8 @@ const FAQPanel = ({
   topicId,
   onClose,
   onSelectQuestion,
+  userTier = 'free',
+  isAdmin = false,
 }) => {
   const slideAnim = useRef(new Animated.Value(PANEL_HEIGHT)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -135,27 +138,48 @@ const FAQPanel = ({
           contentContainerStyle={styles.questionsContent}
           keyboardShouldPersistTaps="always"
         >
-          {questions.map((question, index) => (
-            <React.Fragment key={question.id}>
-              <TouchableOpacity
-                style={styles.questionItem}
-                onPress={() => handleQuestionPress(question)}
-                activeOpacity={0.6}
-              >
-                <Text style={styles.questionText} numberOfLines={2}>
-                  {question.text}
-                </Text>
-                <ChevronRight
-                  size={18}
-                  color={THEME_COLOR}
-                  style={styles.chevron}
-                />
-              </TouchableOpacity>
-              {index < questions.length - 1 && (
-                <View style={styles.questionDivider} />
-              )}
-            </React.Fragment>
-          ))}
+          {questions.map((question, index) => {
+            // Check tier access for template items
+            // Belt-and-suspenders: isAdmin prop bypasses ALL tier checks directly
+            const isLocked = isAdmin ? false : (
+              question.requiredTier
+                ? !checkTemplateAccess(question.templateId || question.requiredTier, userTier).allowed
+                : false
+            );
+
+            return (
+              <React.Fragment key={question.id}>
+                <TouchableOpacity
+                  style={styles.questionItem}
+                  onPress={() => handleQuestionPress(question)}
+                  activeOpacity={0.6}
+                >
+                  <Text style={[styles.questionText, isLocked && styles.questionTextLocked]} numberOfLines={2}>
+                    {question.text}
+                  </Text>
+                  {isLocked ? (
+                    <View style={styles.lockContainer}>
+                      {question.tierLabel && (
+                        <View style={styles.tierBadge}>
+                          <Text style={styles.tierBadgeText}>{question.tierLabel}</Text>
+                        </View>
+                      )}
+                      <Lock size={16} color={COLORS.textMuted || '#718096'} />
+                    </View>
+                  ) : (
+                    <ChevronRight
+                      size={18}
+                      color={THEME_COLOR}
+                      style={styles.chevron}
+                    />
+                  )}
+                </TouchableOpacity>
+                {index < questions.length - 1 && (
+                  <View style={styles.questionDivider} />
+                )}
+              </React.Fragment>
+            );
+          })}
         </ScrollView>
       </Animated.View>
     </Modal>
@@ -258,6 +282,25 @@ const styles = StyleSheet.create({
   },
   chevron: {
     opacity: 0.7,
+  },
+  questionTextLocked: {
+    opacity: 0.6,
+  },
+  lockContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  tierBadge: {
+    backgroundColor: 'rgba(255, 189, 89, 0.2)',
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  tierBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.gold || '#FFBD59',
   },
 });
 

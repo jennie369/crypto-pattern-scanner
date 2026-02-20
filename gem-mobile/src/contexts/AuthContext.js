@@ -384,6 +384,30 @@ export const AuthProvider = ({ children }) => {
       clearNotificationsCache?.();
     } catch (e) {}
 
+    // Phase 18b: Clear additional module-level caches (Rule 3: Module-Level State Bleed)
+    try {
+      const { clearAccountCache } = require('../screens/tabs/AccountScreen');
+      clearAccountCache?.();
+    } catch (e) {}
+    try {
+      const { clearShopCache } = require('../screens/Shop/ShopScreen');
+      clearShopCache?.();
+    } catch (e) {}
+    try {
+      const { clearCourseCache } = require('../screens/Shop/components/CourseSection');
+      clearCourseCache?.();
+    } catch (e) {}
+    try {
+      const { clearVisionBoardCache } = require('../screens/VisionBoard/VisionBoardScreen');
+      clearVisionBoardCache?.();
+    } catch (e) {}
+
+    // Phase 18b: Clear courseService in-memory + AsyncStorage caches
+    try {
+      const { courseService } = require('../services/courseService');
+      courseService.clearAllData();
+    } catch (e) {}
+
     // C3: Clear module-level user/session state to prevent cross-user bleed
     try { errorService.clearUserId(); } catch (e) {}
     try { clearEventSession(); } catch (e) {}
@@ -443,7 +467,13 @@ export const AuthProvider = ({ children }) => {
           } catch (budgetErr) {
             console.warn('[AuthContext] loadSession:', budgetErr.message, '— continuing with null profile');
           }
-          setProfile(profileData);
+          // Only update profile if we got data — never overwrite a good profile with null
+          // Race condition: onAuthStateChange may have already set a valid profile
+          if (profileData) {
+            setProfile(profileData);
+          } else {
+            console.warn('[AuthContext] loadSession: profileData is null — keeping existing profile');
+          }
           console.timeEnd('[AUTH] getUserProfile');
 
           // ⚡ DEBUG: Log admin fields
@@ -566,7 +596,13 @@ export const AuthProvider = ({ children }) => {
           } catch (budgetErr) {
             console.warn('[AuthContext] onAuthStateChange:', budgetErr.message);
           }
-          setProfile(profileData);
+          // Only update profile if we got data — never overwrite a good profile with null
+          // Race condition: loadSession may have already set a valid profile
+          if (profileData) {
+            setProfile(profileData);
+          } else {
+            console.warn('[AuthContext] onAuthStateChange: profileData is null — keeping existing profile');
+          }
 
           // ⚡ DEBUG: Log admin fields on auth change
           console.log('[AuthContext] Profile updated:', {

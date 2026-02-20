@@ -125,6 +125,7 @@ User clicks "Paper Trade" on pattern
 | 14 | — | Payment system: credit card orders lost (webhook filter), QR code cross-order bug (dangerous fallback), duplicate pending_course_access cleanup | `docs/Troubleshooting_Tips.md` Rules 53-54 |
 | 15 | — | Webhook tier upgrade: 5 bugs — early return skips tier processing, RPC writes to wrong table, column name mismatch, missing idempotency table, non-existent `tier_expires_at` column causes silent update failure | `docs/feature-phase15-webhook-tier-fix.md` |
 | 16 | — | Course page bugs: "Đã mở khóa" false display (tier check vs enrollment), preview mode sticky state blocking quizzes, hardcoded stats removal | `docs/Troubleshooting_Tips.md` Rules 64-65 |
+| 18b | — | GemMaster chatbot: Quick Select journal templates, tier-gating, course→product mapping, markdown table rendering, `||` tier resolution, View-inside-Text fix, 7 module-level cache clears on logout | `docs/Troubleshooting_Tips.md` Rules 66-70 |
 
 ## Documentation
 
@@ -136,7 +137,7 @@ User clicks "Paper Trade" on pattern
 | `docs/feature-phase9-startup-freeze-fix.md` | Phase 9 startup freeze fix (6 files, 4 root causes) |
 | `docs/feature-phase10-biometric-push-fix.md` | Phase 10 biometric identity + push dedup (5 files, 5 root causes) |
 | `docs/feature-phase15-webhook-tier-fix.md` | Phase 15 webhook tier upgrade fix (4 bugs, 2 edge functions, 1 migration) |
-| `docs/Troubleshooting_Tips.md` | 29 generalized engineering rules from Phase 1-15 bugs |
+| `docs/Troubleshooting_Tips.md` | 35+ generalized engineering rules from Phase 1-18b bugs |
 | `docs/SCANNER_TRADING_FEATURE_SPEC.md` | Complete Scanner/Trading feature specification (v4.1) |
 
 ## Database Migrations
@@ -195,7 +196,7 @@ One migration deployed to fix 4 bugs preventing tier upgrades from Shopify webho
 - **API**: Always Binance Futures API (`fapi.binance.com`), never Spot (`api.binance.com`)
 - **Affiliate ID**: Use `affiliate.user_id` (auth UUID), not `affiliate.id` (table UUID)
 - **Notifications**: Only ONE `setNotificationHandler` call (in InAppNotificationContext)
-- **Module caches**: Must clear on logout (forumCache, notificationsCache, etc.)
+- **Module caches**: Must clear on logout — `performFullCleanup()` calls 7+ `clearXxxCache()` exports (forumCache, notificationsCache, accountCache, shopCache, courseCache, visionBoardCache, courseService in-memory caches)
 - **RLS**: Every table must have RLS enabled + `service_role ALL` policy + user policies for client-accessible tables
 - **RPC names**: App code must call exact function names from live DB — verify with `SELECT proname FROM pg_proc`
 - **AbortController**: EVERY `fetch()` to external API must have AbortController timeout — not just Binance
@@ -206,3 +207,6 @@ One migration deployed to fix 4 bugs preventing tier upgrades from Shopify webho
 - **Webhook handlers**: Never `return` early after one concern — multi-purpose handlers must process all concerns (enrollment, tier upgrade, commission, logging) before returning
 - **Column names**: Always verify column names against actual schema (`information_schema.columns`) — PostgREST silently fails on unknown columns
 - **Profile tiers**: Always update `profiles` table directly — RPCs that write to `user_access` are legacy and the app reads from `profiles`
+- **Tier resolution**: Never use `tierA || tierB` — JavaScript `||` picks first truthy string (including `'FREE'`). Use rank comparison (`chatbotTier` useMemo in GemMasterScreen)
+- **View inside Text**: React Native silently corrupts `<View>` nested inside `<Text>` — no flex, no borders. Rich-text/table renderers must use `<View>` as parent, not `<Text>`
+- **Logout cache clearing**: Every module-level cache must export a `clearXxxCache()` function and be called from `performFullCleanup()` in AuthContext

@@ -15,7 +15,7 @@
  * - VoiceQuotaDisplay component
  */
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -193,7 +193,20 @@ const GemMasterScreen = ({ navigation, route }) => {
   } = useWebSocketChat({ autoConnect: true });
 
   // User & Tier from AuthContext — reactive to profile changes + app resume
-  const { user, profile: authProfile, isAdmin, userTier, refreshProfile } = useAuth();
+  const { user, profile: authProfile, isAdmin, isManager, userTier, refreshProfile } = useAuth();
+
+  // GemMaster-specific tier: use the HIGHER of chatbot_tier and scanner_tier.
+  // AuthContext's userTier uses (scanner_tier || chatbot_tier) which incorrectly
+  // picks 'FREE' scanner_tier over 'TIER1' chatbot_tier (both are truthy strings).
+  // Admin/Manager always get 'ADMIN' explicitly — never depend on userTier derivation.
+  const chatbotTier = useMemo(() => {
+    if (isAdmin || isManager) return 'ADMIN';
+    const ct = (authProfile?.chatbot_tier || 'FREE').toUpperCase();
+    const st = (authProfile?.scanner_tier || 'FREE').toUpperCase();
+    // Pick the higher tier: ADMIN > TIER3 > TIER2 > TIER1 > FREE
+    const tierRank = { 'FREE': 0, 'TIER1': 1, 'TIER2': 2, 'TIER3': 3, 'ADMIN': 99 };
+    return (tierRank[ct] || 0) >= (tierRank[st] || 0) ? ct : st;
+  }, [isAdmin, isManager, authProfile?.chatbot_tier, authProfile?.scanner_tier]);
 
   // Smart Triggers Hook (Day 25) - proactive AI engagement
   const {
@@ -806,6 +819,8 @@ const GemMasterScreen = ({ navigation, route }) => {
       const isQuestionnaireResponse = response.mode === 'questionnaire' || response.isQuestionMessage;
 
       // If no products from response, try RecommendationEngine (but NOT for questionnaire)
+      // NOTE: courseTags from FAQ are handled in handleSend's inline product section
+      // (generateResponse does NOT receive options param, so options.courseTags was always undefined here)
       if (products.length === 0 && !isQuestionnaireResponse) {
         try {
           const recommendations = await RecommendationEngine.getRecommendations(
@@ -1324,7 +1339,15 @@ const GemMasterScreen = ({ navigation, route }) => {
         // Fetch products from Shopify based on context
         let inlineProducts = [];
 
-        if (shouldShowCourses) {
+        // PRIORITY: Use explicit courseTags from FAQ panel (options is in handleSend scope)
+        if (options?.courseTags?.length > 0) {
+          console.log('[GemMaster] Using FAQ courseTags:', options.courseTags);
+          const courses = await shopifyService.getProductsByTags(options.courseTags, 2, false);
+          if (courses && courses.length > 0) {
+            inlineProducts = [...inlineProducts, ...courses];
+            console.log('[GemMaster] Added', courses.length, 'courses from FAQ courseTags');
+          }
+        } else if (shouldShowCourses) {
           console.log('[GemMaster] Fetching courses for inline display...');
           // Detect course type from context for smarter tag selection
           const lowerText = text.toLowerCase();
@@ -1724,6 +1747,108 @@ const GemMasterScreen = ({ navigation, route }) => {
         handleSend(karmaPrompt);
         break;
 
+      case 'template': {
+        // Template quick-select → check tier access, show form or upgrade
+        // Use chatbotTier (highest of chatbot_tier/scanner_tier) for accurate gating
+        const access = checkTemplateAccess(question.templateId, chatbotTier);
+        if (access.allowed) {
+          // Add user message
+          const templateUserMsg = {
+            id: `user_${Date.now()}`,
+            type: 'user',
+            text: question.text,
+            timestamp: new Date().toISOString(),
+          };
+          setMessages((prev) => [...prev, templateUserMsg]);
+
+          // Template-specific intro messages (same map as handleSend)
+          const templateIntroMessages = {
+            fear_setting: '😰 Tôi hiểu bạn đang lo lắng về điều gì đó. Hãy dùng Fear-Setting để phân tích nỗi sợ và tìm giải pháp.',
+            think_day: '🤔 Thời điểm tuyệt vời để review cuộc sống! Think Day giúp bạn nhìn lại và điều chỉnh hướng đi.',
+            gratitude: '🙏 Ghi nhận sự biết ơn là cách tuyệt vời để nâng cao tần số. Hãy viết nhật ký biết ơn.',
+            daily_wins: '🏆 Ghi nhận thành tựu trong ngày giúp bạn duy trì động lực và năng lượng tích cực.',
+            weekly_planning: '📅 Lên kế hoạch tuần giúp bạn có định hướng rõ ràng và đạt mục tiêu hiệu quả hơn.',
+            vision_3_5_years: '🔮 Tầm nhìn dài hạn giúp bạn định hình tương lai và có động lực mỗi ngày.',
+            trading_journal: '📈 Ghi chép giao dịch giúp bạn học hỏi từ kinh nghiệm và cải thiện hiệu suất trading.',
+            free_form: '✨ Viết tự do giúp bạn giải tỏa tâm trí và khám phá bản thân.',
+            prosperity_frequency: '✨ Tần Số Thịnh Vượng giúp bạn kết nối với năng lượng tài chính dồi dào.',
+            advanced_trading_psychology: '🧠 Phân tích tâm lý giao dịch giúp bạn kiểm soát cảm xúc khi trading.',
+          };
+
+          const introText = templateIntroMessages[question.templateId] || '✨ Hãy điền form để tạo nhật ký và mục tiêu.';
+
+          const templateIntroMsg = {
+            id: `template_intro_${Date.now()}`,
+            type: 'assistant',
+            text: introText,
+            timestamp: new Date().toISOString(),
+            source: 'template_intent',
+          };
+          setMessages((prev) => [...prev, templateIntroMsg]);
+
+          // Auto-scroll
+          setTimeout(() => {
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+          }, 100);
+
+          // Show template inline form
+          setTimeout(() => {
+            setTemplateFormState({
+              visible: true,
+              templateId: question.templateId,
+              autoFillData: {},
+            });
+          }, 500);
+        } else {
+          // Access denied → show upgrade prompt (same pattern as handleSend)
+          const templateDeniedUserMsg = {
+            id: `user_${Date.now()}`,
+            type: 'user',
+            text: question.text,
+            timestamp: new Date().toISOString(),
+          };
+          setMessages((prev) => [...prev, templateDeniedUserMsg]);
+
+          const upgradeInfo = getUpgradePromptForTemplate(question.templateId, chatbotTier);
+          const template = getTemplate(question.templateId);
+          const templateName = template?.name || upgradeInfo.title;
+
+          const upgradeMessages = {
+            fear_setting: `😰 Tôi hiểu bạn muốn sử dụng **Đối diện nỗi sợ (Fear-Setting)** - phương pháp Tim Ferriss để vượt qua nỗi sợ.\n\n🔒 **Nâng cấp lên Pro (Tier 1)** để sử dụng template này!`,
+            think_day: `🧠 Tôi thấy bạn muốn sử dụng **Think Day** - phương pháp review cuộc sống toàn diện.\n\n🔒 **Nâng cấp lên Pro (Tier 1)** để sử dụng template này!`,
+            weekly_planning: `📅 **Tuần mới** là template giúp bạn có định hướng rõ ràng cho tuần.\n\n🔒 **Nâng cấp lên Pro (Tier 1)** để sử dụng template này!`,
+            trading_journal: `📈 Tôi thấy bạn muốn sử dụng **Nhật Ký Giao Dịch** - công cụ ghi chép giao dịch chuyên nghiệp.\n\n🔒 **Nâng cấp lên Premium (Tier 2)** để mở khóa tính năng này!`,
+            vision_3_5_years: `🔮 **Tầm nhìn 3-5 năm** giúp bạn thiết kế cuộc sống lý tưởng.\n\n🔒 **Nâng cấp lên Premium (Tier 2)** để mở khóa template này!`,
+            daily_wins: `🏆 **Chiến thắng hôm nay** giúp bạn ghi nhận thành tựu mỗi ngày.\n\n🔒 **Nâng cấp lên Premium (Tier 2)** để sử dụng template này!`,
+            prosperity_frequency: `✨ **Tần Số Thịnh Vượng** - template cao cấp kết hợp tài chính và tâm linh.\n\n🔒 **Nâng cấp lên VIP (Tier 3)** để mở khóa template này!`,
+            advanced_trading_psychology: `🧠 **Tâm Lý Giao Dịch Nâng Cao** - công cụ chuyên sâu dành cho trader.\n\n🔒 **Nâng cấp lên VIP (Tier 3)** để sử dụng template này!`,
+          };
+
+          const upgradeText = upgradeMessages[question.templateId] ||
+            `✨ Tôi hiểu bạn muốn sử dụng **${templateName}**.\n\n🔒 ${access.reason}. Nâng cấp tài khoản để mở khóa các template cao cấp!`;
+
+          const upgradeMsgObj = {
+            id: `upgrade_prompt_${Date.now()}`,
+            type: 'assistant',
+            text: upgradeText,
+            timestamp: new Date().toISOString(),
+            source: 'template_upgrade_prompt',
+            metadata: {
+              showUpgradeButton: true,
+              templateId: question.templateId,
+              requiredTier: upgradeInfo.targetTier,
+            },
+          };
+          setMessages((prev) => [...prev, upgradeMsgObj]);
+
+          // Auto-scroll
+          setTimeout(() => {
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+          }, 100);
+        }
+        break;
+      }
+
       case 'inline_form':
         // Show inline form → goalSettingForm or InlineChatForm
         // NEW: Add user question and AI brief message first before showing form
@@ -1824,7 +1949,10 @@ const GemMasterScreen = ({ navigation, route }) => {
         // skipFormDetection: prevent "Khóa Tư Duy Triệu Phú - Manifest Tiền Bạc"
         // from triggering prosperity_frequency template or goal form
         if (question.prompt) {
-          handleSend(question.prompt, { skipFormDetection: true });
+          handleSend(question.prompt, {
+            skipFormDetection: true,
+            courseTags: question.courseTags || [],
+          });
         }
         break;
 
@@ -1898,7 +2026,7 @@ const GemMasterScreen = ({ navigation, route }) => {
         }
         break;
     }
-  }, [handleSend, navigation, setInlineFormState, setMessages, setCurrentAffiliatePromo]);
+  }, [handleSend, navigation, setInlineFormState, setMessages, setCurrentAffiliatePromo, chatbotTier]);
 
   // Navigate to I Ching
   const handleIChing = useCallback(() => {
@@ -2803,6 +2931,8 @@ const GemMasterScreen = ({ navigation, route }) => {
           topicId={faqPanelState.topicId}
           onClose={() => setFaqPanelState({ visible: false, topicId: null })}
           onSelectQuestion={handleFAQQuestionSelect}
+          userTier={chatbotTier}
+          isAdmin={isAdmin || isManager}
         />
 
         {/* ===== CHATBOT UPGRADE: Crisis Support Alert ===== */}

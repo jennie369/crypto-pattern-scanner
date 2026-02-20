@@ -61,6 +61,15 @@ const CONTEXT_TO_TAGS = {
   'gems': ['Gem Pack'],
   'ebook': ['Ebook'],
 
+  // ========== SPECIFIC COURSES ==========
+  'tư duy triệu phú': ['Tư Duy Triệu Phú', 'Manifest', 'Khóa học'],
+  'triệu phú': ['Tư Duy Triệu Phú', 'Manifest', 'Khóa học'],
+  'kích hoạt tần số tình yêu': ['Tình Yêu', 'Tần Số', 'Khóa học'],
+  'tần số tình yêu': ['Tình Yêu', 'Tần Số', 'Khóa học'],
+  'khai mở tần số': ['Tần Số Gốc', 'Khai Mở', 'Khóa học'],
+  '7 ngày khai mở': ['Tần Số Gốc', 'Khai Mở', '7 Ngày', 'Khóa học'],
+  'tần số gốc': ['Tần Số Gốc', 'Khai Mở', 'Khóa học'],
+
   // ========== TIER BUNDLES ==========
   'tier 1': ['Tier 1', 'Khóa học Trading'],
   'tier 2': ['Tier 2', 'Khóa học Trading'],
@@ -83,7 +92,7 @@ const PRODUCT_TRIGGER_KEYWORDS = [
   'recommend', 'gợi ý', 'tư vấn',
   // Trading
   'trading', 'scanner', 'chatbot', 'khóa học', 'course',
-  'tier', 'bundle', 'gem pack',
+  'tier', 'bundle', 'gem pack', 'triệu phú',
   // Purposes
   'tình yêu', 'tiền bạc', 'tài lộc', 'manifest', 'thiền',
 ];

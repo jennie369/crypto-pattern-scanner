@@ -141,37 +141,178 @@ const renderInlineMarkdown = (text, baseStyle) => {
 };
 
 /**
+ * Check if a line is a markdown table line (starts and ends with |)
+ */
+const isTableLine = (line) => {
+  const trimmed = line.trim();
+  return trimmed.startsWith('|') && trimmed.endsWith('|');
+};
+
+/**
+ * Check if a line is a table separator (|---|---|)
+ */
+const isSeparatorLine = (line) => /^\|[\s\-:|]+\|$/.test(line.trim());
+
+/**
+ * Parse table cells from a pipe-delimited line
+ */
+const parseTableCells = (line) => {
+  return line.trim().split('|').slice(1, -1).map(cell => cell.trim());
+};
+
+/**
+ * Render a markdown table as a styled View grid
+ */
+const renderTable = (headerRow, dataRows, keyPrefix) => {
+  const headerCells = parseTableCells(headerRow);
+  const goldColor = COLORS.gold || '#FFBD59';
+
+  return (
+    <View key={keyPrefix} style={tableStyles.tableContainer}>
+      {/* Header row */}
+      <View style={[tableStyles.tableRow, tableStyles.tableHeaderRow]}>
+        {headerCells.map((cell, cellIndex) => (
+          <View key={`${keyPrefix}_h${cellIndex}`} style={tableStyles.tableCell}>
+            <Text style={[tableStyles.tableHeaderText, { color: goldColor }]}>
+              {cell}
+            </Text>
+          </View>
+        ))}
+      </View>
+      {/* Data rows */}
+      {dataRows.map((row, rowIndex) => {
+        const cells = parseTableCells(row);
+        const isAlt = rowIndex % 2 === 1;
+        return (
+          <View
+            key={`${keyPrefix}_r${rowIndex}`}
+            style={[
+              tableStyles.tableRow,
+              isAlt && { backgroundColor: 'rgba(255, 255, 255, 0.03)' },
+              rowIndex === dataRows.length - 1 && { borderBottomWidth: 0 },
+            ]}
+          >
+            {cells.map((cell, cellIndex) => (
+              <View key={`${keyPrefix}_r${rowIndex}_c${cellIndex}`} style={tableStyles.tableCell}>
+                <Text style={tableStyles.tableCellText}>
+                  {renderInlineMarkdown(cell, tableStyles.tableCellText)}
+                </Text>
+              </View>
+            ))}
+          </View>
+        );
+      })}
+    </View>
+  );
+};
+
+/**
  * Simple markdown text renderer
- * Supports: **bold**, bullet points, [icon:Name]
+ * Supports: **bold**, bullet points, [icon:Name], | tables |
  */
 const renderMarkdownText = (text, baseStyle) => {
   if (!text) return null;
 
   const normalizedText = normalizeMarkdown(text);
   const lines = normalizedText.split('\n');
+  const result = [];
+  let i = 0;
 
-  return lines.map((line, lineIndex) => {
+  while (i < lines.length) {
+    // Detect start of a table block (consecutive | lines)
+    if (isTableLine(lines[i])) {
+      const tableStart = i;
+      // Collect all consecutive table lines
+      while (i < lines.length && isTableLine(lines[i])) {
+        i++;
+      }
+      const tableLines = lines.slice(tableStart, i);
+
+      // Need at least 2 lines (header + separator or header + data)
+      if (tableLines.length >= 2) {
+        const headerRow = tableLines[0];
+        // Skip separator line if present
+        const dataStartIndex = isSeparatorLine(tableLines[1]) ? 2 : 1;
+        const dataRows = tableLines.slice(dataStartIndex);
+        result.push(renderTable(headerRow, dataRows, `table_${tableStart}`));
+      } else {
+        // Single table line — render as normal text
+        const line = tableLines[0];
+        result.push(
+          <Text key={tableStart} style={baseStyle}>
+            {renderInlineMarkdown(line, baseStyle)}
+          </Text>
+        );
+      }
+      continue;
+    }
+
+    const line = lines[i];
+    const lineIndex = i;
+    i++;
+
+    // Empty line = paragraph break (spacer between blocks)
+    if (line.trim() === '') {
+      result.push(<View key={lineIndex} style={{ height: 6 }} />);
+      continue;
+    }
+
     // Check if line is a bullet point: • or - or single * (not **) followed by space
     const bulletMatch = line.match(/^(\s*)([•\-]|\*(?!\*))\s+(.*)$/);
 
     if (bulletMatch) {
       const content = bulletMatch[3];
-      return (
+      result.push(
         <Text key={lineIndex} style={baseStyle}>
           {'  • '}{renderInlineMarkdown(content, baseStyle)}
-          {lineIndex < lines.length - 1 ? '\n' : ''}
+        </Text>
+      );
+    } else {
+      result.push(
+        <Text key={lineIndex} style={baseStyle}>
+          {renderInlineMarkdown(line, baseStyle)}
         </Text>
       );
     }
+  }
 
-    return (
-      <Text key={lineIndex} style={baseStyle}>
-        {renderInlineMarkdown(line, baseStyle)}
-        {lineIndex < lines.length - 1 ? '\n' : ''}
-      </Text>
-    );
-  });
+  return result;
 };
+
+// Table styles (used by renderTable above)
+const tableStyles = StyleSheet.create({
+  tableContainer: {
+    alignSelf: 'stretch',
+    width: '100%',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.3)',
+    overflow: 'hidden',
+    marginVertical: 8,
+  },
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  tableHeaderRow: {
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+  },
+  tableCell: {
+    flex: 1,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+  },
+  tableCellText: {
+    fontSize: 13,
+    color: COLORS.textPrimary,
+  },
+  tableHeaderText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.gold || '#FFBD59',
+  },
+});
 
 const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, onOptionSelect, onQuickBuy, onFeedback, onRichAction }) => {
   const navigation = useNavigation();
@@ -205,14 +346,17 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, 
     }
   }, [navigation]);
 
-  // Handle upgrade button press - navigate to UpgradeScreen
+  // Handle upgrade button press - navigate to UpgradeScreen (in AccountStack)
   const handleUpgradePress = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const targetTier = message.metadata?.requiredTier || 'tier1';
-    navigation.navigate('UpgradeScreen', {
-      targetTier,
-      source: 'gem_master_template',
-      templateId: message.metadata?.templateId,
+    navigation.navigate('Account', {
+      screen: 'UpgradeScreen',
+      params: {
+        targetTier,
+        source: 'gem_master_template',
+        templateId: message.metadata?.templateId,
+      },
     });
   }, [navigation, message.metadata?.requiredTier, message.metadata?.templateId]);
 
@@ -225,6 +369,9 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, 
 
   // Check if this message is a rich response type (Day 25)
   const isRichResponse = !isUser && message.responseType && Object.values(RESPONSE_TYPES).includes(message.responseType);
+
+  // Detect if message contains a markdown table (for wider bubble)
+  const hasTable = !isUser && message.text && /^\|.*\|$/m.test(message.text);
 
   // Handle feedback (thumbs up/down)
   const handleFeedback = useCallback((feedback) => {
@@ -341,6 +488,7 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, 
           style={({ pressed }) => [
             styles.bubble,
             isUser ? styles.bubbleUser : styles.bubbleAssistant,
+            hasTable && styles.bubbleWideTable,
             pressed && styles.bubblePressed,
             copied && styles.bubbleCopied,
           ]}
@@ -366,16 +514,14 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, 
                 onRichAction?.(actionType, data, message);
               }}
             />
-          ) : (
-            <Text style={[
-              styles.text,
-              isUser ? styles.textUser : styles.textAssistant,
-            ]}>
-              {isUser
-                ? message.text
-                : renderMarkdownText(message.text, [styles.text, styles.textAssistant])
-              }
+          ) : isUser ? (
+            <Text style={[styles.text, styles.textUser]}>
+              {message.text}
             </Text>
+          ) : (
+            <View style={styles.assistantTextWrapper}>
+              {renderMarkdownText(message.text, [styles.text, styles.textAssistant])}
+            </View>
           )}
 
           {/* Interactive Choice Buttons for Questionnaire */}
@@ -615,7 +761,7 @@ const styles = StyleSheet.create({
   bubble: {
     borderRadius: GLASS.borderRadius,
     padding: SPACING.md,
-    maxWidth: '75%',
+    maxWidth: '72%',
   },
   bubbleUser: {
     backgroundColor: COLORS.gold,
@@ -629,6 +775,9 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     borderBottomLeftRadius: SPACING.xs,
   },
+  bubbleWideTable: {
+    maxWidth: '88%',
+  },
   text: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     lineHeight: 22,
@@ -638,6 +787,11 @@ const styles = StyleSheet.create({
   },
   textAssistant: {
     color: COLORS.textPrimary,
+  },
+  assistantTextWrapper: {
+    // Prevent View from stretching bubble to maxWidth for short messages.
+    // Without this, View expands to fill parent (unlike Text which shrink-wraps).
+    flexShrink: 1,
   },
   footer: {
     flexDirection: 'row',

@@ -50,14 +50,28 @@ export const CourseProvider = ({ children }) => {
     return progress < 100; // Include not-started (progress=0) courses too
   });
 
-  // Load data on mount or when admin status changes
+  // Load data on mount or when user/admin status changes
+  // Phase 18b: Reset all state when user changes to prevent cross-user data bleed
   useEffect(() => {
     if (user?.id) {
       console.log('[CourseContext] useEffect triggered - user:', user?.id, 'isAdmin:', isAdmin);
       loadAllData();
       setupRealtimeSubscriptions();
     } else {
+      // User logged out — reset ALL state to prevent stale data on next login
+      setCourses([]);
+      setEnrolledCourseIds([]);
+      setCourseProgress({});
+      setCompletedLessons({});
+      setQuizResults({});
+      setCertificates({});
+      setError(null);
       setLoading(false);
+      // Phase 18b: Also clear AsyncStorage keys (NOT user-scoped, causes cross-user bleed)
+      AsyncStorage.multiRemove([
+        ENROLLMENTS_KEY, PROGRESS_KEY, COMPLETED_LESSONS_KEY,
+        QUIZ_RESULTS_KEY, CERTIFICATES_KEY,
+      ]).catch(() => {});
     }
 
     // Cleanup subscriptions on unmount
@@ -406,18 +420,17 @@ export const CourseProvider = ({ children }) => {
         }
       }
 
-      // If no DB enrollments, use AsyncStorage
-      if (enrollments.length === 0) {
-        const storedEnrollments = await AsyncStorage.getItem(ENROLLMENTS_KEY);
-        if (storedEnrollments) {
-          enrollments = JSON.parse(storedEnrollments);
-        }
-
-        // Load progress from storage
-        const storedProgress = await AsyncStorage.getItem(PROGRESS_KEY);
-        if (storedProgress) {
-          setCourseProgress(JSON.parse(storedProgress));
-        }
+      // Phase 18b Fix: NEVER fall back to AsyncStorage for enrollments.
+      // AsyncStorage key @gem_enrollments is NOT user-scoped — it contains
+      // the PREVIOUS user's enrollment IDs. When admin (0 enrollments) logs in
+      // after Tier 1 user (5 enrollments), the fallback returns stale data.
+      // DB is the single source of truth for enrollments.
+      // AsyncStorage is only used for WRITING (cache for offline display of same user).
+      if (enrollments.length === 0 && user?.id) {
+        console.log('[CourseContext] 0 DB enrollments for user', user.id, '— NOT falling back to AsyncStorage');
+        // Clear stale AsyncStorage to prevent future confusion
+        await AsyncStorage.removeItem(ENROLLMENTS_KEY).catch(() => {});
+        await AsyncStorage.removeItem(PROGRESS_KEY).catch(() => {});
       }
 
       console.log('[CourseContext] Total enrolled courses:', enrollments.length);
