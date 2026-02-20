@@ -4020,3 +4020,43 @@ Supabase gateway rejects requests without a valid JWT token BEFORE the function 
 - Always check auth requirements when deploying webhook receivers
 - External services (Shopify, Stripe, GitHub) never send JWT tokens
 - The function itself should verify the webhook signature (HMAC) — not rely on the gateway
+
+## Rule 57: Component Reads Stale Local Cache Instead of Context (Dual Data Source)
+**Source:** Phase 18 — MyCoursesSection shows "Đã đăng ký: 0, Đang học: 0, Hoàn thành: 0" after Shopify purchase
+
+### When to apply
+When a UI component shows stale/zero data even though the correct data exists in a Context provider that other components consume successfully.
+
+### Symptoms
+- Stats/counts display 0 or empty despite data existing in the database
+- Other screens using the same Context show correct data
+- The component uses a service function directly instead of the Context
+- Refreshing/pull-to-refresh doesn't help (because it re-reads the same stale source)
+- Webhooks write to the DB, but the component reads from AsyncStorage (different key)
+
+### Root Cause
+Two independent data pipelines exist for the same domain:
+1. **Context** (e.g., `CourseContext`) — reads from DB, caches in AsyncStorage key A (`@gem_enrollments`), provides realtime sync
+2. **Service function** (e.g., `courseService.getUserCourseStats()`) — reads from AsyncStorage key B (`@gem_course_enrollments`), no realtime sync
+
+The component calls the service function directly, bypassing the Context. When data enters via webhook → DB, the Context picks it up (realtime subscription), but the service's AsyncStorage key is never populated.
+
+**Secondary issue**: Filter logic can also hide valid data. Example: `inProgressCourses` filtered by `progress > 0` excludes freshly enrolled courses (progress=0), making them invisible in "Đang học" tabs.
+
+### How to Fix
+1. **Single Source of Truth**: Replace direct service calls with Context hooks (`useCourse()`, `useAuth()`, etc.)
+2. **Remove redundant local state**: If the Context already provides `loading`, `enrolledCourses`, etc., don't duplicate them with `useState` + async fetch
+3. **Remove redundant listeners**: If the Context handles refresh/realtime, the component doesn't need its own `FORCE_REFRESH_EVENT` listener or `useFocusEffect`
+4. **Audit filter logic**: Check if computed arrays (e.g., `inProgressCourses`) exclude valid edge cases like `progress === 0`
+
+### How to Detect Similar Issues
+1. **Grep for direct service imports in components that have a Context**: `grep -r "import.*Service" screens/ components/` — if a Context exists for that domain, the component should use the Context
+2. **Grep for duplicate AsyncStorage keys**: `grep -r "@gem_" services/ contexts/` — two different keys for the same data = dual source
+3. **Check filter boundaries**: Search for `> 0 &&` in computed arrays — freshly created records often have 0 values that get excluded
+4. **Compare data paths**: Trace where webhooks write (DB table) vs where the component reads (AsyncStorage key) — if they don't connect, data will be stale
+
+### Generalized Pattern
+- **Context = single source of truth** for any domain (courses, enrollments, profile, etc.)
+- Components should ONLY read from Context, never from service functions that maintain their own cache
+- When adding a new computed array (like `inProgressCourses`), explicitly consider the zero/default case
+- If a webhook writes to the DB, the UI must read from DB (via Context + realtime) — not from a local cache that the webhook never touches

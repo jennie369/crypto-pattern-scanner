@@ -47,7 +47,7 @@ export const CourseProvider = ({ children }) => {
   const completedCourses = courses.filter(c => (courseProgress[c.id] || 0) >= 100);
   const inProgressCourses = enrolledCourses.filter(c => {
     const progress = courseProgress[c.id] || 0;
-    return progress > 0 && progress < 100;
+    return progress < 100; // Include not-started (progress=0) courses too
   });
 
   // Load data on mount or when admin status changes

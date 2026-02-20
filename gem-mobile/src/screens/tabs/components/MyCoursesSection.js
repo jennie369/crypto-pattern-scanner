@@ -5,14 +5,13 @@
  * Layout style similar to Admin Panel but for regular users
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  DeviceEventEmitter,
 } from 'react-native';
 import {
   GraduationCap,
@@ -23,63 +22,21 @@ import {
   CheckCircle,
   Clock,
 } from 'lucide-react-native';
-import { useFocusEffect } from '@react-navigation/native';
 
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
-import { FORCE_REFRESH_EVENT } from '../../../utils/loadingStateManager';
 import { useAuth } from '../../../contexts/AuthContext';
-import courseService from '../../../services/courseService';
+import { useCourse } from '../../../contexts/CourseContext';
 
 export default function MyCoursesSection({ navigation }) {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalEnrolled: 0,
-    inProgress: 0,
-    completed: 0,
-    notStarted: 0,
-  });
+  const { enrolledCourses, inProgressCourses, completedCourses, loading } = useCourse();
 
-  // Load course stats on focus
-  useFocusEffect(
-    useCallback(() => {
-      if (user?.id) {
-        loadCourseStats();
-      } else {
-        setLoading(false);
-      }
-    }, [user?.id])
-  );
-
-  // Rule 55: Recovery listener for child components
-  // FIX: Use setTimeout to break React 18 batch (setLoading(false) + setLoading(true) = no-op)
-  useEffect(() => {
-    const listener = DeviceEventEmitter.addListener(FORCE_REFRESH_EVENT, () => {
-      console.log('[MyCoursesSection] Force refresh received');
-      setLoading(false);
-      if (user?.id) {
-        setTimeout(() => loadCourseStats(true), 50);
-      }
-    });
-    return () => listener.remove();
-  }, [user?.id]);
-
-  const loadCourseStats = async (skipLoading = false) => {
-    try {
-      if (!skipLoading) setLoading(true);
-
-      // Get course stats with timeout
-      const courseStats = await Promise.race([
-        courseService.getUserCourseStats(user.id),
-        // Budget: 4s JWT refresh + 8s query = 12s max → 15s with margin
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Course stats timeout')), 15000)),
-      ]);
-      setStats(courseStats);
-    } catch (error) {
-      console.error('[MyCoursesSection] Load stats error:', error?.message);
-    } finally {
-      setLoading(false);
-    }
+  // Compute stats directly from CourseContext (single source of truth)
+  const stats = {
+    totalEnrolled: enrolledCourses.length,
+    inProgress: inProgressCourses.length,
+    completed: completedCourses.length,
+    notStarted: enrolledCourses.length - inProgressCourses.length - completedCourses.length,
   };
 
   // Don't render if not logged in
