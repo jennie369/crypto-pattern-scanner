@@ -1190,6 +1190,168 @@ The domain (e.g., gemral.com) is managed by a platform (Shopify) that can't serv
 
 ---
 
+# SECTION F2: WEBHOOK & PAYMENT PROCESSING
+
+---
+
+## Rule 27: Early Return Skips Downstream Processing in Multi-Purpose Handler
+**Source:** Phase 15 — Webhook grants course enrollments but skips tier upgrades because `extractIndividualCourses()` returns early before `extractTierFromSku()`
+
+### When to apply
+When a handler processes multiple concerns (enrollment + tier upgrade + commission + logging) and an early `return` after one concern silently skips all others.
+
+### Symptoms
+- Feature A works (course enrollments created) but Feature B doesn't (tiers not upgraded)
+- Webhook returns 200 OK, logs show "success", but some database fields are not updated
+- Only orders with certain product combinations fail (mixed individual + tier products)
+- Adding more products to the courses table makes the problem WORSE (more items match the early check)
+
+### Root cause pattern
+A "shortcut" check runs first and returns early, preventing the main processing logic from executing:
+
+```javascript
+// DANGEROUS: Early return after first concern — skips EVERYTHING else
+const courses = await findMatchingCourses(lineItems, db);
+if (courses.length > 0) {
+  await grantCourseAccess(courses);
+  return new Response({ success: true, message: 'Courses enrolled' }); // ← EXITS HERE
+}
+
+// These NEVER execute if ANY item matched as a course:
+const { tier } = extractTierFromSku(lineItems);    // ← SKIPPED
+await updateProfileTier(user, tier);                // ← SKIPPED
+await trackAffiliateCommission(order);              // ← SKIPPED
+await logOrderToShopifyOrders(order);               // ← SKIPPED
+```
+
+### Why this is insidious
+- The early return was originally correct (when courses and tier products were mutually exclusive)
+- A later change (adding `shopify_product_id` to trading courses in the `courses` table) caused overlap
+- The handler still returns 200 OK with a valid success message — no error to detect
+- The skipped logic (tier upgrade, commission, order logging) fails silently
+
+### Investigation steps
+1. Map ALL `return` statements in the handler — document what logic each one skips
+2. Check if the early-check condition can overlap with items that need downstream processing
+3. Verify: can an order contain BOTH items that match the early check AND items that need the main flow?
+4. Check if the scope of the early check has expanded over time (new DB records, new matching methods)
+
+### Preventive measures
+- **Never return early in multi-concern handlers** — use flags/accumulators instead
+  ```javascript
+  // SAFE: Accumulate results, process ALL concerns, return once at the end
+  const enrolledCourses = await findAndEnrollCourses(lineItems);
+  const { tier } = extractTierFromSku(lineItems);
+  if (tier !== 'none') await updateProfileTier(user, tier);
+  await trackCommission(order);
+  return new Response({ courses: enrolledCourses, tier, success: true });
+  ```
+- **Each concern should be independent**: enrollment doesn't block tier detection
+- **Test with mixed orders**: an order containing both individual courses AND tier products
+- **Log which steps were executed**: `{ steps: ['enrollment', 'tier_upgrade', 'commission'] }`
+
+### Code smell indicators
+- `return new Response(...)` inside an `if` block in the middle of a long handler
+- Handler has 5+ sequential sections (STEP 1, STEP 2...) but some conditions exit before reaching them
+- The early check's matching criteria has been expanded (new DB lookups, new tables linked)
+- Success response from the early return is missing fields that the main return includes
+
+---
+
+## Rule 28: Webhook Writes to Wrong Table (RPC Indirection Mismatch)
+**Source:** Phase 15 — `shopify-paid-webhook` calls `unlock_user_access` RPC which writes to `user_access` table, but app reads tiers from `profiles` table
+
+### When to apply
+When a webhook handler uses an RPC/function to update access, but the RPC writes to a different table than what the app reads from.
+
+### Symptoms
+- Webhook logs show "Access unlocked" but user still sees FREE tier
+- A secondary table (`user_access`) is correctly updated but the primary table (`profiles`) is not
+- The same operation works in one webhook (direct update) but not another (RPC-based)
+- `SELECT * FROM user_access` shows correct tiers; `SELECT * FROM profiles` shows FREE
+
+### Root cause pattern
+An RPC function was created early and writes to an intermediate/legacy table. The app was later refactored to read from a different table, but the RPC was never updated:
+
+```sql
+-- RPC: unlock_user_access
+-- Writes to: user_access table ← WRONG (legacy)
+INSERT INTO user_access (user_email, scanner_tier, course_tier, ...)
+ON CONFLICT (user_email) DO UPDATE SET ...
+
+-- App reads from: profiles table ← RIGHT (primary)
+SELECT course_tier, scanner_tier FROM profiles WHERE id = user_id
+```
+
+### Investigation steps
+1. Find the RPC function source: `SELECT prosrc FROM pg_proc WHERE proname = 'unlock_user_access'`
+2. Check which table the RPC writes to
+3. Check which table the app/frontend reads from
+4. Compare: are they the same table?
+5. Check if there's a trigger or sync mechanism between the tables
+
+### Preventive measures
+- **One source of truth**: Document which table is canonical for each data type
+- **Update the RPC** to write to the canonical table (or update both)
+- **After any refactor**: grep for all RPCs that reference the old table
+- **Integration test**: After webhook fires, query the SAME table the app reads from
+
+### Code smell indicators
+- Two tables with overlapping columns (`user_access.course_tier` AND `profiles.course_tier`)
+- RPC writes to table X, app reads from table Y
+- Manual sync needed between tables (trigger, cron, or duplicate writes)
+- "Legacy" or "backup" comments near table writes
+
+---
+
+## Rule 29: Column Name Mismatch Between Code and Schema
+**Source:** Phase 15 — Both webhooks use `shopify_order_id` (text) but the actual column is `order_id` (bigint). All upserts silently fail.
+
+### When to apply
+When code references a column name that doesn't exist in the actual table schema, causing silent failures via PostgREST/Supabase client.
+
+### Symptoms
+- Upsert/insert operations return no error but no data is written
+- Table remains empty despite webhook returning 200 OK
+- `onConflict` parameter references non-existent column → upsert fails silently
+- Cross-system dedup checks (`SELECT ... WHERE column = value`) find nothing → duplicate processing
+
+### Root cause pattern
+Code was written (or refactored) using a column name that differs from the actual schema:
+
+```javascript
+// Code uses:
+await supabase.from('shopify_orders').upsert({
+  shopify_order_id: orderId,  // ← Column doesn't exist! Table has `order_id`
+  ...
+}, { onConflict: 'shopify_order_id' });  // ← Constraint doesn't exist!
+
+// Supabase PostgREST silently ignores unknown columns in some cases,
+// or returns a 400 error that the code doesn't check
+```
+
+### Investigation steps
+1. Query actual schema: `SELECT column_name FROM information_schema.columns WHERE table_name = 'X'`
+2. Grep code for all references to this table's columns
+3. Compare: do the column names in code match the actual schema?
+4. Check if upsert errors are being caught (`.then()` vs unhandled)
+5. Check constraint names: `SELECT conname FROM pg_constraint WHERE conrelid = 'table'::regclass`
+
+### Preventive measures
+- **TypeScript types generated from schema**: `supabase gen types` and use them
+- **Check upsert return**: always `const { error } = await supabase.from(...).upsert(...)` and log errors
+- **Column name convention**: decide on `order_id` vs `shopify_order_id` and enforce consistently
+- **Migration test**: after any migration, verify all edge functions still write successfully
+- **Schema-first development**: define columns in migration, generate types, then write code
+
+### Code smell indicators
+- `onConflict` references a column not in the table's unique constraints
+- Upsert result is not checked (`await supabase.from(...).upsert(...)` with no `{ error }`)
+- Table has `order_id` column but code references `shopify_order_id` (or vice versa)
+- Multiple references to same table use different column names in different files
+
+---
+
 # SECTION G: SUGGESTED AUTOMATED TESTS
 
 ---
@@ -1280,6 +1442,41 @@ test('og-meta returns OG tags for course URL', async () => {
   const html = await res.text();
   expect(html).toContain('og:title');
   expect(html).toContain('og:image');
+});
+```
+
+## Phase 15 Tests
+
+### Early Return Skips Tier Upgrade (Rule 27)
+```javascript
+test('mixed order with individual courses AND tier products upgrades both', async () => {
+  // Setup: order with 3 mindset courses + 1 trading tier product (SKU gem-course-tier1)
+  // All 4 products have shopify_product_id in courses table
+  // Action: call handleOrderPaid with this order
+  // Assert: course_enrollments created for ALL 4 products
+  // Assert: profiles.course_tier = 'TIER1' (NOT 'FREE')
+  // Assert: profiles.scanner_tier = 'TIER1' (bundle grant)
+});
+```
+
+### RPC Writes to Correct Table (Rule 28)
+```javascript
+test('shopify-paid-webhook updates profiles table, not just user_access', async () => {
+  // Setup: user exists with email, all tiers = FREE
+  // Action: simulate orders/paid webhook to shopify-paid-webhook
+  // Assert: profiles.course_tier updated (not just user_access.course_tier)
+});
+```
+
+### Column Name Matches Schema (Rule 29)
+```javascript
+test('shopify_orders upsert uses correct column names', async () => {
+  // Check schema: shopify_order_id column exists
+  const { data } = await supabase
+    .from('shopify_orders')
+    .select('shopify_order_id')
+    .limit(0);
+  // Assert: no error (column exists)
 });
 ```
 
@@ -3660,4 +3857,166 @@ For any tab with a "stale check on focus":
 - **Too short** → frustrating reloads mid-session
 - **Too long** → stale content when actually switching contexts
 - **Sweet spot**: 3-5 minutes for social feeds, 10+ minutes for static content
+
+---
+
+# RULE 64: Tier Access Check Used as Enrollment Proxy (False "Unlocked" Display)
+**Source:** Phase 16 — Course listing page showed "Đã mở khóa" for ALL FREE courses even when user was NOT enrolled
+
+## What Failed
+CourseCard.jsx displayed "Đã mở khóa" (Unlocked) based on `hasAccess(userTier, course.tier)`. Since ALL users have at least FREE tier (level 0), and FREE courses require FREE tier (level 0), the check `0 >= 0` returned `true` for every FREE course — even when the user had never enrolled or purchased the course.
+
+Clicking into these "unlocked" courses correctly showed lessons as locked (because CourseLearning.jsx checked actual enrollment via `enrollmentService.isEnrolled()`). This mismatch confused users.
+
+## Why It Failed
+Two separate access concepts existed — **tier access** (`hasAccess()` comparing tier levels) and **enrollment** (`course_enrollments` table) — but the CourseCard UI conflated them. The tier check answered "does the user's subscription level allow this course?" but the UI displayed it as "has the user unlocked this course?" These are different questions.
+
+## What Guard Was Added
+1. **CourseCard.jsx**: Changed `isEnrolled` from `course.progress !== undefined` to `!!course.isEnrolled` (explicit flag from enrollment query)
+2. **CourseCard.jsx**: "Đã mở khóa" now shows ONLY when `isEnrolled` is true, not when `hasUserAccess` is true
+3. **Courses.jsx**: Already passes `isEnrolled: !!enrollment` from the enrollment data — CourseCard now uses it
+
+```javascript
+// BEFORE: Tier check masking enrollment status
+{hasUserAccess ? (
+  <span>Đã mở khóa</span>  // Shows for ALL FREE courses!
+) : (...)}
+
+// AFTER: Enrollment check is the source of truth
+{isEnrolled ? (
+  <span>Đã mở khóa</span>  // Only shows when actually enrolled
+) : hasUserAccess ? (
+  <span>Sẵn sàng đăng ký</span>  // Has tier access but not enrolled
+) : (...)}
+```
+
+## How to Detect Similar Issues
+1. **Ask: "Does this check answer the UI's question?"** — if UI says "Unlocked", the check must verify enrollment, not tier compatibility
+2. **Search for `hasAccess` used in display text** (not just access control): `grep -rn "hasAccess\|hasUserAccess" src/ --include='*.jsx' -B2 -A2 | grep -i "unlock\|mở khóa\|enrolled"`
+3. **Test with a fresh user** (no enrollments): do any courses show "Unlocked"?
+4. **Compare listing page vs detail page**: if listing says "Unlocked" but detail says "Locked", there's a mismatch
+
+### Code smell indicators
+- `hasAccess()` result displayed as "Unlocked"/"Enrolled" text (tier != enrollment)
+- Enrollment derived from `progress !== undefined` instead of explicit enrollment check
+- Two different files using different methods to determine "user has this course" (tier vs enrollment)
+
+---
+
+# RULE 65: Preview Mode State Never Reset (Sticky Boolean Trap)
+**Source:** Phase 16 — Enrolled users entering CourseLearning via a preview lesson got permanently stuck in preview mode, blocking all non-preview lesson navigation (including quizzes)
+
+## What Failed
+`CourseLearning.jsx` had `isPreviewMode` state initialized to `false`. When the initial lesson had `is_preview = true`, the code set `setIsPreviewMode(true)` — but there was NO code path that ever set it back to `false`. Once in preview mode:
+- `handleLessonSelect()` blocked all non-preview lessons with an alert
+- "Bài tiếp theo" (Next lesson) button was blocked for non-preview lessons
+- Quiz lessons (which are never `is_preview`) could never be accessed
+
+## Why It Failed
+The enrollment check was SKIPPED when `accessingPreview = true`:
+```javascript
+if (user?.id && !accessingPreview) {  // ← enrollment check skipped for preview!
+  isEnrolled = await enrollmentService.isEnrolled(user.id, courseId);
+}
+```
+So enrolled users who navigated directly to a preview lesson URL were treated as non-enrolled preview viewers. The `isPreviewMode = true` state then persisted for the entire session.
+
+## What Guard Was Added
+1. **Always check enrollment** regardless of whether the lesson is a preview
+2. **Enrolled users are NEVER in preview mode**: `if (isEnrolled) setIsPreviewMode(false)`
+3. Only non-enrolled users viewing preview lessons enter preview mode
+
+```javascript
+// BEFORE: Enrollment check skipped for preview lessons
+let accessingPreview = false;
+if (foundLesson?.is_preview) {
+  accessingPreview = true;
+  setIsPreviewMode(true);  // Set but NEVER cleared!
+}
+if (user?.id && !accessingPreview) {  // SKIPPED for preview!
+  isEnrolled = await enrollmentService.isEnrolled(...);
+}
+
+// AFTER: Enrollment always checked first
+let isEnrolled = false;
+if (user?.id) {
+  isEnrolled = await enrollmentService.isEnrolled(...);  // Always check
+}
+if (isEnrolled) {
+  setIsPreviewMode(false);  // Enrolled = NEVER preview mode
+} else if (accessingPreview) {
+  setIsPreviewMode(true);   // Only for non-enrolled + preview lesson
+}
+```
+
+## How to Detect Similar Issues
+1. **Search for boolean state that's only set in one direction**: `grep -rn "setState(true)" src/ --include='*.jsx'` then check if `setState(false)` also exists in the same file
+2. **Check for conditional enrollment skips**: any `if (!someCondition) { checkEnrollment() }` pattern means enrollment is sometimes unknown
+3. **Test lesson navigation as enrolled user**: enroll → navigate to preview lesson → try clicking non-preview lesson → should work
+4. **Test quiz access**: enroll → navigate to any lesson → try clicking a quiz lesson → should work
+
+### Code smell indicators
+- `setXxxMode(true)` exists but `setXxxMode(false)` does NOT exist in the same component
+- Enrollment check gated by another condition (`!accessingPreview`, `!isAnonymous`, etc.)
+- Boolean state used to restrict navigation but never cleared on context change
+- Preview/demo mode blocking enrolled users from full content
 - **Always preserve**: Pull-to-refresh and explicit refresh as escape hatches
+
+---
+
+## Rule 55: PostgREST Silently Rejects Updates with Unknown Columns
+**Source:** Phase 15 — Fix E: `tier_expires_at` column doesn't exist on `profiles`
+
+### When to apply
+When a Supabase `.update()` or `.insert()` call appears to succeed (no error) but the database row is not actually modified.
+
+### Symptoms
+- Webhook returns 200 but profile/row is unchanged
+- No error in logs — the function runs to completion
+- All other operations in the same function work (e.g., course enrollment succeeds)
+- Only the specific `.update()` call has no effect
+
+### Root Cause
+PostgREST (which Supabase uses under the hood) silently ignores the entire UPDATE when the object contains a column name that doesn't exist in the table. It does NOT throw an error — it just does nothing.
+
+### How to Fix
+1. **Always verify column names** before writing `.update()` code:
+   ```sql
+   SELECT column_name FROM information_schema.columns
+   WHERE table_name = 'your_table' AND table_schema = 'public';
+   ```
+2. **Never assume column names** — check the actual schema, not what you think it should be
+3. **Watch for similar-but-different names**: `tier_expires_at` vs `course_tier_expires_at`, `created_at` vs `enrolled_at`, `enrollment_type` vs `source`
+
+### Generalized Pattern
+Any ORM or API layer that silently drops unknown fields is a trap:
+- **PostgREST**: Silently ignores entire UPDATE with unknown columns
+- **MongoDB**: Silently creates new fields (different but equally surprising)
+- **Defense**: Generate TypeScript types from DB schema (`supabase gen types`) to catch at compile time
+
+---
+
+## Rule 56: Edge Function Deployment Requires --no-verify-jwt for Webhooks
+**Source:** Phase 15 — 401 errors on all Shopify webhook calls after deployment
+
+### When to apply
+When deploying Supabase Edge Functions that receive webhooks from external services (Shopify, Stripe, etc.).
+
+### Symptoms
+- All webhook calls return 401 Unauthorized
+- Function code never executes (no logs from function body)
+- Previous versions worked fine (deployed differently)
+- The external service retries with exponential backoff
+
+### Root Cause
+Supabase gateway rejects requests without a valid JWT token BEFORE the function code runs. External webhooks use their own auth (HMAC, API keys, etc.), not JWT.
+
+### How to Fix
+1. **Create `config.yaml`** in the function directory with `verify_jwt: false`
+2. **Deploy with `--no-verify-jwt` flag**: `supabase functions deploy <name> --no-verify-jwt`
+3. **Both are required** — config.yaml alone is not enough if the CLI flag is missing
+
+### Generalized Pattern
+- Always check auth requirements when deploying webhook receivers
+- External services (Shopify, Stripe, GitHub) never send JWT tokens
+- The function itself should verify the webhook signature (HMAC) — not rely on the gateway

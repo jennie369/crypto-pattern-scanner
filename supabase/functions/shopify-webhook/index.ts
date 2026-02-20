@@ -774,58 +774,34 @@ async function handleOrderPaid(supabase, orderData) {
 
   // ========================================
   // STEP 0.5: Check for individual course purchases
-  // NEW: Now also matches by shopify_product_id in courses table
+  // Enroll user in matched courses, then CONTINUE to tier processing
+  // (Do NOT return early — order may contain both individual courses AND tier products)
   // ========================================
   const individualCourses = await extractIndividualCourses(lineItems, supabase);
+  let enrolledCourseResults = [];
   if (individualCourses.length > 0) {
     console.log(`📚 Found ${individualCourses.length} individual course(s) in order`);
 
     // Find user by email (use profiles table - single source of truth)
-    const { data: userData } = await supabase
+    const { data: courseUserData } = await supabase
       .from('profiles')
       .select('id')
       .eq('email', customerEmail)
       .single();
 
-    if (userData) {
+    if (courseUserData) {
       // Grant access to each course
-      const results = [];
       for (const course of individualCourses) {
         const result = await grantCourseAccess(
           supabase,
-          userData.id,
+          courseUserData.id,
           course.course_id,
           'purchase',
           orderData
         );
-        results.push({ ...course, result });
+        enrolledCourseResults.push({ ...course, result });
       }
-
-      // Update order record
-      await supabase.from('shopify_orders').upsert({
-        shopify_order_id: orderIdShopify.toString(),
-        order_number: orderData.order_number?.toString() || orderData.name,
-        user_id: userData.id,
-        email: customerEmail,
-        total_price: parseFloat(orderData.total_price) || 0,
-        product_type: 'individual_course',
-        tier_purchased: 'none',
-        amount: parseFloat(orderData.total_price) || 0,
-        partner_id: partnerId,
-        financial_status: 'paid',
-        paid_at: new Date().toISOString(),
-        processed_at: new Date().toISOString()
-      }, { onConflict: 'shopify_order_id' });
-
-      return new Response(JSON.stringify({
-        success: true,
-        message: `Granted access to ${individualCourses.length} course(s)`,
-        courses: results,
-        user_id: userData.id,
-      }), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+      console.log(`✅ Enrolled user in ${enrolledCourseResults.length} course(s), continuing to tier processing...`);
     } else {
       // Save to pending for when user signs up
       console.log(`⏳ User not found, saving individual courses to pending...`);
@@ -840,18 +816,10 @@ async function handleOrderPaid(supabase, orderData) {
           applied: false,
         });
       }
-
-      return new Response(JSON.stringify({
-        success: true,
-        message: 'Course access saved to pending. Will be applied when user signs up.',
-        courses: individualCourses,
-        pending: true,
-      }), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+      console.log(`✅ Saved ${individualCourses.length} course(s) to pending, continuing to tier processing...`);
     }
   }
+  // NOTE: No early return here — always continue to STEP 1 for tier extraction
 
   // ========================================
   // STEP 1: Extract tier info from SKU
@@ -1048,14 +1016,14 @@ async function handleOrderPaid(supabase, orderData) {
       updateData.chatbot_tier = bundle.chatbot;
       updateData.chatbot_tier_expires_at = expiryDate;
       updateData.tier = tierPurchased;
-      updateData.tier_expires_at = expiryDate;
+      // NOTE: tier_expires_at column does NOT exist on profiles table — do not set it
       console.log(`⭐ BUNDLE GRANTED: Course ${tierPurchased}, Scanner ${bundle.scanner}, Chatbot ${bundle.chatbot}`);
     }
   } else if (shouldUpgradeTier && productType === 'scanner') {
     updateData.scanner_tier = tierPurchased;
     updateData.scanner_tier_expires_at = calculateExpiryDate(1);
     updateData.tier = tierPurchased;
-    updateData.tier_expires_at = updateData.scanner_tier_expires_at;
+    // NOTE: tier_expires_at column does NOT exist on profiles table — do not set it
   } else if (shouldUpgradeTier && productType === 'chatbot') {
     updateData.chatbot_tier = tierPurchased;
     updateData.chatbot_tier_expires_at = calculateExpiryDate(1);
@@ -1297,12 +1265,15 @@ async function handleOrderPaid(supabase, orderData) {
   // ========================================
   return new Response(JSON.stringify({
     success: true,
-    message: 'Tier upgraded successfully',
+    message: enrolledCourseResults.length > 0
+      ? `Tier upgraded + ${enrolledCourseResults.length} course(s) enrolled`
+      : 'Tier upgraded successfully',
     user_id: userId,
     product_type: productType,
     old_tier: productType === 'course' ? oldCourseTier : productType === 'scanner' ? oldScannerTier : oldChatbotTier,
     new_tier: tierPurchased,
-    partner_id: partnerId
+    partner_id: partnerId,
+    enrolled_courses: enrolledCourseResults.length > 0 ? enrolledCourseResults : undefined,
   }), {
     status: 200,
     headers: {

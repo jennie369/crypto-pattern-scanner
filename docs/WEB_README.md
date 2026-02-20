@@ -323,8 +323,8 @@ npm run lint         # ESLint check
 
 | Route | Page | Mo ta |
 |-------|------|-------|
-| `/courses/:courseId/learn` | CourseLearning.jsx | Hoc khoa hoc (fullscreen) |
-| `/courses/:courseId/learn/:lessonId` | CourseLearning.jsx | Bai hoc cu the |
+| `/courses/:courseId/learn` | CourseLearning.jsx | Hoc khoa hoc (fullscreen, embedded quiz interactivity) |
+| `/courses/:courseId/learn/:lessonId` | CourseLearning.jsx | Bai hoc cu the (React onClick event delegation for quiz + image zoom) |
 | `/courses/admin` | CourseAdmin.jsx | Teacher dashboard |
 | `/courses/admin/create` | CourseBuilder.jsx | Tao khoa hoc moi |
 | `/courses/admin/edit/:courseId` | CourseBuilder.jsx | Chinh sua khoa hoc |
@@ -676,6 +676,15 @@ Ca hai query nen tra ve **0 rows**.
 | RLS bat buoc | Moi table phai co RLS enabled + `service_role ALL` + user policies. |
 | Affiliate ID | Dung `affiliate.user_id` (auth UUID), KHONG dung `affiliate.id` (table UUID). |
 
+### Course Learning (Phase 17 — 2026-02-20)
+
+| Quy tac | Mo ta |
+|---------|-------|
+| Quiz interactivity | Embedded HTML quiz handled via React `onClick` event delegation on `.article-html-content` wrapper. KHONG dung `useEffect + addEventListener` (unreliable with Vite HMR). |
+| Quiz HTML formats | 2 formats: (A) `<li class="quiz-option"><span class="quiz-option-letter">B</span>` + `.quiz-answer-label`, (B) `<li data-correct="true">b) text` + `<strong>Dap an dung: b)</strong>`. Handler supports BOTH. |
+| Sidebar initial state | `sidebarOpen` khoi tao theo screen size: `useState(() => window.innerWidth > 1024)`. KHONG hardcode `true` (causes dark overlay on mobile). |
+| Instructor sections | Da bo instructor name/avatar tu CourseCard, CourseDetail, CourseLearning (Phase 17). |
+
 ### Auth & State
 
 | Quy tac | Mo ta |
@@ -723,7 +732,7 @@ Ca hai query nen tra ve **0 rows**.
 | [`docs/SCANNER_SYNC_MASTER_PLAN.md`](./SCANNER_SYNC_MASTER_PLAN.md) | Ke hoach sync Scanner web-mobile |
 | [`TAISAN_MASTER_PLAN.md`](../TAISAN_MASTER_PLAN.md) | Ke hoach sync Tai San (Account) web-mobile |
 | [`TAISAN_GAP_ANALYSIS.md`](../TAISAN_GAP_ANALYSIS.md) | Gap analysis chi tiet giua mobile Account va web Account |
-| [`docs/Web_Troubleshooting_Tips.md`](./Web_Troubleshooting_Tips.md) | 26 engineering rules cho web frontend |
+| [`docs/Web_Troubleshooting_Tips.md`](./Web_Troubleshooting_Tips.md) | 29 engineering rules cho web frontend |
 
 ---
 

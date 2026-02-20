@@ -1595,6 +1595,178 @@ Khi page co nhieu modals/panels co the hien thi dong thoi (FAQ panel + pricing m
 
 ---
 
+# SECTION I: COURSE LEARNING (2026-02-20)
+
+---
+
+## Rule 27: dangerouslySetInnerHTML Kills All JS — Use React Event Delegation for Embedded Quiz/Interactive HTML
+**Source:** Course Learning Page — Quiz options in DB HTML had no `onclick`, no `<script>`, no `data-correct` attributes. Clicks did nothing.
+
+### Khi nao ap dung (When to apply)
+Khi render HTML tu database (lesson content, blog posts, embedded quizzes) qua `dangerouslySetInnerHTML` va can tuong tac (click, hover, toggle).
+
+### Trieu chung (Symptoms)
+- Quiz options hien thi nhung click khong co gi xay ra
+- `window.checkAnswer` la `undefined` du da define trong `useEffect`
+- `<script>` tags trong HTML khong execute
+- Inline `onclick="fn()"` handlers khong fire
+- Manual `addEventListener` via Chrome DevTools hoat dong, nhung React code thi khong
+
+### Nguyen nhan goc (Root cause pattern)
+React's `dangerouslySetInnerHTML` inject raw HTML nhung browser KHONG execute `<script>` tags hoac bind inline event handlers (`onclick`). Day la browser security behavior:
+
+```jsx
+// SAI: Define window.checkAnswer va hy vong onclick trong HTML se goi no
+useEffect(() => {
+  window.checkAnswer = (option, q) => { ... };  // Defined
+}, []);
+// HTML: <div onclick="checkAnswer(this, 1)"> — KHONG fire vi inline handler khong duoc bind
+
+// SAI: useEffect + addEventListener — unreliable voi Vite HMR
+useEffect(() => {
+  const el = document.querySelector('.article-html-content');
+  el?.addEventListener('click', handler);  // Co the khong fire sau HMR
+  return () => el?.removeEventListener('click', handler);
+}, []);
+
+// DUNG: React onClick tren wrapper div — reliable, survives HMR
+<div
+  className="article-html-content"
+  dangerouslySetInnerHTML={{ __html: content }}
+  onClick={handleArticleClick}  // React synthetic event — LUON hoat dong
+/>
+
+// Event delegation trong handler:
+const handleArticleClick = useCallback((e) => {
+  const option = e.target.closest('.quiz-option') || e.target.closest('.quiz-options > li');
+  if (option) { /* handle quiz click */ }
+  if (e.target.tagName === 'IMG') { /* handle image zoom */ }
+}, []);
+```
+
+### Cach dieu tra (Investigation steps)
+1. Inspect DOM: quiz options co `onclick` attribute khong? (`el.hasAttribute('onclick')`)
+2. Check console: `typeof window.checkAnswer` — `undefined` = useEffect chua fire
+3. Test manual: inject handler via Chrome DevTools — neu hoat dong thi van de la React binding
+4. Check source HTML vs DB HTML — import process co the strip interactive attributes
+
+### Bien phap phong ngua (Preventive measures)
+- **LUON dung React `onClick` tren wrapper div** cho interactive embedded HTML
+- **KHONG dung `useEffect + addEventListener`** — unreliable voi Vite HMR va timing issues
+- **KHONG dung `window.functionName`** — inline handlers trong injected HTML khong duoc bind
+- **Event delegation pattern**: `e.target.closest('.selector')` de match nested elements
+- **Merge all click handlers** (quiz + image zoom + toggle) vao 1 `handleArticleClick` callback
+
+### Dau hieu nhan biet (Code smell indicators)
+- `window.functionName = ...` trong useEffect (hy vong inline handlers se goi no)
+- `useEffect` + `document.querySelector` + `addEventListener` cho content rendered by `dangerouslySetInnerHTML`
+- Quiz/interactive HTML "works in source files but not in the app"
+- `useEffect` dependencies khong trigger re-run khi content thay doi
+
+---
+
+## Rule 28: Multiple Quiz HTML Formats — Never Assume One Structure
+**Source:** Course Learning Page — Trading course quiz worked but "7 Ngay Khai Mo" course quiz did NOT click. Different HTML structures in DB.
+
+### Khi nao ap dung (When to apply)
+Khi co nhieu khoa hoc/content sources duoc import vao cung 1 he thong, moi source co the co HTML structure khac nhau cho cung 1 feature (quiz, accordion, tabs).
+
+### Trieu chung (Symptoms)
+- Quiz hoat dong o khoa A nhung KHONG hoat dong o khoa B
+- Click handler chi match 1 loai selector (`.quiz-option`) nhung HTML khac khong co class do
+- No errors — click simply does nothing tren mot so courses
+
+### Nguyen nhan goc (Root cause pattern)
+Moi khoa hoc duoc tao boi nguoi khac hoac tools khac, HTML structure khac nhau:
+
+```
+Trading course:  <li class="quiz-option"><span class="quiz-option-letter">B</span>Text</li>
+                 Answer: <div class="quiz-answer-label">✓ Đáp án đúng: B</div>
+
+7 Ngay course:   <li data-correct="true">b) Text</li>
+                 Answer: <div class="quiz-answer"><strong>Đáp án đúng: b)</strong></div>
+```
+
+Handler chi match `.quiz-option` → 7 Ngay course (khong co class `.quiz-option`) bi bo qua.
+
+### Cach dieu tra (Investigation steps)
+1. Inspect DOM cua course khong hoat dong: `document.querySelectorAll('.quiz-option').length` — neu 0 nhung van co quiz thi structure khac
+2. Check actual `<li>` elements: `document.querySelectorAll('.quiz-options > li')[0].outerHTML`
+3. So sanh voi course hoat dong — class names, attributes khac nhau cho?
+4. Check `.quiz-answer` structure: co `.quiz-answer-label` hay `<strong>`?
+
+### Bien phap phong ngua (Preventive measures)
+- **Fallback selector chain**: `e.target.closest('.quiz-option') || e.target.closest('.quiz-options > li')`
+- **Multiple correct-answer detection methods**:
+  - Method A: `data-correct="true"` attribute tren `<li>`
+  - Method B: Letter matching tu `.quiz-option-letter` vs `.quiz-answer-label` text
+  - Method C: Text matching tu `<strong>Dap an dung: X)</strong>`
+- **CSS target BOTH formats**: `.quiz-option, .quiz-options > li { cursor: pointer; }`
+- **Test EVERY course** sau khi thay doi quiz handler — khong chi course dang dev
+- **Document HTML formats** trong `TaoKhoaHoc_Troubleshooting_Tips.md`
+
+### Dau hieu nhan biet (Code smell indicators)
+- Click handler chi co 1 selector (`.quiz-option`) ma khong co fallback
+- Correct answer detection chi dung 1 method (chi `data-correct` HOAC chi letter matching)
+- Khong co tests cho nhieu quiz formats
+- New course imported → quiz khong click → HTML structure moi chua duoc handle
+
+---
+
+## Rule 29: Sidebar/Drawer Initial State Must Match Screen Size (Dark Overlay on Mobile Load)
+**Source:** Course Learning Page — Dark overlay covered entire screen on first lesson open. User had to click anywhere to dismiss.
+
+### Khi nao ap dung (When to apply)
+Khi component co sidebar/drawer voi overlay va `useState` cho open/closed state. Dac biet khi CSS co media queries thay doi overlay visibility theo screen size.
+
+### Trieu chung (Symptoms)
+- Trang moi load bi toi den (dark overlay che content)
+- User phai click anywhere de dismiss overlay
+- Chi xay ra tren mobile/tablet (< 1024px), desktop binh thuong
+- Sidebar hien thi dung nhung overlay khong nen xuat hien
+
+### Nguyen nhan goc (Root cause pattern)
+`sidebarOpen` khoi tao `true` — tren desktop thi sidebar hien thi binh thuong (khong co overlay). Nhung tren mobile, CSS them overlay khi sidebar open:
+
+```css
+/* Desktop: overlay hidden */
+.sidebar-overlay { display: none; }
+
+/* Mobile (< 1024px): overlay visible khi sidebarOpen=true */
+@media (max-width: 1024px) {
+  .sidebar-overlay { display: block; }  /* BAM! Dark overlay ngay lap tuc */
+}
+```
+
+```javascript
+// SAI: Hardcode true — mobile se co overlay ngay khi load
+const [sidebarOpen, setSidebarOpen] = useState(true);
+
+// DUNG: Check screen size
+const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 1024);
+```
+
+### Cach dieu tra (Investigation steps)
+1. Load page tren mobile viewport (< 1024px) — co dark overlay khong?
+2. Inspect `.sidebar-overlay` — `display: block`?
+3. Check `sidebarOpen` initial state — hardcode `true`?
+4. Check CSS: `@media` query nao thay doi overlay visibility?
+
+### Bien phap phong ngua (Preventive measures)
+- **KHONG BAO GIO `useState(true)` cho sidebar/drawer** co mobile overlay
+- **Dung function initializer**: `useState(() => window.innerWidth > breakpoint)`
+- **Hoac dung `useMediaQuery` hook**: `const isDesktop = useMediaQuery('(min-width: 1024px)'); useState(isDesktop)`
+- **Test LUON tren mobile viewport** khi load page lan dau
+- **CSS audit**: moi `position: fixed` + `background: rgba(0,0,0,...)` element → kiem tra khi nao no hien thi
+
+### Dau hieu nhan biet (Code smell indicators)
+- `useState(true)` cho sidebar/drawer/modal state
+- CSS `.sidebar-overlay` co `display: block` trong mobile media query
+- User bao "man hinh toi khi mo trang"
+- Overlay chi xuat hien tren mobile, khong xuat hien tren desktop
+
+---
+
 ## Grep Commands for Common Web Issues
 
 ```bash
@@ -1678,6 +1850,15 @@ grep -rn 'useScannerStore' frontend/src/ --include='*.jsx' --include='*.js'
 grep -rn 'createPriceLine' frontend/src/ --include='*.jsx' --include='*.js'
 # Check if canvas overlay exists (DUNG):
 grep -rn 'zoneCanvasRef\|drawZones\|requestAnimationFrame' frontend/src/ --include='*.jsx' --include='*.js'
+
+# Rule 27: dangerouslySetInnerHTML without React onClick (interactive HTML broken)
+grep -rn 'dangerouslySetInnerHTML' frontend/src/ --include='*.jsx' --include='*.js' -A2 | grep -v 'onClick'
+
+# Rule 28: Quiz handler only matching one format
+grep -rn "closest.*quiz-option" frontend/src/ --include='*.jsx' --include='*.js'
+
+# Rule 29: Sidebar initial state hardcoded true (dark overlay on mobile)
+grep -rn 'useState(true)' frontend/src/ --include='*.jsx' --include='*.js' | grep -i 'sidebar\|drawer\|menu'
 ```
 
 ---
@@ -1712,3 +1893,6 @@ grep -rn 'zoneCanvasRef\|drawZones\|requestAnimationFrame' frontend/src/ --inclu
 | 24 | Platform | Quota Daily Reset Timezone Mismatch (UTC vs UTC+7) | Silent data |
 | 25 | Platform | Web Speech API Browser Compatibility | Silent failure |
 | 26 | UI | Multi-Modal z-index Stacking (Modal-on-Modal Collision) | Visual overlap |
+| 27 | UI | dangerouslySetInnerHTML Kills All JS — Use React Event Delegation | Silent interactive failure |
+| 28 | UI | Multiple Quiz HTML Formats — Never Assume One Structure | Silent feature gap |
+| 29 | UI | Sidebar Initial State Must Match Screen Size | Dark overlay on mobile |

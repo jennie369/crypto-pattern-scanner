@@ -123,6 +123,8 @@ User clicks "Paper Trade" on pattern
 | 12 | — | 62 fixes: COALESCE type mismatch, 5 RPC name mismatches, AbortController on 38 fetch calls, `follows` table cleanup in 4 services, edge function auth+SDK updates (8 functions), 2 missing SQL functions created | `docs/Troubleshooting_Tips.md` Rules 42-46 |
 | 13 | — | Trading engine regression: null SL/TP instant-close, duplicate notifications, concurrent pending fills, atomic close guard, grace period, missing notification tables | `docs/Troubleshooting_Tips.md` Rules 47-50 |
 | 14 | — | Payment system: credit card orders lost (webhook filter), QR code cross-order bug (dangerous fallback), duplicate pending_course_access cleanup | `docs/Troubleshooting_Tips.md` Rules 53-54 |
+| 15 | — | Webhook tier upgrade: 5 bugs — early return skips tier processing, RPC writes to wrong table, column name mismatch, missing idempotency table, non-existent `tier_expires_at` column causes silent update failure | `docs/feature-phase15-webhook-tier-fix.md` |
+| 16 | — | Course page bugs: "Đã mở khóa" false display (tier check vs enrollment), preview mode sticky state blocking quizzes, hardcoded stats removal | `docs/Troubleshooting_Tips.md` Rules 64-65 |
 
 ## Documentation
 
@@ -133,7 +135,8 @@ User clicks "Paper Trade" on pattern
 | `docs/feature-phase7.8-resume-deadlock-fix.md` | Phase 7.8 resume deadlock fix (27 files, 3 root causes) |
 | `docs/feature-phase9-startup-freeze-fix.md` | Phase 9 startup freeze fix (6 files, 4 root causes) |
 | `docs/feature-phase10-biometric-push-fix.md` | Phase 10 biometric identity + push dedup (5 files, 5 root causes) |
-| `docs/Troubleshooting_Tips.md` | 54 generalized engineering rules from Phase 1-14 bugs |
+| `docs/feature-phase15-webhook-tier-fix.md` | Phase 15 webhook tier upgrade fix (4 bugs, 2 edge functions, 1 migration) |
+| `docs/Troubleshooting_Tips.md` | 29 generalized engineering rules from Phase 1-15 bugs |
 | `docs/SCANNER_TRADING_FEATURE_SPEC.md` | Complete Scanner/Trading feature specification (v4.1) |
 
 ## Database Migrations
@@ -174,6 +177,18 @@ One migration deployed to support all payment types in `pending_payments`:
 - 4 duplicate `pending_course_access` records deleted
 - DH4745 stuck order marked as `expired`
 
+### Webhook Tier Upgrade Fix (2026-02-20)
+
+One migration deployed to fix 4 bugs preventing tier upgrades from Shopify webhooks:
+
+1. **`20260220_fix_webhook_tier_upgrade`** — Added `shopify_order_id` TEXT column (unique) to `shopify_orders` table (webhooks used this name but column was `order_id`). Created `shopify_webhook_logs` table for webhook idempotency/dedup.
+
+**Edge functions redeployed:**
+- `shopify-webhook`: Removed early return after individual course enrollment — handler now continues to tier extraction and profile update.
+- `shopify-paid-webhook`: Now updates `profiles` table directly (in addition to `user_access` via RPC) for tier upgrades.
+
+**Root cause:** `extractIndividualCourses()` matched ALL products (including trading tier courses) by `shopify_product_id` in the `courses` table, then returned early before reaching `extractTierFromSku()` and profile update logic. See `docs/feature-phase15-webhook-tier-fix.md` for full analysis.
+
 ## Important Conventions
 
 - **Table name**: Always `profiles` (NOT `users`) — all app code reads `profiles`
@@ -188,3 +203,6 @@ One migration deployed to support all payment types in `pending_payments`:
 - **`follows` table**: Does NOT exist. Use `user_follows` or degrade gracefully with empty arrays
 - **Webhooks**: Must process ALL variants of an entity (all payment types, all order statuses) — never silently skip subtypes with `success: true`
 - **Fallback queries**: Must never return unrelated data. Prefer 404 over "most recent" fallback that returns wrong results
+- **Webhook handlers**: Never `return` early after one concern — multi-purpose handlers must process all concerns (enrollment, tier upgrade, commission, logging) before returning
+- **Column names**: Always verify column names against actual schema (`information_schema.columns`) — PostgREST silently fails on unknown columns
+- **Profile tiers**: Always update `profiles` table directly — RPCs that write to `user_access` are legacy and the app reads from `profiles`

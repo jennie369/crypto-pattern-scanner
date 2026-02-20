@@ -8,11 +8,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Play,
-  Clock,
   Lock,
-  BookOpen,
-  Star,
-  Users,
   ArrowRight,
 } from 'lucide-react';
 import { COLORS, TIER_STYLES, ANIMATION } from '../../../shared/design-tokens';
@@ -27,7 +23,7 @@ export const CourseCard = ({
   onClick,
 }) => {
   const hasUserAccess = hasAccess(userTier, course.tier);
-  const isEnrolled = course.progress !== undefined && course.progress !== null;
+  const isEnrolled = !!course.isEnrolled;
 
   // Get tier style from shared tokens (with fallback to helper)
   // Normalize tier to lowercase for TIER_STYLES lookup
@@ -36,11 +32,6 @@ export const CourseCard = ({
   // getTierBadge expects a number (tier level), not a string
   const tierLevel = getTierLevel(course.tier);
   const tierBadge = getTierBadge(tierLevel);
-
-  // Calculate stats
-  const totalLessons = course.lessonCount || course.lessons?.[0]?.count || 0;
-  const totalStudents = course.studentCount || course.enrollments?.[0]?.count || 0;
-  const rating = course.rating || 0;
 
   const handleCardClick = (e) => {
     if (e.target.closest('button')) return;
@@ -99,14 +90,6 @@ export const CourseCard = ({
           )}
         </motion.div>
 
-        {/* Duration Badge */}
-        {course.duration && (
-          <div className="duration-badge">
-            <Clock size={12} />
-            <span>{course.duration}</span>
-          </div>
-        )}
-
         {/* Tier Badge */}
         <div
           className="tier-badge"
@@ -149,38 +132,6 @@ export const CourseCard = ({
           <p className="course-description">{course.description}</p>
         )}
 
-        {/* Instructor */}
-        {course.instructor && (
-          <div className="instructor-row">
-            <img
-              src={course.instructor.avatar || '/default-avatar.png'}
-              alt={course.instructor.name}
-              className="instructor-avatar"
-            />
-            <span className="instructor-name">{course.instructor.name}</span>
-          </div>
-        )}
-
-        {/* Stats Row */}
-        <div className="course-meta">
-          <div className="meta-left">
-            <span className="meta-item">
-              <BookOpen size={14} />
-              {totalLessons} bài
-            </span>
-            <span className="meta-item">
-              <Users size={14} />
-              {totalStudents.toLocaleString()}
-            </span>
-          </div>
-          {rating > 0 && (
-            <div className="rating-wrapper">
-              <Star size={14} fill={COLORS.primary} color={COLORS.primary} />
-              <span className="rating-value">{rating.toFixed(1)}</span>
-            </div>
-          )}
-        </div>
-
         {/* Progress Bar (if enrolled) */}
         {isEnrolled && (
           <div className="progress-wrapper">
@@ -204,9 +155,13 @@ export const CourseCard = ({
         {/* Footer */}
         <div className="course-footer">
           <div className="price-wrapper">
-            {hasUserAccess ? (
+            {isEnrolled ? (
               <span className="price-included" style={{ color: COLORS.success }}>
                 Đã mở khóa
+              </span>
+            ) : hasUserAccess ? (
+              <span className="price-available" style={{ color: COLORS.primary }}>
+                Sẵn sàng đăng ký
               </span>
             ) : (
               <span className="course-price" style={{ color: COLORS.primary }}>

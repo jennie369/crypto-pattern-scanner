@@ -323,62 +323,8 @@ export default function CourseDetail() {
 
               {/* Course Title & Meta */}
               <motion.div className="course-info-section" variants={itemVariants}>
-                {/* Tier Badge */}
-                {tierBadge && (
-                  <motion.div
-                    className="course-tier-badge"
-                    style={{
-                      background: tierStyle.bg,
-                      color: tierStyle.color,
-                      borderColor: tierStyle.border,
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                  >
-                    <Gem size={14} />
-                    <span>{tierBadge.label}</span>
-                  </motion.div>
-                )}
-
                 <h1 className="course-detail-title">{course.title}</h1>
                 <p className="course-detail-description">{course.description}</p>
-
-                {/* Quick Stats */}
-                <div className="course-quick-stats">
-                  <div className="quick-stat">
-                    <Star size={18} fill="var(--brand-gold)" color="var(--brand-gold)" />
-                    <span className="stat-value">{(course.avg_rating || 4.8).toFixed(1)}</span>
-                    <span className="stat-label">đánh giá</span>
-                  </div>
-                  <div className="quick-stat">
-                    <Users size={18} />
-                    <span className="stat-value">{(course.studentCount || 0).toLocaleString()}</span>
-                    <span className="stat-label">học viên</span>
-                  </div>
-                  <div className="quick-stat">
-                    <BookOpen size={18} />
-                    <span className="stat-value">{course.totalLessons || 0}</span>
-                    <span className="stat-label">bài học</span>
-                  </div>
-                  <div className="quick-stat">
-                    <Clock size={18} />
-                    <span className="stat-value">{formatDuration(course.totalDuration)}</span>
-                  </div>
-                </div>
-
-                {/* Instructor */}
-                {course.instructor && (
-                  <div className="course-instructor-card">
-                    <img
-                      src={course.instructor.avatar || '/default-avatar.png'}
-                      alt={course.instructor.name}
-                      className="instructor-avatar"
-                    />
-                    <div className="instructor-info">
-                      <span className="instructor-label">Giảng viên</span>
-                      <span className="instructor-name">{course.instructor.name}</span>
-                    </div>
-                  </div>
-                )}
               </motion.div>
 
               {/* Tabs Navigation */}

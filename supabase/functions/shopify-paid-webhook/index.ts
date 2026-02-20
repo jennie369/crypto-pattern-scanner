@@ -463,6 +463,7 @@ serve(async (req) => {
 
     // Unlock access in database
     if (scannerTier > 0 || courseTier > 0 || chatbotTier > 0) {
+      // 1. Update user_access table via RPC (legacy)
       const { error: rpcError } = await supabase.rpc('unlock_user_access', {
         p_email: customerEmail,
         p_scanner_tier: scannerTier > 0 ? scannerTier : null,
@@ -474,7 +475,82 @@ serve(async (req) => {
       if (rpcError) {
         console.error('[Shopify Paid Webhook] unlock_user_access error:', rpcError);
       } else {
-        console.log('[Shopify Paid Webhook] Access unlocked for:', customerEmail);
+        console.log('[Shopify Paid Webhook] Access unlocked in user_access for:', customerEmail);
+      }
+
+      // 2. ALSO update profiles table directly (app reads tiers from profiles, not user_access)
+      const tierNames = ['FREE', 'STARTER', 'TIER1', 'TIER2', 'TIER3'];
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('id, course_tier, scanner_tier, chatbot_tier')
+        .eq('email', customerEmail)
+        .single();
+
+      if (profileData) {
+        const calculateExpiryDate = (months: number) => {
+          const now = new Date();
+          now.setMonth(now.getMonth() + months);
+          return now.toISOString();
+        };
+
+        const updateData: Record<string, any> = { updated_at: new Date().toISOString() };
+
+        // Course tier upgrade (includes scanner + chatbot bundle for TIER1+)
+        if (courseTier > 0) {
+          const tierName = courseTier === 0 ? 'STARTER' : `TIER${courseTier}`;
+          const bundleMapping: Record<string, { scanner: string; chatbot: string; months: number }> = {
+            'TIER1': { scanner: 'TIER1', chatbot: 'TIER1', months: 12 },
+            'TIER2': { scanner: 'TIER2', chatbot: 'TIER2', months: 12 },
+            'TIER3': { scanner: 'TIER3', chatbot: 'TIER2', months: 24 },
+          };
+          const bundle = bundleMapping[tierName];
+          if (bundle) {
+            const expiryDate = calculateExpiryDate(bundle.months);
+            updateData.course_tier = tierName;
+            updateData.course_tier_expires_at = expiryDate;
+            updateData.scanner_tier = bundle.scanner;
+            updateData.scanner_tier_expires_at = expiryDate;
+            updateData.chatbot_tier = bundle.chatbot;
+            updateData.chatbot_tier_expires_at = expiryDate;
+            updateData.tier = tierName;
+            // NOTE: tier_expires_at column does NOT exist on profiles table — do not set it
+            console.log(`[Shopify Paid Webhook] BUNDLE: Course ${tierName}, Scanner ${bundle.scanner}, Chatbot ${bundle.chatbot}`);
+          } else {
+            // STARTER tier — course only, no bundle
+            updateData.course_tier = tierName;
+            updateData.course_tier_expires_at = calculateExpiryDate(12);
+            console.log(`[Shopify Paid Webhook] Course tier: ${tierName}`);
+          }
+        }
+
+        // Scanner-only upgrade (if no course tier already set it)
+        if (scannerTier > 0 && !updateData.scanner_tier) {
+          const tierName = `TIER${scannerTier}`;
+          updateData.scanner_tier = tierName;
+          updateData.scanner_tier_expires_at = calculateExpiryDate(1);
+          updateData.tier = tierName;
+          // NOTE: tier_expires_at column does NOT exist on profiles table — do not set it
+        }
+
+        // Chatbot-only upgrade (if no course tier already set it)
+        if (chatbotTier > 0 && !updateData.chatbot_tier) {
+          const tierName = `TIER${chatbotTier}`;
+          updateData.chatbot_tier = tierName;
+          updateData.chatbot_tier_expires_at = calculateExpiryDate(1);
+        }
+
+        const { error: profileUpdateError } = await supabase
+          .from('profiles')
+          .update(updateData)
+          .eq('id', profileData.id);
+
+        if (profileUpdateError) {
+          console.error('[Shopify Paid Webhook] profiles update error:', profileUpdateError);
+        } else {
+          console.log('[Shopify Paid Webhook] Profile tiers updated for:', customerEmail);
+        }
+      } else {
+        console.log('[Shopify Paid Webhook] No profile found for email, tiers saved in user_access only:', customerEmail);
       }
     }
 

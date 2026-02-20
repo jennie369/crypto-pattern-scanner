@@ -1869,3 +1869,63 @@
     min-height: 40px;
   }
 }
+
+/* ============================================
+   EMBEDDED QUIZ STYLES (static HTML from DB)
+   ============================================ */
+
+.article-html-content .quiz-option,
+.article-html-content .quiz-options > li {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  transition: border-color 0.25s, background 0.25s, opacity 0.25s;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 10px 14px;
+  list-style: none;
+}
+
+.article-html-content .quiz-option:hover,
+.article-html-content .quiz-options > li:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 189, 89, 0.4) !important;
+}
+
+/* After answered - disable hover */
+.article-html-content .quiz-answered .quiz-option:hover,
+.article-html-content .quiz-answered .quiz-options > li:hover {
+  background: unset !important;
+  border-color: unset !important;
+}
+
+.article-html-content .quiz-correct {
+  border-color: #3AF7A6 !important;
+  background: rgba(58, 247, 166, 0.15) !important;
+}
+
+.article-html-content .quiz-wrong {
+  border-color: #FF6B6B !important;
+  background: rgba(255, 107, 107, 0.15) !important;
+}
+
+/* Answer explanation (hidden by default in DB HTML) */
+.article-html-content .quiz-answer {
+  animation: quizFadeIn 0.3s ease-out;
+}
+
+.article-html-content .quiz-answer .quiz-answer-label {
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-primary, #fff);
+}
+
+.article-html-content .quiz-answer p {
+  color: var(--text-secondary, #ccc);
+  margin: 0;
+  line-height: 1.6;
+}
+
+@keyframes quizFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}

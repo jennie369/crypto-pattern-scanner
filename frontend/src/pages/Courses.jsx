@@ -2,13 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Sparkles, Loader2, AlertCircle, Search } from 'lucide-react';
 import CompactSidebar from '../components/CompactSidebar/CompactSidebar';
-import { CourseHero } from './Courses/components/CourseHero';
 import { CourseCard } from './Courses/components/CourseCard';
-import { FreePreview } from './Courses/components/FreePreview';
 import { useAuth } from '../contexts/AuthContext';
 import { courseService } from '../services/courseService';
 import { enrollmentService } from '../services/enrollmentService';
-import { progressService } from '../services/progressService';
 import './Courses.css';
 
 export default function Courses() {
@@ -18,7 +15,6 @@ export default function Courses() {
   const [isLoading, setIsLoading] = useState(true);
   const [courses, setCourses] = useState([]);
   const [userEnrollments, setUserEnrollments] = useState([]);
-  const [courseStats, setCourseStats] = useState({ totalCourses: 0, totalStudents: 0, completionRate: 0 });
   const [error, setError] = useState(null);
 
   const { user } = useAuth();
@@ -45,14 +41,6 @@ export default function Courses() {
 
       const data = await courseService.getPublishedCourses(options);
       setCourses(data);
-
-      // Calculate stats
-      const totalStudents = data.reduce((sum, c) => sum + (c.studentCount || 0), 0);
-      setCourseStats({
-        totalCourses: data.length,
-        totalStudents,
-        completionRate: 95, // Could calculate from real data
-      });
     } catch (err) {
       console.error('[Courses] Error fetching courses:', err);
       setError('Không thể tải danh sách khóa học. Vui lòng thử lại.');
@@ -139,14 +127,6 @@ export default function Courses() {
     navigate(`/courses/${courseId}`);
   };
 
-  const handleStartFreeTrial = () => {
-    if (!user) {
-      navigate('/signup');
-    } else {
-      navigate('/pricing');
-    }
-  };
-
   const handleSearch = (e) => {
     e.preventDefault();
     fetchCourses();
@@ -157,13 +137,6 @@ export default function Courses() {
       <CompactSidebar />
       <div className="page-container">
         <div className="page-content">
-          {/* Course Hero Section */}
-          <CourseHero
-                totalCourses={courseStats.totalCourses}
-                totalStudents={courseStats.totalStudents}
-                completionRate={courseStats.completionRate}
-              />
-
               {/* Search & Category Filter */}
               <section className="category-section-courses">
                 <div className="container">
@@ -266,31 +239,6 @@ export default function Courses() {
                 </div>
               </section>
 
-              {/* Free Preview */}
-              <FreePreview
-                previewVideoId="preview-001"
-                lessonTitle="Introduction to GEM Frequency Method"
-                lessonDuration="15:30"
-                onStartFreeTrial={handleStartFreeTrial}
-              />
-
-              {/* CTA Section */}
-              <section className="courses-cta-section">
-                <div className="container">
-                  <div className="cta-content">
-                    <h2>Ready to Transform Your Trading?</h2>
-                    <p>Join thousands of successful traders who learned with GEM Academy</p>
-                    <div className="cta-buttons">
-                      <button className="btn-cta-primary" onClick={() => setCategoryFilter('all')}>
-                        Browse All Courses
-                      </button>
-                      <button className="btn-cta-secondary" onClick={handleStartFreeTrial}>
-                        Talk to an Advisor
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </section>
         </div>
       </div>
     </>

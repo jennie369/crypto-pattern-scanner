@@ -12,7 +12,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
   ArrowUp,
-  GraduationCap,
   BookOpen,
   Video,
   CheckCircle,
@@ -64,7 +63,7 @@ export default function CourseLearning() {
   const [error, setError] = useState(null);
   const [completedLessons, setCompletedLessons] = useState([]);
   const [activeTab, setActiveTab] = useState('content');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 1024);
   const [markingComplete, setMarkingComplete] = useState(false);
   const [expandedModules, setExpandedModules] = useState({});
 
@@ -136,33 +135,126 @@ export default function CourseLearning() {
     loadNotes();
   }, [currentLesson?.id, user]);
 
-  // Add click-to-zoom handlers for images in article content
+  // Add cursor pointer to images in article content
   useEffect(() => {
     const articleContent = document.querySelector('.article-html-content');
     if (!articleContent) return;
-
-    const handleImageClick = (e) => {
-      const target = e.target;
-      if (target.tagName === 'IMG' && target.src) {
-        e.preventDefault();
-        e.stopPropagation();
-        setLightboxImage({
-          url: target.src,
-          alt: target.alt || 'Lesson image',
-        });
-        setLightboxZoom(1);
-      }
-    };
-
-    // Add cursor pointer to all images
     const images = articleContent.querySelectorAll('img');
     images.forEach((img) => {
       img.style.cursor = 'zoom-in';
     });
-
-    articleContent.addEventListener('click', handleImageClick);
-    return () => articleContent.removeEventListener('click', handleImageClick);
   }, [currentLesson]);
+
+  // Handle all clicks in article HTML content (quiz options + image zoom)
+  // Quiz HTML in DB is static (no onclick, no data-correct, no scripts).
+  // Structure: .quiz-section > .quiz-question > ul.quiz-options > li.quiz-option
+  const handleArticleClick = useCallback((e) => {
+    // 1) Image zoom
+    if (e.target.tagName === 'IMG' && e.target.src) {
+      e.preventDefault();
+      e.stopPropagation();
+      setLightboxImage({
+        url: e.target.src,
+        alt: e.target.alt || 'Lesson image',
+      });
+      setLightboxZoom(1);
+      return;
+    }
+
+    // 2) Quiz option selection with instant feedback
+    // Two HTML formats:
+    //   A) Trading course: <li class="quiz-option"><span class="quiz-option-letter">B</span>...</li>
+    //      Answer: <div class="quiz-answer"><div class="quiz-answer-label">✓ Đáp án đúng: B</div>...</div>
+    //   B) 7 Ngày course:  <li data-correct="true">b) Text...</li>
+    //      Answer: <div class="quiz-answer"><strong>Đáp án đúng: b)</strong>...</div>
+    const option = e.target.closest('.quiz-option') || e.target.closest('.quiz-options > li');
+    if (!option) return;
+
+    const questionContainer = option.closest('.quiz-question');
+    if (!questionContainer) return;
+    if (questionContainer.classList.contains('quiz-answered')) return;
+
+    const optionsList = option.closest('.quiz-options, ul, ol');
+    if (!optionsList) return;
+
+    const siblings = optionsList.querySelectorAll('li');
+    const answerDiv = questionContainer.querySelector('.quiz-answer');
+
+    // Determine if correct - two methods:
+    let isCorrect = false;
+
+    // Method A: data-correct attribute on <li>
+    if (option.hasAttribute('data-correct')) {
+      isCorrect = option.getAttribute('data-correct') === 'true';
+    } else {
+      // Method B: match letter from .quiz-option-letter vs .quiz-answer-label
+      let correctLetter = null;
+      if (answerDiv) {
+        const labelEl = answerDiv.querySelector('.quiz-answer-label') || answerDiv.querySelector('strong');
+        if (labelEl) {
+          const match = labelEl.textContent.match(/:\s*([A-Da-d])/);
+          if (match) correctLetter = match[1].toUpperCase();
+        }
+      }
+      const letterEl = option.querySelector('.quiz-option-letter');
+      const clickedLetter = letterEl ? letterEl.textContent.trim().toUpperCase() : null;
+      isCorrect = correctLetter && clickedLetter === correctLetter;
+    }
+
+    // Mark question as answered
+    questionContainer.classList.add('quiz-answered');
+
+    // Style all options
+    siblings.forEach(sib => {
+      // Determine if this sibling is the correct one
+      let sibIsCorrect = false;
+      if (sib.hasAttribute('data-correct')) {
+        sibIsCorrect = sib.getAttribute('data-correct') === 'true';
+      } else {
+        let correctLetter = null;
+        if (answerDiv) {
+          const labelEl = answerDiv.querySelector('.quiz-answer-label') || answerDiv.querySelector('strong');
+          if (labelEl) {
+            const match = labelEl.textContent.match(/:\s*([A-Da-d])/);
+            if (match) correctLetter = match[1].toUpperCase();
+          }
+        }
+        const sibLetterEl = sib.querySelector('.quiz-option-letter');
+        const sibLetter = sibLetterEl ? sibLetterEl.textContent.trim().toUpperCase() : null;
+        sibIsCorrect = correctLetter && sibLetter === correctLetter;
+      }
+
+      sib.style.borderWidth = '2px';
+      sib.style.borderStyle = 'solid';
+      sib.style.borderRadius = '12px';
+      sib.style.pointerEvents = 'none';
+      sib.style.padding = sib.style.padding || '10px 14px';
+
+      if (sibIsCorrect) {
+        sib.style.borderColor = '#3AF7A6';
+        sib.style.background = 'rgba(58, 247, 166, 0.15)';
+        sib.classList.add('quiz-correct');
+      } else if (sib === option && !isCorrect) {
+        sib.style.borderColor = '#FF6B6B';
+        sib.style.background = 'rgba(255, 107, 107, 0.15)';
+        sib.classList.add('quiz-wrong');
+      } else {
+        sib.style.borderColor = 'transparent';
+        sib.style.background = '';
+        sib.style.opacity = '0.5';
+      }
+    });
+
+    // Show the answer explanation
+    if (answerDiv) {
+      answerDiv.style.display = 'block';
+      answerDiv.style.marginTop = '12px';
+      answerDiv.style.padding = '16px';
+      answerDiv.style.borderRadius = '12px';
+      answerDiv.style.background = isCorrect ? 'rgba(58, 247, 166, 0.1)' : 'rgba(255, 107, 107, 0.1)';
+      answerDiv.style.borderLeft = isCorrect ? '4px solid #3AF7A6' : '4px solid #FF6B6B';
+    }
+  }, []);
 
   // Save notes to database (debounced)
   const handleNotesChange = (e) => {
@@ -213,10 +305,19 @@ export default function CourseLearning() {
         return;
       }
 
-      // FIRST: Check if accessing a preview lesson (before enrollment check)
+      // Always check enrollment first (regardless of preview status)
+      let isEnrolled = false;
+      if (user?.id) {
+        try {
+          isEnrolled = await enrollmentService.isEnrolled(user.id, courseId);
+        } catch (enrollError) {
+          console.warn('[CourseLearning] Enrollment check failed:', enrollError);
+        }
+      }
+
+      // Check if accessing a preview lesson
       let accessingPreview = false;
       if (lessonId) {
-        // Find the lesson to check if it's a preview
         let foundLesson = null;
         for (const module of courseData.modules || []) {
           foundLesson = module.lessons?.find(l => l.id === lessonId);
@@ -225,19 +326,15 @@ export default function CourseLearning() {
 
         if (foundLesson?.is_preview) {
           accessingPreview = true;
-          setIsPreviewMode(true);
         }
       }
 
-      // Check enrollment (only if user is logged in AND not accessing preview)
-      let isEnrolled = false;
-      if (user?.id && !accessingPreview) {
-        try {
-          isEnrolled = await enrollmentService.isEnrolled(user.id, courseId);
-        } catch (enrollError) {
-          // Table might not exist yet, continue without enrollment check
-          console.warn('[CourseLearning] Enrollment check failed:', enrollError);
-        }
+      // Enrolled users are NEVER in preview mode (they have full access)
+      // Only set preview mode for non-enrolled users viewing a preview lesson
+      if (isEnrolled) {
+        setIsPreviewMode(false);
+      } else if (accessingPreview) {
+        setIsPreviewMode(true);
       }
 
       // If not preview and not enrolled and not admin, redirect
@@ -371,10 +468,10 @@ export default function CourseLearning() {
 
   // Handle lesson selection
   const handleLessonSelect = async (lesson) => {
-    // In preview mode, only allow access to other preview lessons (admin can access all)
     const userIsAdmin = typeof isAdmin === 'function' ? isAdmin() : isAdmin;
+
+    // Only restrict in preview mode for non-enrolled, non-admin users
     if (isPreviewMode && !lesson.is_preview && !userIsAdmin) {
-      // Show message or redirect to course detail
       alert('Đăng ký khóa học để xem toàn bộ nội dung');
       return;
     }
@@ -676,6 +773,7 @@ export default function CourseLearning() {
                 <div
                   className="article-html-content"
                   dangerouslySetInnerHTML={{ __html: displayContent }}
+                  onClick={handleArticleClick}
                 />
               </>
             ) : currentLesson.content_text ? (
@@ -948,10 +1046,6 @@ export default function CourseLearning() {
         {/* Course Info */}
         <div className="sidebar-course-info">
           <h2 className="sidebar-course-title">{course.title}</h2>
-          <div className="sidebar-instructor">
-            <GraduationCap size={16} />
-            <span>{course.instructor?.name || 'Gemral'}</span>
-          </div>
 
           {/* Progress Card */}
           <div className="sidebar-progress-card" style={{ borderColor: tierStyle.border }}>
