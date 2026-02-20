@@ -82,15 +82,15 @@ export default function AdminDashboardHome() {
 
       const { data: partnerStats } = await supabase
         .from('profiles')
-        .select('partner_role, partner_tier')
-        .not('partner_role', 'is', null);
+        .select('partnership_role, ctv_tier')
+        .not('partnership_role', 'is', null);
 
       let affiliateCount = 0;
       let ctvCount = 0;
       if (partnerStats) {
         partnerStats.forEach(p => {
-          if (p.partner_role === 'affiliate') affiliateCount++;
-          if (p.partner_role === 'ctv') ctvCount++;
+          if (p.partnership_role === 'affiliate') affiliateCount++;
+          if (p.partnership_role === 'ctv') ctvCount++;
         });
       }
 

@@ -37,12 +37,12 @@ export default function WithdrawalsPage() {
         .from('withdrawal_requests')
         .select(`
           *,
-          users:user_id (
+          profiles:partner_id (
             id,
             email,
             full_name,
-            partner_role,
-            partner_tier,
+            partnership_role,
+            ctv_tier,
             affiliate_code
           )
         `)
@@ -65,7 +65,7 @@ export default function WithdrawalsPage() {
   };
 
   const handleApproveWithdrawal = async (withdrawal) => {
-    if (!confirm(`Duyệt yêu cầu rút ${formatCurrency(withdrawal.amount)} cho ${withdrawal.users?.email}?`)) {
+    if (!confirm(`Duyệt yêu cầu rút ${formatCurrency(withdrawal.amount)} cho ${withdrawal.profiles?.email}?`)) {
       return;
     }
 
@@ -78,7 +78,7 @@ export default function WithdrawalsPage() {
 
       if (error) throw error;
 
-      await sendPartnershipNotification('withdrawal_approved', withdrawal.user_id, {
+      await sendPartnershipNotification('withdrawal_approved', withdrawal.partner_id, {
         amount: withdrawal.amount
       });
 
@@ -124,7 +124,7 @@ export default function WithdrawalsPage() {
 
       if (error) throw error;
 
-      await sendPartnershipNotification('withdrawal_completed', withdrawal.user_id, {
+      await sendPartnershipNotification('withdrawal_completed', withdrawal.partner_id, {
         amount: withdrawal.amount,
         transaction_id: txId
       });
@@ -150,7 +150,7 @@ export default function WithdrawalsPage() {
 
       if (error) throw error;
 
-      await sendPartnershipNotification('withdrawal_rejected', withdrawal.user_id, {
+      await sendPartnershipNotification('withdrawal_rejected', withdrawal.partner_id, {
         amount: withdrawal.amount,
         reason: reason
       });
@@ -220,14 +220,14 @@ export default function WithdrawalsPage() {
 
               <div className="wd-user-info">
                 <div className="user-avatar">
-                  {wd.users?.full_name?.charAt(0) || wd.users?.email?.charAt(0) || '?'}
+                  {wd.profiles?.full_name?.charAt(0) || wd.profiles?.email?.charAt(0) || '?'}
                 </div>
                 <div className="user-details">
-                  <div className="user-name">{wd.users?.full_name || 'Chưa có tên'}</div>
-                  <div className="user-email">{wd.users?.email}</div>
+                  <div className="user-name">{wd.profiles?.full_name || 'Chưa có tên'}</div>
+                  <div className="user-email">{wd.profiles?.email}</div>
                   <div className="user-role">
-                    <span className={`role-badge ${wd.users?.partner_role}`}>
-                      {wd.users?.partner_role?.toUpperCase()} {wd.users?.partner_tier && `- Tier ${wd.users.partner_tier}`}
+                    <span className={`role-badge ${wd.profiles?.partnership_role}`}>
+                      {wd.profiles?.partnership_role?.toUpperCase()} {wd.profiles?.ctv_tier && `- Tier ${wd.users.ctv_tier}`}
                     </span>
                   </div>
                 </div>

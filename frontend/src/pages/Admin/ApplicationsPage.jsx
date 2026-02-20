@@ -33,12 +33,13 @@ export default function ApplicationsPage() {
         .from('partnership_applications')
         .select(`
           *,
-          users:user_id (
+          profiles:user_id (
             id,
             email,
             full_name,
-            partner_role,
-            partner_tier
+            partnership_role,
+            ctv_tier,
+            affiliate_code
           )
         `)
         .order('created_at', { ascending: false });
@@ -60,7 +61,7 @@ export default function ApplicationsPage() {
   };
 
   const handleApproveApplication = async (application) => {
-    if (!confirm(`Duyệt đơn đăng ký ${application.application_type?.toUpperCase()} cho ${application.users?.email}?`)) {
+    if (!confirm(`Duyệt đơn đăng ký ${application.application_type?.toUpperCase()} cho ${application.profiles?.email}?`)) {
       return;
     }
 
@@ -170,11 +171,11 @@ export default function ApplicationsPage() {
 
               <div className="app-user-info">
                 <div className="user-avatar">
-                  {app.users?.full_name?.charAt(0) || app.users?.email?.charAt(0) || '?'}
+                  {app.profiles?.full_name?.charAt(0) || app.profiles?.email?.charAt(0) || '?'}
                 </div>
                 <div className="user-details">
-                  <div className="user-name">{app.users?.full_name || 'Chưa có tên'}</div>
-                  <div className="user-email">{app.users?.email}</div>
+                  <div className="user-name">{app.profiles?.full_name || 'Chưa có tên'}</div>
+                  <div className="user-email">{app.profiles?.email}</div>
                 </div>
               </div>
 
@@ -226,10 +227,10 @@ export default function ApplicationsPage() {
                 </div>
               )}
 
-              {app.status === 'approved' && app.users?.partner_role && (
+              {app.status === 'approved' && app.profiles?.partnership_role && (
                 <div className="app-result">
                   <CheckCircle size={14} />
-                  <span>Đã trở thành {app.users.partner_role?.toUpperCase()}</span>
+                  <span>Đã trở thành {app.profiles.partnership_role?.toUpperCase()}</span>
                 </div>
               )}
             </div>
