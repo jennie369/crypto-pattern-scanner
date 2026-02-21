@@ -49,7 +49,7 @@ const SwipeableConversationItem = memo(({
   isPinned,
   index,
 }) => {
-  const { alert } = useCustomAlert();
+  const { alert, AlertComponent } = useCustomAlert();
 
   // Animation refs
   const translateX = useRef(new Animated.Value(0)).current;
@@ -256,6 +256,9 @@ const SwipeableConversationItem = memo(({
           isPinned={isPinned}
         />
       </Animated.View>
+
+      {/* Delete confirmation dialog — must be in render tree for useCustomAlert to work */}
+      {AlertComponent}
     </View>
   );
 });

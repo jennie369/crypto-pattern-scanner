@@ -4456,3 +4456,166 @@ if (profileData) {
 - `let data = null; try { data = await ...; } catch { } setState(data);` — null remains if catch fires
 - Two listeners/loaders that both call `setProfile()` without coordinating
 - `Promise.race` with timeout that initializes result to null and sets state unconditionally after
+
+---
+
+## Rule 72: Hook Returns Render Element — Must Be Mounted in JSX
+
+**Source:** Phase 19 — Delete conversation button does nothing (SwipeableConversationItem)
+
+### When to apply
+When a custom React hook returns a UI component (Modal, Alert, Sheet, Toast) that the calling component must render. Forgetting to include the component in JSX makes the hook silently fail.
+
+### What Failed
+`SwipeableConversationItem` used `useCustomAlert()` to show a delete confirmation dialog. The hook returns `{ alert, AlertComponent }`:
+- `alert()` sets internal state (`visible: true`) to trigger the Modal
+- `AlertComponent` is the actual `<CustomAlert>` Modal that must be in the render tree
+
+The component only destructured `alert` and never rendered `AlertComponent`:
+```javascript
+// BUG: AlertComponent not destructured, not rendered
+const { alert } = useCustomAlert();
+
+// When user taps Delete:
+alert({ title: 'Delete?', buttons: [...] });
+// alert() sets visible=true, but Modal is not in DOM → nothing appears
+// Confirmation callback never fires → delete never executes
+```
+
+Other actions (Mute, Pin, Archive) worked because they called callbacks directly without going through a confirmation dialog.
+
+### Why It Failed
+React hooks that return render elements rely on the **consumer** to mount those elements. Unlike Context providers (which wrap the tree), hook-returned components exist only if explicitly placed in JSX. There is no compile-time or runtime error when they are omitted — the hook state updates succeed, but the corresponding UI never appears.
+
+This is especially dangerous because:
+- No error is thrown (silently fails)
+- The `alert()` function call succeeds (state is set)
+- The feature appears "broken" with no visible cause
+- Other features in the same component work fine (confusing)
+
+### What Guard Was Added
+```javascript
+// BEFORE:
+const { alert } = useCustomAlert();
+
+// AFTER:
+const { alert, AlertComponent } = useCustomAlert();
+
+// And in JSX:
+return (
+  <View>
+    {/* ... existing content ... */}
+    {AlertComponent}  {/* MUST be rendered for alert() to show the Modal */}
+  </View>
+);
+```
+
+### How to Detect Similar Issues
+1. **Search for `useCustomAlert()` without `AlertComponent` in JSX**: `grep -l "useCustomAlert" | xargs grep -L "AlertComponent"` — any file that calls the hook but doesn't render the component is broken
+2. **Search for any hook that returns a component**: Look for hooks returning `{ Component, ... }` or `{ render, ... }` — verify every consumer renders it
+3. **Symptom: button does nothing, no error in console**: If a button triggers a hook function (alert, sheet, modal) but nothing appears on screen, check if the hook's render element is mounted
+4. **Comparison test**: If similar actions in the same component work (Mute/Pin/Archive) but one doesn't (Delete), check what's different — likely the broken one goes through a render element that's missing
+
+### Code smell indicators
+- `const { fn } = useHookThatReturnsUI()` — destructuring only the function, not the component
+- `useCustomAlert()` / `useBottomSheet()` / `useActionSheet()` without `{AlertComponent}` / `{SheetComponent}` in JSX
+- Hook source code returns a JSX element but the consumer never uses it
+- No console errors despite feature not working
+
+### Preventive measures
+- **Convention**: Always destructure AND render hook components in the same commit
+- **Naming**: Suffix hook-returned components with `Component` or `Element` so they're obviously required
+- **Code review checklist**: Any PR that adds `useCustomAlert()` must also add `{AlertComponent}` in JSX
+- **Grep audit**: Periodically run `grep -l "useCustomAlert" src/ | xargs grep -L "AlertComponent"` to catch orphaned hooks
+
+---
+
+## Rule 73: Blocking Network Fetch Gates UI Rendering — Use Cache-First Pattern
+
+**Source:** Phase 19 — App startup shows black screen with spinner for 2-10 seconds
+
+### When to apply
+When the app startup sequence has a network request (profile fetch, config fetch, feature flags) that must complete before the UI renders. The user sees a loading screen for the entire duration of the network request.
+
+### What Failed
+AuthContext's `loadSession()` had this sequence:
+1. `getSession()` — reads from AsyncStorage (instant, <30ms)
+2. `getUserProfile()` — **network request to Supabase** (2-10s depending on network)
+3. `setLoading(false); setInitialized(true)` — opens the rendering gate
+
+AppNavigator's gate: `if (!initialized || loading) return <LoadingScreen />`
+
+The profile fetch was **blocking** — the gate couldn't open until the network request completed or timed out (10s budget). On slow networks or cold Supabase instances, users saw a black screen with spinner for up to 10 seconds.
+
+```
+getSession (30ms) → getUserProfile (2-10s BLOCKING) → gate opens → UI renders
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                    User sees black screen during this
+```
+
+### Why It Failed
+The architecture assumed profile data was required before showing any UI. But for returning users, the profile from their last session is sufficient to render the app immediately. The fresh data can be fetched in the background and updated when it arrives.
+
+Key insight: **For returning users, the profile rarely changes between sessions.** Showing a 10-second-old cached profile instantly is far better than showing a black screen for 10 seconds to get a fresh one.
+
+### What Guard Was Added
+Cache-first startup pattern:
+```javascript
+const PROFILE_CACHE_KEY = '@gem_profile_cache_';
+
+// In loadSession():
+// 1. Read cached profile from AsyncStorage (instant, <30ms)
+const cachedJson = await AsyncStorage.getItem(PROFILE_CACHE_KEY + user.id);
+if (cachedJson) {
+  const cachedProfile = JSON.parse(cachedJson);
+  setProfile(cachedProfile);
+
+  // 2. Open the gate IMMEDIATELY — user sees UI in <300ms
+  setLoading(false);
+  setInitialized(true);
+
+  // 3. Fetch fresh profile in BACKGROUND (non-blocking)
+  (async () => {
+    const { data: fresh } = await getUserProfile(user.id);
+    if (fresh) {
+      setProfile(fresh);  // Seamless update, no flash
+      await AsyncStorage.setItem(PROFILE_CACHE_KEY + user.id, JSON.stringify(fresh));
+    }
+  })();
+  return;
+}
+
+// 4. No cache (first login) → fall back to blocking fetch
+const profileData = await getUserProfile(user.id);
+if (profileData) {
+  setProfile(profileData);
+  // Save to cache for instant startup NEXT time
+  await AsyncStorage.setItem(PROFILE_CACHE_KEY + user.id, JSON.stringify(profileData));
+}
+
+// Cache is cleared on logout (performFullCleanup) to prevent cross-user data bleed
+```
+
+**Before:** `getSession (30ms) → profile fetch (2-10s) → gate opens` = **2-10s black screen**
+**After:** `getSession (30ms) → cached profile (30ms) → gate opens` = **<100ms to UI**
+
+### How to Detect Similar Issues
+1. **User reports "slow startup" or "long loading screen"**: Measure time from app launch to first meaningful UI. If >1s, there's likely a blocking network request
+2. **Search for `await` before `setInitialized(true)` or `setLoading(false)`**: Any `await networkRequest()` before the rendering gate opens is a blocking fetch
+3. **Pattern: `if (!ready) return <Loading />`**: The `ready` condition depends on network data that could be cached
+4. **Console timing**: Add `console.time/timeEnd` around each startup step to identify which one takes the longest
+5. **Test on airplane mode**: If the app hangs indefinitely (no timeout) or shows loading for 10-15s (timeout), the startup has a blocking network dependency
+
+### Code smell indicators
+- `useEffect(() => { await fetchData(); setReady(true); }, [])` — blocking fetch before ready
+- `if (!profile) return <Splash />` — profile comes from network, no cache fallback
+- Startup sequence: auth → profile → config → feature flags → render (serial chain)
+- No `AsyncStorage.getItem` call before `setInitialized(true)`
+
+### Preventive measures
+- **Cache-first for all startup data**: Profile, settings, feature flags, config — read from cache, render immediately, refresh in background
+- **Cache key includes user ID**: Prevents cross-user data bleed on logout/login (Rule 3)
+- **Clear cache on logout**: `performFullCleanup()` must remove all user-scoped caches
+- **Background refresh is fire-and-forget**: Wrap in IIFE `(async () => { ... })()`, don't await
+- **First login degrades gracefully**: No cache → blocking fetch is acceptable for first-time users (they expect onboarding to take time)
+- **Timeout budget still applies**: Background refresh uses same timeout (10s) as before — if network is dead, cached data remains valid

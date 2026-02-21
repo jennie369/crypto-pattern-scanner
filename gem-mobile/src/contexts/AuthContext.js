@@ -4,7 +4,11 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase, getUserProfile, signOut, localOnlySignOut } from '../services/supabase';
+
+// Cache key for instant startup — includes user ID to prevent cross-user bleed (Rule 3)
+const PROFILE_CACHE_KEY = '@gem_profile_cache_';
 import presenceService from '../services/presenceService';
 import biometricService from '../services/biometricService';
 import notificationScheduler from '../services/notificationScheduler';
@@ -151,6 +155,14 @@ export const AuthProvider = ({ children }) => {
       // Update profile state
       setProfile(newProfile);
 
+      // Update cache for instant startup next time
+      if (newProfile && user?.id) {
+        AsyncStorage.setItem(
+          PROFILE_CACHE_KEY + user.id,
+          JSON.stringify(newProfile)
+        ).catch(() => {});
+      }
+
       // Check if any tier changed
       const tierChanged = {
         course: previousProfile?.subscription_tier !== newProfile?.subscription_tier,
@@ -291,6 +303,14 @@ export const AuthProvider = ({ children }) => {
       // Step 4: Update profile state - this triggers re-render for all consumers
       setProfile(freshProfile);
 
+      // Step 4b: Update cache for instant startup next time
+      if (freshProfile && freshUser?.id) {
+        AsyncStorage.setItem(
+          PROFILE_CACHE_KEY + freshUser.id,
+          JSON.stringify(freshProfile)
+        ).catch(() => {});
+      }
+
       console.log('[AuthContext] refreshProfile: success', {
         userId: freshUser.id,
         role: freshProfile?.role,
@@ -346,6 +366,11 @@ export const AuthProvider = ({ children }) => {
     userRef.current = null;
     setUser(null);
     setProfile(null);
+
+    // Clear cached profile to prevent cross-user data bleed (Rule 3)
+    if (previousUserId) {
+      try { await AsyncStorage.removeItem(PROFILE_CACHE_KEY + previousUserId); } catch (e) {}
+    }
 
     // Cleanup all services — Phase 9 Fix: individual try/catch prevents
     // one service crash from blocking all cleanup (and setLoading(false))
@@ -420,10 +445,6 @@ export const AuthProvider = ({ children }) => {
       try {
         // Phase 9b Fix: Use getSession() instead of getCurrentUser()
         // getSession() reads from AsyncStorage (INSTANT, no network call).
-        // getCurrentUser() called supabase.auth.getUser() which makes an API call
-        // to /auth/v1/user — this hangs on cold Supabase / slow network, causing
-        // "Auth timeout" after 10s and cascade failure (user=null → profile=null → FREE tier).
-        // Token verification is handled by onAuthStateChange (INITIAL_SESSION event).
         console.time('[AUTH] getSession');
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         console.timeEnd('[AUTH] getSession');
@@ -442,10 +463,88 @@ export const AuthProvider = ({ children }) => {
           userRef.current = user;
           setUser(user);
 
-          // Fetch profile with error handling + retry + 10s total budget
-          // Budget: first try (up to 8s) + 1s delay + retry (up to 8s) = 17s worst case.
-          // Watchdog fires at 15s. Cap entire profile fetch at 10s so loadSession
-          // completes in <12s. App recovers via FORCE_REFRESH_EVENT if profile is null.
+          // =====================================================
+          // CACHE-FIRST STARTUP (Phase 19 Fix)
+          // Read cached profile from AsyncStorage (<30ms) → open gate INSTANTLY.
+          // Then fetch fresh profile in background. This eliminates the 2-10s
+          // blocking profile fetch that caused the black screen with spinner.
+          // Cache key includes user ID to prevent cross-user bleed (Rule 3).
+          // =====================================================
+          let cachedProfile = null;
+          try {
+            const cachedJson = await AsyncStorage.getItem(PROFILE_CACHE_KEY + user.id);
+            if (cachedJson) {
+              cachedProfile = JSON.parse(cachedJson);
+              console.log('[AUTH] ⚡ Cached profile loaded instantly:', {
+                userId: user.id,
+                role: cachedProfile?.role,
+                scanner_tier: cachedProfile?.scanner_tier,
+              });
+            }
+          } catch (cacheErr) {
+            console.warn('[AUTH] Cache read failed (non-fatal):', cacheErr?.message);
+          }
+
+          // If we have a cached profile, set it and OPEN THE GATE immediately
+          if (cachedProfile) {
+            setProfile(cachedProfile);
+
+            // Open the gate NOW — user sees UI in <300ms instead of 2-10s
+            setLoading(false);
+            setInitialized(true);
+            console.timeEnd('[AUTH] Total startup');
+            console.log('[AUTH] ✅ loadSession complete (cache-first) — gate open instantly');
+
+            // Initialize non-blocking services immediately
+            presenceService.initialize();
+            notificationScheduler.initialize(user.id).then((success) => {
+              if (success) console.log('[AuthContext] Push notifications initialized');
+            }).catch((err) => {
+              console.warn('[AuthContext] Push notifications init failed:', err?.message);
+            });
+            QuotaService.clearCache();
+            QuotaService.checkAllQuotas(user.id, true).then((quota) => {
+              console.log('[AuthContext] Quota refreshed on app start:', {
+                chatbot: `${quota.chatbot?.remaining}/${quota.chatbot?.limit}`,
+                scanner: `${quota.scanner?.remaining}/${quota.scanner?.limit}`,
+                resetAt: quota.resetAt,
+              });
+            }).catch((err) => {
+              console.warn('[AuthContext] Quota refresh failed:', err?.message);
+            });
+            paperTradeService.startGlobalMonitoring(user.id, 5000);
+
+            // BACKGROUND: Fetch fresh profile from network (non-blocking)
+            // When it arrives, update state + cache. If it fails, cached profile still works.
+            (async () => {
+              try {
+                console.time('[AUTH] Background profile refresh');
+                const { data: freshProfile, error: freshError } = await getUserProfile(user.id);
+                console.timeEnd('[AUTH] Background profile refresh');
+                if (freshProfile) {
+                  setProfile(freshProfile);
+                  // Update cache for next startup
+                  await AsyncStorage.setItem(
+                    PROFILE_CACHE_KEY + user.id,
+                    JSON.stringify(freshProfile)
+                  ).catch(() => {});
+                  console.log('[AUTH] ✅ Background profile refresh succeeded');
+                } else if (freshError) {
+                  console.warn('[AUTH] Background profile refresh failed:', freshError.message);
+                  // Cached profile still in use — no harm done
+                }
+              } catch (bgErr) {
+                console.warn('[AUTH] Background profile refresh error:', bgErr?.message);
+              }
+            })();
+
+            return; // Gate already open, skip the finally block
+          }
+
+          // =====================================================
+          // NO CACHE — Fall back to blocking fetch (first login or cache cleared)
+          // Same logic as before: retry + 10s budget
+          // =====================================================
           console.time('[AUTH] getUserProfile');
           let profileData = null;
           try {
@@ -467,16 +566,18 @@ export const AuthProvider = ({ children }) => {
           } catch (budgetErr) {
             console.warn('[AuthContext] loadSession:', budgetErr.message, '— continuing with null profile');
           }
-          // Only update profile if we got data — never overwrite a good profile with null
-          // Race condition: onAuthStateChange may have already set a valid profile
           if (profileData) {
             setProfile(profileData);
+            // Save to cache for instant startup next time
+            AsyncStorage.setItem(
+              PROFILE_CACHE_KEY + user.id,
+              JSON.stringify(profileData)
+            ).catch(() => {});
           } else {
             console.warn('[AuthContext] loadSession: profileData is null — keeping existing profile');
           }
           console.timeEnd('[AUTH] getUserProfile');
 
-          // ⚡ DEBUG: Log admin fields
           console.log('[AuthContext] Profile loaded:', {
             userId: user.id,
             role: profileData?.role,
@@ -486,22 +587,13 @@ export const AuthProvider = ({ children }) => {
             loaded: !!profileData,
           });
 
-          // Initialize presence service for real-time messaging
+          // Initialize non-blocking services
           presenceService.initialize();
-
-          // Initialize push notification scheduler
           notificationScheduler.initialize(user.id).then((success) => {
-            if (success) {
-              console.log('[AuthContext] Push notifications initialized');
-            }
+            if (success) console.log('[AuthContext] Push notifications initialized');
           }).catch((err) => {
             console.warn('[AuthContext] Push notifications init failed:', err?.message);
           });
-
-          // =====================================================
-          // REFRESH QUOTA ON APP START (Database-backed)
-          // Clear cache and fetch fresh quota from database
-          // =====================================================
           QuotaService.clearCache();
           QuotaService.checkAllQuotas(user.id, true).then((quota) => {
             console.log('[AuthContext] Quota refreshed on app start:', {
@@ -512,11 +604,6 @@ export const AuthProvider = ({ children }) => {
           }).catch((err) => {
             console.warn('[AuthContext] Quota refresh failed:', err?.message);
           });
-
-          // =====================================================
-          // START PAPER TRADE MONITORING (Auto-close TP/SL)
-          // Checks positions every 5 seconds even when app is backgrounded
-          // =====================================================
           paperTradeService.startGlobalMonitoring(user.id, 5000);
         }
       } catch (error) {
@@ -600,6 +687,11 @@ export const AuthProvider = ({ children }) => {
           // Race condition: loadSession may have already set a valid profile
           if (profileData) {
             setProfile(profileData);
+            // Save to cache for instant startup next time
+            AsyncStorage.setItem(
+              PROFILE_CACHE_KEY + session.user.id,
+              JSON.stringify(profileData)
+            ).catch(() => {});
           } else {
             console.warn('[AuthContext] onAuthStateChange: profileData is null — keeping existing profile');
           }
